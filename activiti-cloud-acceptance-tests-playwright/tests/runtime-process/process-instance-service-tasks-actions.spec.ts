@@ -118,7 +118,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
                 (list) => list.length === 1,
                 `single service task for process ${processInstance.id}`
             );
-            const serviceTask = await queryAdminServiceTestAdmin.getServiceTaskById(tasks[0].id);
+            const serviceTask = await queryAdminServiceTestAdmin.adminServiceTasks.getServiceTaskById(tasks[0].id);
             expect(serviceTask.activityType).toBe('serviceTask');
         });
 
@@ -351,7 +351,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'Then the user can get list of service tasks for process key ConnectorProcess and status COMPLETED',
             async () => {
-                const processDefinitions = await queryServiceTestAdmin.getProcessDefinitions();
+                const processDefinitions = await queryServiceTestAdmin.processDefinitions.getProcessDefinitions();
                 const processDefinition = processDefinitions.find((d) => d.key === CONNECTOR_PROCESS);
                 expect(processDefinition?.id).toBeTruthy();
 

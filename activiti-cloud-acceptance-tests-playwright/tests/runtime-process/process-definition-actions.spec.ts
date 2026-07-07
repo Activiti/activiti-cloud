@@ -30,7 +30,7 @@ activiti.describe('Process Definition Actions', () => {
             async () => {
                 const definition = await queryServiceTestUser.getProcessDefinitionByKey(SINGLE_TASK_PROCESS);
 
-                const processModel = await queryServiceTestUser.getProcessModel(definition.id);
+                const processModel = await queryServiceTestUser.processInstances.getProcessModel(definition.id);
 
                 expect(processModel).not.toBe('');
                 expect(processModel).toContain(`bpmn2:process id="${SINGLE_TASK_PROCESS}"`);

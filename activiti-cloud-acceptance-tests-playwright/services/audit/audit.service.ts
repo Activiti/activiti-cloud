@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { CloudRuntimeEvent, EventQueryParams, EventType } from '../models/audit.models';
-import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../fixtures/context.models';
+import { CloudRuntimeEvent, EventType } from '../../models/audit.models';
+import { BaseService } from '../base.service';
+import { CustomAPIRequest } from '../../fixtures/context.models';
+import { AuditStatusChecks } from './audit-status-checks';
+import { AuditEventsEndpoint, AUDIT_ADMIN_V1_BASE } from './endpoints/index';
 
 const INTEGRATION_EVENT_TYPES: readonly string[] = [
     EventType.INTEGRATION_REQUESTED,
@@ -24,52 +26,32 @@ const INTEGRATION_EVENT_TYPES: readonly string[] = [
     EventType.INTEGRATION_ERROR_RECEIVED,
 ];
 
-function buildAuditSearch(params?: EventQueryParams): string | undefined {
-    const parts: string[] = [];
-    if (params?.entityId) {
-        parts.push(`entityId:${params.entityId}`);
-    }
-    if (params?.processInstanceId) {
-        parts.push(`processInstanceId:${params.processInstanceId}`);
-    }
-    if (params?.processDefinitionKey) {
-        parts.push(`processDefinitionKey:${params.processDefinitionKey}`);
-    }
-    if (params?.eventType) {
-        parts.push(`eventType:${params.eventType}`);
-    }
-    return parts.length > 0 ? parts.join(',') : undefined;
-}
-
 export class AuditService extends BaseService {
-    private readonly basePath = '/audit/v1';
+    readonly events: AuditEventsEndpoint;
+    readonly adminEvents: AuditEventsEndpoint;
+    readonly statusChecks: AuditStatusChecks;
 
     constructor(context: CustomAPIRequest) {
         super(context);
-    }
-
-    async getAllEvents(): Promise<CloudRuntimeEvent[]> {
-        const response = await this.get(`${this.basePath}/events?sort=timestamp,desc&sort=id,desc`);
-        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
-    }
-
-    async getEvents(params?: EventQueryParams): Promise<CloudRuntimeEvent[]> {
-        const searchParams = new URLSearchParams();
-        searchParams.append('sort', 'timestamp,desc');
-        searchParams.append('sort', 'id,desc');
-
-        const search = buildAuditSearch(params);
-        if (search) {
-            searchParams.append('search', search);
-        }
-
-        const response = await this.get(`${this.basePath}/events?${searchParams.toString()}`);
-
-        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
+        this.events = new AuditEventsEndpoint(context, false);
+        this.adminEvents = new AuditEventsEndpoint(context, true);
+        this.statusChecks = new AuditStatusChecks();
     }
 
     async getEventsByEntityId(entityId: string): Promise<CloudRuntimeEvent[]> {
-        return this.getEvents({ entityId });
+        return this.events.getEvents({ entityId });
+    }
+
+    async getEventsByEntityIdAdmin(entityId: string): Promise<CloudRuntimeEvent[]> {
+        const byProcessInstance = await this.adminEvents.getEvents({ processInstanceId: entityId });
+        if (byProcessInstance.length > 0) {
+            return byProcessInstance;
+        }
+
+        const searchParams = new URLSearchParams();
+        searchParams.append('search', `entityId:${entityId},processInstanceId:${entityId}`);
+        const response = await this.get(`${AUDIT_ADMIN_V1_BASE}/events?${searchParams.toString()}`);
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
 
     async waitForEventOfTypeForEntity(entityId: string, eventType: EventType): Promise<CloudRuntimeEvent> {
@@ -82,30 +64,18 @@ export class AuditService extends BaseService {
         return events.find((e) => e.eventType === eventType)!;
     }
 
-    async waitForEventOfTypeForProcessInstance(
-        processInstanceId: string,
-        eventType: EventType
-    ): Promise<CloudRuntimeEvent> {
+    async waitForEventOfTypeForProcessInstance(processInstanceId: string, eventType: EventType): Promise<CloudRuntimeEvent> {
         const events = await AuditService.waitFor(
-            () => this.getEvents({ processInstanceId, eventType }),
-            (list) =>
-                list.some(
-                    (event) =>
-                        event.eventType === eventType &&
-                        event.processInstanceId === processInstanceId
-                ),
+            () => this.events.getEvents({ processInstanceId, eventType }),
+            (list) => list.some((event) => event.eventType === eventType && event.processInstanceId === processInstanceId),
             'auditEvents',
             `event ${eventType} for process ${processInstanceId}`
         );
-        return events.find(
-            (event) =>
-                event.eventType === eventType &&
-                event.processInstanceId === processInstanceId
-        )!;
+        return events.find((event) => event.eventType === eventType && event.processInstanceId === processInstanceId)!;
     }
 
     async getEventsByProcessInstanceId(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
-        return this.getEvents({ processInstanceId });
+        return this.events.getEvents({ processInstanceId });
     }
 
     async waitForEventsCount(
@@ -157,29 +127,16 @@ export class AuditService extends BaseService {
             if (event.entityId !== entityId) {
                 return false;
             }
-            const entity = event.entity as
-                | { activityType?: string; processInstanceId?: string }
-                | undefined;
-            return (
-                entity?.activityType === activityType &&
-                entity?.processInstanceId === processInstanceId
-            );
+            const entity = event.entity as { activityType?: string; processInstanceId?: string } | undefined;
+            return entity?.activityType === activityType && entity?.processInstanceId === processInstanceId;
         });
     }
 
-    async getActivityEventsByType(
-        processInstanceId: string,
-        activityType: string
-    ): Promise<CloudRuntimeEvent[]> {
+    async getActivityEventsByType(processInstanceId: string, activityType: string): Promise<CloudRuntimeEvent[]> {
         const events = await this.getEventsByProcessInstanceId(processInstanceId);
         return events.filter((event) => {
-            const entity = event.entity as
-                | { activityType?: string; processInstanceId?: string }
-                | undefined;
-            return (
-                entity?.activityType === activityType &&
-                entity?.processInstanceId === processInstanceId
-            );
+            const entity = event.entity as { activityType?: string; processInstanceId?: string } | undefined;
+            return entity?.activityType === activityType && entity?.processInstanceId === processInstanceId;
         });
     }
 
@@ -221,7 +178,7 @@ export class AuditService extends BaseService {
         entityId: string,
         eventType: EventType
     ): Promise<CloudRuntimeEvent[]> {
-        const events = await this.getEvents({ processInstanceId, entityId });
+        const events = await this.events.getEvents({ processInstanceId, entityId });
         return events.filter(
             (event) =>
                 event.eventType === eventType &&
@@ -230,15 +187,10 @@ export class AuditService extends BaseService {
         );
     }
 
-    async getEventTypesByEntityAndDefinitionKey(
-        entityId: string,
-        processDefinitionKey: string
-    ): Promise<string[]> {
+    async getEventTypesByEntityAndDefinitionKey(entityId: string, processDefinitionKey: string): Promise<string[]> {
         const events = await this.getEventsByEntityId(entityId);
         return events
-            .filter((event) =>
-                (event.processDefinitionId ?? '').startsWith(processDefinitionKey)
-            )
+            .filter((event) => (event.processDefinitionId ?? '').startsWith(processDefinitionKey))
             .map((event) => event.eventType);
     }
 
@@ -273,11 +225,7 @@ export class AuditService extends BaseService {
         variableNames: readonly string[]
     ): Promise<CloudRuntimeEvent[]> {
         return AuditService.waitFor(
-            () =>
-                this.getEvents({
-                    processInstanceId,
-                    eventType: EventType.VARIABLE_CREATED,
-                }),
+            () => this.events.getEvents({ processInstanceId, eventType: EventType.VARIABLE_CREATED }),
             (events) => {
                 const names = new Set(
                     events
@@ -310,12 +258,7 @@ export class AuditService extends BaseService {
         predicate: (events: CloudRuntimeEvent[]) => boolean,
         description: string
     ): Promise<CloudRuntimeEvent[]> {
-        return AuditService.waitFor(
-            () => this.getEventsByEntityId(entityId),
-            predicate,
-            'auditEvents',
-            description
-        );
+        return AuditService.waitFor(() => this.getEventsByEntityId(entityId), predicate, 'auditEvents', description);
     }
 
     async waitForEventsByProcessInstanceMatching(
@@ -336,11 +279,9 @@ export class AuditService extends BaseService {
         eventType: EventType,
         messageName: string
     ): Promise<CloudRuntimeEvent[]> {
-        const events = await this.getEvents({ processInstanceId, eventType });
+        const events = await this.events.getEvents({ processInstanceId, eventType });
         return events.filter((event) => {
-            const entity = event.entity as
-                | { messagePayload?: { name?: string } }
-                | undefined;
+            const entity = event.entity as { messagePayload?: { name?: string } } | undefined;
             return (
                 event.eventType === eventType &&
                 event.processInstanceId === processInstanceId &&
@@ -368,14 +309,12 @@ export class AuditService extends BaseService {
         eventType: EventType,
         messageName: string
     ): Promise<CloudRuntimeEvent[]> {
-        const events = await this.getEvents({ processDefinitionKey });
+        const events = await this.events.getEvents({ processDefinitionKey });
         return events.filter((event) => {
             if (event.businessKey !== businessKey || event.eventType !== eventType) {
                 return false;
             }
-            const entity = event.entity as
-                | { messagePayload?: { name?: string } }
-                | undefined;
+            const entity = event.entity as { messagePayload?: { name?: string } } | undefined;
             return entity?.messagePayload?.name === messageName;
         });
     }
@@ -387,16 +326,28 @@ export class AuditService extends BaseService {
         messageName: string
     ): Promise<CloudRuntimeEvent[]> {
         return AuditService.waitFor(
-            () =>
-                this.getMessageEventsByDefinitionAndBusinessKey(
-                    processDefinitionKey,
-                    businessKey,
-                    eventType,
-                    messageName
-                ),
+            () => this.getMessageEventsByDefinitionAndBusinessKey(processDefinitionKey, businessKey, eventType, messageName),
             (events) => events.length > 0,
             'auditEvents',
             `${eventType} events for message ${messageName} on ${processDefinitionKey} businessKey ${businessKey}`
+        );
+    }
+
+    async waitForAllEventsAdminCount(expectedCount: number): Promise<CloudRuntimeEvent[]> {
+        return AuditService.waitFor(
+            () => this.adminEvents.getAllEvents(),
+            (events) => events.length === expectedCount,
+            'auditEvents',
+            `admin events count to equal ${expectedCount}`
+        );
+    }
+
+    async waitForAllEventsAdminCountGreaterThan(minCount: number): Promise<CloudRuntimeEvent[]> {
+        return AuditService.waitFor(
+            () => this.adminEvents.getAllEvents(),
+            (events) => events.length > minCount,
+            'auditEvents',
+            `admin events count > ${minCount}`
         );
     }
 
@@ -406,10 +357,5 @@ export class AuditService extends BaseService {
         if (status !== 'UP') {
             throw new Error(`Audit service health check failed: status=${status}`);
         }
-    }
-
-    async getSwaggerSpecification(group: string = 'Audit'): Promise<string> {
-        const root = this.basePath.replace(/\/v1$/, '');
-        return this.getText(`${root}/v3/api-docs/${encodeURIComponent(group)}`);
     }
 }

@@ -56,6 +56,13 @@ export interface TaskQueryParams {
     name?: string;
 }
 
+export interface TaskSearchRequest {
+    onlyStandalone?: boolean;
+    onlyRoot?: boolean;
+    processInstanceId?: string[];
+    id?: string[];
+}
+
 export interface TaskResponse {
     content: CloudTask[];
 }

@@ -224,7 +224,7 @@
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <checkstyle.version>13.7.0</checkstyle.version>
-    <maven-sonar-plugin.version>5.5.0.6356</maven-sonar-plugin.version>
+    <maven-sonar-plugin.version>5.7.0.6970</maven-sonar-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
     <org-json.version>20250107</org-json.version>
 

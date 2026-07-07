@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from '@michalfidor/playswag';
 import type { UserKey } from '../config/users';
 import { AuthCache } from './auth-cache';
+import { ContextFactory, wrapAuthenticatedApiContext } from './context-factory';
 import { CustomAPIRequest } from './context.models';
 
 interface UserContexts {
+    anonymousGatewayContext: CustomAPIRequest;
+    invalidTokenGatewayContext: CustomAPIRequest;
     hrUserContext: CustomAPIRequest;
     hradminContext: CustomAPIRequest;
     processAdminContext: CustomAPIRequest;
@@ -37,8 +40,13 @@ interface WorkerFixtures {
 }
 
 function userContext(userKey: UserKey) {
-    return async ({ authCache }: { authCache: AuthCache }, use: (context: CustomAPIRequest) => Promise<void>) => {
-        await use(await authCache.getContext(userKey));
+    return async (
+        { authCache, trackRequest }: { authCache: AuthCache; trackRequest: (ctx: CustomAPIRequest) => CustomAPIRequest },
+        use: (context: CustomAPIRequest) => Promise<void>
+    ) => {
+        const cached = await authCache.getContext(userKey);
+        const tracked = trackRequest(cached);
+        await use(wrapAuthenticatedApiContext(tracked, cached.token, cached.expires_in, cached.username));
     };
 }
 
@@ -51,6 +59,20 @@ const contexts = base.extend<UserContexts, WorkerFixtures>({
         },
         { scope: 'worker' },
     ],
+
+    anonymousGatewayContext: async ({ trackRequest }, use) => {
+        const context = await ContextFactory.getAnonymousGatewayContext();
+        const tracked = trackRequest(context);
+        await use(wrapAuthenticatedApiContext(tracked, '', new Date(0), 'anonymous'));
+        await tracked.dispose();
+    },
+
+    invalidTokenGatewayContext: async ({ trackRequest }, use) => {
+        const context = await ContextFactory.getInvalidTokenGatewayContext();
+        const tracked = trackRequest(context);
+        await use(wrapAuthenticatedApiContext(tracked, 'invalid', new Date(0), 'invalid-token'));
+        await tracked.dispose();
+    },
 
     processAdminContext: userContext('processadmin'),
     devopsUserContext: userContext('devopsuser'),

@@ -47,7 +47,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then query the process diagram admin endpoint is unauthorized', async () => {
-            const status = await queryAdminServiceHrUser.getProcessInstanceDiagramStatus(processInstanceId);
+            const status = await queryAdminServiceHrUser.adminProcessInstances.getProcessInstanceDiagramStatus(processInstanceId);
             expect(status).toBe(403);
         });
     });
@@ -96,7 +96,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         queryAdminServiceProcessAdmin,
     }) => {
         await activiti.step('Then the user gets all the process definitions in admin endpoint', async () => {
-            const definitions = await queryAdminServiceProcessAdmin.getAllProcessDefinitionsAdmin();
+            const definitions = await queryAdminServiceProcessAdmin.adminProcessDefinitions.getProcessDefinitions();
             const names = definitions.map((definition) => definition.name).filter(Boolean);
             expect(names.length).toBeGreaterThan(0);
             expect(names).toEqual(
@@ -209,7 +209,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then verify the process instance name is my_process_instance_name', async () => {
-            const instances = await queryServiceTestUser.getProcessInstancesByName(processInstanceName);
+            const instances = await queryServiceTestUser.processInstances.getProcessInstances({ name: processInstanceName });
             expect(instances.some((instance) => instance.name === processInstanceName)).toBe(true);
         });
     });

@@ -30,6 +30,8 @@ export interface CloudProcessInstance {
     initiator?: string;
     appName?: string;
     appVersion?: string;
+    linkedProcessInstanceId?: string;
+    linkedProcessInstanceType?: string;
 }
 
 export enum ProcessInstanceStatus {
@@ -46,6 +48,8 @@ export interface StartProcessPayload {
     businessKey?: string;
     name?: string;
     variables?: Record<string, unknown>;
+    linkedProcessInstanceId?: string;
+    linkedProcessInstanceType?: string;
 }
 
 export interface UpdateProcessPayload {
@@ -62,6 +66,10 @@ export interface ProcessQueryParams {
     processDefinitionKey?: string;
     businessKey?: string;
     name?: string;
+}
+
+export interface ProcessInstanceSearchRequest {
+    id?: string[];
 }
 
 export enum ServiceTaskStatus {
