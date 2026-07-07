@@ -20,22 +20,17 @@ import { activiti, expect } from '../../fixtures/services.fixture';
 import { pickScenarioTest, type AcceptanceScenarioMeta } from '../../helpers/acceptance-scenario';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 
-type QueryAdminPostScenario = AcceptanceScenarioMeta & { id: 'tasks' | 'process-instances' };
+const QUERY_ADMIN_POST_ISSUE = 'https://hyland.atlassian.net/browse/AAE-47783';
 
-const postScenarios: QueryAdminPostScenario[] = [
-    {
-        id: 'tasks',
-        title: 'POST /query/admin/v1/tasks list endpoint',
-        exclude:
-            'upstream POST /query/admin/v1/tasks returns 500 (MappingJacksonValue is not supported, use hints instead)',
-    },
-    {
-        id: 'process-instances',
-        title: 'POST /query/admin/v1/process-instances list endpoint',
-        exclude:
-            'upstream POST /query/admin/v1/process-instances returns 500 (MappingJacksonValue is not supported, use hints instead)',
-    },
-];
+const postTasksScenario: AcceptanceScenarioMeta = {
+    title: 'POST /query/admin/v1/tasks list endpoint',
+    exclude: QUERY_ADMIN_POST_ISSUE,
+};
+
+const postProcessInstancesScenario: AcceptanceScenarioMeta = {
+    title: 'POST /query/admin/v1/process-instances list endpoint',
+    exclude: QUERY_ADMIN_POST_ISSUE,
+};
 
 activiti.describe('Runtime — Query Admin Remaining Actions', () => {
     activiti('should cover query admin process instance tasks GET', async ({
@@ -64,47 +59,56 @@ activiti.describe('Runtime — Query Admin Remaining Actions', () => {
         });
     });
 
-    for (const scenario of postScenarios) {
-        pickScenarioTest(activiti, scenario)(scenario.title, async ({
-            runtimeBundleServiceTestUser,
-            taskServiceTestUser,
-            queryAdminServiceTestAdmin,
-        }) => {
-            let processInstanceId = '';
-            let taskId = '';
+    pickScenarioTest(activiti, postTasksScenario)(postTasksScenario.title, async ({
+        runtimeBundleServiceTestUser,
+        taskServiceTestUser,
+        queryAdminServiceTestAdmin,
+    }) => {
+        let taskId = '';
 
-            await activiti.step('Given a process instance with a task synced to query', async () => {
-                const { processInstance, task } = await startCatalogProcessWithFirstTask(
-                    runtimeBundleServiceTestUser,
-                    taskServiceTestUser,
-                    'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
-                );
-                processInstanceId = processInstance.id;
-                taskId = task.id;
-                await queryAdminServiceTestAdmin.waitForProcessInstanceAdminSynced(processInstanceId);
-                await queryAdminServiceTestAdmin.waitForTaskAdminSynced(taskId);
-            });
-
-            if (scenario.id === 'tasks') {
-                await activiti.step('When the admin lists tasks via POST /query/admin/v1/tasks', async () => {
-                    const tasks = await queryAdminServiceTestAdmin.adminTasks.postTasksListQuery({
-                        standalone: false,
-                        rootTasksOnly: false,
-                    });
-                    expect(tasks.map((task) => task.id)).toContain(taskId);
-                });
-                return;
-            }
-
-            await activiti.step(
-                'When the admin lists process instances via POST /query/admin/v1/process-instances',
-                async () => {
-                    const instances = await queryAdminServiceTestAdmin.adminProcessInstances.postProcessInstancesListQuery();
-                    expect(instances.map((instance) => instance.id)).toContain(processInstanceId);
-                }
+        await activiti.step('Given a process instance with a task synced to query', async () => {
+            const { processInstance, task } = await startCatalogProcessWithFirstTask(
+                runtimeBundleServiceTestUser,
+                taskServiceTestUser,
+                'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
             );
+            await queryAdminServiceTestAdmin.waitForProcessInstanceAdminSynced(processInstance.id);
+            await queryAdminServiceTestAdmin.waitForTaskAdminSynced(task.id);
+            taskId = task.id;
         });
-    }
+
+        await activiti.step('When the admin lists tasks via POST /query/admin/v1/tasks', async () => {
+            const tasks = await queryAdminServiceTestAdmin.adminTasks.postTasksListQuery({
+                standalone: false,
+                rootTasksOnly: false,
+            });
+            expect(tasks.map((task) => task.id)).toContain(taskId);
+        });
+    });
+
+    pickScenarioTest(activiti, postProcessInstancesScenario)(postProcessInstancesScenario.title, async ({
+        runtimeBundleServiceTestUser,
+        taskServiceTestUser,
+        queryAdminServiceTestAdmin,
+    }) => {
+        let processInstanceId = '';
+
+        await activiti.step('Given a process instance with a task synced to query', async () => {
+            const { processInstance, task } = await startCatalogProcessWithFirstTask(
+                runtimeBundleServiceTestUser,
+                taskServiceTestUser,
+                'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
+            );
+            processInstanceId = processInstance.id;
+            await queryAdminServiceTestAdmin.waitForProcessInstanceAdminSynced(processInstanceId);
+            await queryAdminServiceTestAdmin.waitForTaskAdminSynced(task.id);
+        });
+
+        await activiti.step('When the admin lists process instances via POST /query/admin/v1/process-instances', async () => {
+            const instances = await queryAdminServiceTestAdmin.adminProcessInstances.postProcessInstancesListQuery();
+            expect(instances.map((instance) => instance.id)).toContain(processInstanceId);
+        });
+    });
 });
 
 activiti.describe('Runtime — Process Instance User Message Actions', () => {
