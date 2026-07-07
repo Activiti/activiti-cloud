@@ -32,11 +32,11 @@ public class IntegrationResultBuilder {
 
     private IntegrationResultBuilder(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
         this.requestEvent = integrationRequest;
-        IntegrationContextImpl sanitizedIntegrationContext = new IntegrationContextImpl(
+        ((IntegrationContextImpl) integrationRequest.getIntegrationContext()).clearInBoundVariables();
+        this.integrationResult = new IntegrationResultImpl(
+            integrationRequest,
             integrationRequest.getIntegrationContext()
         );
-        sanitizedIntegrationContext.clearInBoundVariables();
-        this.integrationResult = new IntegrationResultImpl(integrationRequest, sanitizedIntegrationContext);
         if (connectorProperties != null) {
             this.integrationResult.setAppName(connectorProperties.getAppName());
             this.integrationResult.setAppVersion(connectorProperties.getAppVersion());
