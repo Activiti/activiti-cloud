@@ -12,7 +12,7 @@
   <name>Activiti Cloud :: Runtime API Parent</name>
   <packaging>pom</packaging>
   <properties>
-    <activiti.version>9.1.0-alpha.47</activiti.version>
+    <activiti.version>9.1.0-alpha.48</activiti.version>
     <!--
       Set via -Dskip.common.tests=true in per-service CI builds so common API modules
       are compiled (-am) but tests run only once in build-common.
