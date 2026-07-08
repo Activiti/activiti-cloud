@@ -73,7 +73,6 @@ public class TaskDeleteController {
         for (TaskEntity entity : iterable) {
             Hibernate.initialize(entity.getTaskCandidateUsers());
             Hibernate.initialize(entity.getTaskCandidateGroups());
-            Hibernate.initialize(entity.getProcessVariables());
             result.add(taskRepresentationModelAssembler.toModel(entity));
         }
 
