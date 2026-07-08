@@ -148,10 +148,6 @@ class TaskAdminControllerIT extends AbstractTaskControllerIT {
             .buildAndSave();
         queryTestUtils.buildTask().buildAndSave();
 
-        given()
-            .when()
-            .delete(getSearchEndpointHttpGet())
-            .then()
-            .statusCode(200);
+        given().when().delete(getSearchEndpointHttpGet()).then().statusCode(200);
     }
 }

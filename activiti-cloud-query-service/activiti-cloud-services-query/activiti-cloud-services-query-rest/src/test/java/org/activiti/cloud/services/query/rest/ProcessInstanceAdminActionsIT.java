@@ -139,10 +139,6 @@ class ProcessInstanceAdminActionsIT {
         queryTestUtils.buildProcessInstance().subprocessOf(processInstance).buildAndSave();
         queryTestUtils.buildProcessInstance().buildAndSave();
 
-        given()
-            .when()
-            .delete(PROCESS_INSTANCES_ENDPOINT)
-            .then()
-            .statusCode(200);
+        given().when().delete(PROCESS_INSTANCES_ENDPOINT).then().statusCode(200);
     }
 }
