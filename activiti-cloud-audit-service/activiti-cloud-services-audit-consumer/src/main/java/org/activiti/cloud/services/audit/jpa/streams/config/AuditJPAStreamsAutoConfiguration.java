@@ -36,6 +36,7 @@ import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.ErrorMessage;
 
 @AutoConfiguration
@@ -97,11 +98,15 @@ public class AuditJPAStreamsAutoConfiguration {
             .handle(message -> {
                 if (message instanceof ErrorMessage errorMessage) {
                     final var exception = errorMessage.getPayload();
+                    final var failedMessage =
+                        exception instanceof MessageHandlingException
+                            ? ((MessageHandlingException) exception).getFailedMessage()
+                            : errorMessage.getOriginalMessage();
 
                     LOGGER.error(
                         "{} while handling {} for partition thread {}",
                         exception.getMessage(),
-                        errorMessage.getOriginalMessage(),
+                        failedMessage,
                         Thread.currentThread().getName(),
                         Optional.ofNullable(exception.getCause()).orElse(exception)
                     );

@@ -44,6 +44,7 @@ import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.Trigger;
@@ -112,11 +113,15 @@ public class QueryConsumerAutoConfiguration {
             .handle(message -> {
                 if (message instanceof ErrorMessage errorMessage) {
                     final var exception = errorMessage.getPayload();
+                    final var failedMessage =
+                        exception instanceof MessageHandlingException
+                            ? ((MessageHandlingException) exception).getFailedMessage()
+                            : errorMessage.getOriginalMessage();
 
                     LOGGER.error(
                         "{} while handling {} for partition thread {}",
                         exception.getMessage(),
-                        errorMessage.getOriginalMessage(),
+                        failedMessage,
                         Thread.currentThread().getName(),
                         Optional.ofNullable(exception.getCause()).orElse(exception)
                     );
