@@ -92,7 +92,7 @@ public class AuditJPAStreamsAutoConfiguration {
     }
 
     @Bean
-    public IntegrationFlow partitionedAudutConsumerErrorIntegrationFlow() {
+    public IntegrationFlow partitionedAuditConsumerErrorIntegrationFlow() {
         return IntegrationFlow.from(PARTITIONED_AUDIT_CONSUMER_ERROR_CHANNEL)
             .handle(message -> {
                 if (message instanceof ErrorMessage errorMessage) {
@@ -132,18 +132,19 @@ public class AuditJPAStreamsAutoConfiguration {
     GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericAuditConsumerChannelHandlerAdapter(
         AuditConsumerChannelHandler auditConsumerChannelHandler
     ) {
-        return (events, headers) -> {
+        return (payload, headers) -> {
+            final var events = Optional.ofNullable(payload)
+                .orElseGet(Collections::emptyList)
+                .toArray(CloudRuntimeEvent[]::new);
+
             LOGGER.debug(
                 "Handling {} events with root process instance id {} on partition thread: {}",
-                events.size(),
+                events.length,
                 headers.get(AuditConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID),
                 Thread.currentThread().getName()
             );
 
-            auditConsumerChannelHandler.receiveCloudRuntimeEvent(
-                headers,
-                Optional.of(events).orElse(Collections.emptyList()).toArray(CloudRuntimeEvent[]::new)
-            );
+            auditConsumerChannelHandler.receiveCloudRuntimeEvent(headers, events);
 
             return null;
         };

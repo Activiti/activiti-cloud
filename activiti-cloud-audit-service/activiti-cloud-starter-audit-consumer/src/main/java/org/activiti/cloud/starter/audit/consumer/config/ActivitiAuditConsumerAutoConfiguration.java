@@ -34,7 +34,7 @@ public class ActivitiAuditConsumerAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(HikariDataSource.class)
     @ConditionalOnBean(HikariDataSource.class)
-    static class HikariDataSourceQueryConsumerPartitionedChannelConfiguration {
+    static class HikariDataSourceAuditConsumerPartitionedChannelConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
