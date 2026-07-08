@@ -16,22 +16,28 @@
 package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -47,8 +53,14 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
-@WithMockUser(username = AbstractTaskControllerIT.CURRENT_USER, roles = "ACTIVITI_ADMIN")
-class TaskAdminControllerIT extends AbstractTaskControllerIT {
+@WithMockUser(username = "testuser", roles = "ACTIVITI_ADMIN")
+class ProcessInstanceAdminActionsIT {
+
+    private static final String PROCESS_DEFINITION_KEY = "process-def-key";
+    private static final String VAR_NAME = "var-name";
+    private static final String PROCESS_INSTANCES_ENDPOINT = "/admin/v1/process-instances";
+    private static final String PROCESS_INSTANCES_JSON_PATH = "_embedded.processInstances";
+    private static final String PROCESS_INSTANCE_IDS_JSON_PATH = "_embedded.processInstances.id";
 
     @Container
     @ServiceConnection
@@ -56,101 +68,80 @@ class TaskAdminControllerIT extends AbstractTaskControllerIT {
         Wait.forListeningPort()
     );
 
-    @Override
-    protected String getSearchEndpointHttpGet() {
-        return "/admin/v1/tasks";
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
+    private QueryTestUtils queryTestUtils;
+
+    @BeforeEach
+    void setUp() {
+        webAppContextSetup(context);
+        postProcessors(csrf().asHeader());
     }
 
-    @Override
-    protected String getSearchEndpointHttpPost() {
-        return "/admin/v1/tasks/search";
-    }
-
-    @Override
-    protected String getCountEndpointHttpPost() {
-        return "/admin/v1/tasks/count";
+    @AfterEach
+    void cleanUp() {
+        queryTestUtils.cleanUp();
     }
 
     @Test
-    void should_returnTasksAndCount_unrestrictedTasks() {
-        String otherUser = "other-user";
-
-        TaskEntity task1 = queryTestUtils.buildTask().withOwner(otherUser).buildAndSave();
-
-        TaskEntity task2 = queryTestUtils.buildTask().withTaskCandidateUsers(otherUser).buildAndSave();
-
-        TaskEntity task3 = queryTestUtils.buildTask().withAssignee(otherUser).buildAndSave();
+    void should_returnProcessInstances_whenPostingToAdminEndpointWithoutVariableKeys() {
+        ProcessInstanceEntity process1 = queryTestUtils.buildProcessInstance().buildAndSave();
+        ProcessInstanceEntity process2 = queryTestUtils.buildProcessInstance().buildAndSave();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body("{}")
             .when()
-            .post(getSearchEndpointHttpPost())
+            .post(PROCESS_INSTANCES_ENDPOINT)
             .then()
             .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(3))
-            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(task1.getId(), task2.getId(), task3.getId()));
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body("{}")
-            .when()
-            .post("/admin/v1/tasks/count")
-            .then()
-            .statusCode(200)
-            .body(equalTo("3"));
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, containsInAnyOrder(process1.getId(), process2.getId()));
     }
 
     @Test
-    void should_returnTasks_whenPostingToAdminTasksEndpointWithoutVariableKeys() {
-        TaskEntity task1 = queryTestUtils.buildTask().buildAndSave();
-        TaskEntity task2 = queryTestUtils.buildTask().buildAndSave();
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body("{}")
-            .when()
-            .post(getSearchEndpointHttpGet())
-            .then()
-            .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(2))
-            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(task1.getId(), task2.getId()));
-    }
-
-    @Test
-    void should_returnTasksWithProcessVariables_whenPostingToAdminTasksEndpointWithVariableKeys() {
-        queryTestUtils
+    void should_returnProcessInstancesWithVariables_whenPostingToAdminEndpointWithVariableKeys() {
+        ProcessInstanceEntity process = queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"))
-            .withTasks(queryTestUtils.buildTask())
             .buildAndSave();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body("{\"variableKeys\": [\"" + PROCESS_DEFINITION_KEY + "/" + VAR_NAME + "\"]}")
             .when()
-            .post(getSearchEndpointHttpGet())
+            .post(PROCESS_INSTANCES_ENDPOINT)
             .then()
             .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(1))
-            .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
-            .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(process.getId()))
+            .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables", hasSize(1))
+            .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables.name", hasItem(VAR_NAME));
     }
 
     @Test
-    void should_deleteAllTasks_whenDeletingAdminTasksEndpoint() {
-        queryTestUtils
+    void should_deleteAllProcessInstances_whenDeletingAdminEndpoint() {
+        ProcessInstanceEntity processInstance = queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"))
-            .withTasks(queryTestUtils.buildTask())
+            .withTasks(
+                queryTestUtils
+                    .buildTask()
+                    .withTaskCandidateUsers("user1")
+                    .withTaskCandidateGroups("group1")
+                    .withVariables(new QueryTestUtils.VariableInput("taskVar", VariableType.STRING, "taskValue"))
+            )
             .buildAndSave();
-        queryTestUtils.buildTask().buildAndSave();
+        queryTestUtils.buildProcessInstance().subprocessOf(processInstance).buildAndSave();
+        queryTestUtils.buildProcessInstance().buildAndSave();
 
         given()
             .when()
-            .delete(getSearchEndpointHttpGet())
+            .delete(PROCESS_INSTANCES_ENDPOINT)
             .then()
             .statusCode(200);
     }
