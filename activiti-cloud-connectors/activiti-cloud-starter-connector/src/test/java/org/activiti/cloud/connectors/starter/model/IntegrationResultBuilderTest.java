@@ -18,6 +18,7 @@ package org.activiti.cloud.connectors.starter.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
+import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -56,8 +57,8 @@ public class IntegrationResultBuilderTest {
             .build();
 
         //then
-        assertThat(resultEvent.getIntegrationRequest()).isEqualTo(integrationRequestEvent);
         assertThat(resultEvent.getIntegrationContext().getInBoundVariables()).isEmpty();
+        assertThat(resultEvent.getIntegrationRequest().getIntegrationContext().getInBoundVariables()).isEmpty();
         assertThat(resultEvent.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
         assertThat(resultEvent.getIntegrationContext().getOutBoundVariables()).isEqualTo(
             Collections.singletonMap(VAR, VALUE)
@@ -87,5 +88,29 @@ public class IntegrationResultBuilderTest {
         assertThat(message.getHeaders())
             .containsEntry("targetService", RB_NAME)
             .containsEntry("targetAppName", APP_NAME);
+    }
+
+    @Test
+    void shouldClearInBoundVariables_when_buildingIntegrationResult() {
+        //given
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
+        integrationContext.addInBoundVariables(Map.of("var1", "value1", "var2", "value2"));
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
+
+        //when
+        IntegrationResult resultEvent = IntegrationResultBuilder.resultFor(integrationRequestEvent, connectorProperties)
+            .withOutboundVariables(Collections.singletonMap(VAR, VALUE))
+            .build();
+
+        //then
+        assertThat(resultEvent.getIntegrationContext().getInBoundVariables()).isEmpty();
+        assertThat(resultEvent.getIntegrationRequest().getIntegrationContext().getInBoundVariables()).isEmpty();
+        assertThat(resultEvent.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
     }
 }

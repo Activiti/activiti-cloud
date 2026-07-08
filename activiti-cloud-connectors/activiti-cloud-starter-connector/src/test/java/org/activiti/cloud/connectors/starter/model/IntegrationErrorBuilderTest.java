@@ -211,6 +211,9 @@ public class IntegrationErrorBuilderTest {
 
         //then
         Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
+        Assertions.assertThat(
+            integrationError.getIntegrationRequest().getIntegrationContext().getInBoundVariables()
+        ).isEmpty();
         Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
     }
 }
