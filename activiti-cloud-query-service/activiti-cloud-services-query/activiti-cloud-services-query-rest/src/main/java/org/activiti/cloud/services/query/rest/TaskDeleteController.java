@@ -29,6 +29,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -70,9 +71,9 @@ public class TaskDeleteController {
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
 
         for (TaskEntity entity : iterable) {
-            entity.getTaskCandidateUsers().size();
-            entity.getTaskCandidateGroups().size();
-            entity.getProcessVariables().size();
+            Hibernate.initialize(entity.getTaskCandidateUsers());
+            Hibernate.initialize(entity.getTaskCandidateGroups());
+            Hibernate.initialize(entity.getProcessVariables());
             result.add(taskRepresentationModelAssembler.toModel(entity));
         }
 
