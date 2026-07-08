@@ -290,6 +290,17 @@ configure_cluster() {
         return 0
     fi
 
+    # kubectl not working — a stale KUBECONFIG from test:setup often blocks the default ~/.kube/config.
+    if [[ -n "${KUBECONFIG:-}" ]] && [[ -f "${HOME}/.kube/config" ]]; then
+        echo -e "${YELLOW}kubectl failed with KUBECONFIG=${KUBECONFIG}; trying default ~/.kube/config...${NC}"
+        if KUBECONFIG="${HOME}/.kube/config" kubectl cluster-info &> /dev/null; then
+            export KUBECONFIG="${HOME}/.kube/config"
+            CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null || echo "unknown")
+            echo -e "${GREEN}✓ kubectl connected via ~/.kube/config: $CURRENT_CONTEXT${NC}"
+            return 0
+        fi
+    fi
+
     # kubectl not working, try to configure it
     echo -e "${YELLOW}kubectl not connected to cluster. Attempting to configure...${NC}"
 
@@ -303,6 +314,7 @@ configure_cluster() {
             echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/fix-kubectl-config.sh $target_cluster${NC}"
         else
             if "$SCRIPT_DIR/fix-kubectl-config.sh" "$target_cluster"; then
+                export KUBECONFIG="${HOME}/.kube/config"
                 echo -e "${GREEN}✓ kubectl configured successfully${NC}"
                 CLUSTER_NAME="$target_cluster"
             else
