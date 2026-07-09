@@ -72,6 +72,7 @@ public class QuerySwaggerIT {
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ExternalizedDataConfig"))))
             .andExpect(jsonPath("$.info.title").value("OpenAPI definition"))
             .andExpect(
                 content().string(

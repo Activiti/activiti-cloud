@@ -8977,6 +8977,9 @@
           "connectorType" : {
             "type" : "string"
           },
+          "externalizedDataConfig" : {
+            "$ref" : "#/components/schemas/ExternalizedDataConfig"
+          },
           "clientType" : {
             "type" : "string"
           },
@@ -9000,6 +9003,18 @@
           }
         },
         "title" : "CloudIntegrationContext"
+      },
+      "ExternalizedDataConfig" : {
+        "type" : "object",
+        "properties" : {
+          "providerType" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "title" : "ExternalizedDataConfig"
       },
       "EntriesResponseContentCloudIntegrationContext" : {
         "type" : "object",
