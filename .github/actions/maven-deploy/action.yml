@@ -2,6 +2,9 @@ name: Maven deploy
 description: Deploys Maven artifacts to Nexus for the checked-out project.
 
 inputs:
+  version:
+    description: Version being deployed.
+    required: true
   nexus-username:
     description: Nexus username used for deployment.
     required: true
@@ -24,3 +27,10 @@ runs:
           -Dhttp.keepAlive=false
           -Dmaven.wagon.http.pool=false
           -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
+
+    - name: Publish deployed version to job summary
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        echo "## Built version: $VERSION" >> "$GITHUB_STEP_SUMMARY"

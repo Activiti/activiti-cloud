@@ -398,6 +398,7 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
       - uses: ./.github/actions/maven-deploy
         with:
+          version: ${{ needs.create-tag.outputs.version }}
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 
@@ -428,6 +429,7 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
       - uses: ./.github/actions/maven-deploy
         with:
+          version: ${{ needs.create-tag.outputs.version }}
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 
