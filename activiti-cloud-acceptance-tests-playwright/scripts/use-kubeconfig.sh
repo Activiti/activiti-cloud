@@ -56,7 +56,7 @@ resolve_working_kubeconfig() {
   done < <(collect_kubeconfig_candidates "${explicit}")
 
   if [[ -n "${chosen}" ]]; then
-  if [[ -n "${skipped}" ]]; then
+    if [[ -n "${skipped}" ]]; then
       echo "⚠ Skipping kubeconfig(s) that cannot reach the cluster:${skipped}" >&2
       echo "  Using: ${chosen}" >&2
     fi
@@ -77,14 +77,24 @@ resolve_working_kubeconfig() {
 }
 
 EXPLICIT_KUBECONFIG="${1:-}"
-if ! KUBECONFIG_CANDIDATE="$(resolve_working_kubeconfig "${EXPLICIT_KUBECONFIG}")"; then
-  echo "❌ No working kubeconfig found." >&2
-  if [[ -n "${KUBECONFIG_CANDIDATE:-}" ]]; then
-    echo "   Tried: ${KUBECONFIG_CANDIDATE} (file exists but kubectl cannot connect)" >&2
-  else
-    echo "   Set ACTIVITI_KUBECONFIG or run: npm run kube:use" >&2
-    echo "   Or refresh: ./scripts/fix-kubectl-config.sh activiti" >&2
-  fi
+KUBECONFIG_CANDIDATE=""
+if KUBECONFIG_CANDIDATE="$(resolve_working_kubeconfig "${EXPLICIT_KUBECONFIG}")"; then
+  :
+elif [[ -n "${EXPLICIT_KUBECONFIG}" && ! -f "${EXPLICIT_KUBECONFIG}" ]]; then
+  echo "❌ Kubeconfig not found: ${EXPLICIT_KUBECONFIG}" >&2
+  echo "   export ACTIVITI_KUBECONFIG=/path/to/kubeconfig.yaml" >&2
+  echo "   source activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh" >&2
+  return 1 2>/dev/null || exit 1
+elif [[ -n "${KUBECONFIG_CANDIDATE}" ]]; then
+  echo "❌ kubectl cannot connect using: ${KUBECONFIG_CANDIDATE}" >&2
+  echo "   source activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh" >&2
+  echo "   Or refresh: ./scripts/fix-kubectl-config.sh activiti" >&2
+  return 1 2>/dev/null || exit 1
+else
+  echo "❌ No kubeconfig file found." >&2
+  echo "   export ACTIVITI_KUBECONFIG=/path/to/kubeconfig.yaml" >&2
+  echo "   source activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh" >&2
+  echo "   Or refresh: ./scripts/fix-kubectl-config.sh activiti" >&2
   return 1 2>/dev/null || exit 1
 fi
 
