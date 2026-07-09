@@ -295,6 +295,7 @@ configure_cluster() {
         echo -e "${YELLOW}kubectl failed with KUBECONFIG=${KUBECONFIG}; trying default ~/.kube/config...${NC}"
         if KUBECONFIG="${HOME}/.kube/config" kubectl cluster-info &> /dev/null; then
             export KUBECONFIG="${HOME}/.kube/config"
+            export ACTIVITI_KUBECONFIG="${HOME}/.kube/config"
             CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null || echo "unknown")
             echo -e "${GREEN}✓ kubectl connected via ~/.kube/config: $CURRENT_CONTEXT${NC}"
             return 0
@@ -315,6 +316,7 @@ configure_cluster() {
         else
             if "$SCRIPT_DIR/fix-kubectl-config.sh" "$target_cluster"; then
                 export KUBECONFIG="${HOME}/.kube/config"
+                export ACTIVITI_KUBECONFIG="${HOME}/.kube/config"
                 echo -e "${GREEN}✓ kubectl configured successfully${NC}"
                 CLUSTER_NAME="$target_cluster"
             else

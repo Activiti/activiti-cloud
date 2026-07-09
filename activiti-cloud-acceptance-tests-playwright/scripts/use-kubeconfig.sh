@@ -84,18 +84,21 @@ elif [[ -n "${EXPLICIT_KUBECONFIG}" && ! -f "${EXPLICIT_KUBECONFIG}" ]]; then
   echo "❌ Kubeconfig not found: ${EXPLICIT_KUBECONFIG}" >&2
   echo "   export ACTIVITI_KUBECONFIG=/path/to/kubeconfig.yaml" >&2
   echo "   source activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh" >&2
-  return 1 2>/dev/null || exit 1
+  return 1 2>/dev/null
+  exit 1
 elif [[ -n "${KUBECONFIG_CANDIDATE}" ]]; then
   echo "❌ kubectl cannot connect using: ${KUBECONFIG_CANDIDATE}" >&2
   echo "   source activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh" >&2
   echo "   Or refresh: ./scripts/fix-kubectl-config.sh activiti" >&2
-  return 1 2>/dev/null || exit 1
+  return 1 2>/dev/null
+  exit 1
 else
   echo "❌ No kubeconfig file found." >&2
   echo "   export ACTIVITI_KUBECONFIG=/path/to/kubeconfig.yaml" >&2
   echo "   source activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh" >&2
   echo "   Or refresh: ./scripts/fix-kubectl-config.sh activiti" >&2
-  return 1 2>/dev/null || exit 1
+  return 1 2>/dev/null
+  exit 1
 fi
 
 export KUBECONFIG="${KUBECONFIG_CANDIDATE}"

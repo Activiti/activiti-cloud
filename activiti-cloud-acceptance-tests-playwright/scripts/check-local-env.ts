@@ -26,23 +26,24 @@ async function main(): Promise<void> {
 
     const result = await runPreflightChecks(project);
 
-  for (const w of result.warnings) {
-    console.warn(`⚠️  ${w}`);
-  }
-
-  if (!result.ok) {
-    console.error('\n❌ Environment check failed:\n');
-    for (const e of result.errors) {
-      console.error(`   • ${e}`);
+    for (const w of result.warnings) {
+        console.warn(`⚠️  ${w}`);
     }
-    console.error('\nSee README.md and .env.example\n');
-    process.exit(1);
-  }
 
-  console.log('\n✅ Environment ready — run tests with npm run test\n');
+    if (!result.ok) {
+        console.error('\n❌ Environment check failed:\n');
+        for (const e of result.errors) {
+            console.error(`   • ${e}`);
+        }
+        console.error('\nSee README.md and .env.example\n');
+        process.exit(1);
+    }
+
+    console.log('\n✅ Environment ready — run tests with npm run test\n');
+    process.exit(0);
 }
 
 main().catch((err) => {
-  console.error(err);
-  process.exit(1);
+    console.error(err);
+    process.exit(1);
 });
