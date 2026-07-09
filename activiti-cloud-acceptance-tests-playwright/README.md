@@ -1,6 +1,6 @@
 # Activiti Cloud — Playwright acceptance tests
 
-API acceptance tests for Activiti Cloud preview installs. **Playwright-only** target; remaining Serenity stories are listed in [../activiti-cloud-acceptance-scenarios/DEPRECATED.md](../activiti-cloud-acceptance-scenarios/DEPRECATED.md).
+API acceptance tests for Activiti Cloud preview installs. **Playwright-only** target.
 
 ## Requirements
 
@@ -268,4 +268,4 @@ Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 
 ## Documentation
 
-All extended docs: **[docs/README.md](docs/README.md)** (structure, modeling projects, parallel rules, migration tracker, Serenity retirement, completed [IMPROVEMENTS](docs/IMPROVEMENTS.md) plan).
+All extended docs: **[docs/README.md](docs/README.md)** (structure, modeling projects, parallel rules, completed [IMPROVEMENTS](docs/IMPROVEMENTS.md) plan).
