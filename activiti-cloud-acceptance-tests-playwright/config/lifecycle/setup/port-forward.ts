@@ -44,14 +44,13 @@ async function checkPortForwardingActive(localPort: string, throwOnError: boolea
         acceptanceLog('traefik', `Could not detect port-forward process — probing ${LOCAL_LOOPBACK} anyway`);
     }
 
+    const context = await request.newContext();
     try {
-        const context = await request.newContext();
         const response = await context.get(`http://${LOCAL_LOOPBACK}:${localPort}`, {
             timeout: timeouts.http.localPortProbe,
             ignoreHTTPSErrors: true,
         });
         acceptanceLog('traefik', `✓ ${LOCAL_LOOPBACK}:${localPort} reachable (HTTP ${response.status()})`);
-        await context.dispose();
         return true;
     } catch (error) {
         const pfCmd = getPortForwardHelpCommand(localPort);
@@ -67,6 +66,8 @@ Error: ${error}`;
         }
         acceptanceLog('traefik', `${LOCAL_LOOPBACK} not reachable yet — will start port-forward automatically`);
         return false;
+    } finally {
+        await context.dispose();
     }
 }
 
@@ -138,9 +139,9 @@ Error: ${error}`);
 }
 
 async function checkGatewayConnectivity(localPort: string, expectedGatewayHost: string): Promise<void> {
+    const hostWithoutPort = expectedGatewayHost.replace(/:\d+$/, '');
+    const context = await request.newContext();
     try {
-        const hostWithoutPort = expectedGatewayHost.replace(/:\d+$/, '');
-        const context = await request.newContext();
         const response = await context.get(`http://${LOCAL_LOOPBACK}:${localPort}`, {
             timeout: timeouts.http.healthCheck,
             ignoreHTTPSErrors: true,
@@ -151,7 +152,6 @@ async function checkGatewayConnectivity(localPort: string, expectedGatewayHost: 
             'traefik',
             `✓ Gateway reachable via tunnel (HTTP ${response.status()}) — ${hostWithoutPort} → ${LOCAL_LOOPBACK}:${localPort}`
         );
-        await context.dispose();
     } catch (error) {
         const pfCmd = getPortForwardHelpCommand(localPort);
         throw new Error(`Cannot reach gateway through port-forward.
@@ -161,6 +161,8 @@ async function checkGatewayConnectivity(localPort: string, expectedGatewayHost: 
    curl -H "Host: ${expectedGatewayHost.replace(/:\d+$/, '')}" http://${LOCAL_LOOPBACK}:${localPort}/rb/actuator/health
 
 Error: ${error}`);
+    } finally {
+        await context.dispose();
     }
 }
 

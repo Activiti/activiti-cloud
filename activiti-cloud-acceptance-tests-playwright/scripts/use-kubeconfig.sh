@@ -12,7 +12,7 @@
 # A stale ~/Downloads/activiti.yaml is skipped when ~/.kube/config works.
 
 kubeconfig_connects() {
-  KUBECONFIG="$1" kubectl cluster-info &>/dev/null
+  KUBECONFIG="$1" kubectl cluster-info --request-timeout=10s &>/dev/null
 }
 
 collect_kubeconfig_candidates() {
