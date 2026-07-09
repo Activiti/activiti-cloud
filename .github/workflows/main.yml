@@ -32,6 +32,12 @@ jobs:
       skip-tests: ${{ steps.check-skip-tests.outputs.result }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+      - name: Check PR freshness with develop
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: bash scripts/ci/check-pr-develop-freshness.sh
       - name: Check dependabot build
         uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         with:
@@ -285,7 +291,8 @@ jobs:
       - create-tag
       - maven-build
     if: >-
-      needs.pre-checks.outputs.skip != 'true'
+      github.event_name != 'push'
+      && needs.pre-checks.outputs.skip != 'true'
       && needs.pre-checks.outputs.skip-tests != 'true'
       && needs.maven-build.result == 'success'
     uses: ./.github/workflows/_reusable-playwright-tests.yml
@@ -331,8 +338,8 @@ jobs:
            || contains(needs.maven-test.result, 'cancelled')
            || contains(needs.sonar.result, 'failure')
            || contains(needs.sonar.result, 'cancelled')
-           || contains(needs.playwright-tests.result, 'failure')
-           || contains(needs.playwright-tests.result, 'cancelled')
+           || (needs.playwright-tests.result != 'skipped' && contains(needs.playwright-tests.result, 'failure'))
+           || (needs.playwright-tests.result != 'skipped' && contains(needs.playwright-tests.result, 'cancelled'))
           }}
         run: |
           echo "CI jobs have failed or been cancelled. Exiting ..."
