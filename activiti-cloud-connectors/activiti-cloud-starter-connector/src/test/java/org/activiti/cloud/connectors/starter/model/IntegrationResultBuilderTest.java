@@ -58,7 +58,6 @@ public class IntegrationResultBuilderTest {
 
         //then
         assertThat(resultEvent.getIntegrationContext().getInBoundVariables()).isEmpty();
-        assertThat(resultEvent.getIntegrationRequest().getIntegrationContext().getInBoundVariables()).isEmpty();
         assertThat(resultEvent.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
         assertThat(resultEvent.getIntegrationContext().getOutBoundVariables()).isEqualTo(
             Collections.singletonMap(VAR, VALUE)
@@ -110,7 +109,6 @@ public class IntegrationResultBuilderTest {
 
         //then
         assertThat(resultEvent.getIntegrationContext().getInBoundVariables()).isEmpty();
-        assertThat(resultEvent.getIntegrationRequest().getIntegrationContext().getInBoundVariables()).isEmpty();
         assertThat(resultEvent.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
     }
 }

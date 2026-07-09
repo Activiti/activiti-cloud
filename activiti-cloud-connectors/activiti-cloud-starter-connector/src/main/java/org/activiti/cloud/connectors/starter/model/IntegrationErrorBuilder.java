@@ -61,8 +61,11 @@ public class IntegrationErrorBuilder {
 
         IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error, customErrorMessage);
 
-        ((IntegrationContextImpl) integrationRequest.getIntegrationContext()).clearInBoundVariables();
-        integrationError.setIntegrationContext(integrationRequest.getIntegrationContext());
+        IntegrationContextImpl sanitizedIntegrationContext = new IntegrationContextImpl(
+            integrationRequest.getIntegrationContext()
+        );
+        sanitizedIntegrationContext.clearInBoundVariables();
+        integrationError.setIntegrationContext(sanitizedIntegrationContext);
 
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
