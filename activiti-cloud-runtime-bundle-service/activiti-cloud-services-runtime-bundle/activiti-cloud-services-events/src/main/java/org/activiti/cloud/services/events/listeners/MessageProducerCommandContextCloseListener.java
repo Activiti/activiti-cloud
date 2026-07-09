@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.listeners;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -44,6 +45,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     private RuntimeBundleProperties runtimeBundleProperties;
     private final EventChunker eventChunker;
     private final IncidentService incidentService;
+    private final List<MessageProducerCommandContextFilter> filters;
 
     public MessageProducerCommandContextCloseListener(
         ProcessEngineChannels producer,
@@ -51,7 +53,8 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         RuntimeBundleProperties runtimeBundleProperties,
         EventChunker eventChunker,
-        IncidentService incidentService
+        IncidentService incidentService,
+        List<MessageProducerCommandContextFilter> filters
     ) {
         Assert.notNull(producer, "producer must not be null");
         Assert.notNull(messageBuilderChainFactory, "messageBuilderChainFactory must not be null");
@@ -65,6 +68,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.eventChunker = eventChunker;
         this.incidentService = incidentService;
+        this.filters = filters != null ? filters : List.of();
     }
 
     @Override
@@ -74,8 +78,28 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
             return;
         }
 
+        List<CloudRuntimeEvent<?, ?>> filteredEvents = applyFilters(events);
+
         ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(ROOT_EXECUTION_CONTEXT);
-        sendEvents(events, rootExecutionContext);
+        sendEvents(filteredEvents, rootExecutionContext);
+    }
+
+    private List<CloudRuntimeEvent<?, ?>> applyFilters(List<CloudRuntimeEvent<?, ?>> events) {
+        if (this.filters.isEmpty()) {
+            return events;
+        }
+        return events.stream().map(this::applyFilters).toList();
+    }
+
+    private CloudRuntimeEvent<?, ?> applyFilters(CloudRuntimeEvent<?, ?> event) {
+        CloudRuntimeEvent<?, ?> result = event;
+        for (MessageProducerCommandContextFilter filter : this.filters) {
+            result = Objects.requireNonNull(
+                filter.produce(result),
+                "MessageProducerCommandContextFilter must not return a null event"
+            );
+        }
+        return result;
     }
 
     @Override

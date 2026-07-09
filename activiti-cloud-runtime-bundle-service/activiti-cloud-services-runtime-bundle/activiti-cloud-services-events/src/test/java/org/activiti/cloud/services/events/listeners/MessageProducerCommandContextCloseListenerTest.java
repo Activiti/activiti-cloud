@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -149,7 +150,8 @@ class MessageProducerCommandContextCloseListenerTest {
             runtimeBundleInfoAppender,
             properties,
             eventChunker,
-            incidentService
+            incidentService,
+            List.of()
         );
 
         ProcessInstance processInstance = new ProcessInstanceImpl();
@@ -390,6 +392,59 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
     }
 
+    @Test
+    void closedShouldReplaceEventsWithResultFromFilters() {
+        var replacement = new CloudProcessCreatedEventImpl(new ProcessInstanceImpl());
+        MessageProducerCommandContextFilter filter = mock(MessageProducerCommandContextFilter.class);
+        doReturn(replacement).when(filter).produce(any());
+        var listener = getListenerWithFilters(List.of(filter));
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(Collections.singletonList(event));
+
+        listener.closed(commandContext);
+
+        verify(filter).produce(event);
+        verify(auditChannel).send(messageArgumentCaptor.capture());
+        assertThat(messageArgumentCaptor.getValue().getPayload()).containsExactly(replacement);
+    }
+
+    @Test
+    void closedShouldApplyAllFiltersInOrder() {
+        var intermediateEvent = new CloudProcessCreatedEventImpl(new ProcessInstanceImpl());
+        var finalEvent = new CloudProcessCreatedEventImpl(new ProcessInstanceImpl());
+        MessageProducerCommandContextFilter firstFilter = mock(MessageProducerCommandContextFilter.class);
+        MessageProducerCommandContextFilter secondFilter = mock(MessageProducerCommandContextFilter.class);
+        doReturn(intermediateEvent).when(firstFilter).produce(event);
+        doReturn(finalEvent).when(secondFilter).produce(intermediateEvent);
+
+        var listener = getListenerWithFilters(List.of(firstFilter, secondFilter));
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(Collections.singletonList(event));
+
+        listener.closed(commandContext);
+
+        verify(firstFilter).produce(event);
+        verify(secondFilter).produce(intermediateEvent);
+        verify(auditChannel).send(messageArgumentCaptor.capture());
+        assertThat(messageArgumentCaptor.getValue().getPayload()).containsExactly(finalEvent);
+    }
+
+    private MessageProducerCommandContextCloseListener getListenerWithFilters(
+        List<MessageProducerCommandContextFilter> filters
+    ) {
+        return new MessageProducerCommandContextCloseListener(
+            producer,
+            messageBuilderChainFactory,
+            runtimeBundleInfoAppender,
+            properties,
+            eventChunker,
+            incidentService,
+            filters
+        );
+    }
+
     private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {
         var runtimeBundleProperties = new RuntimeBundleProperties() {
             {
@@ -407,7 +462,8 @@ class MessageProducerCommandContextCloseListenerTest {
             runtimeBundleInfoAppender,
             runtimeBundleProperties,
             eventChunker,
-            incidentService
+            incidentService,
+            List.of()
         );
     }
 

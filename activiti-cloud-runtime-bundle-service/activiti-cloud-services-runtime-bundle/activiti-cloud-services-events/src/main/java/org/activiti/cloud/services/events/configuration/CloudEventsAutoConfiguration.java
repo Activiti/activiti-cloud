@@ -68,6 +68,7 @@ import org.activiti.cloud.services.events.listeners.CloudVariableCreatedProducer
 import org.activiti.cloud.services.events.listeners.CloudVariableDeletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudVariableUpdatedProducer;
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
+import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextFilter;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.events.listeners.ProcessStartedActorProviderEventListener;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
@@ -81,6 +82,7 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.spring.process.ProcessExtensionService;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -206,7 +208,8 @@ public class CloudEventsAutoConfiguration {
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         RuntimeBundleProperties runtimeBundleProperties,
         EventChunker eventChunker,
-        IncidentService incidentService
+        IncidentService incidentService,
+        ObjectProvider<MessageProducerCommandContextFilter> filters
     ) {
         return new MessageProducerCommandContextCloseListener(
             processEngineChannels,
@@ -214,7 +217,8 @@ public class CloudEventsAutoConfiguration {
             runtimeBundleInfoAppender,
             runtimeBundleProperties,
             eventChunker,
-            incidentService
+            incidentService,
+            filters.orderedStream().toList()
         );
     }
 
