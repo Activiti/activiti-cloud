@@ -39,7 +39,7 @@ export function resolveSsoConnection(): SsoConnection {
         if (preview && cluster) {
             const hostHeader = stripPort(buildIdentityHost(preview, cluster, domain));
             return {
-                tokenUrl: `http://localhost:${localPort}/auth/realms/${realm}/protocol/openid-connect/token`,
+                tokenUrl: `http://127.0.0.1:${localPort}/auth/realms/${realm}/protocol/openid-connect/token`,
                 hostHeader,
             };
         }
