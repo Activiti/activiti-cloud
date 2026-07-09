@@ -45,7 +45,7 @@ async function checkPortForwardingActive(localPort: string, throwOnError: boolea
 
     try {
         const context = await request.newContext();
-        const response = await context.get(`http://localhost:${localPort}`, {
+        const response = await context.get(`http://127.0.0.1:${localPort}`, {
             timeout: timeouts.http.localPortProbe,
             ignoreHTTPSErrors: true,
         });
@@ -140,7 +140,7 @@ async function checkGatewayConnectivity(localPort: string, expectedGatewayHost: 
     try {
         const hostWithoutPort = expectedGatewayHost.replace(/:\d+$/, '');
         const context = await request.newContext();
-        const response = await context.get(`http://localhost:${localPort}`, {
+        const response = await context.get(`http://127.0.0.1:${localPort}`, {
             timeout: timeouts.http.healthCheck,
             ignoreHTTPSErrors: true,
             headers: { Host: hostWithoutPort },

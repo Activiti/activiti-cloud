@@ -7,15 +7,24 @@
 import '../config/load-env';
 import { applyResolvedHostsToEnv } from '../config/connection/env-hosts';
 import { runPreflightChecks } from '../config/validation/environment-validator';
+import { setupPortForwarding } from '../config/lifecycle/setup/port-forward';
 
 applyResolvedHostsToEnv();
 
 const project = process.argv[2] || 'all';
 
-async function main(): Promise<void> {
-  console.log(`\n🔍 Playwright environment check (project: ${project})\n`);
+function isCI(): boolean {
+    return process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+}
 
-  const result = await runPreflightChecks(project);
+async function main(): Promise<void> {
+    console.log(`\n🔍 Playwright environment check (project: ${project})\n`);
+
+    if (!isCI()) {
+        await setupPortForwarding();
+    }
+
+    const result = await runPreflightChecks(project);
 
   for (const w of result.warnings) {
     console.warn(`⚠️  ${w}`);
