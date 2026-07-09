@@ -58,7 +58,9 @@ public class IntegrationRequestedEventHandlerTest {
         String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
         when(entityManager.find(eq(IntegrationContextEntity.class), eq(integrationContext.getId()))).thenReturn(null);
-        when(entityManager.find(eq(ServiceTaskEntity.class), eq(serviceTaskId))).thenReturn(mock(ServiceTaskEntity.class));
+        when(entityManager.find(eq(ServiceTaskEntity.class), eq(serviceTaskId))).thenReturn(
+            mock(ServiceTaskEntity.class)
+        );
 
         handler.handle(event);
 
@@ -82,7 +84,9 @@ public class IntegrationRequestedEventHandlerTest {
         String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
         when(entityManager.find(eq(IntegrationContextEntity.class), eq(integrationContext.getId()))).thenReturn(null);
-        when(entityManager.find(eq(ServiceTaskEntity.class), eq(serviceTaskId))).thenReturn(mock(ServiceTaskEntity.class));
+        when(entityManager.find(eq(ServiceTaskEntity.class), eq(serviceTaskId))).thenReturn(
+            mock(ServiceTaskEntity.class)
+        );
 
         handler.handle(event);
 
