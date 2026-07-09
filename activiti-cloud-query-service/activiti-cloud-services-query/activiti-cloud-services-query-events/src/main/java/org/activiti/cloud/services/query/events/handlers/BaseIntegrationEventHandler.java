@@ -17,8 +17,10 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
+import org.activiti.api.process.model.ExternalizedDataConfig;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
+import org.activiti.cloud.services.query.model.ExternalizedDataConfigEmbeddable;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +70,12 @@ public abstract class BaseIntegrationEventHandler {
         entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
         entity.setBusinessKey(integrationContext.getBusinessKey());
         entity.setInBoundVariables(integrationContext.getInBoundVariables());
+        entity.setExternalizedDataConfig(toEmbeddable(integrationContext.getExternalizedDataConfig()));
 
         return entity;
+    }
+
+    protected static ExternalizedDataConfigEmbeddable toEmbeddable(ExternalizedDataConfig externalizedDataConfig) {
+        return externalizedDataConfig != null ? new ExternalizedDataConfigEmbeddable(externalizedDataConfig) : null;
     }
 }
