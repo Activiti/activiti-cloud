@@ -24,14 +24,18 @@ activiti.describe('Process Instance Actions - Multiple Runtime Bundle Services',
             let processInstanceThrowSignal: CloudProcessInstance;
 
             await activiti.step('When the user starts signal catch process on primary runtime', async () => {
-                processInstanceCatchSignal = await multipleRuntimeServiceTestUser.startProcessOnPrimary('SignalCatchEventProcess');
+                processInstanceCatchSignal = await multipleRuntimeServiceTestUser.primary.processInstances.startProcess({
+                    processDefinitionKey: 'SignalCatchEventProcess',
+                });
                 expect(processInstanceCatchSignal).toBeDefined();
                 expect(processInstanceCatchSignal.id).toBeTruthy();
                 expect(processInstanceCatchSignal.processDefinitionKey).toBe('SignalCatchEventProcess');
             });
 
             await activiti.step('And starts signal throw process on secondary runtime', async () => {
-                processInstanceThrowSignal = await multipleRuntimeServiceTestUser.startProcessOnSecondary('SignalThrowEventProcess');
+                processInstanceThrowSignal = await multipleRuntimeServiceTestUser.secondary.processInstances.startProcess({
+                    processDefinitionKey: 'SignalThrowEventProcess',
+                });
                 expect(processInstanceThrowSignal).toBeDefined();
                 expect(processInstanceThrowSignal.id).toBeTruthy();
                 expect(processInstanceThrowSignal.processDefinitionKey).toBe('SignalThrowEventProcess');

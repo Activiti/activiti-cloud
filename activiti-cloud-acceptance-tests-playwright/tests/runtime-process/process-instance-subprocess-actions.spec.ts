@@ -38,7 +38,7 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
             'Given the user is authenticated as hruser ' +
                 'When the user starts a process with tasks and a subProcess called PROCESS_INSTANCE_WITH_EMBEDDED_SUB_PROCESS',
             async () => {
-                processInstance = await runtimeBundleServiceHrUser.startProcess({
+                processInstance = await runtimeBundleServiceHrUser.processInstances.startProcess({
                     processDefinitionKey: PROCESS_INSTANCE_WITH_EMBEDDED_SUB_PROCESS,
                 });
                 expect(processInstance).toBeTruthy();
@@ -51,11 +51,11 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
         );
 
         await activiti.step('And the user claims the task declared in the subprocess', async () => {
-            await taskServiceHrUser.claimTask(currentTaskId);
+            await taskServiceHrUser.tasks.claimTask(currentTaskId);
         });
 
         await activiti.step('And the user completes the task declared in the subprocess', async () => {
-            await taskServiceHrUser.completeTask(currentTaskId);
+            await taskServiceHrUser.tasks.completeTask(currentTaskId);
         });
 
         await activiti.step('Then subProcess events are emitted', async () => {
@@ -92,7 +92,7 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
             'Given the user is authenticated as hruser ' +
                 'When the user starts a process with a subProcess called PARENT_PROCESS',
             async () => {
-                processInstance = await runtimeBundleServiceHrUser.startProcess({
+                processInstance = await runtimeBundleServiceHrUser.processInstances.startProcess({
                     processDefinitionKey: PARENT_PROCESS,
                 });
                 expect(processInstance).toBeTruthy();
@@ -134,12 +134,12 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'When the user claims and completes the subprocess task my-task-call-activity',
             async () => {
-                const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(subprocessInstance.id);
+                const tasks = await taskServiceHrUser.tasks.getTasksByProcessInstanceId(subprocessInstance.id);
                 expect(tasks.length).toBeGreaterThan(0);
                 const subTask = tasks[0];
                 expect(subTask.name).toBe('my-task-call-activity');
-                await taskServiceHrUser.claimTask(subTask.id);
-                await taskServiceHrUser.completeTask(subTask.id);
+                await taskServiceHrUser.tasks.claimTask(subTask.id);
+                await taskServiceHrUser.tasks.completeTask(subTask.id);
             }
         );
 

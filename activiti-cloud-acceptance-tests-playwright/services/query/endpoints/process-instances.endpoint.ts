@@ -190,4 +190,11 @@ export class QueryProcessInstancesEndpoint extends BaseService {
         const response = await this.delete(`${this.basePath}/process-instances`);
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
+
+    async postProcessInstancesListQuery(body: { variableKeys?: string[] } = {}): Promise<CloudProcessInstance[]> {
+        const response = await this.post(`${this.basePath}/process-instances`, {
+            data: body.variableKeys ? { variableKeys: body.variableKeys } : {},
+        });
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
 }

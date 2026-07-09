@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { RuntimeBundleService } from './runtime-bundle.service';
-import { TaskService } from './task.service';
+import { RuntimeBundleService } from './runtime-bundle/runtime-bundle.service';
+import { TaskService } from './task/task.service';
 import { QueryService } from './query/query.service';
 import { AuditService } from './audit/audit.service';
-import { RuntimeAdminService } from './runtime-admin.service';
+import { RuntimeAdminService } from './runtime-admin/runtime-admin.service';
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
-import { CloudTask } from '../models/task.models';
 import { CloudRuntimeEvent } from '../models/audit.models';
 import { ProcessDefinitionRegistry } from '../models/process-definition-registry';
 import { BaseService, RequestResponse } from './base.service';
@@ -34,25 +33,26 @@ interface ErrorEntry {
 }
 
 export class SecurityPoliciesService extends BaseService {
-    private readonly runtimeBundleService: RuntimeBundleService;
-    private readonly taskService: TaskService;
-    private readonly queryService: QueryService;
-    private readonly auditService: AuditService;
-    private readonly runtimeAdminService: RuntimeAdminService;
+    readonly runtimeBundle: RuntimeBundleService;
+    readonly taskService: TaskService;
+    readonly query: QueryService;
+    readonly audit: AuditService;
+    readonly runtimeAdmin: RuntimeAdminService;
 
     constructor(context: CustomAPIRequest) {
         super(context);
-        this.runtimeBundleService = new RuntimeBundleService(context);
+        this.runtimeBundle = new RuntimeBundleService(context);
         this.taskService = new TaskService(context);
-        this.queryService = new QueryService(context);
-        this.auditService = new AuditService(context);
-        this.runtimeAdminService = new RuntimeAdminService(context);
+        this.query = new QueryService(context);
+        this.audit = new AuditService(context);
+        this.runtimeAdmin = new RuntimeAdminService(context);
     }
 
     attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {
         super.attachIsolation(dirtyRegistry, testScope);
-        this.runtimeBundleService.attachIsolation(dirtyRegistry, testScope);
+        this.runtimeBundle.attachIsolation(dirtyRegistry, testScope);
         this.taskService.attachIsolation(dirtyRegistry, testScope);
+        this.runtimeAdmin.attachIsolation(dirtyRegistry, testScope);
     }
 
     async startProcess(processName: string): Promise<CloudProcessInstance> {
@@ -78,80 +78,30 @@ export class SecurityPoliciesService extends BaseService {
         return processInstance;
     }
 
-    async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
-        return this.runtimeBundleService.getProcessInstances();
-    }
-
-    async getRuntimeProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.runtimeBundleService.getProcessInstance(processInstanceId);
-    }
-
-    async getRuntimeInstancesByProcessName(processName: string): Promise<CloudProcessInstance[]> {
-        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
-        return this.runtimeBundleService.getProcessInstances({ processDefinitionKey });
-    }
-
-    async getQueryInstancesByProcessName(processName: string): Promise<CloudProcessInstance[]> {
-        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
-        return this.queryService.processInstances.getProcessInstances({ processDefinitionKey });
-    }
-
     async waitForQueryInstancesByProcessName(processName: string): Promise<CloudProcessInstance[]> {
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
         return SecurityPoliciesService.waitFor(
-            () => this.getQueryInstancesByProcessName(processName),
+            () => this.query.processInstances.getProcessInstances({ processDefinitionKey }),
             (instances) => instances.length > 0,
             'querySync',
             `query process instances for ${processName}`
         );
     }
 
-    async getEventsByProcessName(processName: string): Promise<CloudRuntimeEvent[]> {
-        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
-        return this.auditService.events.getEvents({ processDefinitionKey });
-    }
-
-    async getAuditEventsForProcessInstance(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
-        return this.auditService.events.getEvents({ processInstanceId });
-    }
-
-    async getRuntimeAdminProcessInstances(params: {
-        processDefinitionKey: string;
-    }): Promise<CloudProcessInstance[]> {
-        return this.runtimeAdminService.getProcessInstancesWithParams(params);
-    }
-
-    async getQueryAdminProcessInstances(params: {
-        processDefinitionKey: string;
-    }): Promise<CloudProcessInstance[]> {
-        return this.queryService.adminProcessInstances.getProcessInstances(params);
-    }
-
-    async queryAllProcessInstances(): Promise<CloudProcessInstance[]> {
-        return this.queryService.processInstances.getAllProcessInstances();
-    }
-
-    async getAllTasks(): Promise<CloudTask[]> {
-        return this.taskService.getAllTasks();
-    }
-
-    async queryAllTasks(): Promise<CloudTask[]> {
-        return this.queryService.tasks.getAllTasks();
-    }
-
-    async getEventsByEntityIdAdmin(entityId: string): Promise<CloudRuntimeEvent[]> {
-        return this.auditService.getEventsByEntityIdAdmin(entityId);
-    }
-
     async getFilteredAllRuntimeInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
-        return this.filterProcessInstancesByKey(await this.getAllProcessInstances(), processName);
+        const all = await this.runtimeBundle.processInstances.getProcessInstances();
+        return this.filterProcessInstancesByKey(all, processName);
     }
 
     async getFilteredAllQueryInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
-        return this.filterProcessInstancesByKey(await this.queryAllProcessInstances(), processName);
+        const all = await this.query.processInstances.getAllProcessInstances();
+        return this.filterProcessInstancesByKey(all, processName);
     }
 
     async getFilteredEventsByName(processName: string): Promise<CloudRuntimeEvent[]> {
-        return this.filterEventsByProcessKey(await this.getEventsByProcessName(processName), processName);
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        const all = await this.audit.events.getEvents({ processDefinitionKey });
+        return this.filterEventsByProcessKey(all, processName);
     }
 
     async waitForFilteredEventsByName(processName: string): Promise<CloudRuntimeEvent[]> {
@@ -165,13 +115,13 @@ export class SecurityPoliciesService extends BaseService {
 
     async getFilteredRuntimeAdminInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
         const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
-        const all = await this.getRuntimeAdminProcessInstances({ processDefinitionKey });
+        const all = await this.runtimeAdmin.processInstances.getProcessInstancesWithParams({ processDefinitionKey });
         return this.filterProcessInstancesByKey(all, processName);
     }
 
     async getFilteredQueryAdminInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
         const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
-        const all = await this.getQueryAdminProcessInstances({ processDefinitionKey });
+        const all = await this.query.adminProcessInstances.getProcessInstances({ processDefinitionKey });
         return this.filterProcessInstancesByKey(all, processName);
     }
 
@@ -197,7 +147,7 @@ export class SecurityPoliciesService extends BaseService {
         processInstanceId: string,
         processName: string
     ): Promise<CloudRuntimeEvent[]> {
-        const all = await this.getEventsByEntityIdAdmin(processInstanceId);
+        const all = await this.audit.getEventsByEntityIdAdmin(processInstanceId);
         return this.filterEventsByProcessInstance(all, processInstanceId, processName);
     }
 
@@ -214,7 +164,7 @@ export class SecurityPoliciesService extends BaseService {
     }
 
     async getAuditEventsByProcessInstanceFiltered(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
-        const events = await this.getAuditEventsForProcessInstance(processInstanceId);
+        const events = await this.audit.events.getEvents({ processInstanceId });
         return events.filter(
             (event) =>
                 event.processInstanceId === processInstanceId ||

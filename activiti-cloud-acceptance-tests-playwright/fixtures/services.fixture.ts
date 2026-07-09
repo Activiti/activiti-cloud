@@ -29,11 +29,11 @@ import {
 } from '../helpers/service-factory';
 import { getTestScope, TestScope } from '../helpers/test-isolation';
 import { MultipleRuntimeBundleService } from '../services/multiple-runtime-bundle.service';
-import { RuntimeBundleService } from '../services/runtime-bundle.service';
+import { RuntimeBundleService } from '../services/runtime-bundle/runtime-bundle.service';
 import { QueryService } from '../services/query/query.service';
-import { RuntimeAdminService } from '../services/runtime-admin.service';
-import { TaskService } from '../services/task.service';
-import { TaskAdminService } from '../services/task-admin.service';
+import { RuntimeAdminService } from '../services/runtime-admin/runtime-admin.service';
+import { TaskService } from '../services/task/task.service';
+import { TaskAdminService } from '../services/task-admin/task-admin.service';
 import { AuditService } from '../services/audit/audit.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { IdentityManagementService } from '../services/identity-management.service';
@@ -122,8 +122,8 @@ const activiti = contexts.extend<ServicesFixture>({
     queryServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createQueryService(testAdminUserContext));
     },
-    runtimeAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
-        await use(createRuntimeAdminService(testAdminUserContext));
+    runtimeAdminServiceTestAdmin: async ({ testAdminUserContext, dirtyRegistry, testScope }, use) => {
+        await use(createRuntimeAdminService(testAdminUserContext, isolationOpts(dirtyRegistry, testScope)));
     },
     runtimeBundleServiceTestAdmin: async ({ testAdminUserContext, dirtyRegistry, testScope }, use) => {
         await use(createRuntimeBundleService(testAdminUserContext, '/rb', isolationOpts(dirtyRegistry, testScope)));
@@ -140,14 +140,14 @@ const activiti = contexts.extend<ServicesFixture>({
     taskServiceTestAdmin: async ({ testAdminUserContext, dirtyRegistry, testScope }, use) => {
         await use(createTaskService(testAdminUserContext, isolationOpts(dirtyRegistry, testScope)));
     },
-    taskAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
-        await use(createTaskAdminService(testAdminUserContext));
+    taskAdminServiceTestAdmin: async ({ testAdminUserContext, dirtyRegistry, testScope }, use) => {
+        await use(createTaskAdminService(testAdminUserContext, isolationOpts(dirtyRegistry, testScope)));
     },
     taskServiceHradmin: async ({ hradminContext, dirtyRegistry, testScope }, use) => {
         await use(createTaskService(hradminContext, isolationOpts(dirtyRegistry, testScope)));
     },
-    taskAdminServiceHradmin: async ({ hradminContext }, use) => {
-        await use(createTaskAdminService(hradminContext));
+    taskAdminServiceHradmin: async ({ hradminContext, dirtyRegistry, testScope }, use) => {
+        await use(createTaskAdminService(hradminContext, isolationOpts(dirtyRegistry, testScope)));
     },
     auditServiceTestUser: async ({ testUserContext }, use) => {
         await use(createAuditService(testUserContext));

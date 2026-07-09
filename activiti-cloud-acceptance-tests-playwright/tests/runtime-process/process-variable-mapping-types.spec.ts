@@ -55,16 +55,16 @@ activiti.describe('Process Variable Mapping Types', () => {
         await activiti.step(
             `When the user starts the process ${TASK_DATE_VAR_MAPPING_PROCESS}`,
             async () => {
-                const processInstance = await runtimeBundleServiceHrUser.startProcessWithVariables(
-                    TASK_DATE_VAR_MAPPING_PROCESS,
-                    {
+                const processInstance = await runtimeBundleServiceHrUser.processInstances.startProcess({
+                    processDefinitionKey: TASK_DATE_VAR_MAPPING_PROCESS,
+                    variables: {
                         [processVariableString]: 'stringValue1',
                         [processVariableInteger]: 123,
                         [processVariableBoolean]: true,
                         [processVariableDate]: '2019-09-09',
                         [processVariableDateTime]: testDateTime.toISOString(),
-                    }
-                );
+                    },
+                });
                 processInstanceId = processInstance.id;
                 expect(processInstanceId).toBeTruthy();
             }
@@ -93,7 +93,7 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('And variables have correct values', async () => {
-            const vars = await runtimeBundleServiceHrUser.getProcessInstanceVariables(processInstanceId);
+            const vars = await runtimeBundleServiceHrUser.processInstances.getProcessInstanceVariables(processInstanceId);
             expect(vars.find((v) => v.name === processVariableString)?.value).toBe('stringValue1');
             expect(vars.find((v) => v.name === processVariableInteger)?.value).toBe(123);
             expect(vars.find((v) => v.name === processVariableBoolean)?.value).toBe(true);
@@ -102,7 +102,7 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('And variables have correct types in rb', async () => {
-            const vars = await runtimeBundleServiceHrUser.getProcessInstanceVariables(processInstanceId);
+            const vars = await runtimeBundleServiceHrUser.processInstances.getProcessInstanceVariables(processInstanceId);
             expect(vars.find((v) => v.name === processVariableString)?.type).toBe('string');
             expect(vars.find((v) => v.name === processVariableInteger)?.type).toBe('integer');
             expect(vars.find((v) => v.name === processVariableBoolean)?.type).toBe('boolean');
@@ -155,7 +155,7 @@ activiti.describe('Process Variable Mapping Types', () => {
             taskId = matched.id;
             expect(matched.status).toBe('CREATED');
 
-            const taskVars = await taskServiceHrUser.getTaskVariables(taskId);
+            const taskVars = await taskServiceHrUser.tasks.getTaskVariables(taskId);
             expect(taskVars.find((v) => v.name === taskVariableString)?.value).toBe('stringValue1');
             expect(taskVars.find((v) => v.name === taskVariableInteger)?.value).toBe(123);
             expect(taskVars.find((v) => v.name === taskVariableBoolean)?.value).toBe(true);
@@ -164,7 +164,7 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('And variables types in task are correct', async () => {
-            const taskVars = await taskServiceHrUser.getTaskVariables(taskId);
+            const taskVars = await taskServiceHrUser.tasks.getTaskVariables(taskId);
             expect(taskVars.find((v) => v.name === taskVariableString)?.type).toBe('string');
             expect(taskVars.find((v) => v.name === taskVariableInteger)?.type).toBe('integer');
             expect(taskVars.find((v) => v.name === taskVariableBoolean)?.type).toBe('boolean');
@@ -173,17 +173,17 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('When the user ask to claim the task', async () => {
-            await taskServiceHrUser.claimTask(taskId);
+            await taskServiceHrUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('When update task variables', async () => {
-            await taskServiceHrUser.updateTaskVariable(taskId, taskVariableString, 'string321');
-            await taskServiceHrUser.updateTaskVariable(taskId, taskVariableInteger, 321);
-            await taskServiceHrUser.updateTaskVariable(taskId, taskVariableBoolean, false);
+            await taskServiceHrUser.tasks.updateTaskVariable(taskId, taskVariableString, 'string321');
+            await taskServiceHrUser.tasks.updateTaskVariable(taskId, taskVariableInteger, 321);
+            await taskServiceHrUser.tasks.updateTaskVariable(taskId, taskVariableBoolean, false);
         });
 
         await activiti.step('And the user ask to complete the task', async () => {
-            await taskServiceHrUser.completeTask(taskId);
+            await taskServiceHrUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then variables have correct values in process', async () => {
@@ -221,10 +221,10 @@ activiti.describe('Process Variable Mapping Types', () => {
         let taskId: string;
 
         await activiti.step('When the user starts variables mapping process on start event', async () => {
-            const processInstance = await runtimeBundleServiceHrUser.startProcessWithVariables(
-                PROCESS_START_EVENT_VARIABLE_MAPPING_PROCESS,
-                { Text0xfems: 'Form name', Text0rvs0o: 'Form email' }
-            );
+            const processInstance = await runtimeBundleServiceHrUser.processInstances.startProcess({
+                processDefinitionKey: PROCESS_START_EVENT_VARIABLE_MAPPING_PROCESS,
+                variables: { Text0xfems: 'Form name', Text0rvs0o: 'Form email' },
+            });
             processInstanceId = processInstance.id;
             expect(processInstanceId).toBeTruthy();
         });
@@ -263,7 +263,7 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('And the user may complete the task', async () => {
-            await taskServiceHrUser.completeTask(taskId);
+            await taskServiceHrUser.tasks.completeTask(taskId);
         });
     });
 });
