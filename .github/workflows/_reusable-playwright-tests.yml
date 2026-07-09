@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: playwright-activiti-slot-${{ matrix.concurrency-slot }}
-      cancel-in-progress: false
+      queue: max
     strategy:
       max-parallel: 4 # this is a max parallel - above that, the jobs will fail
       fail-fast: false
