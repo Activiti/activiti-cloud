@@ -18,5 +18,5 @@ package org.activiti.cloud.services.events.listeners;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public interface MessageProducerCommandContextFilter {
-    CloudRuntimeEvent<?, ?> produce(CloudRuntimeEvent<?, ?> event);
+    <T, K extends Enum<?>> CloudRuntimeEvent<T, K> produce(CloudRuntimeEvent<T, K> event);
 }
