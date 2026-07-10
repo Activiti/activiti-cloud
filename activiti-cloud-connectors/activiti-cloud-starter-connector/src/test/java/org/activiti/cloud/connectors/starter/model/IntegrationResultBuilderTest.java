@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Collections;
 import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -110,5 +111,23 @@ public class IntegrationResultBuilderTest {
         //then
         assertThat(resultEvent.getIntegrationContext().getInBoundVariables()).isEmpty();
         assertThat(resultEvent.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
+    }
+
+    @Test
+    void shouldNotCleanupIntegrationContext_when_integrationContextIsNull() {
+        //given
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(null);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
+
+        //when
+        IntegrationResult resultEvent = IntegrationResultBuilder.resultFor(
+            integrationRequestEvent,
+            connectorProperties
+        ).build();
+
+        //then
+        assertThat(resultEvent).isNotNull();
+        assertThat(resultEvent.getIntegrationContext()).isNull();
     }
 }

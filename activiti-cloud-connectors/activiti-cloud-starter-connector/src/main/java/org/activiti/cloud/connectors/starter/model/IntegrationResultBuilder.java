@@ -16,6 +16,7 @@
 package org.activiti.cloud.connectors.starter.model;
 
 import java.util.Map;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -32,10 +33,14 @@ public class IntegrationResultBuilder {
 
     private IntegrationResultBuilder(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
         this.requestEvent = integrationRequest;
-        IntegrationContextImpl sanitizedIntegrationContext = new IntegrationContextImpl(
-            integrationRequest.getIntegrationContext()
-        );
-        sanitizedIntegrationContext.clearInBoundVariables();
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        IntegrationContextImpl sanitizedIntegrationContext = null;
+
+        if (integrationContext != null) {
+            sanitizedIntegrationContext = new IntegrationContextImpl(integrationContext);
+            sanitizedIntegrationContext.clearInBoundVariables();
+        }
+
         this.integrationResult = new IntegrationResultImpl(integrationRequest, sanitizedIntegrationContext);
 
         if (connectorProperties != null) {

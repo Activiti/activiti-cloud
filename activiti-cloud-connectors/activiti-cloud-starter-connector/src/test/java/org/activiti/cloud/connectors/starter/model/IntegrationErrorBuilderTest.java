@@ -213,4 +213,25 @@ public class IntegrationErrorBuilderTest {
         Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
         Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
     }
+
+    @Test
+    void shouldNotCleanupIntegrationContext_when_integrationContextIsNull() {
+        //given
+        Throwable error = new RuntimeException("Error");
+
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(null);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
+
+        //when
+        IntegrationError integrationError = IntegrationErrorBuilder.errorFor(
+            integrationRequestEvent,
+            connectorProperties,
+            error
+        ).build();
+
+        //then
+        Assertions.assertThat(integrationError).isNotNull();
+        Assertions.assertThat(integrationError.getIntegrationContext()).isNull();
+    }
 }
