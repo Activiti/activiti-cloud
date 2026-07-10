@@ -260,31 +260,30 @@ class OrphanedIntegrationRecoveryIT {
         var errorHandler = AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(
             ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)
         );
-        await()
-            .atMost(Duration.ofSeconds(30))
-            .untilAsserted(() -> {
-                var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
-                verify(errorHandler, atLeastOnce()).receive(errorCaptor.capture());
-                assertThat(errorCaptor.getValue()).satisfies(error -> {
-                    assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
-                    assertThat(error.getErrorMessage()).isEqualTo(
-                        OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
-                    );
-                });
-                assertThat(
-                    ctx2
-                        .getBean(IntegrationContextService.class)
-                        .createIntegrationContextQuery()
-                        .list()
-                        .stream()
-                        .filter(ic -> processInstanceId.equals(ic.getProcessInstanceId()))
-                        .count()
-                )
-                    .as(
-                        "integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up"
-                    )
-                    .isZero();
-            });
+
+        AopTestUtils.<OrphanedIntegrationRecoveryScheduler>getTargetObject(
+            ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class)
+        ).recoverOrphanedIntegrations();
+
+        var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
+        verify(errorHandler, atLeastOnce()).receive(errorCaptor.capture());
+        assertThat(errorCaptor.getValue()).satisfies(error -> {
+            assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
+            assertThat(error.getErrorMessage()).isEqualTo(
+                OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
+            );
+        });
+        assertThat(
+            ctx2
+                .getBean(IntegrationContextService.class)
+                .createIntegrationContextQuery()
+                .list()
+                .stream()
+                .filter(ic -> processInstanceId.equals(ic.getProcessInstanceId()))
+                .count()
+        )
+            .as("integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up")
+            .isZero();
 
         setupAdminSecurityContext();
         assertThat(ctx2.getBean(ProcessAdminRuntime.class).processInstance(processInstanceId).getStatus())
@@ -373,7 +372,7 @@ class OrphanedIntegrationRecoveryIT {
                     "spring.activiti.async-executor.seconds-to-wait-on-shutdown=0",
                     "activiti.cloud.runtime-bundle.messaging.required-audit-producer-groups=",
                     "activiti.orphaned-integration-recovery.threshold-seconds=0",
-                    "activiti.orphaned-integration-recovery.cron=*/2 * * * * *",
+                    "activiti.orphaned-integration-recovery.cron=-",
                     "activiti.features.rb.orphaned-integration-recovery.enabled=true",
                     "activiti.cloud.messaging.function-router.enabled=" + functionRouterEnabled,
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.destination=test.longRunningConnector",
