@@ -19,7 +19,9 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
@@ -87,8 +89,16 @@ class ProcessInstanceAdminActionsIT {
 
     @Test
     void should_returnProcessInstances_whenPostingToAdminEndpointWithoutVariableKeys() {
-        ProcessInstanceEntity process1 = queryTestUtils.buildProcessInstance().buildAndSave();
-        ProcessInstanceEntity process2 = queryTestUtils.buildProcessInstance().buildAndSave();
+        ProcessInstanceEntity process1 = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"))
+            .buildAndSave();
+        ProcessInstanceEntity process2 = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value2"))
+            .buildAndSave();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +108,9 @@ class ProcessInstanceAdminActionsIT {
             .then()
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, containsInAnyOrder(process1.getId(), process2.getId()));
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, containsInAnyOrder(process1.getId(), process2.getId()))
+            .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables", nullValue())
+            .body(PROCESS_INSTANCES_JSON_PATH + "[1].variables", nullValue());
     }
 
     @Test
@@ -140,5 +152,14 @@ class ProcessInstanceAdminActionsIT {
         queryTestUtils.buildProcessInstance().buildAndSave();
 
         given().when().delete(PROCESS_INSTANCES_ENDPOINT).then().statusCode(200);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(PROCESS_INSTANCES_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body("page.totalElements", equalTo(0));
     }
 }

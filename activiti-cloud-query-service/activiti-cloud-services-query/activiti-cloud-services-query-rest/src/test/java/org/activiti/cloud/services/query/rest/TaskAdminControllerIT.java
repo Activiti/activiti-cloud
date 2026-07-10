@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -114,7 +115,9 @@ class TaskAdminControllerIT extends AbstractTaskControllerIT {
             .then()
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
-            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(task1.getId(), task2.getId()));
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(task1.getId(), task2.getId()))
+            .body(TASKS_JSON_PATH + "[0].processVariables", nullValue())
+            .body(TASKS_JSON_PATH + "[1].processVariables", nullValue());
     }
 
     @Test
@@ -148,6 +151,24 @@ class TaskAdminControllerIT extends AbstractTaskControllerIT {
             .buildAndSave();
         queryTestUtils.buildTask().buildAndSave();
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+
         given().when().delete(getSearchEndpointHttpGet()).then().statusCode(200);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
     }
 }
