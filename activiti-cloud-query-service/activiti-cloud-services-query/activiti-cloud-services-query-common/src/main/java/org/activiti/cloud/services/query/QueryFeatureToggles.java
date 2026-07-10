@@ -31,17 +31,4 @@ public final class QueryFeatureToggles {
      * subquery-based queries (flag {@code true}).
      */
     public static final String FEATURE_EXISTS_SUBQUERIES = "query.specifications.exists-subqueries";
-
-    /**
-     * Enables persistence of process variable change history in the
-     * {@code PROCESS_VARIABLE_HISTORY} table (flag {@code false} by default).
-     *
-     * <p>When disabled, {@code VARIABLE_CREATED}, {@code VARIABLE_UPDATED} and
-     * {@code VARIABLE_DELETED} events are still applied to the live
-     * {@code ProcessVariableEntity} state but no history record is written.
-     *
-     * <p>The default {@link org.activiti.cloud.common.feature.EnvironmentFeatureToggle}
-     * reads property {@code activiti.features.query.process-variable-history.enabled}.
-     */
-    public static final String PROCESS_VARIABLE_HISTORY = "query.process-variable-history";
 }

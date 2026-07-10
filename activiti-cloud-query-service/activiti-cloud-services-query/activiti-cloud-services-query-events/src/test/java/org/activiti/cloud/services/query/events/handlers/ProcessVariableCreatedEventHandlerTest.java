@@ -16,8 +16,6 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,10 +24,8 @@ import java.util.Optional;
 import java.util.Set;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -49,113 +45,32 @@ class ProcessVariableCreatedEventHandlerTest {
     @Mock
     private EntityManagerFinder entityManagerFinder;
 
-    @Mock
-    private FeatureToggle featureToggle;
-
     @Test
-    void handleShouldPersistVariableAndHistoryEntry() {
-        //given
-        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
-            "var",
-            "string",
-            "value",
-            "procInstId",
-            null
-        );
-        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(
-            "eventId",
-            System.currentTimeMillis(),
-            variable
-        );
+    void should_persistVariable_when_handleCalled() {
+        var variable = new VariableInstanceImpl<>("var", "string", "value", "procInstId", null);
+        var event = new CloudVariableCreatedEventImpl("eventId", System.currentTimeMillis(), variable);
         event.setMessageId("msg-003");
         event.setSequenceNumber(7);
         event.setCommandId("cmd-abc");
 
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        var processInstanceEntity = new ProcessInstanceEntity();
         when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
             Optional.of(processInstanceEntity)
         );
         when(entityManagerFinder.findTasksWithProcessVariables("procInstId")).thenReturn(Set.of());
 
-        //when
         handler.handle(event);
 
-        //then
-        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        verify(entityManager, org.mockito.Mockito.times(2)).persist(captor.capture());
-
-        var persisted = captor.getAllValues();
-        var history = persisted
-            .stream()
-            .filter(ProcessVariableHistoryEntity.class::isInstance)
-            .map(o -> (ProcessVariableHistoryEntity) o)
-            .findFirst();
-        assertThat(history).isPresent();
-        assertThat(history.get().getProcessInstanceId()).isEqualTo("procInstId");
-        assertThat(history.get().getVariableName()).isEqualTo("var");
-        assertThat(history.get().isDeleted()).isFalse();
-        assertThat(history.get().getMessageId()).isEqualTo("msg-003");
-        assertThat(history.get().getSequenceNumber()).isEqualTo(7);
-        assertThat(history.get().getCommandId()).isEqualTo("cmd-abc");
-        assertThat(history.get().getEventTime()).isNotNull();
-        assertThat(history.get().getRecordCreateTime()).isNotNull();
-    }
-
-    @Test
-    void handleShouldPersistVariableButSkipHistoryWhenVariableIsEphemeral() {
-        //given
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
-            "var",
-            "string",
-            "value",
-            "procInstId",
-            null
-        );
-        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(variable, true);
-
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
-            Optional.of(processInstanceEntity)
-        );
-        when(entityManagerFinder.findTasksWithProcessVariables("procInstId")).thenReturn(Set.of());
-
-        //when
-        handler.handle(event);
-
-        //then - only variable persisted, no history
-        verify(entityManager).persist(any(org.activiti.cloud.services.query.model.ProcessVariableEntity.class));
-        verify(entityManager, never()).persist(any(ProcessVariableHistoryEntity.class));
-    }
-
-    @Test
-    void handleShouldPersistVariableButSkipHistoryWhenFeatureFlagDisabled() {
-        //given
-        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(false);
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
-            "var",
-            "string",
-            "value",
-            "procInstId",
-            null
-        );
-        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(
-            "eventId",
-            System.currentTimeMillis(),
-            variable
-        );
-
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
-            Optional.of(processInstanceEntity)
-        );
-        when(entityManagerFinder.findTasksWithProcessVariables("procInstId")).thenReturn(Set.of());
-
-        //when
-        handler.handle(event);
-
-        //then - only variable persisted, no history
-        verify(entityManager).persist(any(org.activiti.cloud.services.query.model.ProcessVariableEntity.class));
-        verify(entityManager, never()).persist(any(ProcessVariableHistoryEntity.class));
+        var captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
+        verify(entityManager).persist(captor.capture());
+        assertThat(captor.getValue())
+            .extracting(
+                ProcessVariableEntity::getName,
+                ProcessVariableEntity::getType,
+                ProcessVariableEntity::getValue,
+                ProcessVariableEntity::getProcessInstanceId,
+                ProcessVariableEntity::getProcessInstance
+            )
+            .containsExactly("var", "string", "value", "procInstId", processInstanceEntity);
     }
 }
