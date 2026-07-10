@@ -282,7 +282,9 @@ class OrphanedIntegrationRecoveryIT {
                 .filter(ic -> processInstanceId.equals(ic.getProcessInstanceId()))
                 .count()
         )
-            .as("integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up")
+            .as(
+                "integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up"
+            )
             .isZero();
 
         setupAdminSecurityContext();
