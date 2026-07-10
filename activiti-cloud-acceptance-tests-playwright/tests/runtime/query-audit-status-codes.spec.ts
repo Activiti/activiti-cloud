@@ -15,8 +15,7 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
-import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
+import { startCatalogProcess, startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 import { EventType } from '../../models/audit.models';
 
 const FAKE_ID = '00000000-0000-0000-0000-000000000099';

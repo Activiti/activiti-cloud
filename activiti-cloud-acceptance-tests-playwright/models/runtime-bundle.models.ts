@@ -44,12 +44,28 @@ export enum ProcessInstanceStatus {
 
 export interface StartProcessPayload {
     payloadType: 'StartProcessPayload';
-    processDefinitionKey: string;
+    processDefinitionKey?: string;
+    processDefinitionId?: string;
     businessKey?: string;
     name?: string;
     variables?: Record<string, unknown>;
     linkedProcessInstanceId?: string;
     linkedProcessInstanceType?: string;
+}
+
+export interface CreateProcessInstancePayload {
+    payloadType: 'CreateProcessInstancePayload';
+    processDefinitionKey?: string;
+    processDefinitionId?: string;
+    businessKey?: string;
+    name?: string;
+    variables?: Record<string, unknown>;
+}
+
+export interface SignalPayload {
+    payloadType: 'SignalPayload';
+    name: string;
+    variables?: Record<string, unknown>;
 }
 
 export interface UpdateProcessPayload {

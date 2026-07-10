@@ -33,7 +33,7 @@ activiti.describe('Runtime — Task Variable Actions', () => {
 
         await activiti.step('And the user creates task variables', async () => {
             for (const [name, value] of Object.entries(TASK_VARIABLES)) {
-                await taskServiceTestUser.createTaskVariable(taskId, name, value);
+                await taskServiceTestUser.tasks.createTaskVariable(taskId, name, value);
             }
         });
 

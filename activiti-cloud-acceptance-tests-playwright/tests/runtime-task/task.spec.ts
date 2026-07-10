@@ -42,11 +42,11 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         );
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
@@ -56,7 +56,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
             );
             expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             await expect(async () => {
-                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
             const queryTask = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
             expect(queryTask.status).toBe(TaskStatus.COMPLETED);
@@ -95,7 +95,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('When the user deletes the standalone task', async () => {
-            await taskServiceTestUser.deleteTask(taskId);
+            await taskServiceTestUser.tasks.deleteTask(taskId);
         });
 
         await activiti.step('Then the standalone task is deleted', async () => {
@@ -121,7 +121,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('Then the subtask is created and references another task', async () => {
-            const created = await taskServiceTestUser.getTaskById(subtaskId);
+            const created = await taskServiceTestUser.tasks.getTaskById(subtaskId);
             expect(created.parentTaskId?.toLowerCase()).toBe(parentTaskId.toLowerCase());
             const querySubtask = await queryServiceTestUser.tasks.getTaskById(subtaskId);
             expect(querySubtask?.parentTaskId?.toLowerCase()).toBe(parentTaskId.toLowerCase());
@@ -143,7 +143,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('Then a list of one subtask is be available for the task', async () => {
-            const subtasks = await taskServiceTestUser.getSubtasks(parentTaskId);
+            const subtasks = await taskServiceTestUser.tasks.getSubtasks(parentTaskId);
             expect(subtasks.map((task) => task.id)).toEqual([subtaskId]);
         });
     });
@@ -177,7 +177,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
@@ -187,7 +187,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
             );
             expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             await expect(async () => {
-                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
         });
     });
@@ -221,11 +221,11 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
@@ -235,7 +235,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
             );
             expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             await expect(async () => {
-                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
         });
     });
@@ -269,11 +269,11 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
@@ -283,7 +283,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
             );
             expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             await expect(async () => {
-                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
         });
     });
@@ -307,11 +307,11 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         );
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the user cannot complete the task', async () => {
-            const response = await taskServiceTestUser.completeTask(taskId);
+            const response = await taskServiceTestUser.tasks.completeTask(taskId);
             expect(response.httpStatus).toBeGreaterThanOrEqual(400);
             expect(response.httpStatus).toBeLessThan(500);
             expect(JSON.stringify(response)).toContain('Unable to find task');
@@ -342,10 +342,10 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
             'And another user is authenticated as hruser ' +
                 'Then the task cannot be claimed by user',
             async () => {
-                const response = await taskServiceHrUser.claimTask(taskId);
+                const response = await taskServiceHrUser.tasks.claimTask(taskId);
                 expect(response.httpStatus).toBeGreaterThanOrEqual(400);
-            expect(response.httpStatus).toBeLessThan(500);
-            expect(JSON.stringify(response)).toContain('Unable to find task');
+                expect(response.httpStatus).toBeLessThan(500);
+                expect(JSON.stringify(response)).toContain('Unable to find task');
                 const hrTasks = await queryServiceHrUser.tasks.getAllTasks();
                 expect(hrTasks.map((task) => task.id)).not.toContain(taskId);
             }

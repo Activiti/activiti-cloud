@@ -15,7 +15,8 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { catalogProcessKey, startCatalogProcess } from '../../flows/start-catalog-process';
+import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 
 const LINK_TYPE = 'acceptance-link-type';
 
@@ -100,11 +101,11 @@ activiti.describe('Runtime — Query Admin Process Instances', () => {
         });
 
         await activiti.step('Given a main process and a linkable orphan process', async () => {
-            const mainProcess = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: catalogProcessKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'),
+            const mainProcess = await runtimeBundleServiceTestUser.processInstances.startProcess({
+                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'),
             });
-            const orphanProcess = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: catalogProcessKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'),
+            const orphanProcess = await runtimeBundleServiceTestUser.processInstances.startProcess({
+                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'),
                 linkedProcessInstanceType: LINK_TYPE,
             });
             parentProcessInstanceId = mainProcess.id;

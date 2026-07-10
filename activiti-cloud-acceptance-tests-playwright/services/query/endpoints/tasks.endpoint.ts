@@ -159,4 +159,19 @@ export class QueryTasksEndpoint extends BaseService {
         const response = await this.delete(`${this.basePath}/tasks`);
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
+
+    async postTasksListQuery(body: {
+        standalone?: boolean;
+        rootTasksOnly?: boolean;
+        variableKeys?: string[];
+    } = {}): Promise<CloudTask[]> {
+        const response = await this.post(`${this.basePath}/tasks`, {
+            data: {
+                ...(body.standalone !== undefined ? { standalone: body.standalone } : {}),
+                ...(body.rootTasksOnly !== undefined ? { rootTasksOnly: body.rootTasksOnly } : {}),
+                ...(body.variableKeys ? { variableKeys: body.variableKeys } : {}),
+            },
+        });
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
 }
