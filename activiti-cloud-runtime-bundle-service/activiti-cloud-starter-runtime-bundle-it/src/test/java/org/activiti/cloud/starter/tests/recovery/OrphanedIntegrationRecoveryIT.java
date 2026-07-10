@@ -150,7 +150,7 @@ class OrphanedIntegrationRecoveryIT {
 
     @ParameterizedTest(name = "functionRouterEnabled={0}")
     @ValueSource(booleans = { false, true })
-    void should_taskRemainInStartedState_when_applicationIsKilledDuringServiceTaskExecution(
+    void should_taskTransitionToErrorState_when_applicationIsKilledDuringServiceTaskExecution(
         boolean functionRouterEnabled
     ) {
         ctx1 = buildContext(functionRouterEnabled);
