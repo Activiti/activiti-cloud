@@ -1,4 +1,4 @@
-DROP INDEX IF EXISTS idx_pvh_record_create_time;
-DROP INDEX IF EXISTS idx_pvh_process_var;
-DROP TABLE IF EXISTS process_variable_history;
-DROP SEQUENCE IF EXISTS process_variable_history_sequence;
+DROP INDEX idx_pvh_record_create_time;
+DROP INDEX idx_pvh_process_var;
+DROP TABLE process_variable_history;
+DROP SEQUENCE process_variable_history_sequence;
