@@ -26,13 +26,26 @@ import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.streams.AuditConsumerChannelHandlerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.integration.core.GenericHandler;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandlingException;
+import org.springframework.messaging.support.ErrorMessage;
 
 @AutoConfiguration
 public class AuditJPAStreamsAutoConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditJPAStreamsAutoConfiguration.class);
+    public static final String PARTITIONED_AUDIT_CONSUMER_INTEGRATION_FLOW_INPUT =
+        "partitionedAuditConsumerIntegrationFlowInput";
+    public static final String PARTITIONED_AUDIT_CONSUMER_ERROR_CHANNEL = "partitionedAuditConsumerErrorChannel";
 
     @Bean
     @ConditionalOnMissingBean
@@ -46,15 +59,99 @@ public class AuditJPAStreamsAutoConfiguration {
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER)
     @Bean
     public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> auditConsumerChannelHandlerConsumer(
-        AuditConsumerChannelHandler handler
+        IntegrationFlow partitionedAuditConsumerIntegrationFlow
     ) {
-        return message -> {
-            handler.receiveCloudRuntimeEvent(
-                message.getHeaders(),
-                Optional.ofNullable(message.getPayload())
-                    .orElse(Collections.emptyList())
-                    .toArray(new CloudRuntimeEvent[0])
+        return message -> partitionedAuditConsumerIntegrationFlow.getInputChannel().send(message);
+    }
+
+    @Bean
+    public IntegrationFlow partitionedAuditConsumerIntegrationFlow(
+        AuditConsumerPartitionedChannelCountProvider auditConsumerPartitionedChannelCountProvider,
+        AuditConsumerPartitionedChannelKeySelector auditConsumerPartitionedChannelKeySelector,
+        GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericAuditConsumerChannelHandlerAdapter,
+        @Value("${activiti.cloud.query.consumer.worker-queue-size:10}") Integer workerQueueSize
+    ) {
+        LOGGER.info(
+            "Initializing AuditJPAStreamsAutoConfiguration with {} partitioned channel count using worker-queue size {}",
+            auditConsumerPartitionedChannelCountProvider.get(),
+            workerQueueSize
+        );
+        return IntegrationFlow.from(PARTITIONED_AUDIT_CONSUMER_INTEGRATION_FLOW_INPUT)
+            .gateway(
+                request ->
+                    request
+                        .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_AUDIT_CONSUMER_ERROR_CHANNEL, true))
+                        .channel(
+                            MessageChannels.partitioned(auditConsumerPartitionedChannelCountProvider.get())
+                                .partitionKey(auditConsumerPartitionedChannelKeySelector)
+                                .workerQueueSize(workerQueueSize)
+                        )
+                        .handle(genericAuditConsumerChannelHandlerAdapter),
+                gatewayEndpointSpec -> gatewayEndpointSpec.requiresReply(false).replyTimeout(0L)
+            )
+            .get();
+    }
+
+    @Bean
+    public IntegrationFlow partitionedAuditConsumerErrorIntegrationFlow() {
+        return IntegrationFlow.from(PARTITIONED_AUDIT_CONSUMER_ERROR_CHANNEL)
+            .handle(message -> {
+                if (message instanceof ErrorMessage errorMessage) {
+                    final var exception = errorMessage.getPayload();
+                    final var failedMessage =
+                        exception instanceof MessageHandlingException
+                            ? ((MessageHandlingException) exception).getFailedMessage()
+                            : errorMessage.getOriginalMessage();
+
+                    LOGGER.error(
+                        "{} while handling {} for partition thread {}",
+                        exception.getMessage(),
+                        failedMessage,
+                        Thread.currentThread().getName(),
+                        Optional.ofNullable(exception.getCause()).orElse(exception)
+                    );
+                } else {
+                    LOGGER.error(
+                        "Unexpected message type {} on {}: {}",
+                        message.getClass(),
+                        PARTITIONED_AUDIT_CONSUMER_ERROR_CHANNEL,
+                        message
+                    );
+                }
+            })
+            .get();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    AuditConsumerPartitionedChannelCountProvider auditConsumerPartitionedChannelCountProvider() {
+        return () -> Runtime.getRuntime().availableProcessors() * 2;
+    }
+
+    @Bean
+    AuditConsumerPartitionedChannelKeySelector auditConsumerPartitionedChannelKeySelector() {
+        return new DefaultConsumerPartitionedChannelKeySelector();
+    }
+
+    @Bean
+    GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericAuditConsumerChannelHandlerAdapter(
+        AuditConsumerChannelHandler auditConsumerChannelHandler
+    ) {
+        return (payload, headers) -> {
+            final var events = Optional.ofNullable(payload)
+                .orElseGet(Collections::emptyList)
+                .toArray(CloudRuntimeEvent[]::new);
+
+            LOGGER.debug(
+                "Handling {} events with root process instance id {} on partition thread: {}",
+                events.length,
+                headers.get(AuditConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID),
+                Thread.currentThread().getName()
             );
+
+            auditConsumerChannelHandler.receiveCloudRuntimeEvent(headers, events);
+
+            return null;
         };
     }
 }
