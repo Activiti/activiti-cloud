@@ -33,10 +33,10 @@ import org.activiti.cloud.services.audit.jpa.exceptions.AuditExportException;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.EntityModel;
@@ -100,15 +100,22 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
             }
         }
 
-        Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
+        Slice<AuditEventEntity> allAuditSlice = eventsRepository.findAllAsSlice(pageable);
 
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditInPage.getContent());
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditSlice.getContent());
 
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            new PageImpl<>(events, pageable, allAuditInPage.getTotalElements()),
+            new PageImpl<>(events, pageable, totalElements(allAuditSlice, pageable)),
             eventRepresentationModelAssembler
         );
+    }
+
+    private static long totalElements(Slice<?> slice, Pageable pageable) {
+        if (!slice.hasNext()) {
+            return pageable.getOffset() + slice.getNumberOfElements();
+        }
+        return pageable.getOffset() + pageable.getPageSize() + 1;
     }
 
     @GetMapping(path = "/export/{fileName}")

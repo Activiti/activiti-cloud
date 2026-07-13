@@ -26,7 +26,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface EventsRepository<
     T extends AuditEventEntity
-> extends PagingAndSortingRepository<T, Long>, JpaSpecificationExecutor<T>, CrudRepository<T, Long> {
+> extends PagingAndSortingRepository<T, Long>, JpaSpecificationExecutor<T>, CrudRepository<T, Long>, EventsRepositoryCustom {
     Optional<T> findByEventId(String eventId);
 
     Collection<T> findAllByOrderByTimestampDesc();

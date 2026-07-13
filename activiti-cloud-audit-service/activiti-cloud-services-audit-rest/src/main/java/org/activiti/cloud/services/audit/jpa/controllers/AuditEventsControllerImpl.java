@@ -44,10 +44,10 @@ import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.EntityModel;
@@ -142,10 +142,10 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
         spec = securityPoliciesApplicationService.createSpecWithSecurity(spec, SecurityPolicyAccess.READ);
 
-        Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(spec, pageable);
+        Slice<AuditEventEntity> allAuditSlice = eventsRepository.findAllAsSlice(spec, pageable);
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
-        for (AuditEventEntity aee : allAuditInPage.getContent()) {
+        for (AuditEventEntity aee : allAuditSlice.getContent()) {
             EventToEntityConverter converterByEventTypeName = eventConverters.getConverterByEventTypeName(
                 aee.getEventType()
             );
@@ -158,9 +158,16 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            new PageImpl<>(events, pageable, allAuditInPage.getTotalElements()),
+            new PageImpl<>(events, pageable, totalElements(allAuditSlice, pageable)),
             eventRepresentationModelAssembler
         );
+    }
+
+    private static long totalElements(Slice<?> slice, Pageable pageable) {
+        if (!slice.hasNext()) {
+            return pageable.getOffset() + slice.getNumberOfElements();
+        }
+        return pageable.getOffset() + pageable.getPageSize() + 1;
     }
 
     private Specification<AuditEventEntity> createSearchSpec(SearchParams searchParams) {
