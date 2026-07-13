@@ -215,7 +215,7 @@ public class IntegrationErrorBuilderTest {
     }
 
     @Test
-    void shouldNotCleanupIntegrationContext_when_integrationContextIsNull() {
+    void shouldNot_break_when_integrationContextIsNull() {
         //given
         Throwable error = new RuntimeException("Error");
 

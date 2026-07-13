@@ -113,7 +113,7 @@ public class IntegrationResultBuilderTest {
     }
 
     @Test
-    void shouldNotCleanupIntegrationContext_when_integrationContextIsNull() {
+    void shouldNot_break_when_integrationContextIsNull() {
         //given
         IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(null);
         integrationRequestEvent.setAppName(APP_NAME);
