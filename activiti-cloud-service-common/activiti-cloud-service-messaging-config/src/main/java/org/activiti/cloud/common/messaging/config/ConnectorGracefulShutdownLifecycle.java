@@ -69,7 +69,7 @@ public class ConnectorGracefulShutdownLifecycle implements SmartLifecycle {
     }
 
     private void stopConsumption() {
-        LOGGER.info("Graceful shutdown started: stopping connector message consumption");
+        LOGGER.info("Graceful shutdown started: stopping message consumption");
         inputBindingLifecycle.stop();
     }
 
@@ -77,7 +77,7 @@ public class ConnectorGracefulShutdownLifecycle implements SmartLifecycle {
         final long deadline = System.nanoTime() + shutdownTimeout.toNanos();
         int remaining = inFlightTracker.inFlight();
         while (remaining > 0 && System.nanoTime() < deadline) {
-            LOGGER.debug("Graceful shutdown: waiting for {} in-flight connector request(s) to finish", remaining);
+            LOGGER.debug("Graceful shutdown: waiting for {} in-flight message(s) to finish", remaining);
             try {
                 Thread.sleep(POLL_INTERVAL_MILLIS);
             } catch (InterruptedException _) {
@@ -89,12 +89,12 @@ public class ConnectorGracefulShutdownLifecycle implements SmartLifecycle {
 
         if (remaining > 0) {
             LOGGER.warn(
-                "Graceful shutdown timeout ({}) exceeded; {} in-flight connector request(s) did not finish",
+                "Graceful shutdown timeout ({}) exceeded; {} in-flight message(s) did not finish",
                 shutdownTimeout,
                 remaining
             );
         } else {
-            LOGGER.info("Graceful shutdown: all in-flight connector requests finished");
+            LOGGER.info("Graceful shutdown: all in-flight message(s) finished");
         }
     }
 }
