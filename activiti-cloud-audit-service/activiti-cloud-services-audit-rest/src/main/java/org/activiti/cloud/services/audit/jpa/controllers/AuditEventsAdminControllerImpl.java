@@ -106,16 +106,9 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
 
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            new PageImpl<>(events, pageable, totalElements(allAuditSlice, pageable)),
+            new PageImpl<>(events, pageable, PageUtils.totalElements(allAuditSlice, pageable)),
             eventRepresentationModelAssembler
         );
-    }
-
-    private static long totalElements(Slice<?> slice, Pageable pageable) {
-        if (!slice.hasNext()) {
-            return pageable.getOffset() + slice.getNumberOfElements();
-        }
-        return pageable.getOffset() + pageable.getPageSize() + 1;
     }
 
     @GetMapping(path = "/export/{fileName}")
