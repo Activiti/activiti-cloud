@@ -51,8 +51,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -61,8 +61,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -121,8 +121,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -131,8 +131,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -201,8 +201,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -211,8 +211,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -286,8 +286,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -296,8 +296,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -356,8 +356,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -366,8 +366,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -733,8 +733,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -743,8 +743,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1084,8 +1084,8 @@
           }
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1094,8 +1094,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1119,12 +1119,12 @@
             "content" : {
               "application/hal+json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/MappingJacksonValue"
+                  "$ref" : "#/components/schemas/ListResponseContentQueryCloudTask"
                 }
               },
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/MappingJacksonValue"
+                  "$ref" : "#/components/schemas/ListResponseContentQueryCloudTask"
                 }
               }
             }
@@ -1384,8 +1384,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1394,8 +1394,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1481,8 +1481,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1491,8 +1491,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1551,8 +1551,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1561,8 +1561,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1859,8 +1859,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1869,8 +1869,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2159,8 +2159,8 @@
           }
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2169,8 +2169,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2194,12 +2194,12 @@
             "content" : {
               "application/hal+json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/MappingJacksonValue"
+                  "$ref" : "#/components/schemas/ListResponseContentQueryCloudProcessInstance"
                 }
               },
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/MappingJacksonValue"
+                  "$ref" : "#/components/schemas/ListResponseContentQueryCloudProcessInstance"
                 }
               }
             }
@@ -2424,8 +2424,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2434,8 +2434,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2521,8 +2521,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2531,8 +2531,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2591,8 +2591,8 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2601,8 +2601,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2968,8 +2968,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -2978,8 +2978,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3081,8 +3081,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3091,8 +3091,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3149,8 +3149,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3159,8 +3159,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3217,8 +3217,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3227,8 +3227,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3291,8 +3291,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3301,8 +3301,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3603,8 +3603,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3613,8 +3613,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3671,8 +3671,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3681,8 +3681,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3796,8 +3796,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3806,8 +3806,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3903,8 +3903,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -3913,8 +3913,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4213,8 +4213,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4223,8 +4223,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4281,8 +4281,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4291,8 +4291,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4418,8 +4418,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4428,8 +4428,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4486,8 +4486,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4496,8 +4496,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4586,8 +4586,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4596,8 +4596,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4699,8 +4699,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4709,8 +4709,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4767,8 +4767,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4777,8 +4777,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4835,8 +4835,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4845,8 +4845,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4909,8 +4909,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -4919,8 +4919,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5043,8 +5043,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5053,8 +5053,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5111,8 +5111,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5121,8 +5121,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5205,8 +5205,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5215,8 +5215,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5273,8 +5273,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5283,8 +5283,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5342,8 +5342,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5352,8 +5352,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5467,8 +5467,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5477,8 +5477,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5561,8 +5561,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5571,8 +5571,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5861,8 +5861,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5871,8 +5871,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5996,8 +5996,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6006,8 +6006,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6182,8 +6182,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6192,8 +6192,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6250,8 +6250,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6260,8 +6260,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6339,8 +6339,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6349,8 +6349,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6433,8 +6433,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6443,8 +6443,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6700,8 +6700,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6710,8 +6710,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6858,8 +6858,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6868,8 +6868,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6926,8 +6926,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6936,8 +6936,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6989,8 +6989,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6999,8 +6999,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -7094,8 +7094,8 @@
           }
         } ],
         "responses" : {
-          "400" : {
-            "description" : "Bad Request",
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -7104,8 +7104,8 @@
               }
             }
           },
-          "404" : {
-            "description" : "Not Found",
+          "400" : {
+            "description" : "Bad Request",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -7522,34 +7522,14 @@
           "appVersion" : {
             "type" : "string"
           },
-          "description" : {
+          "processInstanceId" : {
             "type" : "string"
-          },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "CREATED", "ASSIGNED", "SUSPENDED", "COMPLETED", "CANCELLED", "DELETED" ]
           },
           "businessKey" : {
             "type" : "string"
           },
           "formKey" : {
             "type" : "string"
-          },
-          "taskDefinitionKey" : {
-            "type" : "string"
-          },
-          "taskProcessRootProcessInstanceId" : {
-            "type" : "string"
-          },
-          "processInstanceId" : {
-            "type" : "string"
-          },
-          "processDefinitionId" : {
-            "type" : "string"
-          },
-          "processDefinitionVersion" : {
-            "type" : "integer",
-            "format" : "int32"
           },
           "completedDate" : {
             "type" : "string",
@@ -7570,6 +7550,16 @@
           "assignee" : {
             "type" : "string"
           },
+          "processDefinitionId" : {
+            "type" : "string"
+          },
+          "processDefinitionVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "taskDefinitionKey" : {
+            "type" : "string"
+          },
           "createdDate" : {
             "type" : "string",
             "format" : "date-time"
@@ -7587,6 +7577,16 @@
           },
           "completedBy" : {
             "type" : "string"
+          },
+          "taskProcessRootProcessInstanceId" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "CREATED", "ASSIGNED", "SUSPENDED", "COMPLETED", "CANCELLED", "DELETED" ]
           },
           "name" : {
             "type" : "string"
@@ -7837,21 +7837,15 @@
           "appVersion" : {
             "type" : "string"
           },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "CREATED", "RUNNING", "SUSPENDED", "CANCELLED", "COMPLETED" ]
-          },
-          "parentId" : {
-            "type" : "string"
-          },
           "businessKey" : {
             "type" : "string"
           },
-          "processDefinitionName" : {
+          "initiator" : {
             "type" : "string"
           },
-          "rootProcessInstanceId" : {
-            "type" : "string"
+          "completedDate" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "processDefinitionId" : {
             "type" : "string"
@@ -7863,16 +7857,22 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "initiator" : {
+          "processDefinitionName" : {
             "type" : "string"
           },
-          "completedDate" : {
-            "type" : "string",
-            "format" : "date-time"
+          "rootProcessInstanceId" : {
+            "type" : "string"
           },
           "startDate" : {
             "type" : "string",
             "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "CREATED", "RUNNING", "SUSPENDED", "CANCELLED", "COMPLETED" ]
+          },
+          "parentId" : {
+            "type" : "string"
           },
           "name" : {
             "type" : "string"
@@ -7913,18 +7913,233 @@
         },
         "title" : "TasksQueryBody"
       },
-      "FilterProvider" : {
-        "title" : "FilterProvider"
-      },
-      "MappingJacksonValue" : {
+      "CloudVariableInstance" : {
         "type" : "object",
         "properties" : {
+          "appName" : {
+            "type" : "string"
+          },
+          "serviceName" : {
+            "type" : "string"
+          },
+          "serviceFullName" : {
+            "type" : "string"
+          },
+          "serviceType" : {
+            "type" : "string"
+          },
+          "serviceVersion" : {
+            "type" : "string"
+          },
+          "appVersion" : {
+            "type" : "string"
+          },
+          "processInstanceId" : {
+            "type" : "string"
+          },
+          "taskId" : {
+            "type" : "string"
+          },
+          "taskVariable" : {
+            "type" : "boolean"
+          },
+          "name" : {
+            "type" : "string"
+          },
           "value" : { },
-          "filters" : {
-            "$ref" : "#/components/schemas/FilterProvider"
+          "type" : {
+            "type" : "string"
           }
         },
-        "title" : "MappingJacksonValue"
+        "title" : "CloudVariableInstance"
+      },
+      "EntriesResponseContentQueryCloudTask" : {
+        "type" : "object",
+        "properties" : {
+          "entries" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EntryResponseContentQueryCloudTask"
+            }
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title" : "EntriesResponseContentQueryCloudTask"
+      },
+      "EntryResponseContentQueryCloudTask" : {
+        "type" : "object",
+        "properties" : {
+          "entry" : {
+            "$ref" : "#/components/schemas/QueryCloudTask"
+          }
+        },
+        "title" : "EntryResponseContentQueryCloudTask"
+      },
+      "ListResponseContentQueryCloudTask" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "$ref" : "#/components/schemas/EntriesResponseContentQueryCloudTask"
+          }
+        },
+        "title" : "ListResponseContentQueryCloudTask"
+      },
+      "PaginationMetadata" : {
+        "type" : "object",
+        "properties" : {
+          "skipCount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "maxItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "hasMoreItems" : {
+            "type" : "boolean"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "title" : "PaginationMetadata"
+      },
+      "QueryCloudTask" : {
+        "type" : "object",
+        "properties" : {
+          "processDefinitionName" : {
+            "type" : "string"
+          },
+          "rootProcessInstanceId" : {
+            "type" : "string"
+          },
+          "processVariables" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CloudVariableInstance"
+            },
+            "uniqueItems" : true
+          },
+          "permissions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "VIEW", "CLAIM", "RELEASE", "UPDATE" ]
+            }
+          },
+          "appName" : {
+            "type" : "string"
+          },
+          "serviceName" : {
+            "type" : "string"
+          },
+          "serviceFullName" : {
+            "type" : "string"
+          },
+          "serviceType" : {
+            "type" : "string"
+          },
+          "serviceVersion" : {
+            "type" : "string"
+          },
+          "appVersion" : {
+            "type" : "string"
+          },
+          "processInstanceId" : {
+            "type" : "string"
+          },
+          "businessKey" : {
+            "type" : "string"
+          },
+          "formKey" : {
+            "type" : "string"
+          },
+          "completedDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "candidateUsers" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "candidateGroups" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "assignee" : {
+            "type" : "string"
+          },
+          "processDefinitionId" : {
+            "type" : "string"
+          },
+          "processDefinitionVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "taskDefinitionKey" : {
+            "type" : "string"
+          },
+          "createdDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "dueDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "claimedDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "parentTaskId" : {
+            "type" : "string"
+          },
+          "completedBy" : {
+            "type" : "string"
+          },
+          "taskProcessRootProcessInstanceId" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "CREATED", "ASSIGNED", "SUSPENDED", "COMPLETED", "CANCELLED", "DELETED" ]
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "owner" : {
+            "type" : "string"
+          },
+          "duration" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "standalone" : {
+            "type" : "boolean"
+          }
+        },
+        "title" : "QueryCloudTask"
       },
       "ProcessInstanceQueryBody" : {
         "type" : "object",
@@ -7937,6 +8152,138 @@
           }
         },
         "title" : "ProcessInstanceQueryBody"
+      },
+      "EntriesResponseContentQueryCloudProcessInstance" : {
+        "type" : "object",
+        "properties" : {
+          "entries" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EntryResponseContentQueryCloudProcessInstance"
+            }
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title" : "EntriesResponseContentQueryCloudProcessInstance"
+      },
+      "EntryResponseContentQueryCloudProcessInstance" : {
+        "type" : "object",
+        "properties" : {
+          "entry" : {
+            "$ref" : "#/components/schemas/QueryCloudProcessInstance"
+          }
+        },
+        "title" : "EntryResponseContentQueryCloudProcessInstance"
+      },
+      "ListResponseContentQueryCloudProcessInstance" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "$ref" : "#/components/schemas/EntriesResponseContentQueryCloudProcessInstance"
+          }
+        },
+        "title" : "ListResponseContentQueryCloudProcessInstance"
+      },
+      "QueryCloudProcessInstance" : {
+        "type" : "object",
+        "properties" : {
+          "subprocesses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/QueryCloudSubprocessInstance"
+            },
+            "uniqueItems" : true
+          },
+          "linkedProcesses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/QueryCloudSubprocessInstance"
+            },
+            "uniqueItems" : true
+          },
+          "linkedProcessInstanceType" : {
+            "type" : "string"
+          },
+          "linkedProcessInstanceId" : {
+            "type" : "string"
+          },
+          "appName" : {
+            "type" : "string"
+          },
+          "serviceName" : {
+            "type" : "string"
+          },
+          "serviceFullName" : {
+            "type" : "string"
+          },
+          "serviceType" : {
+            "type" : "string"
+          },
+          "serviceVersion" : {
+            "type" : "string"
+          },
+          "appVersion" : {
+            "type" : "string"
+          },
+          "businessKey" : {
+            "type" : "string"
+          },
+          "initiator" : {
+            "type" : "string"
+          },
+          "completedDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "processDefinitionId" : {
+            "type" : "string"
+          },
+          "processDefinitionKey" : {
+            "type" : "string"
+          },
+          "processDefinitionVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "processDefinitionName" : {
+            "type" : "string"
+          },
+          "rootProcessInstanceId" : {
+            "type" : "string"
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "CREATED", "RUNNING", "SUSPENDED", "CANCELLED", "COMPLETED" ]
+          },
+          "parentId" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          }
+        },
+        "title" : "QueryCloudProcessInstance"
+      },
+      "QueryCloudSubprocessInstance" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "processDefinitionName" : {
+            "type" : "string"
+          }
+        },
+        "title" : "QueryCloudSubprocessInstance"
       },
       "EntriesResponseContentProcessInstanceSearchResult_ProcessVariables" : {
         "type" : "object",
@@ -7974,6 +8321,14 @@
       "ProcessInstanceSearchResult_ProcessVariables" : {
         "type" : "object",
         "properties" : {
+          "subprocessesCount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "linkedProcessesCount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "variables" : {
             "type" : "array",
             "items" : {
@@ -7986,14 +8341,6 @@
           },
           "linkedProcessInstanceId" : {
             "type" : "string"
-          },
-          "subprocessesCount" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "linkedProcessesCount" : {
-            "type" : "integer",
-            "format" : "int64"
           },
           "appName" : {
             "type" : "string"
@@ -8013,21 +8360,15 @@
           "appVersion" : {
             "type" : "string"
           },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "CREATED", "RUNNING", "SUSPENDED", "CANCELLED", "COMPLETED" ]
-          },
-          "parentId" : {
-            "type" : "string"
-          },
           "businessKey" : {
             "type" : "string"
           },
-          "processDefinitionName" : {
+          "initiator" : {
             "type" : "string"
           },
-          "rootProcessInstanceId" : {
-            "type" : "string"
+          "completedDate" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "processDefinitionId" : {
             "type" : "string"
@@ -8039,16 +8380,22 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "initiator" : {
+          "processDefinitionName" : {
             "type" : "string"
           },
-          "completedDate" : {
-            "type" : "string",
-            "format" : "date-time"
+          "rootProcessInstanceId" : {
+            "type" : "string"
           },
           "startDate" : {
             "type" : "string",
             "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "CREATED", "RUNNING", "SUSPENDED", "CANCELLED", "COMPLETED" ]
+          },
+          "parentId" : {
+            "type" : "string"
           },
           "name" : {
             "type" : "string"
@@ -8102,46 +8449,6 @@
         },
         "title" : "QueryCloudVariableInstance_ProcessVariables"
       },
-      "CloudVariableInstance" : {
-        "type" : "object",
-        "properties" : {
-          "appName" : {
-            "type" : "string"
-          },
-          "serviceName" : {
-            "type" : "string"
-          },
-          "serviceFullName" : {
-            "type" : "string"
-          },
-          "serviceType" : {
-            "type" : "string"
-          },
-          "serviceVersion" : {
-            "type" : "string"
-          },
-          "appVersion" : {
-            "type" : "string"
-          },
-          "processInstanceId" : {
-            "type" : "string"
-          },
-          "taskId" : {
-            "type" : "string"
-          },
-          "taskVariable" : {
-            "type" : "boolean"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "value" : { },
-          "type" : {
-            "type" : "string"
-          }
-        },
-        "title" : "CloudVariableInstance"
-      },
       "EntriesResponseContentCloudVariableInstance" : {
         "type" : "object",
         "properties" : {
@@ -8174,31 +8481,6 @@
           }
         },
         "title" : "ListResponseContentCloudVariableInstance"
-      },
-      "PaginationMetadata" : {
-        "type" : "object",
-        "properties" : {
-          "skipCount" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "maxItems" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "count" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "hasMoreItems" : {
-            "type" : "boolean"
-          },
-          "totalItems" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        },
-        "title" : "PaginationMetadata"
       },
       "CloudVariableInstance_General" : {
         "type" : "object",
@@ -8290,34 +8572,14 @@
           "appVersion" : {
             "type" : "string"
           },
-          "description" : {
+          "processInstanceId" : {
             "type" : "string"
-          },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "CREATED", "ASSIGNED", "SUSPENDED", "COMPLETED", "CANCELLED", "DELETED" ]
           },
           "businessKey" : {
             "type" : "string"
           },
           "formKey" : {
             "type" : "string"
-          },
-          "taskDefinitionKey" : {
-            "type" : "string"
-          },
-          "taskProcessRootProcessInstanceId" : {
-            "type" : "string"
-          },
-          "processInstanceId" : {
-            "type" : "string"
-          },
-          "processDefinitionId" : {
-            "type" : "string"
-          },
-          "processDefinitionVersion" : {
-            "type" : "integer",
-            "format" : "int32"
           },
           "completedDate" : {
             "type" : "string",
@@ -8338,6 +8600,16 @@
           "assignee" : {
             "type" : "string"
           },
+          "processDefinitionId" : {
+            "type" : "string"
+          },
+          "processDefinitionVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "taskDefinitionKey" : {
+            "type" : "string"
+          },
           "createdDate" : {
             "type" : "string",
             "format" : "date-time"
@@ -8355,6 +8627,16 @@
           },
           "completedBy" : {
             "type" : "string"
+          },
+          "taskProcessRootProcessInstanceId" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "CREATED", "ASSIGNED", "SUSPENDED", "COMPLETED", "CANCELLED", "DELETED" ]
           },
           "name" : {
             "type" : "string"
@@ -8429,21 +8711,15 @@
           "appVersion" : {
             "type" : "string"
           },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "CREATED", "RUNNING", "SUSPENDED", "CANCELLED", "COMPLETED" ]
-          },
-          "parentId" : {
-            "type" : "string"
-          },
           "businessKey" : {
             "type" : "string"
           },
-          "processDefinitionName" : {
+          "initiator" : {
             "type" : "string"
           },
-          "rootProcessInstanceId" : {
-            "type" : "string"
+          "completedDate" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "processDefinitionId" : {
             "type" : "string"
@@ -8455,16 +8731,22 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "initiator" : {
+          "processDefinitionName" : {
             "type" : "string"
           },
-          "completedDate" : {
-            "type" : "string",
-            "format" : "date-time"
+          "rootProcessInstanceId" : {
+            "type" : "string"
           },
           "startDate" : {
             "type" : "string",
             "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "CREATED", "RUNNING", "SUSPENDED", "CANCELLED", "COMPLETED" ]
+          },
+          "parentId" : {
+            "type" : "string"
           },
           "name" : {
             "type" : "string"
@@ -8657,13 +8939,13 @@
           "appVersion" : {
             "type" : "string"
           },
-          "description" : {
-            "type" : "string"
-          },
           "formKey" : {
             "type" : "string"
           },
           "category" : {
+            "type" : "string"
+          },
+          "description" : {
             "type" : "string"
           },
           "name" : {
@@ -8770,19 +9052,8 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "STARTED", "COMPLETED", "CANCELLED", "ERROR" ]
-          },
           "businessKey" : {
             "type" : "string"
-          },
-          "processDefinitionKey" : {
-            "type" : "string"
-          },
-          "processDefinitionVersion" : {
-            "type" : "integer",
-            "format" : "int32"
           },
           "startedDate" : {
             "type" : "string",
@@ -8795,6 +9066,17 @@
           "cancelledDate" : {
             "type" : "string",
             "format" : "date-time"
+          },
+          "processDefinitionKey" : {
+            "type" : "string"
+          },
+          "processDefinitionVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "STARTED", "COMPLETED", "CANCELLED", "ERROR" ]
           },
           "id" : {
             "type" : "string"
@@ -8829,10 +9111,10 @@
           "processInstanceId" : {
             "type" : "string"
           },
-          "processDefinitionId" : {
+          "elementId" : {
             "type" : "string"
           },
-          "elementId" : {
+          "processDefinitionId" : {
             "type" : "string"
           }
         },
@@ -8874,14 +9156,19 @@
       "CloudIntegrationContext" : {
         "type" : "object",
         "properties" : {
-          "errorMessage" : {
-            "type" : "string"
-          },
-          "status" : {
+          "requestDate" : {
             "type" : "string",
-            "enum" : [ "INTEGRATION_REQUESTED", "INTEGRATION_RESULT_RECEIVED", "INTEGRATION_ERROR_RECEIVED" ]
+            "format" : "date-time"
           },
-          "errorCode" : {
+          "resultDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "errorDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "errorClassName" : {
             "type" : "string"
           },
           "stackTraceElements" : {
@@ -8917,25 +9204,23 @@
               }
             }
           },
-          "requestDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "resultDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "errorDate" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "errorClassName" : {
+          "errorCode" : {
             "type" : "string"
+          },
+          "errorMessage" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "INTEGRATION_REQUESTED", "INTEGRATION_RESULT_RECEIVED", "INTEGRATION_ERROR_RECEIVED" ]
           },
           "clientId" : {
             "type" : "string"
           },
           "clientName" : {
+            "type" : "string"
+          },
+          "processInstanceId" : {
             "type" : "string"
           },
           "appVersion" : {
@@ -8944,10 +9229,7 @@
           "businessKey" : {
             "type" : "string"
           },
-          "rootProcessInstanceId" : {
-            "type" : "string"
-          },
-          "processInstanceId" : {
+          "executionId" : {
             "type" : "string"
           },
           "parentProcessInstanceId" : {
@@ -8963,7 +9245,13 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "executionId" : {
+          "rootProcessInstanceId" : {
+            "type" : "string"
+          },
+          "connectorType" : {
+            "type" : "string"
+          },
+          "clientType" : {
             "type" : "string"
           },
           "inBoundVariables" : {
@@ -8973,12 +9261,6 @@
           "outBoundVariables" : {
             "type" : "object",
             "additionalProperties" : { }
-          },
-          "connectorType" : {
-            "type" : "string"
-          },
-          "clientType" : {
-            "type" : "string"
           },
           "id" : {
             "type" : "string"
