@@ -22,6 +22,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +126,9 @@ public class ActivitiCloudMessagingProperties {
     @NestedConfigurationProperty
     private RabbitMqProperties rabbitmq = new RabbitMqProperties();
 
+    @NestedConfigurationProperty
+    private Map<String, ConnectorProperties> connectors = new HashMap<>();
+
     public static class RabbitMqProperties {
 
         private Boolean missingAnonymousQueuesFatal;
@@ -175,6 +179,37 @@ public class ActivitiCloudMessagingProperties {
 
         public void setPrefix(String prefix) {
             this.prefix = prefix;
+        }
+    }
+
+    public static class ConnectorProperties {
+
+        private String[] requiredGroups;
+        private String destination;
+        private boolean queueNameGroupOnly;
+
+        public String[] getRequiredGroups() {
+            return requiredGroups;
+        }
+
+        public void setRequiredGroups(String... requiredGroup) {
+            this.requiredGroups = requiredGroup;
+        }
+
+        public String getDestination() {
+            return destination;
+        }
+
+        public void setDestination(String destination) {
+            this.destination = destination;
+        }
+
+        public boolean isQueueNameGroupOnly() {
+            return queueNameGroupOnly;
+        }
+
+        public void setQueueNameGroupOnly(boolean queueNameGroupOnly) {
+            this.queueNameGroupOnly = queueNameGroupOnly;
         }
     }
 
@@ -292,6 +327,14 @@ public class ActivitiCloudMessagingProperties {
 
     public void setDestinationTransformers(List<String> destinationTransformers) {
         this.destinationTransformers = destinationTransformers;
+    }
+
+    public Map<String, ConnectorProperties> getConnectors() {
+        return connectors;
+    }
+
+    public void setConnectors(Map<String, ConnectorProperties> connectors) {
+        this.connectors = connectors;
     }
 
     @Override

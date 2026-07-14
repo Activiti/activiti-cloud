@@ -72,7 +72,7 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
 
                         if (!StringUtils.hasText(outputBindings)) {
                             outputBindings = beanOutName;
-                        } else {
+                        } else if (!outputBindings.contains(beanOutName)) {
                             outputBindings += ";" + beanOutName;
                         }
 
