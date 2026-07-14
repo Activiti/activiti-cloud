@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest.advice;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Collections;
 import java.util.Map;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -57,7 +58,7 @@ public class SerializationViewResponseBodyAdvice implements ResponseBodyAdvice<O
     }
 
     @Override
-    public @Nullable Map<String, Object> determineWriteHints(
+    public @Nullable Map<@NonNull String, @NonNull Object> determineWriteHints(
         @Nullable Object body,
         MethodParameter returnType,
         MediaType selectedContentType,
