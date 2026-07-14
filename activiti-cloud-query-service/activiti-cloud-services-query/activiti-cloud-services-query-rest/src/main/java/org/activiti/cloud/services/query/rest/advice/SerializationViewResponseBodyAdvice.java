@@ -45,8 +45,8 @@ public class SerializationViewResponseBodyAdvice implements ResponseBodyAdvice<O
     }
 
     @Override
-    public Object beforeBodyWrite(
-        Object body,
+    public @Nullable Object beforeBodyWrite(
+        @Nullable Object body,
         MethodParameter returnType,
         MediaType selectedContentType,
         Class<? extends HttpMessageConverter<?>> selectedConverterType,
