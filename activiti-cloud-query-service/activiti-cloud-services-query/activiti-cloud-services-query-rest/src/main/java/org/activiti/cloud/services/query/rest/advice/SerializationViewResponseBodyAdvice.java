@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest.advice;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Collections;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
@@ -56,8 +57,8 @@ public class SerializationViewResponseBodyAdvice implements ResponseBodyAdvice<O
     }
 
     @Override
-    public Map<String, Object> determineWriteHints(
-        Object body,
+    public @Nullable Map<String, Object> determineWriteHints(
+        @Nullable Object body,
         MethodParameter returnType,
         MediaType selectedContentType,
         Class<? extends HttpMessageConverter<?>> converterType
