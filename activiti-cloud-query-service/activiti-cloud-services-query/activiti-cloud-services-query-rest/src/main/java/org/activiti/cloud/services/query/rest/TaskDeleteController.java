@@ -24,12 +24,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -71,13 +71,25 @@ public class TaskDeleteController {
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
 
         for (TaskEntity entity : iterable) {
-            Hibernate.initialize(entity.getTaskCandidateUsers());
-            Hibernate.initialize(entity.getTaskCandidateGroups());
+            touchLazyAssociations(entity);
             result.add(taskRepresentationModelAssembler.toModel(entity));
+            Optional.ofNullable(entity.getTaskCandidateUsers()).ifPresent(Collection::clear);
+            Optional.ofNullable(entity.getTaskCandidateGroups()).ifPresent(Collection::clear);
         }
 
         taskRepository.deleteAll(iterable);
 
         return CollectionModel.of(result);
+    }
+
+    /**
+     * JSON serialization runs after the transaction closes; touch lazy associations while the
+     * persistence context is still open. Use {@link Collection#size()} rather than
+     * {@link org.hibernate.Hibernate#initialize(Object)} so Hibernate does not attach transient
+     * candidate rows that break {@link TaskRepository#deleteAll(Iterable)} on flush.
+     */
+    private static void touchLazyAssociations(TaskEntity entity) {
+        Optional.ofNullable(entity.getTaskCandidateUsers()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getTaskCandidateGroups()).ifPresent(Collection::size);
     }
 }

@@ -26,6 +26,8 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         runtimeBundleServiceTestUser,
         auditAdminServiceTestAdmin,
     }) => {
+        activiti.slow();
+
         await activiti.step('When the testuser starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
             async () => {
                 const processInstance = await startCatalogProcess(
@@ -58,11 +60,23 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         taskServiceTestUser,
         queryAdminServiceTestAdmin,
     }) => {
+        activiti.slow();
+
         let processTaskId = '';
         let standaloneTaskId = '';
 
         await activiti.step(
-            'Given a process task and a standalone task synced to query',
+            'Given prior acceptance tests left data in query, the admin cleans process instances and tasks',
+            async () => {
+                await queryAdminServiceTestAdmin.adminProcessInstances.deleteAllProcessInstances();
+                await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
+                await queryAdminServiceTestAdmin.adminTasks.deleteAllTasks();
+                await queryAdminServiceTestAdmin.waitForAdminTasksCount(0);
+            }
+        );
+
+        await activiti.step(
+            'And a process task and a standalone task are synced to query',
             async () => {
                 const { processInstance, task } = await startCatalogProcessWithFirstTask(
                     runtimeBundleServiceTestUser,
@@ -90,7 +104,7 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                 expect(standaloneTask.id).toBe(standaloneTaskId);
 
                 const beforeCount = await queryAdminServiceTestAdmin.adminTasks.countTasks({});
-                expect(beforeCount).toBeGreaterThan(0);
+                expect(beforeCount).toBeGreaterThanOrEqual(2);
 
                 await queryAdminServiceTestAdmin.adminTasks.deleteAllTasks();
 
@@ -104,6 +118,8 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         runtimeBundleServiceTestUser,
         queryAdminServiceTestAdmin,
     }) => {
+        activiti.slow();
+
         let processInstanceId = '';
 
         await activiti.step('When the testuser starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
@@ -128,11 +144,11 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         await activiti.step(
             'And another user is authenticated as testadmin the user is able to delete all process instances in query service',
             async () => {
-                const before = await queryAdminServiceTestAdmin.adminProcessInstances.getAllProcessInstances();
-                expect(before.length).toBeGreaterThan(0);
+                const beforeCount = await queryAdminServiceTestAdmin.adminProcessInstances.countProcessInstances({});
+                expect(beforeCount).toBeGreaterThan(0);
                 await queryAdminServiceTestAdmin.adminProcessInstances.deleteAllProcessInstances();
-                const after = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
-                expect(after.length).toBe(0);
+                const afterCount = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
+                expect(afterCount.length).toBe(0);
             }
         );
     });
