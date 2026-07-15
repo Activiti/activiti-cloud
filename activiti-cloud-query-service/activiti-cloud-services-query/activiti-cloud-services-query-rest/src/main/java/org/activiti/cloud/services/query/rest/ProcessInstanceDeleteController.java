@@ -24,12 +24,17 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -67,6 +72,10 @@ public class ProcessInstanceDeleteController {
 
     private final BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
 
+    private final TaskCandidateUserRepository taskCandidateUserRepository;
+
+    private final TaskCandidateGroupRepository taskCandidateGroupRepository;
+
     private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
     @Autowired
@@ -77,6 +86,8 @@ public class ProcessInstanceDeleteController {
         ServiceTaskRepository serviceTaskRepository,
         BPMNActivityRepository bpmnActivityRepository,
         BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
+        TaskCandidateUserRepository taskCandidateUserRepository,
+        TaskCandidateGroupRepository taskCandidateGroupRepository,
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler
     ) {
         this.processInstanceRepository = processInstanceRepository;
@@ -85,6 +96,8 @@ public class ProcessInstanceDeleteController {
         this.serviceTaskRepository = serviceTaskRepository;
         this.bpmnActivityRepository = bpmnActivityRepository;
         this.bpmnSequenceFlowRepository = bpmnSequenceFlowRepository;
+        this.taskCandidateUserRepository = taskCandidateUserRepository;
+        this.taskCandidateGroupRepository = taskCandidateGroupRepository;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
     }
 
@@ -120,13 +133,14 @@ public class ProcessInstanceDeleteController {
             return;
         }
 
-        for (TaskEntity task : tasks) {
-            touchTaskLazyAssociations(task);
-            Optional.ofNullable(task.getTaskCandidateUsers()).ifPresent(Collection::clear);
-            Optional.ofNullable(task.getTaskCandidateGroups()).ifPresent(Collection::clear);
+        List<TaskEntity> taskList = new ArrayList<>(tasks);
+        Set<String> taskIds = taskList.stream().map(TaskEntity::getId).collect(Collectors.toSet());
+        if (!taskIds.isEmpty()) {
+            taskCandidateUserRepository.deleteAll(taskCandidateUserRepository.findByTaskIdIn(taskIds));
+            taskCandidateGroupRepository.deleteAll(taskCandidateGroupRepository.findByTaskIdIn(taskIds));
         }
 
-        taskRepository.deleteAll(tasks);
+        taskRepository.deleteAll(taskList);
     }
 
     private static void touchLazyAssociations(ProcessInstanceEntity entity) {
@@ -135,10 +149,5 @@ public class ProcessInstanceDeleteController {
         Optional.ofNullable(entity.getServiceTasks()).ifPresent(Collection::size);
         Optional.ofNullable(entity.getActivities()).ifPresent(Collection::size);
         Optional.ofNullable(entity.getSequenceFlows()).ifPresent(Collection::size);
-    }
-
-    private static void touchTaskLazyAssociations(TaskEntity entity) {
-        Optional.ofNullable(entity.getTaskCandidateUsers()).ifPresent(Collection::size);
-        Optional.ofNullable(entity.getTaskCandidateGroups()).ifPresent(Collection::size);
     }
 }
