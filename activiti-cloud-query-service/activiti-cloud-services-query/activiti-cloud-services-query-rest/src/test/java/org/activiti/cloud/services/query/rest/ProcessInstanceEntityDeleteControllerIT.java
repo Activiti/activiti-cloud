@@ -48,6 +48,7 @@ import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
@@ -93,6 +94,9 @@ public class ProcessInstanceEntityDeleteControllerIT {
 
     @MockitoBean
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
+
+    @MockitoBean
+    private TaskVariableRepository taskVariableRepository;
 
     @MockitoBean
     private SecurityManager securityManager;

@@ -33,6 +33,7 @@ import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
@@ -58,6 +59,8 @@ public class TaskDeleteController {
 
     private final TaskCandidateGroupRepository taskCandidateGroupRepository;
 
+    private final TaskVariableRepository taskVariableRepository;
+
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
     @Autowired
@@ -65,11 +68,13 @@ public class TaskDeleteController {
         TaskRepository taskRepository,
         TaskCandidateUserRepository taskCandidateUserRepository,
         TaskCandidateGroupRepository taskCandidateGroupRepository,
+        TaskVariableRepository taskVariableRepository,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler
     ) {
         this.taskRepository = taskRepository;
         this.taskCandidateUserRepository = taskCandidateUserRepository;
         this.taskCandidateGroupRepository = taskCandidateGroupRepository;
+        this.taskVariableRepository = taskVariableRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
     }
 
@@ -88,6 +93,7 @@ public class TaskDeleteController {
         if (!taskIds.isEmpty()) {
             taskCandidateUserRepository.deleteAll(taskCandidateUserRepository.findByTaskIdIn(taskIds));
             taskCandidateGroupRepository.deleteAll(taskCandidateGroupRepository.findByTaskIdIn(taskIds));
+            taskVariableRepository.deleteAll(taskVariableRepository.findByTaskIdIn(taskIds));
         }
 
         for (TaskEntity entity : tasks) {

@@ -36,6 +36,7 @@ import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -76,6 +77,8 @@ public class ProcessInstanceDeleteController {
 
     private final TaskCandidateGroupRepository taskCandidateGroupRepository;
 
+    private final TaskVariableRepository taskVariableRepository;
+
     private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
     @Autowired
@@ -88,6 +91,7 @@ public class ProcessInstanceDeleteController {
         BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
         TaskCandidateUserRepository taskCandidateUserRepository,
         TaskCandidateGroupRepository taskCandidateGroupRepository,
+        TaskVariableRepository taskVariableRepository,
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler
     ) {
         this.processInstanceRepository = processInstanceRepository;
@@ -98,6 +102,7 @@ public class ProcessInstanceDeleteController {
         this.bpmnSequenceFlowRepository = bpmnSequenceFlowRepository;
         this.taskCandidateUserRepository = taskCandidateUserRepository;
         this.taskCandidateGroupRepository = taskCandidateGroupRepository;
+        this.taskVariableRepository = taskVariableRepository;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
     }
 
@@ -138,6 +143,7 @@ public class ProcessInstanceDeleteController {
         if (!taskIds.isEmpty()) {
             taskCandidateUserRepository.deleteAll(taskCandidateUserRepository.findByTaskIdIn(taskIds));
             taskCandidateGroupRepository.deleteAll(taskCandidateGroupRepository.findByTaskIdIn(taskIds));
+            taskVariableRepository.deleteAll(taskVariableRepository.findByTaskIdIn(taskIds));
         }
 
         for (TaskEntity task : taskList) {
