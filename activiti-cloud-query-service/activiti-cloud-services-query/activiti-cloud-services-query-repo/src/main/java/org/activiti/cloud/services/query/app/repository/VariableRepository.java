@@ -20,12 +20,16 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 import com.querydsl.core.types.dsl.StringPath;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface VariableRepository
     extends
@@ -41,4 +45,20 @@ public interface VariableRepository
 
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
+
+    @Query(
+        value = """
+            SELECT pv.id, pv.name, pv.type, pv.process_instance_id AS processInstanceId,
+                   pv.process_definition_key AS processDefinitionKey, length(cast("value" as text)) AS valueSize
+            FROM process_variable pv
+            WHERE length(cast("value" as text)) >= :minSize
+            ORDER BY length(cast("value" as text)) DESC
+            """,
+        countQuery = """
+            SELECT count(*) FROM process_variable pv
+            WHERE length(cast("value" as text)) >= :minSize
+            """,
+        nativeQuery = true
+    )
+    Page<Object[]> findLargeVariables(@Param("minSize") int minSize, Pageable pageable);
 }

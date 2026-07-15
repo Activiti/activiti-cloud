@@ -36,6 +36,7 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceVariableAdminContro
 import org.activiti.cloud.services.query.rest.ProcessInstanceVariableController;
 import org.activiti.cloud.services.query.rest.ProcessModelAdminController;
 import org.activiti.cloud.services.query.rest.ProcessModelController;
+import org.activiti.cloud.services.query.rest.ProcessVariableSizeAdminController;
 import org.activiti.cloud.services.query.rest.ServiceTaskAdminController;
 import org.activiti.cloud.services.query.rest.ServiceTaskIntegrationContextAdminController;
 import org.activiti.cloud.services.query.rest.TaskAdminController;
@@ -73,6 +74,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         ProcessInstanceVariableController.class,
         ProcessModelAdminController.class,
         ProcessModelController.class,
+        ProcessVariableSizeAdminController.class,
         TaskAdminController.class,
         TaskController.class,
         TaskDeleteController.class,
