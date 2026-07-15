@@ -66,17 +66,7 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         let standaloneTaskId = '';
 
         await activiti.step(
-            'Given prior acceptance tests left data in query, the admin cleans process instances and tasks',
-            async () => {
-                await queryAdminServiceTestAdmin.adminProcessInstances.deleteAllProcessInstances();
-                await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
-                await queryAdminServiceTestAdmin.adminTasks.deleteAllTasks();
-                await queryAdminServiceTestAdmin.waitForAdminTasksCount(0);
-            }
-        );
-
-        await activiti.step(
-            'And a process task and a standalone task are synced to query',
+            'Given a process task and a standalone task synced to query',
             async () => {
                 const { processInstance, task } = await startCatalogProcessWithFirstTask(
                     runtimeBundleServiceTestUser,

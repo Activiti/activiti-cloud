@@ -100,6 +100,7 @@ public class ProcessInstanceDeleteController {
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
 
         for (ProcessInstanceEntity entity : iterable) {
+            touchLazyAssociations(entity);
             deleteRelatedTasks(entity.getTasks());
             Optional.ofNullable(entity.getVariables()).ifPresent(variableRepository::deleteAll);
             Optional.ofNullable(entity.getServiceTasks()).ifPresent(serviceTaskRepository::deleteAll);
@@ -120,7 +121,7 @@ public class ProcessInstanceDeleteController {
         }
 
         for (TaskEntity task : tasks) {
-            touchLazyAssociations(task);
+            touchTaskLazyAssociations(task);
             Optional.ofNullable(task.getTaskCandidateUsers()).ifPresent(Collection::clear);
             Optional.ofNullable(task.getTaskCandidateGroups()).ifPresent(Collection::clear);
         }
@@ -128,7 +129,15 @@ public class ProcessInstanceDeleteController {
         taskRepository.deleteAll(tasks);
     }
 
-    private static void touchLazyAssociations(TaskEntity entity) {
+    private static void touchLazyAssociations(ProcessInstanceEntity entity) {
+        Optional.ofNullable(entity.getTasks()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getVariables()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getServiceTasks()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getActivities()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getSequenceFlows()).ifPresent(Collection::size);
+    }
+
+    private static void touchTaskLazyAssociations(TaskEntity entity) {
         Optional.ofNullable(entity.getTaskCandidateUsers()).ifPresent(Collection::size);
         Optional.ofNullable(entity.getTaskCandidateGroups()).ifPresent(Collection::size);
     }
