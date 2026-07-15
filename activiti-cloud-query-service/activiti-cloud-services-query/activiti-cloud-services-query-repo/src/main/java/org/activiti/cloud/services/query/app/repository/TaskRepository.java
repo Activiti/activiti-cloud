@@ -19,6 +19,8 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -36,6 +38,8 @@ public interface TaskRepository
         CustomizedTaskRepository,
         CrudRepository<TaskEntity, String>
 {
+    List<TaskEntity> findByProcessInstanceIdIn(Collection<String> processInstanceIds);
+
     @Override
     default void customize(QuerydslBindings bindings, QTaskEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
