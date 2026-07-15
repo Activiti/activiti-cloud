@@ -114,9 +114,10 @@ public class ProcessInstanceDeleteController {
             root = ProcessInstanceEntity.class
         ) Predicate predicate
     ) {
-        List<ProcessInstanceEntity> processInstances = StreamSupport
-            .stream(processInstanceRepository.findAll(predicate).spliterator(), false)
-            .toList();
+        List<ProcessInstanceEntity> processInstances = StreamSupport.stream(
+            processInstanceRepository.findAll(predicate).spliterator(),
+            false
+        ).toList();
         Set<String> processInstanceIds = processInstances
             .stream()
             .map(ProcessInstanceEntity::getId)
