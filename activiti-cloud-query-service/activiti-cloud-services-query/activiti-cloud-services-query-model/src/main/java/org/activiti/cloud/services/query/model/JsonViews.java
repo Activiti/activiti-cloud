@@ -19,5 +19,7 @@ public class JsonViews {
 
     public static class General {}
 
+    public static class IntegrationContexts extends General {}
+
     public static class ProcessVariables {}
 }
