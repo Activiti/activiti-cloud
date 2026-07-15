@@ -89,11 +89,13 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                 expect(processTask.id).toBe(processTaskId);
                 expect(standaloneTask.id).toBe(standaloneTaskId);
 
-                const before = await queryAdminServiceTestAdmin.adminTasks.getAllTasks();
-                expect(before.length).toBeGreaterThan(0);
+                const beforeCount = await queryAdminServiceTestAdmin.adminTasks.countTasks({});
+                expect(beforeCount).toBeGreaterThan(0);
+
                 await queryAdminServiceTestAdmin.adminTasks.deleteAllTasks();
-                const after = await queryAdminServiceTestAdmin.waitForAllTasksAdminCount(0);
-                expect(after.length).toBe(0);
+
+                const afterCount = await queryAdminServiceTestAdmin.waitForAdminTasksCount(0);
+                expect(afterCount).toBe(0);
             }
         );
     });

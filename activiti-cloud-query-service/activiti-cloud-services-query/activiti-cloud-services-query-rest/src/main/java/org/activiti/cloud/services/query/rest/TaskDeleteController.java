@@ -24,13 +24,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -54,22 +48,14 @@ public class TaskDeleteController {
 
     private final TaskRepository taskRepository;
 
-    private final TaskCandidateUserRepository taskCandidateUserRepository;
-
-    private final TaskCandidateGroupRepository taskCandidateGroupRepository;
-
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
     @Autowired
     public TaskDeleteController(
         TaskRepository taskRepository,
-        TaskCandidateUserRepository taskCandidateUserRepository,
-        TaskCandidateGroupRepository taskCandidateGroupRepository,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler
     ) {
         this.taskRepository = taskRepository;
-        this.taskCandidateUserRepository = taskCandidateUserRepository;
-        this.taskCandidateGroupRepository = taskCandidateGroupRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
     }
 
@@ -82,21 +68,15 @@ public class TaskDeleteController {
         ) Predicate predicate
     ) {
         Collection<EntityModel<QueryCloudTask>> result = new ArrayList<>();
-        List<TaskEntity> tasks = StreamSupport.stream(taskRepository.findAll(predicate).spliterator(), false).toList();
+        Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
 
-        for (TaskEntity entity : tasks) {
+        for (TaskEntity entity : iterable) {
             Hibernate.initialize(entity.getTaskCandidateUsers());
             Hibernate.initialize(entity.getTaskCandidateGroups());
             result.add(taskRepresentationModelAssembler.toModel(entity));
         }
 
-        Set<String> taskIds = tasks.stream().map(TaskEntity::getId).collect(Collectors.toSet());
-        if (!taskIds.isEmpty()) {
-            taskCandidateUserRepository.deleteAll(taskCandidateUserRepository.findByTaskIdIn(taskIds));
-            taskCandidateGroupRepository.deleteAll(taskCandidateGroupRepository.findByTaskIdIn(taskIds));
-        }
-
-        taskRepository.deleteAll(tasks);
+        taskRepository.deleteAll(iterable);
 
         return CollectionModel.of(result);
     }
