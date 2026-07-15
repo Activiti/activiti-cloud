@@ -34,6 +34,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -99,7 +100,7 @@ public class ProcessInstanceDeleteController {
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
 
         for (ProcessInstanceEntity entity : iterable) {
-            Optional.ofNullable(entity.getTasks()).ifPresent(taskRepository::deleteAll);
+            deleteRelatedTasks(entity.getTasks());
             Optional.ofNullable(entity.getVariables()).ifPresent(variableRepository::deleteAll);
             Optional.ofNullable(entity.getServiceTasks()).ifPresent(serviceTaskRepository::deleteAll);
             Optional.ofNullable(entity.getActivities()).ifPresent(bpmnActivityRepository::deleteAll);
@@ -111,5 +112,24 @@ public class ProcessInstanceDeleteController {
         processInstanceRepository.deleteAll(iterable);
 
         return CollectionModel.of(result);
+    }
+
+    private void deleteRelatedTasks(Collection<TaskEntity> tasks) {
+        if (tasks == null || tasks.isEmpty()) {
+            return;
+        }
+
+        for (TaskEntity task : tasks) {
+            touchLazyAssociations(task);
+            Optional.ofNullable(task.getTaskCandidateUsers()).ifPresent(Collection::clear);
+            Optional.ofNullable(task.getTaskCandidateGroups()).ifPresent(Collection::clear);
+        }
+
+        taskRepository.deleteAll(tasks);
+    }
+
+    private static void touchLazyAssociations(TaskEntity entity) {
+        Optional.ofNullable(entity.getTaskCandidateUsers()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getTaskCandidateGroups()).ifPresent(Collection::size);
     }
 }
