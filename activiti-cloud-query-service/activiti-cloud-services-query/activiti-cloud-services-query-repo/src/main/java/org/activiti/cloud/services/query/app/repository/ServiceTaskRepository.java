@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.app.repository;
 import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
 
 import com.querydsl.core.types.dsl.StringPath;
+import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.model.QServiceTaskEntity;
@@ -52,6 +53,8 @@ public interface ServiceTaskRepository
     );
 
     List<ServiceTaskEntity> findByProcessInstanceId(String processInstanceId);
+
+    List<ServiceTaskEntity> findByProcessInstanceIdIn(Collection<String> processInstanceIds);
 
     ServiceTaskEntity findByProcessInstanceIdAndElementId(String processInstanceId, String elementId);
 

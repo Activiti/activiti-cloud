@@ -17,20 +17,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pickScenarioTest, type AcceptanceScenarioMeta } from '../../helpers/acceptance-scenario';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
-
-const QUERY_ADMIN_POST_ISSUE = 'https://hyland.atlassian.net/browse/AAE-47783';
-
-const postTasksScenario: AcceptanceScenarioMeta = {
-    title: 'admin POST tasks list query',
-    exclude: QUERY_ADMIN_POST_ISSUE,
-};
-
-const postProcessInstancesScenario: AcceptanceScenarioMeta = {
-    title: 'admin POST process instances list query',
-    exclude: QUERY_ADMIN_POST_ISSUE,
-};
 
 activiti.describe('Runtime — Query Admin Remaining Actions', () => {
     activiti('should cover query admin process instance tasks GET', async ({
@@ -59,7 +46,7 @@ activiti.describe('Runtime — Query Admin Remaining Actions', () => {
         });
     });
 
-    pickScenarioTest(activiti, postTasksScenario)(postTasksScenario.title, async ({
+    activiti('admin POST tasks list query', async ({
         runtimeBundleServiceTestUser,
         taskServiceTestUser,
         queryAdminServiceTestAdmin,
@@ -86,7 +73,7 @@ activiti.describe('Runtime — Query Admin Remaining Actions', () => {
         });
     });
 
-    pickScenarioTest(activiti, postProcessInstancesScenario)(postProcessInstancesScenario.title, async ({
+    activiti('admin POST process instances list query', async ({
         runtimeBundleServiceTestUser,
         taskServiceTestUser,
         queryAdminServiceTestAdmin,
