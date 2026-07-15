@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProcessVariableSizeAdminController {
 
     private static final int DEFAULT_MIN_SIZE = 4000;
+    private static final String DEFAULT_MIN_SIZE_VALUE = "4000";
 
     private final VariableRepository variableRepository;
 
@@ -49,20 +50,27 @@ public class ProcessVariableSizeAdminController {
     )
     public Page<ProcessVariableSizeInfo> findLargeVariables(
         @Parameter(description = "Minimum variable value size in characters (default: 4000)")
-        @RequestParam(name = "minSize", defaultValue = "" + DEFAULT_MIN_SIZE) int minSize,
+        @RequestParam(name = "minSize", defaultValue = DEFAULT_MIN_SIZE_VALUE) int minSize,
         Pageable pageable
     ) {
         return variableRepository.findLargeVariables(minSize, pageable).map(this::toDto);
     }
 
+    private static final int COL_ID = 0;
+    private static final int COL_NAME = 1;
+    private static final int COL_TYPE = 2;
+    private static final int COL_PROCESS_INSTANCE_ID = 3;
+    private static final int COL_PROCESS_DEFINITION_KEY = 4;
+    private static final int COL_VALUE_SIZE = 5;
+
     private ProcessVariableSizeInfo toDto(Object[] row) {
         return new ProcessVariableSizeInfo(
-            ((Number) row[0]).longValue(),
-            (String) row[1],
-            (String) row[2],
-            (String) row[3],
-            (String) row[4],
-            ((Number) row[5]).longValue()
+            ((Number) row[COL_ID]).longValue(),
+            (String) row[COL_NAME],
+            (String) row[COL_TYPE],
+            (String) row[COL_PROCESS_INSTANCE_ID],
+            (String) row[COL_PROCESS_DEFINITION_KEY],
+            ((Number) row[COL_VALUE_SIZE]).longValue()
         );
     }
 }

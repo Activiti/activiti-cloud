@@ -48,11 +48,15 @@ public interface VariableRepository
 
     @Query(
         value = """
-            SELECT pv.id, pv.name, pv.type, pv.process_instance_id AS processInstanceId,
-                   pv.process_definition_key AS processDefinitionKey, length(cast("value" as text)) AS valueSize
-            FROM process_variable pv
-            WHERE length(cast("value" as text)) >= :minSize
-            ORDER BY length(cast("value" as text)) DESC
+            SELECT id, name, type, process_instance_id AS processInstanceId,
+                   process_definition_key AS processDefinitionKey, value_size AS valueSize
+            FROM (
+                SELECT pv.id, pv.name, pv.type, pv.process_instance_id, pv.process_definition_key,
+                       length(cast("value" as text)) AS value_size
+                FROM process_variable pv
+            ) pv
+            WHERE value_size >= :minSize
+            ORDER BY value_size DESC
             """,
         countQuery = """
             SELECT count(*) FROM process_variable pv
