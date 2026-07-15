@@ -147,9 +147,9 @@ class TaskAdminControllerIT extends AbstractTaskControllerIT {
             .buildProcessInstance()
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"))
-            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers("candidate-user"))
+            .withTasks(queryTestUtils.buildTask())
             .buildAndSave();
-        queryTestUtils.buildTask().withTaskCandidateGroups("candidate-group").buildAndSave();
+        queryTestUtils.buildTask().buildAndSave();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)

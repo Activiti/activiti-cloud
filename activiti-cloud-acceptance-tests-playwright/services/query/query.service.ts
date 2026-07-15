@@ -616,15 +616,6 @@ export class QueryService extends BaseService {
         );
     }
 
-    async waitForAdminTasksCount(expectedCount: number): Promise<number> {
-        return QueryService.waitFor(
-            () => this.adminTasks.countTasks({}),
-            (count) => count === expectedCount,
-            'querySync',
-            `admin tasks count to equal ${expectedCount}`
-        );
-    }
-
     async waitForAllTasksAdminCountGreaterThan(minCount: number): Promise<CloudTask[]> {
         return QueryService.waitFor(
             () => this.adminTasks.getAllTasks(),

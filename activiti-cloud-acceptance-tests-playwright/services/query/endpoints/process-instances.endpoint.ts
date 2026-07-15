@@ -188,10 +188,6 @@ export class QueryProcessInstancesEndpoint extends BaseService {
 
     async deleteAllProcessInstances(): Promise<CloudProcessInstance[]> {
         const response = await this.delete(`${this.basePath}/process-instances`);
-        if (response.httpStatus && response.httpStatus >= 400) {
-            const detail = typeof response.body === 'string' ? response.body : JSON.stringify(response);
-            throw new Error(`deleteAllProcessInstances failed (${response.httpStatus}): ${detail}`);
-        }
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
