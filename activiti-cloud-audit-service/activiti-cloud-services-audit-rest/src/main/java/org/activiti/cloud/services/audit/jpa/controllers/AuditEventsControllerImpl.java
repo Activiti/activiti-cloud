@@ -44,10 +44,10 @@ import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.EntityModel;
@@ -68,7 +68,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AuditEventsAdminControllerImpl.class);
 
-    private final EventsRepository eventsRepository;
+    private final EventsRepository<AuditEventEntity> eventsRepository;
 
     private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
 
@@ -82,7 +82,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
     @Autowired
     public AuditEventsControllerImpl(
-        EventsRepository eventsRepository,
+        EventsRepository<AuditEventEntity> eventsRepository,
         EventRepresentationModelAssembler eventRepresentationModelAssembler,
         APIEventToEntityConverters eventConverters,
         SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
@@ -142,7 +142,8 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
         spec = securityPoliciesApplicationService.createSpecWithSecurity(spec, SecurityPolicyAccess.READ);
 
-        Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(spec, pageable);
+        Pageable slicePageable = pageable;
+        Slice<AuditEventEntity> allAuditInPage = eventsRepository.findBy(spec, query -> query.slice(slicePageable));
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
         for (AuditEventEntity aee : allAuditInPage.getContent()) {
@@ -156,9 +157,11 @@ public class AuditEventsControllerImpl implements AuditEventsController {
             }
         }
 
+        long knownElements = pageable.getOffset() + events.size() + (allAuditInPage.hasNext() ? 1 : 0);
+
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            new PageImpl<>(events, pageable, allAuditInPage.getTotalElements()),
+            new PageImpl<>(events, pageable, knownElements),
             eventRepresentationModelAssembler
         );
     }
