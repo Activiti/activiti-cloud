@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -31,5 +32,24 @@ class MapOfStringObjectJsonConverterTest {
         String date = converter.convertToDatabaseColumn(Map.of("date", localDateTime));
 
         assertThat(date).startsWith("{\"date\":\"2000-01-01T01:01:00\"}");
+    }
+
+    @Test
+    void convertToEntityAttributeShouldRejectDataExceedingMaxSize() {
+        MapOfStringObjectJsonConverter converter = new MapOfStringObjectJsonConverter();
+        String oversizedData = "{\"key\":\"" + "x".repeat(MapOfStringObjectJsonConverter.MAX_DESERIALIZE_SIZE) + "\"}";
+
+        assertThatThrownBy(() -> converter.convertToEntityAttribute(oversizedData))
+            .isInstanceOf(QueryException.class)
+            .hasMessageContaining("exceeds maximum allowed size");
+    }
+
+    @Test
+    void convertToEntityAttributeShouldDeserializeValidData() {
+        MapOfStringObjectJsonConverter converter = new MapOfStringObjectJsonConverter();
+
+        Map<String, Object> result = converter.convertToEntityAttribute("{\"key\":\"value\"}");
+
+        assertThat(result).isEqualTo(Map.of("key", "value"));
     }
 }

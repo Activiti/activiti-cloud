@@ -26,6 +26,8 @@ public class MapOfStringObjectJsonConverter implements AttributeConverter<Map<St
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    static final int MAX_DESERIALIZE_SIZE = 10 * 1024 * 1024; // 10 MB
+
     public MapOfStringObjectJsonConverter() {}
 
     @Override
@@ -41,6 +43,15 @@ public class MapOfStringObjectJsonConverter implements AttributeConverter<Map<St
     public Map<String, Object> convertToEntityAttribute(String dbData) {
         try {
             if (dbData != null && dbData.length() > 0) {
+                if (dbData.length() > MAX_DESERIALIZE_SIZE) {
+                    throw new QueryException(
+                        "Variable data exceeds maximum allowed size for deserialization (" +
+                        MAX_DESERIALIZE_SIZE +
+                        " bytes). Actual size: " +
+                        dbData.length() +
+                        " bytes"
+                    );
+                }
                 return objectMapper.readValue(dbData, new TypeReference<Map<String, Object>>() {});
             } else {
                 return Collections.emptyMap();
