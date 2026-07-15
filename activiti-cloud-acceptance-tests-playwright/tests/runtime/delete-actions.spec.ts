@@ -14,36 +14,19 @@
  * limitations under the License.
  */
 
+import { randomUUID } from 'node:crypto';
+
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pickScenarioTest, type AcceptanceScenarioMeta } from '../../helpers/acceptance-scenario';
-import { startCatalogProcess } from '../../flows/start-process-with-first-task';
-
-const QUERY_ADMIN_DELETE_ISSUE = 'https://hyland.atlassian.net/browse/AAE-47783';
-
-const auditScenario: AcceptanceScenarioMeta = {
-    title: 'delete records in audit service',
-};
-
-const queryTasksScenario: AcceptanceScenarioMeta = {
-    title: 'delete all tasks in query service',
-    exclude: QUERY_ADMIN_DELETE_ISSUE,
-};
-
-const queryProcessInstancesScenario: AcceptanceScenarioMeta = {
-    title: 'delete all process instances in query service',
-    exclude: QUERY_ADMIN_DELETE_ISSUE,
-};
+import { startCatalogProcess, startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 
 activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive'] }, () => {
     activiti.describe.configure({ mode: 'serial' });
 
-    pickScenarioTest(activiti, auditScenario)(auditScenario.title, async ({
+    activiti('delete records in audit service', async ({
         runtimeBundleServiceTestUser,
         auditAdminServiceTestAdmin,
     }) => {
-        await activiti.step(
-            'Given the user is authenticated as testuser ' +
-                'When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
+        await activiti.step('When the testuser starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
             async () => {
                 const processInstance = await startCatalogProcess(
                     runtimeBundleServiceTestUser,
@@ -59,8 +42,7 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         });
 
         await activiti.step(
-            'And another user is authenticated as testadmin ' +
-                'Then the user is able to delete all events in audit service',
+            'And another user is authenticated as testadmin the user is able to delete all events in audit service',
             async () => {
                 const before = await auditAdminServiceTestAdmin.adminEvents.getAllEvents();
                 expect(before.length).toBeGreaterThan(0);
@@ -71,39 +53,41 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         );
     });
 
-    pickScenarioTest(activiti, queryTasksScenario)(queryTasksScenario.title, async ({
+    activiti('delete all tasks in query service', async ({
         runtimeBundleServiceTestUser,
         taskServiceTestUser,
         queryAdminServiceTestAdmin,
     }) => {
+        let processTaskId = '';
+        let standaloneTaskId = '';
+
         await activiti.step(
-            'Given the user is authenticated as testuser ' +
-                'When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
+            'Given a process task and a standalone task synced to query',
             async () => {
-                const processInstance = await startCatalogProcess(
+                const { processInstance, task } = await startCatalogProcessWithFirstTask(
                     runtimeBundleServiceTestUser,
+                    taskServiceTestUser,
                     'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
                 );
-                expect(processInstance.id).toBeTruthy();
+                processTaskId = task.id;
+                await queryAdminServiceTestAdmin.waitForProcessInstanceAdminSynced(processInstance.id);
+                await queryAdminServiceTestAdmin.waitForTaskAdminSynced(processTaskId);
+
+                const standalone = await taskServiceTestUser.createStandaloneTask({
+                    name: `delete-actions-standalone-${randomUUID()}`,
+                });
+                standaloneTaskId = standalone.id;
+                await queryAdminServiceTestAdmin.waitForTaskAdminSynced(standaloneTaskId);
             }
         );
 
-        await activiti.step('And the user creates a standalone task', async () => {
-            const task = await taskServiceTestUser.createStandaloneTask();
-            expect(task.id).toBeTruthy();
-        });
-
-        await activiti.step('And query service has synced tasks', async () => {
-            const tasks = await queryAdminServiceTestAdmin.waitForAllTasksAdminCountGreaterThan(0);
-            expect(tasks.length).toBeGreaterThan(0);
-        });
-
         await activiti.step(
-            'And another user is authenticated as testadmin ' +
-                'Then the user is able to delete all tasks in query service',
+            'And another user is authenticated as testadmin the user is able to delete all tasks in query service',
             async () => {
                 const before = await queryAdminServiceTestAdmin.adminTasks.getAllTasks();
-                expect(before.length).toBeGreaterThan(0);
+                expect(before.map((task) => task.id)).toEqual(
+                    expect.arrayContaining([processTaskId, standaloneTaskId])
+                );
                 await queryAdminServiceTestAdmin.adminTasks.deleteAllTasks();
                 const after = await queryAdminServiceTestAdmin.waitForAllTasksAdminCount(0);
                 expect(after.length).toBe(0);
@@ -111,33 +95,34 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         );
     });
 
-    pickScenarioTest(activiti, queryProcessInstancesScenario)(queryProcessInstancesScenario.title, async ({
+    activiti('delete all process instances in query service', async ({
         runtimeBundleServiceTestUser,
         queryAdminServiceTestAdmin,
     }) => {
-        await activiti.step(
-            'Given the user is authenticated as testuser ' +
-                'When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
+        let processInstanceId = '';
+
+        await activiti.step('When the testuser starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
             async () => {
                 const processInstance = await startCatalogProcess(
                     runtimeBundleServiceTestUser,
                     'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
                 );
-                expect(processInstance.id).toBeTruthy();
+                processInstanceId = processInstance.id;
+                expect(processInstanceId).toBeTruthy();
             }
         );
 
-        await activiti.step('And query service has synced process instances', async () => {
-            const instances = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCountGreaterThan(0);
-            expect(instances.length).toBeGreaterThan(0);
+        await activiti.step('And query service has synced the process instance', async () => {
+            await queryAdminServiceTestAdmin.waitForProcessInstanceAdminSynced(processInstanceId);
+            const instances = await queryAdminServiceTestAdmin.adminProcessInstances.getAllProcessInstances();
+            expect(instances.map((instance) => instance.id)).toContain(processInstanceId);
         });
 
         await activiti.step(
-            'And another user is authenticated as testadmin ' +
-                'Then the user is able to delete all process instances in query service',
+            'And another user is authenticated as testadmin the user is able to delete all process instances in query service',
             async () => {
                 const before = await queryAdminServiceTestAdmin.adminProcessInstances.getAllProcessInstances();
-                expect(before.length).toBeGreaterThan(0);
+                expect(before.map((instance) => instance.id)).toContain(processInstanceId);
                 await queryAdminServiceTestAdmin.adminProcessInstances.deleteAllProcessInstances();
                 const after = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
                 expect(after.length).toBe(0);
