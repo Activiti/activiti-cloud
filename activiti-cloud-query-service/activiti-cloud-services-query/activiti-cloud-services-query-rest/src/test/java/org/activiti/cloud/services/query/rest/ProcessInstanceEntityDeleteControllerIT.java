@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -172,7 +173,7 @@ public class ProcessInstanceEntityDeleteControllerIT {
             //then
             .andExpect(status().isOk());
 
-        verify(taskRepository).deleteAll(processInstanceEntity.getTasks());
+        verify(taskRepository).deleteAll(anyIterable());
         verify(variableRepository).deleteAll(processInstanceEntity.getVariables());
         verify(bpmnActivityRepository).deleteAll(processInstanceEntity.getActivities());
         verify(serviceTaskRepository).deleteAll(processInstanceEntity.getServiceTasks());

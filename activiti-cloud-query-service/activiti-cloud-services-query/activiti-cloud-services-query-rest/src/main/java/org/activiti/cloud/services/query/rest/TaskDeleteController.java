@@ -25,6 +25,7 @@ import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -90,11 +91,24 @@ public class TaskDeleteController {
         }
 
         for (TaskEntity entity : tasks) {
+            touchLazyAssociations(entity);
             result.add(taskRepresentationModelAssembler.toModel(entity));
         }
 
         taskRepository.deleteAll(tasks);
 
         return CollectionModel.of(result);
+    }
+
+    /**
+     * JSON serialization runs after the transaction closes; touch lazy associations while the
+     * persistence context is still open (same pattern as {@link ProcessInstanceDeleteController}).
+     */
+    private static void touchLazyAssociations(TaskEntity entity) {
+        Optional.ofNullable(entity.getTaskCandidateUsers()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getTaskCandidateGroups()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getVariables()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getProcessVariables()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getProcessInstance()).ifPresent(processInstance -> processInstance.getId());
     }
 }

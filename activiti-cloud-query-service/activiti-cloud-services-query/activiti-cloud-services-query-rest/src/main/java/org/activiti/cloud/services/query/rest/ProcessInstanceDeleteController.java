@@ -140,7 +140,19 @@ public class ProcessInstanceDeleteController {
             taskCandidateGroupRepository.deleteAll(taskCandidateGroupRepository.findByTaskIdIn(taskIds));
         }
 
+        for (TaskEntity task : taskList) {
+            touchTaskLazyAssociations(task);
+        }
+
         taskRepository.deleteAll(taskList);
+    }
+
+    private static void touchTaskLazyAssociations(TaskEntity entity) {
+        Optional.ofNullable(entity.getTaskCandidateUsers()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getTaskCandidateGroups()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getVariables()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getProcessVariables()).ifPresent(Collection::size);
+        Optional.ofNullable(entity.getProcessInstance()).ifPresent(processInstance -> processInstance.getId());
     }
 
     private static void touchLazyAssociations(ProcessInstanceEntity entity) {
