@@ -64,6 +64,7 @@ class FunctionRouterExecutorFactoryTest {
         final var executor = factory.apply("foo-registration");
         final var taskStarted = new CountDownLatch(1);
         final var releaseTask = new CountDownLatch(1);
+        final var queuedTaskExecuted = new CountDownLatch(1);
 
         executor.submit(() -> {
             taskStarted.countDown();
@@ -72,16 +73,19 @@ class FunctionRouterExecutorFactoryTest {
 
         assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
+        executor.submit(queuedTaskExecuted::countDown);
         // Fill queue slots
-        for (int queueSize = 5; queueSize > 0; queueSize--) {
-            executor.submit(() -> {});
-        }
+        //for (int queueSize = 5; queueSize > 0; queueSize--) {
+        //    executor.submit(() -> {});
+        //}
 
         assertThatThrownBy(() -> executor.submit(() -> {}))
             .isInstanceOf(RejectedExecutionException.class)
             .hasMessageContaining("queue is full");
 
         releaseTask.countDown();
+
+        assertThat(queuedTaskExecuted.await(200, TimeUnit.MILLISECONDS)).isTrue();
     }
 
     @Test
@@ -95,7 +99,6 @@ class FunctionRouterExecutorFactoryTest {
         final var thrown = new AtomicReference<Throwable>();
         final var submitterDone = new CountDownLatch(1);
 
-        // Single thread is busy
         executor.submit(() -> {
             taskStarted.countDown();
             await(releaseTask);
@@ -103,10 +106,11 @@ class FunctionRouterExecutorFactoryTest {
 
         assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
+        executor.submit(() -> {});
         // Fill queue slots
-        for (int queueSize = 5; queueSize > 0; queueSize--) {
-            executor.submit(() -> {});
-        }
+        //for (int queueSize = 5; queueSize > 0; queueSize--) {
+        //    executor.submit(() -> {});
+        //}
 
         final var submitter = Thread.ofPlatform().start(() -> {
             try {
