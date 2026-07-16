@@ -64,7 +64,8 @@ class FunctionRouterExecutorFactoryTest {
         final var executor = factory.apply("foo-registration");
         final var taskStarted = new CountDownLatch(1);
         final var releaseTask = new CountDownLatch(1);
-        final var queuedTaskExecuted = new CountDownLatch(1);
+        final var queuedTask1Executed = new CountDownLatch(1);
+        final var queuedTask2Executed = new CountDownLatch(1);
 
         executor.submit(() -> {
             taskStarted.countDown();
@@ -73,7 +74,10 @@ class FunctionRouterExecutorFactoryTest {
 
         assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
-        executor.submit(queuedTaskExecuted::countDown);
+        // Fill queue slot 1
+        executor.submit(queuedTask1Executed::countDown);
+        // Fill queue slot 2
+        executor.submit(queuedTask2Executed::countDown);
 
         assertThatThrownBy(() -> executor.submit(() -> {}))
             .isInstanceOf(RejectedExecutionException.class)
@@ -81,7 +85,8 @@ class FunctionRouterExecutorFactoryTest {
 
         releaseTask.countDown();
 
-        assertThat(queuedTaskExecuted.await(200, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(queuedTask1Executed.await(200, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(queuedTask2Executed.await(200, TimeUnit.MILLISECONDS)).isTrue();
     }
 
     @Test
@@ -95,6 +100,7 @@ class FunctionRouterExecutorFactoryTest {
         final var thrown = new AtomicReference<Throwable>();
         final var submitterDone = new CountDownLatch(1);
 
+        // Single thread is busy
         executor.submit(() -> {
             taskStarted.countDown();
             await(releaseTask);
@@ -102,6 +108,9 @@ class FunctionRouterExecutorFactoryTest {
 
         assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
+        // Fill queue slot 1
+        executor.submit(() -> {});
+        // Fill queue slot 2
         executor.submit(() -> {});
 
         final var submitter = Thread.ofPlatform().start(() -> {
