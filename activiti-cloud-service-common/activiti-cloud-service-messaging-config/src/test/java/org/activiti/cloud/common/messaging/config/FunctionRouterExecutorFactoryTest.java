@@ -73,7 +73,7 @@ class FunctionRouterExecutorFactoryTest {
         assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
         // Fill queue slots
-        for(int queueSize = 5; queueSize > 0; queueSize--) {
+        for (int queueSize = 5; queueSize > 0; queueSize--) {
             executor.submit(() -> {});
         }
 
@@ -104,7 +104,7 @@ class FunctionRouterExecutorFactoryTest {
         assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
         // Fill queue slots
-        for(int queueSize = 5; queueSize > 0; queueSize--) {
+        for (int queueSize = 5; queueSize > 0; queueSize--) {
             executor.submit(() -> {});
         }
 
