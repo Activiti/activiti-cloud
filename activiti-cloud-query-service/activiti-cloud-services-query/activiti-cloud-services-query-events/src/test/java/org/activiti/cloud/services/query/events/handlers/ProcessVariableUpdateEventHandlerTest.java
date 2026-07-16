@@ -16,16 +16,12 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
-import jakarta.persistence.EntityManager;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
-import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -42,92 +38,24 @@ class ProcessVariableUpdateEventHandlerTest {
     @Mock
     private ProcessVariableUpdater variableUpdater;
 
-    @Mock
-    private EntityManager entityManager;
-
-    @Mock
-    private FeatureToggle featureToggle;
-
     @Test
-    void handleShouldUpdateVariableAndPersistHistoryEntry() {
-        //given
-        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
-            "var",
-            "string",
-            "newValue",
-            "procInstId",
-            null
-        );
-        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(
-            "eventId",
-            System.currentTimeMillis(),
-            variable,
-            "oldValue"
-        );
+    void should_updateVariable_when_handleCalled() {
+        var variable = new VariableInstanceImpl<>("var", "string", "newValue", "procInstId", null);
+        var event = new CloudVariableUpdatedEventImpl<>("eventId", System.currentTimeMillis(), variable, "oldValue");
         event.setMessageId("msg-001");
         event.setSequenceNumber(3);
 
-        //when
         handler.handle(event);
 
-        //then
-        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        verify(entityManager).persist(captor.capture());
-
-        ProcessVariableHistoryEntity historyEntity = (ProcessVariableHistoryEntity) captor.getValue();
-        assertThat(historyEntity.getProcessInstanceId()).isEqualTo("procInstId");
-        assertThat(historyEntity.getVariableName()).isEqualTo("var");
-        assertThat(historyEntity.getType()).isEqualTo("string");
-        assertThat((String) historyEntity.getValue()).isEqualTo("newValue");
-        assertThat(historyEntity.isDeleted()).isFalse();
-        assertThat(historyEntity.getMessageId()).isEqualTo("msg-001");
-        assertThat(historyEntity.getSequenceNumber()).isEqualTo(3);
-        assertThat(historyEntity.getEventTime()).isNotNull();
-        assertThat(historyEntity.getRecordCreateTime()).isNotNull();
-    }
-
-    @Test
-    void handleShouldSkipHistoryWhenVariableIsEphemeral() {
-        //given
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
-            "var",
-            "string",
-            "newValue",
-            "procInstId",
-            null
-        );
-        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(variable, "oldValue", true);
-
-        //when
-        handler.handle(event);
-
-        //then
-        verifyNoInteractions(entityManager);
-    }
-
-    @Test
-    void handleShouldSkipHistoryWhenFeatureFlagDisabled() {
-        //given
-        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(false);
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
-            "var",
-            "string",
-            "newValue",
-            "procInstId",
-            null
-        );
-        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(
-            "eventId",
-            System.currentTimeMillis(),
-            variable,
-            "oldValue"
-        );
-
-        //when
-        handler.handle(event);
-
-        //then
-        verifyNoInteractions(entityManager);
+        var captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
+        verify(variableUpdater).update(captor.capture(), anyString());
+        assertThat(captor.getValue())
+            .extracting(
+                ProcessVariableEntity::getName,
+                ProcessVariableEntity::getType,
+                ProcessVariableEntity::getValue,
+                ProcessVariableEntity::getProcessInstanceId
+            )
+            .containsExactly("var", "string", "newValue", "procInstId");
     }
 }
