@@ -39,7 +39,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
@@ -87,9 +86,6 @@ public class TaskEntityDeleteControllerIT {
 
     @MockitoBean
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
-
-    @MockitoBean
-    private TaskVariableRepository taskVariableRepository;
 
     @MockitoBean
     private SecurityManager securityManager;

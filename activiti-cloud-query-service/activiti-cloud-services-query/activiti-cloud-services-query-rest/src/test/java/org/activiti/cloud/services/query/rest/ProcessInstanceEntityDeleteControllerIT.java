@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -49,7 +47,6 @@ import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
@@ -95,9 +92,6 @@ public class ProcessInstanceEntityDeleteControllerIT {
 
     @MockitoBean
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
-
-    @MockitoBean
-    private TaskVariableRepository taskVariableRepository;
 
     @MockitoBean
     private SecurityManager securityManager;
@@ -172,29 +166,17 @@ public class ProcessInstanceEntityDeleteControllerIT {
         List<ProcessInstanceEntity> processInstanceEntities = Collections.singletonList(processInstanceEntity);
         given(processInstanceRepository.findAll(any(Predicate.class))).willReturn(processInstanceEntities);
 
-        List<TaskEntity> tasks = new ArrayList<>(processInstanceEntity.getTasks());
-        List<ProcessVariableEntity> variables = new ArrayList<>(processInstanceEntity.getVariables());
-        List<ServiceTaskEntity> serviceTasks = new ArrayList<>(processInstanceEntity.getServiceTasks());
-        List<BPMNActivityEntity> activities = new ArrayList<>(processInstanceEntity.getActivities());
-        List<BPMNSequenceFlowEntity> sequenceFlows = new ArrayList<>(processInstanceEntity.getSequenceFlows());
-
-        given(taskRepository.findByProcessInstanceIdIn(anyCollection())).willReturn(tasks);
-        given(variableRepository.findByProcessInstanceIdIn(anyCollection())).willReturn(variables);
-        given(serviceTaskRepository.findByProcessInstanceIdIn(anyCollection())).willReturn(serviceTasks);
-        given(bpmnActivityRepository.findByProcessInstanceIdIn(anyCollection())).willReturn(activities);
-        given(bpmnSequenceFlowRepository.findByProcessInstanceIdIn(anyCollection())).willReturn(sequenceFlows);
-
         //when
         mockMvc
             .perform(delete("/admin/v1/process-instances").with(csrf()).accept(MediaType.APPLICATION_JSON))
             //then
             .andExpect(status().isOk());
 
-        verify(taskRepository).deleteAll(tasks);
-        verify(variableRepository).deleteAll(variables);
-        verify(bpmnActivityRepository).deleteAll(activities);
-        verify(serviceTaskRepository).deleteAll(serviceTasks);
-        verify(bpmnSequenceFlowRepository).deleteAll(sequenceFlows);
+        verify(taskRepository).deleteAll(processInstanceEntity.getTasks());
+        verify(variableRepository).deleteAll(processInstanceEntity.getVariables());
+        verify(bpmnActivityRepository).deleteAll(processInstanceEntity.getActivities());
+        verify(serviceTaskRepository).deleteAll(processInstanceEntity.getServiceTasks());
+        verify(bpmnSequenceFlowRepository).deleteAll(processInstanceEntity.getSequenceFlows());
 
         verify(processInstanceRepository).deleteAll(processInstanceEntities);
     }

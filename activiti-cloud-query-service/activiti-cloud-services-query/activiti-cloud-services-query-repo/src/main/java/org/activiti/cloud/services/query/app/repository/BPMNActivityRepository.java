@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.app.repository;
 import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
 
 import com.querydsl.core.types.dsl.StringPath;
-import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
@@ -49,8 +48,6 @@ public interface BPMNActivityRepository
     );
 
     List<BPMNActivityEntity> findByProcessInstanceId(String processInstanceId);
-
-    List<BPMNActivityEntity> findByProcessInstanceIdIn(Collection<String> processInstanceIds);
 
     BPMNActivityEntity findByProcessInstanceIdAndElementId(String processInstanceId, String elementId);
 
