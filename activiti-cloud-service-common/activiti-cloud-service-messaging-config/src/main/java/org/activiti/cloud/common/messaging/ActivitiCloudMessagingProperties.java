@@ -131,9 +131,9 @@ public class ActivitiCloudMessagingProperties {
 
         private Boolean missingDurableQueuesFatal;
 
-        private Boolean compress = true;
+        private Boolean compress = false;
 
-        private Integer compressionLevel = 6;
+        private Integer compressionLevel = 1;
 
         private String prefix;
 
@@ -442,7 +442,7 @@ public class ActivitiCloudMessagingProperties {
 
         private Duration retryInterval = Duration.ofMillis(10);
 
-        private Duration requestTimeout = Duration.ofSeconds(25);
+        private Duration requestTimeout = Duration.ofSeconds(30);
 
         @NestedConfigurationProperty
         private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();

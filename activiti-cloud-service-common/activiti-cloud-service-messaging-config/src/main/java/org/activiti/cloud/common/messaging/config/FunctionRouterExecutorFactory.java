@@ -31,9 +31,9 @@ import java.util.function.Function;
 public class FunctionRouterExecutorFactory implements Function<String, ExecutorService> {
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
-    private Duration timeout = Duration.ofSeconds(25);
+    private Duration timeout = Duration.ofSeconds(30);
     private static final int SINGLE_THREAD_POOL_SIZE = 1;
-    private static final int QUEUE_CAPACITY = 2;
+    private static final int QUEUE_CAPACITY = 5;
 
     public FunctionRouterExecutorFactory() {}
 
