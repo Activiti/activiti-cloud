@@ -15,9 +15,11 @@
  */
 package org.activiti.cloud.services.query.model;
 
-public class JsonViews {
+@SuppressWarnings("all")
+public interface JsonViews {
+    interface General {}
 
-    public static class General {}
+    interface IntegrationContexts extends General {}
 
-    public static class ProcessVariables {}
+    interface ProcessVariables {}
 }
