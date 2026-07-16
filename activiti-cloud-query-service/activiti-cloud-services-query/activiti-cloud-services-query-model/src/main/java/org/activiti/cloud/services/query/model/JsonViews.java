@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.model;
 
+@SuppressWarnings("all")
 public interface JsonViews {
     interface General {}
 
