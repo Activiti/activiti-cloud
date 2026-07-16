@@ -21,6 +21,7 @@ import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControl
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
+import org.activiti.cloud.services.audit.jpa.controllers.v2.AuditEventsControllerV2Impl;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -38,6 +39,7 @@ import tools.jackson.databind.ObjectMapper;
         EventRepresentationModelAssemblerConfiguration.class,
         AuditEventsAdminControllerImpl.class,
         AuditEventsControllerImpl.class,
+        AuditEventsControllerV2Impl.class,
         AuditEventsDeleteController.class,
     }
 )

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.jpa.controllers;
+package org.activiti.cloud.services.audit.jpa.controllers.v2;
 
 import static java.util.stream.Collectors.joining;
 
@@ -27,7 +27,6 @@ import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
@@ -44,10 +43,10 @@ import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.EntityModel;
@@ -61,14 +60,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-    value = "/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
+    value = "/v2/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-public class AuditEventsControllerImpl implements AuditEventsController {
+public class AuditEventsControllerV2Impl {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(AuditEventsAdminControllerImpl.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(AuditEventsControllerV2Impl.class);
 
-    private final EventsRepository eventsRepository;
+    private final EventsRepository<AuditEventEntity> eventsRepository;
 
     private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
 
@@ -76,13 +75,13 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         CloudRuntimeEvent<?, CloudRuntimeEventType>
     > pagedCollectionModelAssembler;
 
-    private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
+    private final SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
     private final APIEventToEntityConverters eventConverters;
 
     @Autowired
-    public AuditEventsControllerImpl(
-        EventsRepository eventsRepository,
+    public AuditEventsControllerV2Impl(
+        EventsRepository<AuditEventEntity> eventsRepository,
         EventRepresentationModelAssembler eventRepresentationModelAssembler,
         APIEventToEntityConverters eventConverters,
         SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
@@ -96,7 +95,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId) {
+    public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findByIdV2(@PathVariable String eventId) {
         Optional<AuditEventEntity> findResult = eventsRepository.findByEventId(eventId);
         if (!findResult.isPresent()) {
             throw new NotFoundException("Unable to find event for the given id:'" + eventId + "'");
@@ -120,7 +119,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> searchV2(
         SearchParams searchParams,
         Pageable pageable
     ) {
@@ -142,7 +141,8 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
         spec = securityPoliciesApplicationService.createSpecWithSecurity(spec, SecurityPolicyAccess.READ);
 
-        Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(spec, pageable);
+        Pageable slicePageable = pageable;
+        Slice<AuditEventEntity> allAuditInPage = eventsRepository.findBy(spec, query -> query.slice(slicePageable));
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
         for (AuditEventEntity aee : allAuditInPage.getContent()) {
@@ -156,9 +156,11 @@ public class AuditEventsControllerImpl implements AuditEventsController {
             }
         }
 
+        long knownElements = pageable.getOffset() + events.size() + (allAuditInPage.hasNext() ? 1 : 0);
+
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            new PageImpl<>(events, pageable, allAuditInPage.getTotalElements()),
+            new PageImpl<>(events, pageable, knownElements),
             eventRepresentationModelAssembler
         );
     }

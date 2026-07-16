@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
@@ -29,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
@@ -70,13 +69,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor.SpecificationFluentQuery;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -120,9 +118,9 @@ class AuditEventsControllerImpWebMvcTest {
     @Test
     void getEvents() throws Exception {
         PageRequest pageable = PageRequest.of(1, 10);
-        Slice<AuditEventEntity> eventsPage = new SliceImpl<>(buildEventsData(1), pageable, false);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 11);
 
-        givenSlice(eventsPage);
+        given(eventsRepository.findAll(any(), any(PageRequest.class))).willReturn(eventsPage);
 
         mockMvc
             .perform(get("/{version}/events", "v1").param("page", "1").param("size", "10").param("sort", "asc"))
@@ -132,11 +130,14 @@ class AuditEventsControllerImpWebMvcTest {
     @Test
     void shouldDefaultSortToTimestampDescWhenNoSortProvided() throws Exception {
         PageRequest pageable = PageRequest.of(0, 20);
-        Slice<AuditEventEntity> eventsPage = new SliceImpl<>(buildEventsData(1), pageable, false);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 1);
 
-        ArgumentCaptor<Pageable> pageableCaptor = givenSlice(eventsPage);
+        given(eventsRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(eventsPage);
 
         mockMvc.perform(get("/{version}/events", "v1")).andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
 
         Sort sort = pageableCaptor.getValue().getSort();
         assertThat(sort.isSorted()).isTrue();
@@ -146,11 +147,14 @@ class AuditEventsControllerImpWebMvcTest {
     @Test
     void shouldPreserveExplicitTimestampAscSort() throws Exception {
         PageRequest pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.ASC, "timestamp"));
-        Slice<AuditEventEntity> eventsPage = new SliceImpl<>(buildEventsData(1), pageable, false);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 1);
 
-        ArgumentCaptor<Pageable> pageableCaptor = givenSlice(eventsPage);
+        given(eventsRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(eventsPage);
 
         mockMvc.perform(get("/{version}/events", "v1").param("sort", "timestamp,asc")).andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
 
         assertThat(pageableCaptor.getValue().getSort()).containsExactly(
             new Sort.Order(Sort.Direction.ASC, "timestamp")
@@ -160,11 +164,14 @@ class AuditEventsControllerImpWebMvcTest {
     @Test
     void shouldPreserveExplicitNonTimestampSort() throws Exception {
         PageRequest pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.ASC, "eventType"));
-        Slice<AuditEventEntity> eventsPage = new SliceImpl<>(buildEventsData(1), pageable, false);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 1);
 
-        ArgumentCaptor<Pageable> pageableCaptor = givenSlice(eventsPage);
+        given(eventsRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(eventsPage);
 
         mockMvc.perform(get("/{version}/events", "v1").param("sort", "eventType,asc")).andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
 
         assertThat(pageableCaptor.getValue().getSort()).containsExactly(
             new Sort.Order(Sort.Direction.ASC, "eventType")
@@ -207,7 +214,9 @@ class AuditEventsControllerImpWebMvcTest {
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        givenSlice(new SliceImpl<>(events, pageRequest, false));
+        given(eventsRepository.findAll(any(), any(AlfrescoPageRequest.class))).willReturn(
+            new PageImpl<>(events, pageRequest, 12)
+        );
 
         MvcResult result = mockMvc
             .perform(get("/{version}/events?skipCount=11&maxItems=10", "v1").accept(MediaType.APPLICATION_JSON))
@@ -226,9 +235,9 @@ class AuditEventsControllerImpWebMvcTest {
     @Test
     void headEvents() throws Exception {
         PageRequest pageable = PageRequest.of(1, 10);
-        Slice<AuditEventEntity> eventsPage = new SliceImpl<>(buildEventsData(1), pageable, false);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 10);
 
-        givenSlice(eventsPage);
+        given(eventsRepository.findAll(any(), any(PageRequest.class))).willReturn(eventsPage);
 
         mockMvc.perform(head("/{version}/events", "v1")).andExpect(status().isOk());
     }
@@ -239,7 +248,9 @@ class AuditEventsControllerImpWebMvcTest {
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        givenSlice(new SliceImpl<>(events, pageRequest, false));
+        given(eventsRepository.findAll(any(), any(AlfrescoPageRequest.class))).willReturn(
+            new PageImpl<>(events, pageRequest, 12)
+        );
 
         mockMvc
             .perform(head("/{version}/events?skipCount=11&maxItems=10", "v1").accept(MediaType.APPLICATION_JSON))
@@ -411,16 +422,5 @@ class AuditEventsControllerImpWebMvcTest {
             .withCorrelationKey("correlationId")
             .withVariable("name", "value")
             .build();
-    }
-
-    private ArgumentCaptor<Pageable> givenSlice(Slice<AuditEventEntity> slice) {
-        SpecificationFluentQuery<AuditEventEntity> fluentQuery = mock(SpecificationFluentQuery.class);
-        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        given(fluentQuery.slice(pageableCaptor.capture())).willReturn(slice);
-        given(eventsRepository.findBy(any(Specification.class), any())).willAnswer(invocation -> {
-            Function<SpecificationFluentQuery<AuditEventEntity>, Object> queryFunction = invocation.getArgument(1);
-            return queryFunction.apply(fluentQuery);
-        });
-        return pageableCaptor;
     }
 }
