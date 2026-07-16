@@ -444,6 +444,19 @@ public class ActivitiCloudMessagingProperties {
 
         private Duration requestTimeout = Duration.ofSeconds(15);
 
+        /**
+         * Use virtual threads for function router executors instead of platform threads.
+         * When enabled, blocking I/O in connectors yields the carrier thread.
+         */
+        private boolean virtualThreads = false;
+
+        /**
+         * Maximum number of concurrent tasks per registration when virtual threads are enabled.
+         * Set to 0 for unbounded concurrency.
+         */
+        @Min(0)
+        private int maxConcurrency = 1;
+
         @NestedConfigurationProperty
         private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();
 
@@ -660,6 +673,22 @@ public class ActivitiCloudMessagingProperties {
 
         public void setRequestTimeout(Duration requestTimeout) {
             this.requestTimeout = requestTimeout;
+        }
+
+        public boolean isVirtualThreads() {
+            return virtualThreads;
+        }
+
+        public void setVirtualThreads(boolean virtualThreads) {
+            this.virtualThreads = virtualThreads;
+        }
+
+        public int getMaxConcurrency() {
+            return maxConcurrency;
+        }
+
+        public void setMaxConcurrency(int maxConcurrency) {
+            this.maxConcurrency = maxConcurrency;
         }
     }
 

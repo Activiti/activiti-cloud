@@ -138,7 +138,13 @@ public class FunctionRouterConfiguration {
     Function<String, ExecutorService> functionRouterExecutorFactory(
         ActivitiCloudMessagingProperties messagingProperties
     ) {
-        return new FunctionRouterExecutorFactory(messagingProperties.getFunctionRouter().getRequestTimeout());
+        ActivitiCloudMessagingProperties.FunctionRouterProperties functionRouter =
+            messagingProperties.getFunctionRouter();
+        return new FunctionRouterExecutorFactory(
+            functionRouter.getRequestTimeout(),
+            functionRouter.isVirtualThreads(),
+            functionRouter.getMaxConcurrency()
+        );
     }
 
     @Bean
