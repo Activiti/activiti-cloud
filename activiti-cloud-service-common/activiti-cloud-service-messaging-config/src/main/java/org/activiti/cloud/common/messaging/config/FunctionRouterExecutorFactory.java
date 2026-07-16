@@ -31,8 +31,9 @@ import java.util.function.Function;
 public class FunctionRouterExecutorFactory implements Function<String, ExecutorService> {
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
-    private Duration timeout = Duration.ofSeconds(5);
+    private Duration timeout = Duration.ofSeconds(25);
     private static final int SINGLE_THREAD_POOL_SIZE = 1;
+    private static final int QUEUE_CAPACITY = 2;
 
     public FunctionRouterExecutorFactory() {}
 
@@ -66,7 +67,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             SINGLE_THREAD_POOL_SIZE,
             0L,
             TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(1, true),
+            new ArrayBlockingQueue<>(QUEUE_CAPACITY, true),
             Thread.ofPlatform().name(registration).factory(),
             taskExecutionHandler
         );
