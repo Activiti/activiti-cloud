@@ -31,7 +31,7 @@ jobs:
       skip: ${{ steps.dependabot.outputs.result }}
       skip-tests: ${{ steps.check-skip-tests.outputs.result }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Check dependabot build
         uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
@@ -71,7 +71,7 @@ jobs:
       version: ${{ steps.export-version.outputs.version }}
       ref: ${{ steps.export-ref.outputs.ref }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -117,7 +117,7 @@ jobs:
       - create-tag
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -175,7 +175,7 @@ jobs:
     outputs:
       transformed-json: ${{ steps.transform.outputs.transformed-json }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - id: scan
         uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
@@ -211,7 +211,7 @@ jobs:
       - create-tag
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -264,7 +264,7 @@ jobs:
       && needs.maven-build-dependencies-bom.result == 'success'
       && needs.maven-test.result == 'success'
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
 
@@ -358,7 +358,7 @@ jobs:
       - create-tag
     steps:
       - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -392,7 +392,7 @@ jobs:
       && needs.maven-build-dependencies-bom.result == 'success'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -423,7 +423,7 @@ jobs:
       )
     steps:
       - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -443,7 +443,7 @@ jobs:
       VERSION: ${{ needs.create-tag.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           version: ${{ needs.create-tag.outputs.version }}
@@ -469,7 +469,7 @@ jobs:
       FULL_CHART_BASE_BRANCH: develop
       FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.create-tag.outputs.version }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           path: ${{ env.FULL_CHART_DIR }}
           repository: Activiti/activiti-cloud-full-chart
