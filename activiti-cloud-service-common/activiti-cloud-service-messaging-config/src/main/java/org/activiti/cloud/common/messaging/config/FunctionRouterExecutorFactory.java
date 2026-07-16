@@ -51,7 +51,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             // until the queue can accept the task.
             if (!executor.getQueue().offer(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 throw new RejectedExecutionException(
-                    "fix/AAE-47841: Timeout after %s duration because the queue is full (queueCapacity=%d)".formatted(timeout, QUEUE_CAPACITY)
+                    "fix/AAE-47841: Timeout after %s duration because the queue is full (queueCapacity=%d)".formatted(
+                        timeout,
+                        QUEUE_CAPACITY
+                    )
                 );
             }
         } catch (InterruptedException e) {
