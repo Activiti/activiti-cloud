@@ -33,7 +33,7 @@ jobs:
           version: v1.19.6
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}

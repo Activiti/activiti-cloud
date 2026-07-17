@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers.config;
 
+import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 @Import(
@@ -52,7 +55,18 @@ public class AuditJPAControllersAutoConfiguration {
     }
 
     @Bean
-    public AuditEventsAdminService auditEventsAdminService(EventsRepository eventsRepository) {
-        return new AuditEventsAdminService(eventsRepository);
+    @ConditionalOnMissingBean
+    public AuditEventsExporter auditEventsExporter(ObjectMapper objectMapper) {
+        return new AuditEventsExporter(objectMapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AuditEventsAdminService auditEventsAdminService(
+        EventsRepository eventsRepository,
+        APIEventToEntityConverters eventConverters,
+        AuditEventsExporter auditEventsExporter
+    ) {
+        return new AuditEventsAdminService(eventsRepository, eventConverters, auditEventsExporter);
     }
 }

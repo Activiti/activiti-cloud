@@ -15,27 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import jakarta.persistence.EntityManager;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 
 public class ProcessVariableUpdateEventHandler {
 
     private final ProcessVariableUpdater variableUpdater;
-    private final EntityManager entityManager;
-    private final FeatureToggle featureToggle;
 
-    public ProcessVariableUpdateEventHandler(
-        ProcessVariableUpdater variableUpdater,
-        EntityManager entityManager,
-        FeatureToggle featureToggle
-    ) {
+    public ProcessVariableUpdateEventHandler(ProcessVariableUpdater variableUpdater) {
         this.variableUpdater = variableUpdater;
-        this.entityManager = entityManager;
-        this.featureToggle = featureToggle;
     }
 
     public void handle(CloudVariableUpdatedEvent event) {
@@ -48,10 +36,5 @@ public class ProcessVariableUpdateEventHandler {
             variableEntity,
             "Unable to find variable named '" + variableName + "' for process instance '" + processInstanceId + "'"
         );
-
-        if (!event.isEphemeralVariable() && featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)) {
-            ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forUpdate(event);
-            entityManager.persist(history);
-        }
     }
 }

@@ -33,30 +33,32 @@ jobs:
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Check dependabot build
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "Fork PRs cannot be validated in this repository."
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: "dependabot[bot]"
           label: github_actions
       - name: Check skip tests
         id: check-skip-tests
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           label: skip-tests
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
-        uses: hyland/github-actions-ensure-sha-pinned-actions@7d494b6b53e71f75194d74b4dd890a2266d060b5 # v2.0.0
+        uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
+      - name: Ensure all actions are covered by Dependabot
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
 
   create-tag:
     runs-on: ubuntu-latest
@@ -73,7 +75,7 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         if: github.event_name == 'push'
         id: tag
         env:
@@ -148,7 +150,7 @@ jobs:
           )
           echo "modules=$MODULES" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -176,7 +178,7 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - id: scan
-        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
 
       - id: transform
         name: Transform docker image matrix
@@ -214,7 +216,7 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -266,7 +268,7 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -373,6 +375,33 @@ jobs:
               make docker-delete-all
           fi
 
+  publish-preview:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - create-tag
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+    if: >-
+      github.event_name == 'pull_request'
+      && contains(github.event.pull_request.labels.*.name, 'preview')
+      && needs.pre-checks.outputs.skip != 'true'
+      && needs.maven-build-common.result == 'success'
+      && needs.maven-build.result == 'success'
+      && needs.maven-build-dependencies-bom.result == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ needs.create-tag.outputs.ref }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+      - uses: ./.github/actions/maven-deploy
+        with:
+          version: ${{ needs.create-tag.outputs.version }}
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+
   publish:
     runs-on: ubuntu-latest
     needs:
@@ -384,37 +413,25 @@ jobs:
       - build-summary
       - delete-test-images
     if: >-
-      (github.event_name == 'push' && needs.pre-checks.outputs.skip != 'true'
-        || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')))
+      github.event_name == 'push' && needs.pre-checks.outputs.skip != 'true'
       && needs.maven-build-common.result == 'success'
       && needs.maven-build.result == 'success'
       && needs.maven-build-dependencies-bom.result == 'success'
       && (
         needs.build-summary.result == 'success'
-        || (github.event_name == 'push' && needs.pre-checks.outputs.skip-tests == 'true')
+        || needs.pre-checks.outputs.skip-tests == 'true'
       )
-    env:
-      VERSION: ${{ needs.create-tag.outputs.version }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - uses: ./.github/actions/maven-deploy
         with:
-          java-version: '25'
-          java-distribution: 'corretto'
-          maven-command: >-
-            deploy -DskipTests -Dskip.common.tests=true
-            -Dhttp.keepAlive=false
-            -Dmaven.wagon.http.pool=false
-            -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
+          version: ${{ needs.create-tag.outputs.version }}
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 
   propagate-maven:
     runs-on: ubuntu-latest
@@ -427,15 +444,18 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "true"
           labels: "be-propagation,${{ env.DEVELOPMENT_BRANCH }}"
           base-branch-name: ${{ env.DEVELOPMENT_BRANCH }}
-          git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          git-username: ${{ vars.HXPS_GIT_USERNAME }}
           git-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          git-author-name: ${{ secrets.BOT_GITHUB_USERNAME }}
+          git-author-name: ${{ vars.HXPS_GIT_USERNAME }}
+          git-author-email: ${{ vars.HXPS_GIT_EMAIL }}
+          gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
 
   propagate-helm:
     runs-on: ubuntu-latest
@@ -465,19 +485,43 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
-        with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          add-options: -u
-          repository-directory: ${{ env.FULL_CHART_DIR}}
-          commit-message: "Update docker image tags to $VERSION"
+      - name: Configure commit signing
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_FINGERPRINT: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
+          GIT_USERNAME: ${{ vars.HXPS_GIT_USERNAME }}
+          GIT_USEREMAIL: ${{ vars.HXPS_GIT_EMAIL }}
+        run: |
+          GNUPGHOME="$(mktemp -d)"
+          chmod 700 "$GNUPGHOME"
+          export GNUPGHOME
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --yes --pinentry-mode loopback --import
+          git config --global user.name "$GIT_USERNAME"
+          git config --global user.email "$GIT_USEREMAIL"
+          git config --global user.signingkey "$GPG_PRIVATE_KEY_FINGERPRINT"
+          git config --global commit.gpgsign true
+
+      - name: Commit signed chart changes
+        id: commit
+        working-directory: ${{ env.FULL_CHART_DIR }}
+        run: |
+          git add -u
+          if git diff --cached --quiet; then
+            echo "No chart changes to commit; skipping."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Update docker image tags to $VERSION"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create propagation PR
+        if: steps.commit.outputs.changed == 'true'
         working-directory: ${{ env.FULL_CHART_DIR}}
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -493,6 +537,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}

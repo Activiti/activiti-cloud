@@ -16,7 +16,8 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { scopedName } from '../../helpers/test-isolation';
-import { catalogProcessKey, startCatalogProcess } from '../../flows/start-catalog-process';
+import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { buildConnectorStartVariables } from '../../helpers/connector-process-payload';
 
@@ -47,7 +48,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then query the process diagram admin endpoint is unauthorized', async () => {
-            const status = await queryAdminServiceHrUser.getProcessInstanceDiagramStatus(processInstanceId);
+            const status = await queryAdminServiceHrUser.adminProcessInstances.getProcessInstanceDiagramStatus(processInstanceId);
             expect(status).toBe(403);
         });
     });
@@ -96,7 +97,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         queryAdminServiceProcessAdmin,
     }) => {
         await activiti.step('Then the user gets all the process definitions in admin endpoint', async () => {
-            const definitions = await queryAdminServiceProcessAdmin.getAllProcessDefinitionsAdmin();
+            const definitions = await queryAdminServiceProcessAdmin.adminProcessDefinitions.getProcessDefinitions();
             const names = definitions.map((definition) => definition.name).filter(Boolean);
             expect(names.length).toBeGreaterThan(0);
             expect(names).toEqual(
@@ -146,7 +147,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
     }) => {
         await activiti.step('Then the PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED definition has the formKey field with value startForm', async () => {
             const definition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(
-                catalogProcessKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED')
+                ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED')
             );
             expect(definition.formKey).toBe('startForm');
         });
@@ -168,11 +169,11 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the user updates the name of the process instance to new-process-name', async () => {
-            await runtimeBundleServiceTestUser.updateProcessInstance(processInstanceId, { name: newName });
+            await runtimeBundleServiceTestUser.processInstances.updateProcessInstance(processInstanceId, { name: newName });
         });
 
         await activiti.step('Then the process instance is updated', async () => {
-            const runtimeInstance = await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+            const runtimeInstance = await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstanceId);
             expect(runtimeInstance.name).toBe(newName);
         });
 
@@ -198,7 +199,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
                 'SIMPLE_PROCESS_INSTANCE',
                 { name: processInstanceName }
             );
-            const runtimeInstance = await runtimeBundleServiceTestUser.getProcessInstance(processInstance.id);
+            const runtimeInstance = await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstance.id);
             expect(runtimeInstance.name).toBe(processInstanceName);
 
             const queryInstance = await queryServiceTestUser.waitForProcessInstanceName(
@@ -209,7 +210,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then verify the process instance name is my_process_instance_name', async () => {
-            const instances = await queryServiceTestUser.getProcessInstancesByName(processInstanceName);
+            const instances = await queryServiceTestUser.processInstances.getProcessInstances({ name: processInstanceName });
             expect(instances.some((instance) => instance.name === processInstanceName)).toBe(true);
         });
     });
@@ -229,12 +230,12 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the admin deletes the process', async () => {
-            await runtimeAdminServiceTestAdmin.deleteProcessInstance(processInstanceId);
+            await runtimeAdminServiceTestAdmin.processInstances.deleteProcessInstance(processInstanceId);
         });
 
         await activiti.step('Then the process instance is deleted', async () => {
             await expect(async () => {
-                await runtimeBundleServiceTestAdmin.getProcessInstance(processInstanceId);
+                await runtimeBundleServiceTestAdmin.processInstances.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
         });
     });
@@ -255,7 +256,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the admin force destroys the process', async () => {
-            await runtimeAdminServiceTestAdmin.destroyProcessInstance(processInstanceId, true);
+            await runtimeAdminServiceTestAdmin.processInstances.destroyProcessInstance(processInstanceId, true);
         });
 
         await activiti.step('Then the process instance is destroyed', async () => {
@@ -363,14 +364,14 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
+            const tasks = await taskServiceHrUser.tasks.getTasksByProcessInstanceId(processInstanceId);
             expect(tasks.length).toBeGreaterThan(0);
-            await taskServiceHrUser.claimTask(tasks[0].id);
+            await taskServiceHrUser.tasks.claimTask(tasks[0].id);
         });
 
         await activiti.step('And the user completes the task', async () => {
-            const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-            await taskServiceHrUser.completeTask(tasks[0].id);
+            const tasks = await taskServiceHrUser.tasks.getTasksByProcessInstanceId(processInstanceId);
+            await taskServiceHrUser.tasks.completeTask(tasks[0].id);
         });
 
         for (const variableName of headerVariableNames) {

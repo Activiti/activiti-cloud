@@ -15,7 +15,7 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 
 activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, () => {
     activiti(
@@ -43,7 +43,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the admin update the instance variables start1 with value value1 and start2 with value value2',
                 async () => {
-                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.processInstances.setProcessVariables(processInstanceId, {
                         start1: 'value1',
                         start2: 'value2',
                     });
@@ -95,7 +95,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the user set the instance variable dummy1 with value dummyValue1',
                 async () => {
-                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.processInstances.setProcessVariables(processInstanceId, {
                         dummy1: 'dummyValue1',
                     });
                 }
@@ -104,7 +104,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the user set the instance variable dummy2 with value dummyValue2',
                 async () => {
-                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.processInstances.setProcessVariables(processInstanceId, {
                         dummy2: 'dummyValue2',
                     });
                 }
@@ -155,7 +155,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the user set the instance variable dummy1 with value dummyValue1',
                 async () => {
-                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.processInstances.setProcessVariables(processInstanceId, {
                         dummy1: 'dummyValue1',
                     });
                 }
@@ -164,14 +164,14 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the user set the instance variable dummy2 with value dummyValue2',
                 async () => {
-                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.processInstances.setProcessVariables(processInstanceId, {
                         dummy2: 'dummyValue2',
                     });
                 }
             );
 
             await activiti.step('And the admin delete the instance variable dummy1', async () => {
-                await runtimeAdminServiceTestAdmin.deleteProcessVariables(processInstanceId, [
+                await runtimeAdminServiceTestAdmin.processInstances.deleteProcessVariables(processInstanceId, [
                     'dummy1',
                 ]);
             });

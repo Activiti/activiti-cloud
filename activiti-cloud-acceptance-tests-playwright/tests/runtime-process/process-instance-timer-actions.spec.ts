@@ -36,7 +36,7 @@ activiti.describe('Process Instance Timer Actions', { tag: '@slow' }, () => {
                 'Given the user is authenticated as hruser ' +
                     'When the user starts a process with timer events called INTERMEDIATE_TIMER_EVENT_PROCESS',
                 async () => {
-                    const processInstance = await runtimeBundleServiceHrUser.startProcess({
+                    const processInstance = await runtimeBundleServiceHrUser.processInstances.startProcess({
                         processDefinitionKey: INTERMEDIATE_TIMER_EVENT_PROCESS,
                     });
                     expect(processInstance.id).toBeTruthy();
@@ -131,7 +131,7 @@ activiti.describe('Process Instance Timer Actions', { tag: '@slow' }, () => {
                 'Given the user is authenticated as hruser ' +
                     'When the user starts a process with timer events called BOUNDARY_TIMER_EVENT_PROCESS',
                 async () => {
-                    const processInstance = await runtimeBundleServiceHrUser.startProcess({
+                    const processInstance = await runtimeBundleServiceHrUser.processInstances.startProcess({
                         processDefinitionKey: BOUNDARY_TIMER_EVENT_PROCESS,
                     });
                     expect(processInstance.id).toBeTruthy();

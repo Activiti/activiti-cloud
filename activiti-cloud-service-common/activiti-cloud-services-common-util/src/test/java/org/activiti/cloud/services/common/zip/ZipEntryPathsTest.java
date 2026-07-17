@@ -192,7 +192,11 @@ class ZipEntryPathsTest {
         Path realDir = tempDir.resolve("real");
         Files.createDirectory(realDir);
         Path link = tempDir.resolve("link");
-        Files.createSymbolicLink(link, realDir);
+        try {
+            Files.createSymbolicLink(link, realDir);
+        } catch (UnsupportedOperationException | IOException _) {
+            org.junit.jupiter.api.Assumptions.abort("Symbolic links are not supported in this environment");
+        }
 
         assertThatThrownBy(() -> ZipEntryPaths.resolveTargetRoot(link))
             .isInstanceOf(IOException.class)
@@ -227,7 +231,7 @@ class ZipEntryPathsTest {
         Path link = targetRoot.resolve("link.txt");
         try {
             Files.createSymbolicLink(link, outside);
-        } catch (UnsupportedOperationException | IOException ignored) {
+        } catch (UnsupportedOperationException | IOException _) {
             org.junit.jupiter.api.Assumptions.abort("Symbolic links are not supported in this environment");
         }
 

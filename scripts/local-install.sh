@@ -260,6 +260,30 @@ configure_hosts_file() {
 }
 
 # Function to configure cluster connection
+auto_detect_cluster_name_from_context() {
+    if [[ -n "$CLUSTER_NAME" ]]; then
+        return 0
+    fi
+
+    local current_context
+    current_context=$(kubectl config current-context 2>/dev/null || echo "unknown")
+    case "$current_context" in
+        "activiti-hackathon")
+            CLUSTER_NAME="activiti-hackathon"
+            ;;
+        "activiti-community")
+            CLUSTER_NAME="activiti-community"
+            ;;
+        *rancher*)
+            CLUSTER_NAME="activiti"
+            ;;
+        *)
+            CLUSTER_NAME="$current_context"
+            ;;
+    esac
+    echo -e "${YELLOW}Auto-detected cluster: $CLUSTER_NAME${NC}"
+}
+
 configure_cluster() {
     echo -e "${BLUE}=== Configuring Cluster Connection ===${NC}"
 
@@ -268,26 +292,21 @@ configure_cluster() {
         CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null || echo "unknown")
         echo -e "${GREEN}✓ kubectl already connected to: $CURRENT_CONTEXT${NC}"
 
-        # Auto-detect cluster name if not specified
-        if [[ -z "$CLUSTER_NAME" ]]; then
-            case "$CURRENT_CONTEXT" in
-                "activiti-hackathon")
-                    CLUSTER_NAME="activiti-hackathon"
-                    ;;
-                "activiti-community")
-                    CLUSTER_NAME="activiti-community"
-                    ;;
-                *rancher*)
-                    CLUSTER_NAME="activiti"
-                    ;;
-                *)
-                    # Use the context name directly for other clusters like aae-38098
-                    CLUSTER_NAME="$CURRENT_CONTEXT"
-                    ;;
-            esac
-            echo -e "${YELLOW}Auto-detected cluster: $CLUSTER_NAME${NC}"
-        fi
+        auto_detect_cluster_name_from_context
         return 0
+    fi
+
+    # kubectl not working — a stale KUBECONFIG from test:setup often blocks the default ~/.kube/config.
+    if [[ -n "${KUBECONFIG:-}" ]] && [[ -f "${HOME}/.kube/config" ]]; then
+        echo -e "${YELLOW}kubectl failed with KUBECONFIG=${KUBECONFIG}; trying default ~/.kube/config...${NC}"
+        if KUBECONFIG="${HOME}/.kube/config" kubectl cluster-info &> /dev/null; then
+            export KUBECONFIG="${HOME}/.kube/config"
+            export ACTIVITI_KUBECONFIG="${HOME}/.kube/config"
+            CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null || echo "unknown")
+            echo -e "${GREEN}✓ kubectl connected via ~/.kube/config: $CURRENT_CONTEXT${NC}"
+            auto_detect_cluster_name_from_context
+            return 0
+        fi
     fi
 
     # kubectl not working, try to configure it
@@ -303,6 +322,8 @@ configure_cluster() {
             echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/fix-kubectl-config.sh $target_cluster${NC}"
         else
             if "$SCRIPT_DIR/fix-kubectl-config.sh" "$target_cluster"; then
+                export KUBECONFIG="${HOME}/.kube/config"
+                export ACTIVITI_KUBECONFIG="${HOME}/.kube/config"
                 echo -e "${GREEN}✓ kubectl configured successfully${NC}"
                 CLUSTER_NAME="$target_cluster"
             else

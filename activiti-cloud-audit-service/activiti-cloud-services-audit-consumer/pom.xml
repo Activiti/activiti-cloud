@@ -37,5 +37,10 @@
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>org.springframework.integration</groupId>
+          <artifactId>spring-integration-test</artifactId>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
 </project>

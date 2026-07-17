@@ -22,3 +22,18 @@ export interface CloudProcessDefinition {
     formKey?: string;
     [key: string]: unknown;
 }
+
+export interface ConnectorDefinition {
+    id: string;
+    name?: string;
+    [key: string]: unknown;
+}
+
+export interface ProcessDefinitionMeta {
+    variables?: unknown[];
+    users?: unknown[];
+    groups?: unknown[];
+    userTasks?: unknown[];
+    serviceTasks?: unknown[];
+    [key: string]: unknown;
+}

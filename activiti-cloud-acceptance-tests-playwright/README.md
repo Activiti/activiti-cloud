@@ -1,6 +1,6 @@
 # Activiti Cloud — Playwright acceptance tests
 
-API acceptance tests for Activiti Cloud preview installs. **Playwright-only** target; remaining Serenity stories are listed in [../activiti-cloud-acceptance-scenarios/DEPRECATED.md](../activiti-cloud-acceptance-scenarios/DEPRECATED.md).
+API acceptance tests for Activiti Cloud preview installs. **Playwright-only** target.
 
 ## Requirements
 
@@ -126,6 +126,27 @@ kubectl get ns | grep '^pr-'
 | `npm run test:no-destructive`     | Full suite without `destructive-last` project          |
 | `npm run test:destructive`        | Only admin bulk-delete (`destructive-last` project)    |
 | `npm run report`                  | Open last HTML report                                  |
+| `npm run report:coverage`         | Open Playswag OpenAPI coverage report (HTML)           |
+
+## Playswag (OpenAPI coverage)
+
+Tests use [@michalfidor/playswag](https://www.npmjs.com/package/@michalfidor/playswag) to match HTTP calls against cached OpenAPI specs for **query**, **audit**, and **runtime-bundle**.
+
+| Output          | Location                                                                              |
+| --------------- | ------------------------------------------------------------------------------------- |
+| HTML report     | `activiti-cloud-acceptance-tests-playwright/playswag-coverage/playswag-coverage.html` |
+| JSON / Markdown | same directory (CI also uploads on failure)                                           |
+
+```bash
+npm run test
+npm run report:coverage
+```
+
+Configuration: [`config/playswag.config.ts`](config/playswag.config.ts). Specs are fetched once in global-setup (`config/lifecycle/setup/openapi-spec-cache.ts`) from `/v3/api-docs` on the preview gateway.
+
+- **Host validation:** `allowedSpecHosts` is derived from `GATEWAY_HOST` / port-forward base URL; `allowPrivateHosts` stays `false` so a wrong gateway is not silently accepted. Local port-forward to `localhost` still works because that hostname is listed explicitly when resolved.
+- **Disable locally:** `PLAYSWAG_ENABLED=false npm run test`
+- **CI:** reporter emits console summary + artifacts; `failOnSpecError` is enabled so a broken spec fetch fails the job.
 
 Playwright **projects** are in `playwright.config.ts`. `npm run test` runs the CI suite (`acceptance` → `notifications` → `destructive-last` via `package.json` → `config.pw_suite`). Slices use `--project=…`:
 
@@ -247,4 +268,4 @@ Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 
 ## Documentation
 
-All extended docs: **[docs/README.md](docs/README.md)** (structure, modeling projects, parallel rules, migration tracker, Serenity retirement, completed [IMPROVEMENTS](docs/IMPROVEMENTS.md) plan).
+All extended docs: **[docs/README.md](docs/README.md)** (structure, modeling projects, parallel rules, completed [IMPROVEMENTS](docs/IMPROVEMENTS.md) plan).

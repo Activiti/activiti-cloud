@@ -955,4 +955,30 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter43-schema" dbms="postgresql">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="process_variable_history"/>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/43-alter.pg.schema.9.1.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter43-oracle-schema" dbms="oracle">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="process_variable_history"/>
+    </preConditions>
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/43-alter.oracle.schema.9.1.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
 </databaseChangeLog>

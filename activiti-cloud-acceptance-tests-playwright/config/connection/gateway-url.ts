@@ -32,7 +32,7 @@ export function resolveGatewayConnection(): GatewayConnection {
         const hostHeader = stripPort(gatewayHost || new URL(gatewayUrl!).host);
 
         return {
-            baseURL: `http://localhost:${localPort}`,
+            baseURL: `http://127.0.0.1:${localPort}`,
             hostHeader,
         };
     }

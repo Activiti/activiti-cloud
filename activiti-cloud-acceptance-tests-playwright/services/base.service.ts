@@ -9,7 +9,7 @@ import { APIResponse } from '@playwright/test';
 import { CustomAPIRequest } from '../fixtures/context.models';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import { scopedBusinessKey, scopedName, TestScope } from '../helpers/test-isolation';
-import { Options } from '../models/base-service.models';
+import { Options, HttpStatusCheck } from '../models/base-service.models';
 import { Logger } from '../helpers/logging/logger';
 import { PollProfile, pollOptions } from '../config/runtime/timeouts';
 
@@ -154,6 +154,16 @@ export abstract class BaseService {
 
     async delete(endpoint: string, options?: Options): Promise<RequestResponse> {
         return this.request('delete', endpoint, options);
+    }
+
+    async getHttpStatus(endpoint: string, options?: Options): Promise<number> {
+        const response = await this.requestRaw('get', endpoint, options);
+        return response.status();
+    }
+
+    async postHttpStatus(endpoint: string, options?: Options): Promise<number> {
+        const response = await this.requestRaw('post', endpoint, options);
+        return response.status();
     }
 
     private async request(httpMethod: string, endpoint: string, overriddenOptions?: Options): Promise<RequestResponse> {
@@ -425,5 +435,28 @@ export abstract class BaseService {
             'message' in entry &&
             typeof (entry as { code: unknown }).code === 'number'
         );
+    }
+
+    static getStatusCheck<T extends BaseService>(label: string, path: string): HttpStatusCheck<T> {
+        return { label, run: (service) => service.getHttpStatus(path) };
+    }
+
+    static postStatusCheck<T extends BaseService>(
+        label: string,
+        path: string,
+        data: unknown
+    ): HttpStatusCheck<T> {
+        return { label, run: (service) => service.postHttpStatus(path, { data }) };
+    }
+
+    static runStatusChecks<T extends BaseService>(
+        checks: readonly HttpStatusCheck<T>[],
+        service: T
+    ): Promise<number[]> {
+        return Promise.all(checks.map(({ run }) => run(service)));
+    }
+
+    runStatusChecks(checks: readonly HttpStatusCheck<this>[]): Promise<number[]> {
+        return BaseService.runStatusChecks(checks, this);
     }
 }
