@@ -24,6 +24,7 @@ import { ensureKeycloakClientSecretFromCluster } from './setup/keycloak-secret';
 import { ensureKubeconfig, resolvePreviewNamespace } from './setup/kubeconfig';
 import { verifyProcessCatalogIfEnabled } from './setup/process-catalog';
 import { setupPortForwarding } from './setup/port-forward';
+import { cacheOpenApiSpecs } from './setup/openapi-spec-cache';
 
 async function globalSetup(): Promise<void> {
     acceptancePhase('discovery', 'Playwright global setup');
@@ -57,12 +58,14 @@ async function globalSetup(): Promise<void> {
     if (testConfig.isCI) {
         acceptancePhase('discovery', 'CI mode');
         acceptanceLog('traefik', 'Direct HTTPS gateway — skipping port-forward');
+        await cacheOpenApiSpecs();
         await verifyProcessCatalogIfEnabled();
         acceptanceLog('discovery', '✓ All preconditions passed — tests can proceed');
         return;
     }
 
     await setupPortForwarding();
+    await cacheOpenApiSpecs();
     await verifyProcessCatalogIfEnabled();
     acceptanceLog('discovery', '✓ All preconditions passed — tests can proceed');
 }

@@ -27,12 +27,12 @@ activiti.describe('Runtime — Task Variable Admin Actions', () => {
         });
 
         await activiti.step('When the user creates, using admin endpoint, a task variable named title with value Mr.', async () => {
-            await taskAdminServiceHradmin.createTaskVariable(taskId, 'title', 'Mr.');
+            await taskAdminServiceHradmin.tasks.createTaskVariable(taskId, 'title', 'Mr.');
         });
 
         await activiti.step('Then the user is able to retrieve, using the admin endpoint, a variable named title with value Mr.', async () => {
-            const variables = await taskAdminServiceHradmin.getTaskVariables(taskId);
-            expect(variables.some(v => v.name === 'title' && v.value === 'Mr.')).toBe(true);
+            const variables = await taskAdminServiceHradmin.tasks.getTaskVariables(taskId);
+            expect(variables.some((v) => v.name === 'title' && v.value === 'Mr.')).toBe(true);
         });
     });
 
@@ -46,16 +46,16 @@ activiti.describe('Runtime — Task Variable Admin Actions', () => {
         });
 
         await activiti.step('And the user creates, using admin endpoint, a task variable named title with value Mr.', async () => {
-            await taskAdminServiceHradmin.createTaskVariable(taskId, 'title', 'Mr.');
+            await taskAdminServiceHradmin.tasks.createTaskVariable(taskId, 'title', 'Mr.');
         });
 
         await activiti.step('When the user updates, using admin endpoint, the task variable named title with value Dr.', async () => {
-            await taskAdminServiceHradmin.updateTaskVariable(taskId, 'title', 'Dr.');
+            await taskAdminServiceHradmin.tasks.updateTaskVariable(taskId, 'title', 'Dr.');
         });
 
         await activiti.step('Then the user is able to retrieve, using the admin endpoint, a variable named title with value Dr.', async () => {
-            const variables = await taskAdminServiceHradmin.getTaskVariables(taskId);
-            expect(variables.some(v => v.name === 'title' && v.value === 'Dr.')).toBe(true);
+            const variables = await taskAdminServiceHradmin.tasks.getTaskVariables(taskId);
+            expect(variables.some((v) => v.name === 'title' && v.value === 'Dr.')).toBe(true);
         });
     });
 });

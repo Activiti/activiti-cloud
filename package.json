@@ -29,6 +29,7 @@
     "test:runtime:process": "npm run pw -- --project=runtime-process",
     "test:runtime:task": "npm run pw -- --project=runtime-task",
     "report": "playwright show-report",
+    "report:coverage": "npx --yes open@10 activiti-cloud-acceptance-tests-playwright/playswag-coverage/playswag-coverage.html",
     "install:browsers": "playwright install",
     "install:deps": "playwright install-deps",
     "matrix:rabbitmq:non-partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p non-partitioned -d default-destinations",
@@ -49,6 +50,7 @@
   "author": "michal.fidor@hyland.com",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@michalfidor/playswag": "^1.10.1",
     "@reportportal/agent-js-playwright": "^5.4.0",
     "@playwright/test": "^1.57.0",
     "@types/node": "^22.0.0",
@@ -61,10 +63,10 @@
   },
   "dependencies": {
     "chalk": "^5.6.2",
-    "date-fns": "^4.1.0",
-    "dotenv": "^17.2.2",
+    "date-fns": "^4.4.0",
+    "dotenv": "^17.4.2",
     "jwt-decode": "^4.0.0",
-    "winston": "^3.14.2",
+    "winston": "^3.19.0",
     "ws": "^8.21.0"
   }
 }

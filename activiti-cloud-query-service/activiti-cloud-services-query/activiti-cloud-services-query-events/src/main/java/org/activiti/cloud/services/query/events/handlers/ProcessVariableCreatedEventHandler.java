@@ -18,11 +18,8 @@ package org.activiti.cloud.services.query.events.handlers;
 import jakarta.persistence.EntityManager;
 import java.util.Set;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,16 +29,10 @@ public class ProcessVariableCreatedEventHandler {
 
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
-    private final FeatureToggle featureToggle;
 
-    public ProcessVariableCreatedEventHandler(
-        EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder,
-        FeatureToggle featureToggle
-    ) {
+    public ProcessVariableCreatedEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
         this.entityManagerFinder = entityManagerFinder;
-        this.featureToggle = featureToggle;
     }
 
     public void handle(CloudVariableCreatedEvent variableCreatedEvent) {
@@ -82,15 +73,6 @@ public class ProcessVariableCreatedEventHandler {
         variableEntity.setProcessDefinitionKey(variableCreatedEvent.getProcessDefinitionKey());
         variableEntity.setProcessInstance(processInstanceEntity);
         entityManager.persist(variableEntity);
-
-        if (
-            !variableCreatedEvent.isEphemeralVariable() &&
-            featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)
-        ) {
-            ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forCreate(variableCreatedEvent);
-            entityManager.persist(history);
-        }
-
         return variableEntity;
     }
 

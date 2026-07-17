@@ -19,11 +19,13 @@ import static org.activiti.cloud.services.query.model.QServiceTaskEntity.service
 import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
 import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +65,7 @@ public class ProcessInstanceServiceTasksAdminController {
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/service-tasks", method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudServiceTask>> getServiceTasks(
         @PathVariable String processInstanceId,

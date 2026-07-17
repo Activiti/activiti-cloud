@@ -1,20 +1,30 @@
 /*
- * Factory helpers — attach dirty-context + test scope to services consistently.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { CustomAPIRequest } from '../fixtures/context.models';
 import { DirtyContextRegistry } from './dirty-context';
 import { TestScope } from './test-isolation';
-import { RuntimeBundleService } from '../services/runtime-bundle.service';
-import { TaskService } from '../services/task.service';
+import { RuntimeBundleService } from '../services/runtime-bundle/runtime-bundle.service';
+import { TaskService } from '../services/task/task.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { MultipleRuntimeBundleService } from '../services/multiple-runtime-bundle.service';
-import { QueryService } from '../services/query.service';
-import { QueryAdminService } from '../services/query-admin.service';
-import { RuntimeAdminService } from '../services/runtime-admin.service';
-import { TaskAdminService } from '../services/task-admin.service';
-import { AuditService } from '../services/audit.service';
-import { AuditAdminService } from '../services/audit-admin.service';
+import { QueryService } from '../services/query/query.service';
+import { RuntimeAdminService } from '../services/runtime-admin/runtime-admin.service';
+import { TaskAdminService } from '../services/task-admin/task-admin.service';
+import { AuditService } from '../services/audit/audit.service';
 import { IdentityManagementService } from '../services/identity-management.service';
 
 export interface ServiceIsolationOptions {
@@ -59,28 +69,30 @@ export function createMultipleRuntimeBundleService(
     return service;
 }
 
-export function createQueryService(context: CustomAPIRequest): QueryService {
-    return new QueryService(context);
+export function createQueryService(context: CustomAPIRequest, adminMode = false): QueryService {
+    return new QueryService(context, adminMode);
 }
 
-export function createQueryAdminService(context: CustomAPIRequest): QueryAdminService {
-    return new QueryAdminService(context);
+export function createRuntimeAdminService(
+    context: CustomAPIRequest,
+    isolation: ServiceIsolationOptions = {}
+): RuntimeAdminService {
+    const service = new RuntimeAdminService(context);
+    service.attachIsolation(isolation.dirtyRegistry, isolation.testScope);
+    return service;
 }
 
-export function createRuntimeAdminService(context: CustomAPIRequest): RuntimeAdminService {
-    return new RuntimeAdminService(context);
-}
-
-export function createTaskAdminService(context: CustomAPIRequest): TaskAdminService {
-    return new TaskAdminService(context);
+export function createTaskAdminService(
+    context: CustomAPIRequest,
+    isolation: ServiceIsolationOptions = {}
+): TaskAdminService {
+    const service = new TaskAdminService(context);
+    service.attachIsolation(isolation.dirtyRegistry, isolation.testScope);
+    return service;
 }
 
 export function createAuditService(context: CustomAPIRequest): AuditService {
     return new AuditService(context);
-}
-
-export function createAuditAdminService(context: CustomAPIRequest): AuditAdminService {
-    return new AuditAdminService(context);
 }
 
 export function createIdentityManagementService(context: CustomAPIRequest): IdentityManagementService {

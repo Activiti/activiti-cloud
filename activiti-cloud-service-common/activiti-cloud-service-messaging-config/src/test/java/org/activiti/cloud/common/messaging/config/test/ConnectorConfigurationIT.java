@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
+import static org.activiti.cloud.common.messaging.config.ConnectorConfiguration.INTEGRATION_RESULT_TIMEOUT;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
@@ -23,16 +24,22 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
@@ -65,6 +72,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -92,6 +100,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
         "spring.cloud.stream.bindings.integrationResults.destination=integrationResults",
         "spring.cloud.stream.bindings.[script.EXECUTE].destination=script.EXECUTE",
         "spring.cloud.stream.default.error-handler-definition=myErrorHandler",
+        "SCRIPT_EXECUTE_TIMEOUT=PT10S",
     }
 )
 @Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
@@ -103,10 +112,15 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_C = "auditProcessorHandler";
     private static final String FUNCTION_NAME_ERROR = "connectorTestMyErrorHandler";
     private static final String FUNCTION_NAME_RETRY = "connectorWithRetry";
+    private static final String FUNCTION_NAME_TIMEOUT = "connectorWithTimeout";
+    private static final String FUNCTION_NAME_INTERRUPT = "connectorWithInterrupt";
+    private static final String FUNCTION_NAME_TIMEOUT_HEADER = "connectorWithTimeoutHeader";
 
     private static final String FUNCTION_NAME_D = "auditProcessorVersionHandler";
     public static final String MY_ERROR_HANDLER = "myErrorHandler";
     private static final AtomicInteger connectorTestMyErrorHandlerCounter = new AtomicInteger(0);
+    private static final AtomicInteger connectorTimeoutCounter = new AtomicInteger(0);
+    private static final AtomicReference<Thread> connectorWorkerThread = new AtomicReference<>();
 
     @Autowired
     private StandardEvaluationContext evaluationContext;
@@ -131,6 +145,12 @@ public class ConnectorConfigurationIT {
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
+
+    @Autowired
+    private AsyncTaskExecutor connectorAsyncTaskExecutor;
+
+    @Autowired
+    private BiFunction<Message<?>, ConnectorBinding, Duration> connectorIntegrationResultTimeoutResolver;
 
     @MockitoSpyBean
     private MyErrorHandler myErrorHandler;
@@ -246,12 +266,89 @@ public class ConnectorConfigurationIT {
                 assertThat(payload).isNotNull().isEqualTo("TestRetry");
             };
         }
+
+        @Bean(FUNCTION_NAME_TIMEOUT)
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "script.EXECUTE",
+            condition = "headers['type']=='TestTimeout'",
+            integrationResultTimeout = "PT1S"
+        )
+        public Consumer<Message<String>> consumerTimeout() {
+            return message -> {
+                try {
+                    assertThat(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT))
+                        .isNotNull()
+                        .isEqualTo(Duration.ofSeconds(1));
+
+                    TimeUnit.of(ChronoUnit.SECONDS).sleep(2);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    connectorTimeoutCounter.incrementAndGet();
+                }
+            };
+        }
+
+        @Bean(FUNCTION_NAME_INTERRUPT)
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "script.EXECUTE",
+            condition = "headers['type']=='TestInterrupt'",
+            integrationResultTimeout = "${SCRIPT_EXECUTE_TIMEOUT}"
+        )
+        public Consumer<Message<String>> consumerInterrupt() {
+            return message -> {
+                assertThat(message.getPayload()).isNotNull().isEqualTo("TestInterrupt");
+                assertThat(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT))
+                    .isNotNull()
+                    .isEqualTo(Duration.ofSeconds(10));
+
+                connectorWorkerThread.set(Thread.currentThread());
+
+                try {
+                    Thread.sleep(Duration.ofSeconds(5).toMillis());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restores flag
+                    throw new RuntimeException(e);
+                }
+            };
+        }
+
+        @Bean(FUNCTION_NAME_TIMEOUT_HEADER)
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "script.EXECUTE",
+            condition = "headers['type']=='TestTimeoutHeader'"
+        )
+        public Consumer<Message<String>> consumerTimeoutHeader() {
+            return message -> {
+                try {
+                    final var integrationResultTimeout = assertThat(
+                        message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT, Duration.class)
+                    )
+                        .isNotNull()
+                        .isEqualTo(Duration.ofSeconds(1))
+                        .actual();
+
+                    TimeUnit.of(ChronoUnit.SECONDS).sleep(integrationResultTimeout.plusSeconds(5).toSeconds());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    connectorTimeoutCounter.incrementAndGet();
+                }
+            };
+        }
     }
 
     @BeforeEach
     public void setUp() {
         expression = resolveExpression(condition);
         output.clear();
+        connectorWorkerThread.set(null);
+        clearInvocations(myErrorHandler);
+        myErrorHandler.reset();
     }
 
     @Test
@@ -522,7 +619,6 @@ public class ConnectorConfigurationIT {
             .build();
 
         // when
-        long start = System.currentTimeMillis();
         input.send(message, "script.EXECUTE");
 
         //Check delay execution = (retries -1) * delay time. It is a bit greater because some operation overload
@@ -542,10 +638,153 @@ public class ConnectorConfigurationIT {
     }
 
     @Test
+    public void testShouldHandleErrorOnExecutionTimeout() {
+        // given
+        connectorTimeoutCounter.set(0);
+
+        byte[] payload = "TestTimeout".getBytes();
+        Message<?> message = MessageBuilder.withPayload(payload)
+            .setHeader("appVersion", "20")
+            .setHeader("type", "TestTimeout")
+            .setHeader("resultDestination", "commandResults")
+            .setHeader("connectorType", "script.EXECUTE")
+            .build();
+
+        // when
+        new Thread(() -> input.send(message, "script.EXECUTE")).start();
+
+        await().untilAtomic(myErrorHandler.getReference(), Matchers.notNullValue());
+
+        // then
+        verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
+
+        Assertions.assertThat(myErrorHandler.getReference().get().getPayload())
+            .hasRootCauseInstanceOf(TimeoutException.class)
+            .extracting(Throwable::getCause)
+            .extracting(Throwable::getMessage)
+            .isEqualTo("Timeout after PT1S while waiting for result");
+
+        assertThat(connectorTimeoutCounter.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void testShouldHandleErrorOnExecutionInterrupt() {
+        // given
+        Message<?> message = MessageBuilder.withPayload("TestInterrupt".getBytes())
+            .setHeader("appVersion", "20")
+            .setHeader("type", "TestInterrupt")
+            .setHeader("resultDestination", "commandResults")
+            .setHeader("connectorType", "script.EXECUTE")
+            .build();
+
+        // when
+        new Thread(() -> input.send(message, "script.EXECUTE")).start();
+
+        await().untilAtomic(connectorWorkerThread, Matchers.notNullValue());
+
+        connectorWorkerThread.get().interrupt();
+
+        await().untilAtomic(myErrorHandler.getReference(), Matchers.notNullValue());
+
+        // then
+        verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
+
+        Assertions.assertThat(myErrorHandler.getReference().get().getPayload()).hasRootCauseInstanceOf(
+            InterruptedException.class
+        );
+    }
+
+    @Test
+    public void testShouldHandleErrorOnExecutionTimeoutHeader() {
+        // given
+        connectorTimeoutCounter.set(0);
+
+        Message<?> message = MessageBuilder.withPayload("TestTimeoutHeader".getBytes())
+            .setHeader("appVersion", "20")
+            .setHeader("type", "TestTimeoutHeader")
+            .setHeader("resultDestination", "commandResults")
+            .setHeader("connectorType", "script.EXECUTE")
+            .setHeader(INTEGRATION_RESULT_TIMEOUT, "PT1S")
+            .build();
+
+        // when
+        new Thread(() -> input.send(message, "script.EXECUTE")).start();
+
+        await().untilAtomic(myErrorHandler.getReference(), Matchers.notNullValue());
+
+        // then
+        verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
+
+        Assertions.assertThat(myErrorHandler.getReference().get().getPayload())
+            .hasRootCauseInstanceOf(TimeoutException.class)
+            .extracting(Throwable::getCause)
+            .extracting(Throwable::getMessage)
+            .isEqualTo("Timeout after PT1S while waiting for result");
+
+        assertThat(connectorTimeoutCounter.get()).isEqualTo(1);
+    }
+
+    @Test
     void shouldUseCaseInsensitiveMatchForBindingsProperties() {
         assertThat(bindingServiceProperties.getBindings().get("integrationRequests")).isEqualTo(
             bindingServiceProperties.getBindings().get("integrationrequests")
         );
+    }
+
+    @Test
+    void connectorIntegrationResultTimeoutResolver() {
+        assertThat(
+            connectorIntegrationResultTimeoutResolver.apply(
+                MessageBuilder.withPayload("foo").build(),
+                AnnotationUtils.synthesizeAnnotation(ConnectorBinding.class)
+            )
+        )
+            .as("Should fallback to default value")
+            .isEqualTo(Duration.ofMinutes(25));
+
+        assertThat(
+            connectorIntegrationResultTimeoutResolver.apply(
+                MessageBuilder.withPayload("foo").setHeader(INTEGRATION_RESULT_TIMEOUT, "PT01S").build(),
+                AnnotationUtils.synthesizeAnnotation(ConnectorBinding.class)
+            )
+        )
+            .as("Should apply value from message headers")
+            .isEqualTo(Duration.ofSeconds(1));
+
+        assertThat(
+            connectorIntegrationResultTimeoutResolver.apply(
+                MessageBuilder.withPayload("foo").setHeader(INTEGRATION_RESULT_TIMEOUT, "PT30M").build(),
+                AnnotationUtils.synthesizeAnnotation(ConnectorBinding.class)
+            )
+        )
+            .as("Should apply default value if greater than PT25M")
+            .isEqualTo(Duration.ofMinutes(25));
+
+        assertThat(
+            connectorIntegrationResultTimeoutResolver.apply(
+                MessageBuilder.withPayload("foo").build(),
+                AnnotationUtils.synthesizeAnnotation(
+                    Map.of(INTEGRATION_RESULT_TIMEOUT, "PT30M"),
+                    ConnectorBinding.class,
+                    null
+                )
+            )
+        )
+            .as("Should apply default value if greater than PT25M")
+            .isEqualTo(Duration.ofMinutes(25));
+
+        assertThat(
+            connectorIntegrationResultTimeoutResolver.apply(
+                MessageBuilder.withPayload("foo").build(),
+                AnnotationUtils.synthesizeAnnotation(
+                    Map.of(INTEGRATION_RESULT_TIMEOUT, "30"),
+                    ConnectorBinding.class,
+                    null
+                )
+            )
+        )
+            .as("Should apply default value if incorrect timeout value provided")
+            .isEqualTo(Duration.ofMinutes(25));
     }
 
     @Captor
@@ -579,6 +818,10 @@ public class ConnectorConfigurationIT {
 
         public AtomicReference<ErrorMessage> getReference() {
             return reference;
+        }
+
+        public void reset() {
+            reference.set(null);
         }
     }
 }

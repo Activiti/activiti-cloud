@@ -59,7 +59,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@4e61fa01622e3f3a1898eb059d9a3af208897515 # v18.9.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
 
     - name: Compute Report Portal Launch key
       id: compute-rp-launch-key
@@ -109,6 +109,7 @@ runs:
         path: |
           activiti-cloud-acceptance-tests-playwright/test-results
           activiti-cloud-acceptance-tests-playwright/reporter
+          activiti-cloud-acceptance-tests-playwright/playswag-coverage
         retention-days: 7
         if-no-files-found: ignore
 

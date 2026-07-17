@@ -33,10 +33,10 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
         await activiti.step(
             'When the user starts a process with inclusive gateway PROCESS_INSTANCE_WITH_INCLUSIVE_GATEWAY and set input variable value to 1',
             async () => {
-                const processInstance = await runtimeBundleServiceHrUser.startProcessWithVariables(
-                    PROCESS_INSTANCE_WITH_INCLUSIVE_GATEWAY,
-                    { input: 1 }
-                );
+                const processInstance = await runtimeBundleServiceHrUser.processInstances.startProcess({
+                    processDefinitionKey: PROCESS_INSTANCE_WITH_INCLUSIVE_GATEWAY,
+                    variables: { input: 1 },
+                });
                 processInstanceId = processInstance.id;
                 expect(processInstanceId).toBeTruthy();
             }
@@ -51,12 +51,12 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
             const found = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Start Process');
             const taskId = found.id;
 
-            await taskServiceHrUser.claimTask(taskId);
+            await taskServiceHrUser.tasks.claimTask(taskId);
             const claimed = await taskServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
             expect(claimed.status).toBe(TaskStatus.ASSIGNED);
             const querClaimed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
             expect(querClaimed.status).toBe(TaskStatus.ASSIGNED);
-            await taskServiceHrUser.completeTask(taskId);
+            await taskServiceHrUser.tasks.completeTask(taskId);
             const completed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
             expect(completed.status).toBe(TaskStatus.COMPLETED);
         });
@@ -98,12 +98,12 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
             const found = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Send e-mail');
             const taskId = found.id;
 
-            await taskServiceHrUser.claimTask(taskId);
+            await taskServiceHrUser.tasks.claimTask(taskId);
             const claimed = await taskServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
             expect(claimed.status).toBe(TaskStatus.ASSIGNED);
             const querClaimed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
             expect(querClaimed.status).toBe(TaskStatus.ASSIGNED);
-            await taskServiceHrUser.completeTask(taskId);
+            await taskServiceHrUser.tasks.completeTask(taskId);
             const completed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
             expect(completed.status).toBe(TaskStatus.COMPLETED);
         });
@@ -122,12 +122,12 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
             const found = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Check account');
             const taskId = found.id;
 
-            await taskServiceHrUser.claimTask(taskId);
+            await taskServiceHrUser.tasks.claimTask(taskId);
             const claimed = await taskServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
             expect(claimed.status).toBe(TaskStatus.ASSIGNED);
             const querClaimed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
             expect(querClaimed.status).toBe(TaskStatus.ASSIGNED);
-            await taskServiceHrUser.completeTask(taskId);
+            await taskServiceHrUser.tasks.completeTask(taskId);
             const completed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
             expect(completed.status).toBe(TaskStatus.COMPLETED);
         });

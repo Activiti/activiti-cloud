@@ -37,7 +37,7 @@
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>9.1.0-alpha.39</activiti.version>
+    <activiti.version>9.1.0-alpha.51</activiti.version>
     <!-- See activiti-cloud-api/pom.xml: skip.common.tests for per-service CI builds -->
     <skip.common.tests>false</skip.common.tests>
     <java-semver.version>0.10.2</java-semver.version>
@@ -49,7 +49,7 @@
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
     <james.apache-mime4j.version>0.8.13</james.apache-mime4j.version>
     <!-- Replacement for older LZ4 dependency util a newer one will be used in Spring -->
-    <lz4-java.version>1.11.0</lz4-java.version>
+    <lz4-java.version>1.11.1</lz4-java.version>
     <batik.version>1.19</batik.version>
   </properties>
   <dependencyManagement>

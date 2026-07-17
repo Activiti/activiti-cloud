@@ -15,11 +15,13 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
+import com.opencsv.exceptions.CsvChainedException;
+import com.opencsv.exceptions.CsvFieldAssignmentException;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
@@ -29,49 +31,36 @@ import tools.jackson.databind.ObjectMapper;
 
 public class AuditEventsExporter {
 
-    private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";
-    private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-    private static final String CSV_CONTENT_TYPE = "text/csv";
-
     private ObjectToJsonStrategy objectToJsonStrategy;
 
     public AuditEventsExporter(ObjectMapper objectMapper) {
         objectToJsonStrategy = new ObjectToJsonStrategy(objectMapper);
     }
 
-    public void exportCsv(
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-        String fileName,
-        HttpServletResponse response
-    ) throws Exception {
-        setHttpHeaders(fileName, response);
-        writeEventsAsCsv(events, response);
+    public CSVWriter startExport(HttpServletResponse response) throws IOException, CsvFieldAssignmentException {
+        CSVWriter csvWriter = createCsvWriter(response.getWriter());
+        csvWriter.writeNext(objectToJsonStrategy.generateHeader(CsvLogEntry.class), true);
+        return csvWriter;
     }
 
-    private void setHttpHeaders(String fileName, HttpServletResponse response) {
-        response.setContentType(CSV_CONTENT_TYPE);
-        response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_ATTACHMENT_FILENAME + fileName);
-    }
-
-    private void writeEventsAsCsv(
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-        HttpServletResponse response
-    ) throws Exception {
-        List<CsvLogEntry> entries = toCsvLogEntryList(events);
-
-        PrintWriter writer = response.getWriter();
-        StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<List<CloudRuntimeEvent>>(writer)
-            .withMappingStrategy(objectToJsonStrategy)
-            .build();
-        beanToCsv.write(entries);
-        writer.close();
-    }
-
-    private List<CsvLogEntry> toCsvLogEntryList(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events) {
-        List<CsvLogEntry> entries = new ArrayList<>();
-        for (CloudRuntimeEvent event : events) {
-            entries.add(new CsvLogEntry(event));
+    public void writeChunk(CSVWriter csvWriter, List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events)
+        throws CsvFieldAssignmentException, CsvChainedException {
+        for (CloudRuntimeEvent<?, CloudRuntimeEventType> event : events) {
+            csvWriter.writeNext(objectToJsonStrategy.transmuteBean(new CsvLogEntry(event)), true);
         }
-        return entries;
+    }
+
+    public void finishExport(CSVWriter csvWriter) {
+        csvWriter.flushQuietly();
+    }
+
+    private CSVWriter createCsvWriter(PrintWriter writer) {
+        return new CSVWriter(
+            writer,
+            ICSVWriter.DEFAULT_SEPARATOR,
+            ICSVWriter.DEFAULT_QUOTE_CHARACTER,
+            ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
+            ICSVWriter.DEFAULT_LINE_END
+        );
     }
 }

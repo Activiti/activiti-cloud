@@ -17,12 +17,16 @@ package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -96,5 +100,75 @@ class TaskAdminControllerIT extends AbstractTaskControllerIT {
             .then()
             .statusCode(200)
             .body(equalTo("3"));
+    }
+
+    @Test
+    void should_returnTasks_whenPostingToAdminTasksEndpointWithoutVariableKeys() {
+        TaskEntity task1 = queryTestUtils.buildTask().buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getSearchEndpointHttpGet())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(task1.getId(), task2.getId()))
+            .body(TASKS_JSON_PATH + "[0].processVariables", nullValue())
+            .body(TASKS_JSON_PATH + "[1].processVariables", nullValue());
+    }
+
+    @Test
+    void should_returnTasksWithProcessVariables_whenPostingToAdminTasksEndpointWithVariableKeys() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"))
+            .withTasks(queryTestUtils.buildTask())
+            .buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{\"variableKeys\": [\"" + PROCESS_DEFINITION_KEY + "/" + VAR_NAME + "\"]}")
+            .when()
+            .post(getSearchEndpointHttpGet())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
+    }
+
+    @Test
+    void should_deleteAllTasks_whenDeletingAdminTasksEndpoint() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"))
+            .withTasks(queryTestUtils.buildTask())
+            .buildAndSave();
+        queryTestUtils.buildTask().buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+
+        given().when().delete(getSearchEndpointHttpGet()).then().statusCode(200);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
     }
 }

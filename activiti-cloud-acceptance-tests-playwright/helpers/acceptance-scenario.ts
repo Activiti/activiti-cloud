@@ -16,21 +16,14 @@
 
 import type { activiti as ActivitiTest } from '../fixtures/services.fixture';
 
-/**
- * Upstream-blocked acceptance scenarios: set `exclude` to keep the spec in the suite but
- * register it as Playwright-skipped (same pattern as process-instance-error-events-actions).
- */
 export type AcceptanceScenarioMeta = {
     title: string;
-    /** When set, scenario is excluded until the upstream issue is fixed. */
     exclude?: string;
 };
 
-/** Pick `test` or `test.skip` for a scenario (exclude = skipped, not failed). */
 export function pickScenarioTest(
     test: typeof ActivitiTest,
     scenario: AcceptanceScenarioMeta
 ): typeof ActivitiTest {
-    // test.skip is callable but narrows to TestType['skip']; cast keeps fixture typing.
     return (scenario.exclude ? test.skip : test) as typeof ActivitiTest;
 }

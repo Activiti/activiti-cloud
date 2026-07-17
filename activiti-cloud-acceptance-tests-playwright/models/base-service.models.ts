@@ -7,6 +7,17 @@
 
 import * as fs from 'fs';
 
+export interface SearchPageParams {
+    skipCount?: number;
+    maxItems?: number;
+    sort?: string[];
+}
+
+export interface HttpStatusCheck<TService> {
+    readonly label: string;
+    readonly run: (service: TService) => Promise<number>;
+}
+
 export interface Options {
     data?: string | Buffer | any;
     failOnStatusCode?: boolean;

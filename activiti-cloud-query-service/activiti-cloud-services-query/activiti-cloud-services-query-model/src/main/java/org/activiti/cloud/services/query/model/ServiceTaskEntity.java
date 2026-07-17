@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import jakarta.persistence.Access;
@@ -39,8 +40,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 @SQLRestriction("activity_type='serviceTask'")
 @DynamicInsert
 @DynamicUpdate
+@JsonView(JsonViews.General.class)
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
+    @JsonView(JsonViews.IntegrationContexts.class)
     @OneToMany(mappedBy = "serviceTask", fetch = FetchType.LAZY)
     private List<IntegrationContextEntity> integrationContexts;
 

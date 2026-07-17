@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.common.messaging.config.PartitionedChannelGracefulShutdown;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
@@ -29,9 +30,11 @@ import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContex
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.stream.binding.InputBindingLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.channel.QueueChannel;
@@ -44,6 +47,7 @@ import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.Trigger;
@@ -59,6 +63,7 @@ public class QueryConsumerAutoConfiguration {
     public static final String PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT =
         "partitionedQueryConsumerIntegrationFlowInput";
     public static final String PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL = "partitionedQueryConsumerErrorChannel";
+    public static final String QUERY_CONSUMER_GRACEFUL_SHUTDOWN = "queryConsumerGracefulShutdown";
 
     @Bean
     InitializingBean queryConsumerAutoConfigurationInfo(
@@ -112,11 +117,15 @@ public class QueryConsumerAutoConfiguration {
             .handle(message -> {
                 if (message instanceof ErrorMessage errorMessage) {
                     final var exception = errorMessage.getPayload();
+                    final var failedMessage =
+                        exception instanceof MessageHandlingException
+                            ? ((MessageHandlingException) exception).getFailedMessage()
+                            : errorMessage.getOriginalMessage();
 
                     LOGGER.error(
                         "{} while handling {} for partition thread {}",
                         exception.getMessage(),
-                        errorMessage.getOriginalMessage(),
+                        failedMessage,
                         Thread.currentThread().getName(),
                         Optional.ofNullable(exception.getCause()).orElse(exception)
                     );
@@ -132,19 +141,30 @@ public class QueryConsumerAutoConfiguration {
             .get();
     }
 
+    @Bean(QUERY_CONSUMER_GRACEFUL_SHUTDOWN)
+    @ConditionalOnMissingBean(name = QUERY_CONSUMER_GRACEFUL_SHUTDOWN)
+    public PartitionedChannelGracefulShutdown queryConsumerGracefulShutdown(
+        InputBindingLifecycle inputBindingLifecycle,
+        @Value("${activiti.cloud.query.consumer.shutdown-timeout:30s}") Duration shutdownTimeout
+    ) {
+        return new PartitionedChannelGracefulShutdown(inputBindingLifecycle, shutdownTimeout);
+    }
+
     @Bean
     public IntegrationFlow partitionedQueryConsumerIntegrationFlow(
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
         QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector,
         GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter,
+        @Qualifier(QUERY_CONSUMER_GRACEFUL_SHUTDOWN) PartitionedChannelGracefulShutdown queryConsumerGracefulShutdown,
         @Value("${activiti.cloud.query.consumer.worker-queue-size:10}") Integer workerQueueSize
     ) {
         return IntegrationFlow.from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
-            .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL))
+            .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL, true))
             .channel(
                 MessageChannels.partitioned(queryConsumerPartitionedChannelCountProvider.get())
                     .partitionKey(queryConsumerPartitionedChannelKeySelector)
                     .workerQueueSize(workerQueueSize)
+                    .interceptor(queryConsumerGracefulShutdown.channelInterceptor())
             )
             .handle(genericQueryConsumerChannelHandlerAdapter, endpoint -> endpoint.requiresReply(false))
             .get();
