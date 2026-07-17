@@ -18,12 +18,14 @@ package org.activiti.cloud.services.query.rest;
 import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
 import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.QServiceTaskEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
@@ -65,6 +67,7 @@ public class ServiceTaskAdminController {
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudServiceTask>> findAllServiceTasks(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
@@ -79,6 +82,7 @@ public class ServiceTaskAdminController {
         );
     }
 
+    @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{serviceTaskId}", method = RequestMethod.GET)
     public EntityModel<CloudServiceTask> findByIdServiceTaskAdmin(@PathVariable String serviceTaskId) {
         Predicate filter = QServiceTaskEntity.serviceTaskEntity.id.eq(serviceTaskId);
