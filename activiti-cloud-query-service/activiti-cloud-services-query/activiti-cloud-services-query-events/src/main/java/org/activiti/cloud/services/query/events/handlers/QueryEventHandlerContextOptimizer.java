@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import jakarta.persistence.AttributeNode;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
@@ -134,72 +133,66 @@ public class QueryEventHandlerContextOptimizer {
 
     public List<CloudRuntimeEvent<?, ?>> optimize(List<CloudRuntimeEvent<?, ?>> events) {
         resolveProcessInstanceId(events).ifPresent(processInstanceId -> {
-            LOGGER.debug("Building entity fetch graph for root process instance: {}", processInstanceId);
-            var entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
-
-            var criteriaBuilder = entityManager.getCriteriaBuilder();
-            var criteriaQuery = criteriaBuilder.createQuery(ProcessInstanceEntity.class);
-            var fromProcessInstance = criteriaQuery.from(ProcessInstanceEntity.class);
-            var whereProcessInstance = criteriaBuilder.equal(fromProcessInstance.get("id"), processInstanceId);
-
-            criteriaQuery.select(fromProcessInstance).where(whereProcessInstance);
+            LOGGER.debug("Loading fetch graph for root process instance: {}", processInstanceId);
 
             findRuntimeEvents(events, CloudVariableEvent.class, entity -> true, VariableInstance::getName).ifPresent(
-                variableNames -> {
-                    fetch(fromProcessInstance, entityGraph, VARIABLES, "name", variableNames);
-                }
+                variableNames -> fetchAssociation(processInstanceId, VARIABLES, "name", variableNames)
             );
 
-            findRuntimeEvents(events, CloudTaskRuntimeEvent.class, entity -> true, Task::getId).ifPresent(taskIds -> {
-                fetch(fromProcessInstance, entityGraph, TASKS, "id", taskIds);
-            });
+            findRuntimeEvents(events, CloudTaskRuntimeEvent.class, entity -> true, Task::getId).ifPresent(taskIds ->
+                fetchAssociation(processInstanceId, TASKS, "id", taskIds)
+            );
 
             findRuntimeEvents(
                 events,
                 CloudBPMNActivityEvent.class,
                 entity -> true,
                 BPMNActivityEntity.IdBuilderHelper::from
-            ).ifPresent(activityIds -> {
-                fetch(fromProcessInstance, entityGraph, ACTIVITIES, "id", activityIds);
-            });
+            ).ifPresent(activityIds -> fetchAssociation(processInstanceId, ACTIVITIES, "id", activityIds));
 
             findRuntimeEvents(
                 events,
                 CloudBPMNActivityEvent.class,
                 entity -> SERVICE_TASKS.equals(entity.getActivityType()),
                 BPMNActivityEntity.IdBuilderHelper::from
-            ).ifPresent(serviceTaskIds -> {
-                fetch(fromProcessInstance, entityGraph, SERVICE_TASKS, "id", serviceTaskIds);
-            });
+            ).ifPresent(serviceTaskIds -> fetchAssociation(processInstanceId, SERVICE_TASKS, "id", serviceTaskIds));
 
             findRuntimeEvents(events, CloudIntegrationEvent.class, entity -> true, IntegrationContext::getId).ifPresent(
-                integrationContextIds -> {
-                    fetch(fromProcessInstance, entityGraph, INTEGRATION_CONTEXTS, "id", integrationContextIds);
-                }
+                integrationContextIds ->
+                    fetchAssociation(processInstanceId, INTEGRATION_CONTEXTS, "id", integrationContextIds)
             );
-
-            entityManager
-                .createQuery(criteriaQuery)
-                .setHint(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
-                .getResultList()
-                .stream()
-                .findFirst()
-                .ifPresent(rootProcessInstance -> {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug(
-                            "Fetched entity graph attributes {} for process instance: {}",
-                            entityGraph
-                                .getAttributeNodes()
-                                .stream()
-                                .map(AttributeNode::getAttributeName)
-                                .collect(Collectors.toList()),
-                            processInstanceId
-                        );
-                    }
-                });
         });
 
         return events.stream().sorted(byEventClass.thenComparing(byTimestamp)).collect(Collectors.toList());
+    }
+
+    protected <R> void fetchAssociation(String processInstanceId, String association, String attribute, List<R> ids) {
+        var entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var criteriaQuery = criteriaBuilder.createQuery(ProcessInstanceEntity.class);
+        var fromProcessInstance = criteriaQuery.from(ProcessInstanceEntity.class);
+        criteriaQuery
+            .select(fromProcessInstance)
+            .where(criteriaBuilder.equal(fromProcessInstance.get("id"), processInstanceId));
+
+        fetch(fromProcessInstance, entityGraph, association, attribute, ids);
+
+        entityManager
+            .createQuery(criteriaQuery)
+            .setHint(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
+            .getResultList()
+            .stream()
+            .findFirst()
+            .ifPresent(rootProcessInstance -> {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug(
+                        "Fetched entity graph attribute {} for process instance: {}",
+                        association,
+                        processInstanceId
+                    );
+                }
+            });
     }
 
     protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {
