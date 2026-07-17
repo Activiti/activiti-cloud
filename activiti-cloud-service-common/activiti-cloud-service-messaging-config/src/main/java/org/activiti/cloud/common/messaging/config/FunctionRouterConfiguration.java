@@ -207,16 +207,46 @@ public class FunctionRouterConfiguration {
                                 .build();
                         };
 
+                        log.info(
+                            "AAE-47841: Processing message with {} registrations. MessageId: {}",
+                            registrations.size(),
+                            message.getHeaders().get("amqp_messageId")
+                        );
+
                         var functions = registrations
                             .stream()
                             .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
-                            .map(functionRequest ->
-                                supplyAsyncWithRetry(
-                                    () ->
-                                        CompletableFuture.supplyAsync(
-                                            () -> routingFunction.apply(functionRequest),
+                            .map(functionRequest -> {
+                                log.info(
+                                    "AAE-47841: Submitting to executor for registration: {}",
+                                    functionRequest.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION)
+                                );
+                                return supplyAsyncWithRetry(
+                                    () -> {
+                                        log.info(
+                                            "AAE-47841: About to call supplyAsync for: {}",
+                                            functionRequest.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION)
+                                        );
+                                        return CompletableFuture.supplyAsync(
+                                            () -> {
+                                                log.info(
+                                                    "AAE-47841: EXECUTING inside executor thread for: {}",
+                                                    functionRequest
+                                                        .getHeaders()
+                                                        .get(FunctionProperties.FUNCTION_DEFINITION)
+                                                );
+                                                var result = routingFunction.apply(functionRequest);
+                                                log.info(
+                                                    "AAE-47841: COMPLETED execution for: {}",
+                                                    functionRequest
+                                                        .getHeaders()
+                                                        .get(FunctionProperties.FUNCTION_DEFINITION)
+                                                );
+                                                return result;
+                                            },
                                             functionExecutorSelector.apply(functionRequest)
-                                        ),
+                                        );
+                                    },
                                     functionRouter.getMaxRetries(),
                                     functionRouter.getRetryInterval()
                                 )
@@ -238,8 +268,8 @@ public class FunctionRouterConfiguration {
                                             error
                                         );
                                         return Map.entry(functionDefinition, Optional.of(error));
-                                    })
-                            )
+                                    });
+                            })
                             .toArray(CompletableFuture[]::new);
 
                         var completed = CompletableFuture.allOf(functions).thenApply(v ->
