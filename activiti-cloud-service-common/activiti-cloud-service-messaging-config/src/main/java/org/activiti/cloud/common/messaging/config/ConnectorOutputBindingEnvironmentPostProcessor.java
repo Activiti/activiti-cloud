@@ -71,9 +71,13 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
         Map<String, Object> contributedProperties = new LinkedHashMap<>();
         Set<String> outputBindings = existingOutputBindings(environment);
 
-        connectors.forEach((bindingName, connectorProperties) -> {
+        connectors.forEach((connectorKey, connectorProperties) -> {
+            String bindingName = connectorProperties.getBindingKey();
+
             if (!StringUtils.hasText(bindingName)) {
-                return;
+                throw new IllegalStateException(
+                    "%s.%s.binding-key is required".formatted(CONNECTORS_PREFIX, connectorKey)
+                );
             }
 
             outputBindings.add(bindingName);
