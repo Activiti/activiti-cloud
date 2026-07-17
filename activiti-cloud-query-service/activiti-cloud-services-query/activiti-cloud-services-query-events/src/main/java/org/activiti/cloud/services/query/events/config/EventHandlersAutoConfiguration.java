@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.events.config;
 
 import jakarta.persistence.EntityManager;
 import java.util.Set;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.ApplicationDeployedEventHandler;
@@ -249,12 +248,11 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public VariableCreatedEventHandler variableCreatedEventHandler(
         EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder,
-        FeatureToggle featureToggle
+        EntityManagerFinder entityManagerFinder
     ) {
         return new VariableCreatedEventHandler(
             new TaskVariableCreatedEventHandler(entityManager, entityManagerFinder),
-            new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder, featureToggle)
+            new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder)
         );
     }
 
@@ -262,11 +260,10 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public VariableDeletedEventHandler variableDeletedEventHandler(
         EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder,
-        FeatureToggle featureToggle
+        EntityManagerFinder entityManagerFinder
     ) {
         return new VariableDeletedEventHandler(
-            new ProcessVariableDeletedEventHandler(entityManager, entityManagerFinder, featureToggle),
+            new ProcessVariableDeletedEventHandler(entityManager, entityManagerFinder),
             new TaskVariableDeletedEventHandler(entityManager, entityManagerFinder)
         );
     }
@@ -275,15 +272,10 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public VariableUpdatedEventHandler variableUpdatedEventHandler(
         EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder,
-        FeatureToggle featureToggle
+        EntityManagerFinder entityManagerFinder
     ) {
         return new VariableUpdatedEventHandler(
-            new ProcessVariableUpdateEventHandler(
-                new ProcessVariableUpdater(entityManager, entityManagerFinder),
-                entityManager,
-                featureToggle
-            ),
+            new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager, entityManagerFinder)),
             new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager, entityManagerFinder))
         );
     }

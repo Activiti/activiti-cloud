@@ -15,8 +15,8 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { catalogProcessKey, startCatalogProcess } from '../../flows/start-catalog-process';
-import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
+import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
+import { startCatalogProcess, startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { TaskStatus } from '../../models/task.models';
 import { scopedName } from '../../helpers/test-isolation';
@@ -44,7 +44,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
                 expect(rbCreated.status).toBe(TaskStatus.CREATED);
                 const queryCreated = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.CREATED);
                 expect(queryCreated.status).toBe(TaskStatus.CREATED);
-                await taskServiceTestUser.claimTask(taskId);
+                await taskServiceTestUser.tasks.claimTask(taskId);
                 const rbAssigned = await taskServiceTestUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
                 expect(rbAssigned.status).toBe(TaskStatus.ASSIGNED);
                 const queryAssigned = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
@@ -53,7 +53,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         );
 
         await activiti.step('Then hruser cannot claim the task', async () => {
-            const response = await taskServiceHrUser.claimTask(taskId);
+            const response = await taskServiceHrUser.tasks.claimTask(taskId);
             expect(response.httpStatus).toBeGreaterThanOrEqual(400);
             expect(response.httpStatus).toBeLessThan(500);
             expect(JSON.stringify(response)).toContain('Unable to find task');
@@ -70,7 +70,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
             queryServiceTestUser,
             queryServiceHrUser,
         }) => {
-            const processKey = catalogProcessKey(
+            const processKey = ProcessDefinitionRegistry.getProcessDefinitionKey(
                 'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP'
             );
 
@@ -80,15 +80,15 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
                     'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP'
                 );
                 const task = await taskServiceTestUser.getFirstTaskByProcessInstanceId(processInstance.id);
-                await taskServiceTestUser.claimTask(task.id);
-                await taskServiceTestUser.completeTask(task.id);
+                await taskServiceTestUser.tasks.claimTask(task.id);
+                await taskServiceTestUser.tasks.completeTask(task.id);
                 const completed = await queryServiceTestUser.waitForProcessInstanceStatus(
                     processInstance.id,
                     ProcessInstanceStatus.COMPLETED
                 );
                 expect(completed.status).toBe(ProcessInstanceStatus.COMPLETED);
                 await expect(async () => {
-                    await runtimeBundleServiceTestUser.getProcessInstance(processInstance.id);
+                    await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstance.id);
                 }).rejects.toThrow();
             });
 
@@ -111,8 +111,8 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         await activiti.step('When the user creates, claims, and releases a standalone task', async () => {
             const task = await taskServiceTestUser.createUnassignedStandaloneTask();
             taskId = task.id;
-            await taskServiceTestUser.claimTask(taskId);
-            await taskServiceTestUser.releaseTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
+            await taskServiceTestUser.tasks.releaseTask(taskId);
         });
 
         await activiti.step('Then the task status is CREATED in RB and Query', async () => {
@@ -136,7 +136,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         });
 
         await activiti.step('When the admin deletes the standalone task', async () => {
-            await taskAdminServiceTestAdmin.deleteTask(taskId);
+            await taskAdminServiceTestAdmin.tasks.deleteTask(taskId);
         });
 
         await activiti.step('Then the standalone task is deleted', async () => {
@@ -198,7 +198,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         });
 
         await activiti.step('And the admin completes the task', async () => {
-            await taskAdminServiceTestAdmin.completeTask(taskId);
+            await taskAdminServiceTestAdmin.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the process is completed', async () => {
@@ -223,7 +223,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
                 taskServiceTestUser,
                 'PROCESS_INSTANCE_WITH_VARIABLES'
             );
-            await taskServiceTestUser.claimTask(processTask.id);
+            await taskServiceTestUser.tasks.claimTask(processTask.id);
 
             const standalone = await taskServiceTestUser.createStandaloneTask();
             standaloneTaskId = standalone.id;
@@ -250,7 +250,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         });
 
         await activiti.step('Then RB task lists partition into standalone and process tasks', async () => {
-            const allTasks = await taskServiceTestUser.getAllTasks();
+            const allTasks = await taskServiceTestUser.tasks.getAllTasks();
             const standaloneTasks = taskServiceTestUser.filterByStandalone(allTasks, true);
             const processTasks = taskServiceTestUser.filterByStandalone(allTasks, false);
 

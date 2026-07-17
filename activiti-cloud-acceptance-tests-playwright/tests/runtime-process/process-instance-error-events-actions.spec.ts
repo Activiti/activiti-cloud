@@ -61,7 +61,7 @@ activiti.describe('Process Instance Error Events Actions', { tag: '@slow' }, () 
             await activiti.step(
                 `When the user starts a process with error events called ${scenario.processDefinitionKey}`,
                 async () => {
-                    const processInstance = await runtimeBundleServiceHrUser.startProcess({
+                    const processInstance = await runtimeBundleServiceHrUser.processInstances.startProcess({
                         processDefinitionKey: scenario.processDefinitionKey,
                     });
                     processInstanceId = processInstance.id;
@@ -117,7 +117,7 @@ activiti.describe('Process Instance Error Events Actions', { tag: '@slow' }, () 
             });
 
             await activiti.step('And the user deletes the process with error events', async () => {
-                await runtimeBundleServiceHrUser.deleteProcessInstance(processInstanceId);
+                await runtimeBundleServiceHrUser.processInstances.deleteProcessInstance(processInstanceId);
             });
         });
     }

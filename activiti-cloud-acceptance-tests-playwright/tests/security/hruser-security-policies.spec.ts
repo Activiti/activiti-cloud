@@ -30,7 +30,9 @@ activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () =
             });
 
             await activiti.step('Then the user can get simple process instances', async () => {
-                const fetched = await securityPoliciesServiceHrUser.getRuntimeProcessInstance(simpleProcessInstance.id);
+                const fetched = await securityPoliciesServiceHrUser.runtimeBundle.processInstances.getProcessInstance(
+                    simpleProcessInstance.id
+                );
                 expect(fetched.id).toBe(simpleProcessInstance.id);
                 expect(fetched.processDefinitionKey).toBe('SimpleProcess');
             });
@@ -94,14 +96,14 @@ activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () =
     activiti.describe('Task Access', () => {
         activiti('should allow hruser to access tasks', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user can get tasks', async () => {
-                const tasks = await securityPoliciesServiceHrUser.getAllTasks();
+                const tasks = await securityPoliciesServiceHrUser.taskService.tasks.getAllTasks();
                 expect(tasks).toBeDefined();
             });
         });
 
         activiti('should allow hruser to query tasks', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user can query tasks', async () => {
-                const queryTasks = await securityPoliciesServiceHrUser.queryAllTasks();
+                const queryTasks = await securityPoliciesServiceHrUser.query.tasks.getAllTasks();
                 expect(queryTasks).toBeDefined();
             });
         });

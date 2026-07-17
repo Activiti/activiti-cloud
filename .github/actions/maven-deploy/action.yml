@@ -1,0 +1,36 @@
+name: Maven deploy
+description: Deploys Maven artifacts to Nexus for the checked-out project.
+
+inputs:
+  version:
+    description: Version being deployed.
+    required: true
+  nexus-username:
+    description: Nexus username used for deployment.
+    required: true
+  nexus-password:
+    description: Nexus password used for deployment.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
+      env:
+        MAVEN_USERNAME: ${{ inputs.nexus-username }}
+        MAVEN_PASSWORD: ${{ inputs.nexus-password }}
+      with:
+        java-version: '25'
+        java-distribution: 'corretto'
+        maven-command: >-
+          deploy -DskipTests -Dskip.common.tests=true
+          -Dhttp.keepAlive=false
+          -Dmaven.wagon.http.pool=false
+          -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
+
+    - name: Publish deployed version to job summary
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        echo "## Built version: $VERSION" >> "$GITHUB_STEP_SUMMARY"

@@ -24,6 +24,11 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-runtime-bundle-liquibase</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-core</artifactId>
         <version>${project.version}</version>
       </dependency>

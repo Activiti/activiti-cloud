@@ -19,8 +19,7 @@ activiti-cloud-acceptance-tests-playwright/
 │   └── services.fixture.ts    # exports activiti (services + cleanup)
 ├── services/                  # REST API clients (extend BaseService)
 ├── flows/
-│   ├── start-catalog-process.ts        # startCatalogProcess(), catalogProcessKey()
-│   └── start-process-with-first-task.ts  # startCatalogProcessWithFirstTask()
+│   └── start-process-with-first-task.ts  # startCatalogProcess(), startCatalogProcessWithFirstTask()
 ├── helpers/                   # Test utilities, logging, assertions
 │   ├── security-policies.assertions.ts
 │   ├── multiple-runtime.assertions.ts

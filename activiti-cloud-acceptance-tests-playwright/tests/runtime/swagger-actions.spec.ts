@@ -25,7 +25,7 @@ activiti.describe('Runtime — Swagger Actions', () => {
             let auditSwagger = '';
 
             await activiti.step('When the user asks for swagger specification', async () => {
-                runtimeBundleSwagger = await runtimeBundleServiceTestUser.getSwaggerSpecification();
+                runtimeBundleSwagger = await runtimeBundleServiceTestUser.openApiSpec.getSwaggerSpecification();
                 querySwagger = await queryServiceTestUser.openApiSpec.getSwaggerSpecification();
                 auditSwagger = await auditServiceTestUser.events.getSwaggerSpecification();
             });

@@ -275,6 +275,16 @@ public class QueryAdminProcessServiceTasksIT {
         //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
+        final CloudServiceTask serviceTask = waitForServiceTask(BPMNActivityStatus.STARTED);
+
+        // when - Create and send integration context
+        IntegrationContext integrationContext1 = buildIntegrationContext(
+            process,
+            serviceTask.getProcessInstanceId(),
+            serviceTask
+        );
+        sendIntegrationRequestedEvent(integrationContext1);
+
         //then
         await().untilAsserted(() -> {
             assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
@@ -294,8 +304,8 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
                 .hasSize(1)
-                .extracting(CloudServiceTask::getActivityType)
-                .contains(SERVICE_TASK_TYPE);
+                .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getIntegrationContextCounter)
+                .contains(tuple(SERVICE_TASK_TYPE, 1));
         });
     }
 
@@ -914,6 +924,7 @@ public class QueryAdminProcessServiceTasksIT {
     private ProcessInstanceImpl sendEventsForStartSimpleProcessInstance() {
         ProcessInstanceImpl process = startSimpleProcessInstance();
         eventsAggregator.sendAll();
+
         return process;
     }
 

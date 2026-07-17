@@ -26,7 +26,7 @@ repos:
           - prettier-plugin-java@2.8.1
         exclude: ^\.github/workflows/.*\.(lock\.yml|md)$
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.31.2
+    rev: 0.37.4
     hooks:
       - id: check-dependabot
       - id: check-github-actions

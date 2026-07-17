@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.app.repository;
 
-import java.util.List;
-import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
-import org.springframework.data.repository.CrudRepository;
-
-public interface ProcessVariableHistoryRepository extends CrudRepository<ProcessVariableHistoryEntity, Long> {
-    List<ProcessVariableHistoryEntity> findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
-        String processInstanceId,
-        String variableName
-    );
+export function candidateNamesFromList(
+    items: Record<string, unknown>[],
+    field: 'user' | 'group'
+): string[] {
+    return items
+        .map((item) => item[field])
+        .filter((value): value is string => typeof value === 'string');
 }

@@ -16,6 +16,7 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { CloudProcessInstance } from '../../models/runtime-bundle.models';
+import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
 
 activiti.describe('Security Policies - HR Admin Actions', { tag: '@smoke' }, () => {
     activiti.describe('Admin Access to Process with Variables', () => {
@@ -46,7 +47,7 @@ activiti.describe('Security Policies - HR Admin Actions', { tag: '@smoke' }, () 
             });
 
             await activiti.step('And the user can access audit admin endpoints', async () => {
-                const adminEvents = await securityPoliciesServiceProcessAdmin.getEventsByEntityIdAdmin(
+                const adminEvents = await securityPoliciesServiceProcessAdmin.audit.getEventsByEntityIdAdmin(
                     processWithVariablesInstance.id
                 );
                 expect(adminEvents.length).toBeGreaterThan(0);
@@ -75,10 +76,11 @@ activiti.describe('Security Policies - HR Admin Actions', { tag: '@smoke' }, () 
             });
 
             await activiti.step('And the user cannot query process with variables instances (through user endpoints)', async () => {
-                const queryInstances =
-                    await securityPoliciesServiceHradmin.getQueryInstancesByProcessName(
+                const queryInstances = await securityPoliciesServiceHradmin.query.processInstances.getProcessInstances({
+                    processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey(
                         'PROCESS_INSTANCE_WITH_VARIABLES'
-                    );
+                    ),
+                });
                 expect(queryInstances.map((pi) => pi.id)).not.toContain(processWithVariablesInstance.id);
             });
 
