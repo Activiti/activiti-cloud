@@ -74,10 +74,6 @@ class FunctionRouterExecutorFactoryTest {
         assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
         executor.submit(queuedTaskExecuted::countDown);
-        // Fill queue slots
-        //for (int queueSize = 5; queueSize > 0; queueSize--) {
-        //    executor.submit(() -> {});
-        //}
 
         assertThatThrownBy(() -> executor.submit(() -> {}))
             .isInstanceOf(RejectedExecutionException.class)
@@ -107,10 +103,6 @@ class FunctionRouterExecutorFactoryTest {
         assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
         executor.submit(() -> {});
-        // Fill queue slots
-        //for (int queueSize = 5; queueSize > 0; queueSize--) {
-        //    executor.submit(() -> {});
-        //}
 
         final var submitter = Thread.ofPlatform().start(() -> {
             try {
