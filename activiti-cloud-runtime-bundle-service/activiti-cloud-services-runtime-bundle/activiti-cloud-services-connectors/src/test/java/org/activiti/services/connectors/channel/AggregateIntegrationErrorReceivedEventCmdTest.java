@@ -39,7 +39,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AggregateIntegrationErrorReceivedEventCmdTest {
+public class AggregateIntegrationErrorReceivedEventCmdTest {
 
     private final RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties();
 
@@ -50,7 +50,7 @@ class AggregateIntegrationErrorReceivedEventCmdTest {
     private ArgumentCaptor<CloudRuntimeEvent<?, ?>> cloudRuntimeEventArgumentCaptor;
 
     @Test
-    void should_aggregateIntegrationErrorReceivedEvent_when_auditEventAreEnabled() {
+    public void should_aggregateIntegrationErrorReceivedEvent_when_auditEventAreEnabled() {
         //given
         final IntegrationError integrationError = mock(IntegrationError.class);
         final IntegrationContext integrationContext = mock(IntegrationContext.class);
@@ -78,35 +78,6 @@ class AggregateIntegrationErrorReceivedEventCmdTest {
         assertThat(errorReceivedEvent.getErrorMessage()).isEqualTo("my error message");
         assertThat(errorReceivedEvent.getErrorClassName()).isEqualTo("className");
         assertThat(errorReceivedEvent.getStackTraceElements()).isEqualTo(stackTraceElements);
-    }
-
-    @Test
-    void should_clearInBoundVariables_when_integrationAuditEventIsSent() {
-        //given
-        final IntegrationError integrationError = mock(IntegrationError.class);
-
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.addInBoundVariables(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
-        integrationContext.addOutBoundVariables(
-            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
-        );
-
-        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
-
-        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
-            integrationError,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
-        );
-
-        //when
-        command.execute(mock(CommandContext.class));
-
-        //then
-        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
-        final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
-        IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
-        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
     }
 
     @Test
@@ -140,7 +111,7 @@ class AggregateIntegrationErrorReceivedEventCmdTest {
     }
 
     @Test
-    void should_retainOutboundVariables_when_integrationContextDoesNotHaveEphemeralVariables() {
+    void should_retainInboundAndOutboundVariables_when_integrationContextHasEphemeralVariables() {
         //given
         final IntegrationError integrationError = mock(IntegrationError.class);
 
@@ -165,7 +136,9 @@ class AggregateIntegrationErrorReceivedEventCmdTest {
         verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
         final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
         IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
-        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
+        assertThat(sanitizedContext.getInBoundVariables()).containsExactlyInAnyOrderEntriesOf(
+            Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2")
+        );
         assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(
             Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
         );
