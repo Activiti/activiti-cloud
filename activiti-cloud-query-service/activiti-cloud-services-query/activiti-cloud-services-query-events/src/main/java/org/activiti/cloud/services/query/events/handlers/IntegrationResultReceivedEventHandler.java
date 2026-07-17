@@ -39,7 +39,8 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
         boolean isNewEntity = result.isEmpty();
 
         // If entity doesn't exist (e.g., purged during migration), create a new one with the new PK format
-        IntegrationContextEntity entity = result.orElseGet(() -> createMissingIntegrationContextEntity(integrationEvent)
+        IntegrationContextEntity entity = result.orElseGet(() ->
+            createMissingIntegrationContextEntity(integrationEvent)
         );
 
         String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());

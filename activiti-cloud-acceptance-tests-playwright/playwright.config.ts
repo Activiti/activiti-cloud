@@ -15,24 +15,26 @@
  */
 
 import './config/load-env';
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from '@michalfidor/playswag';
 import { applyResolvedHostsToEnv } from './config/connection/env-hosts';
+import { buildPlayswagProjectUse, buildPlayswagReporterConfig } from './config/playswag.config';
 import { paths } from './config/paths';
 import { getTestConfiguration } from './config/runtime/test-configuration';
 import { timeouts } from './config/runtime/timeouts';
+import { getReportPortalConfig } from './report-portal.config';
 applyResolvedHostsToEnv();
 
 const testConfig = getTestConfiguration();
 const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
-const isCi = Boolean(process.env.CI);
+const isCi = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+
+const reportPortalReporter = isCi
+    ? ([['@reportportal/agent-js-playwright', getReportPortalConfig()], ['github']] as const)
+    : ([] as const);
 
 /** Serial projects (subscriptions, admin bulk-delete). */
 const serial = { workers: 1, fullyParallel: false } as const;
 
-/**
- * CI suite (`npm run test`) selects acceptance → notifications → destructive-last.
- * `dependencies` enforce that order; slice scripts pass a single `--project=…`.
- */
 export default defineConfig({
   testDir: './tests',
   timeout: timeouts.test,
@@ -63,24 +65,21 @@ export default defineConfig({
       ...serial,
     },
     { name: 'smoke', grep: /@smoke/ },
-    { name: 'identity', testMatch: '**/identity-adapter.spec.ts' },
-    {
-      name: 'security',
-      testMatch: ['**/hruser-security-policies.spec.ts', '**/hradmin-security-policies.spec.ts'],
-    },
-    { name: 'process', testMatch: '**/process-instance-actions.spec.ts' },
-    { name: 'runtime', testMatch: '**/runtime/**/*.spec.ts' },
-    { name: 'runtime-process-instance', testMatch: '**/runtime/process-instance*.spec.ts' },
-    { name: 'runtime-tasks', testMatch: '**/runtime/task*.spec.ts' },
+    { name: 'identity', testDir: './tests/identity' },
+    { name: 'security', testDir: './tests/security' },
+    { name: 'runtime-process', testDir: './tests/runtime-process' },
+    { name: 'runtime-task', testDir: './tests/runtime-task' },
+    { name: 'runtime', testDir: './tests/runtime' },
   ],
   maxFailures: isCi ? 10 : undefined,
 
   reporter: [
-    ['html'],
+    ...(isCi ? [] : ([['html']] as const)),
     ['list'],
     ['junit', { outputFile: `${paths.reporter}/junit.xml` }],
     ['json', { outputFile: `${paths.reporter}/results.json` }],
-    ...(isCi ? ([['github']] as const) : []),
+    ['@michalfidor/playswag/reporter', buildPlayswagReporterConfig()],
+    ...reportPortalReporter,
   ],
 
   outputDir: paths.testResults,
@@ -92,6 +91,7 @@ export default defineConfig({
     video: isCi ? 'off' : 'retain-on-failure',
     actionTimeout: timeouts.action,
     navigationTimeout: timeouts.navigation,
+    ...buildPlayswagProjectUse(),
   },
 
   globalSetup: './config/lifecycle/global-setup.ts',

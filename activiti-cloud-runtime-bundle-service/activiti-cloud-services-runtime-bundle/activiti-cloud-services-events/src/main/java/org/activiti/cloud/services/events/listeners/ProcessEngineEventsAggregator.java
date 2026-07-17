@@ -42,7 +42,8 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 
 public class ProcessEngineEventsAggregator
-    extends BaseCommandContextEventsAggregator<CloudRuntimeEvent<?, ?>, MessageProducerCommandContextCloseListener> {
+    extends BaseCommandContextEventsAggregator<CloudRuntimeEvent<?, ?>, MessageProducerCommandContextCloseListener>
+{
 
     private final MessageProducerCommandContextCloseListener closeListener;
 
@@ -69,6 +70,10 @@ public class ProcessEngineEventsAggregator
     public void add(CloudRuntimeEvent<?, ?> element) {
         CommandContext commandContext = getCurrentCommandContext();
 
+        if (element instanceof CloudRuntimeEventImpl<?, ?> impl) {
+            impl.setCommandId(commandContext.getCommandId());
+        }
+
         // Let's try resolve underlying execution Id
         String executionId = resolveExecutionId(element);
 
@@ -91,15 +96,15 @@ public class ProcessEngineEventsAggregator
 
     protected ExecutionContext resolveExecutionContext(CommandContext commandContext, String executionId) {
         if (executionId != null && commandContext.getGenericAttribute(executionId) == null) {
-            Optional
-                .ofNullable(commandContext.getExecutionEntityManager().findById(executionId))
-                .ifPresent(executionEntity -> {
+            Optional.ofNullable(commandContext.getExecutionEntityManager().findById(executionId)).ifPresent(
+                executionEntity -> {
                     mayBeAddRootExecutionContext(commandContext, executionEntity);
 
                     ExecutionContext executionContext = createExecutionContext(executionEntity);
 
                     commandContext.addAttribute(executionId, executionContext);
-                });
+                }
+            );
         }
 
         return commandContext.getGenericAttribute(executionId);

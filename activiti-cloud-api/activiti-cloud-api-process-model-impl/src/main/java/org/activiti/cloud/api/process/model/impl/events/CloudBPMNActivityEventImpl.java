@@ -20,7 +20,8 @@ import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
 public abstract class CloudBPMNActivityEventImpl
-    extends CloudRuntimeEventImpl<BPMNActivity, BPMNActivityEvent.ActivityEvents> {
+    extends CloudRuntimeEventImpl<BPMNActivity, BPMNActivityEvent.ActivityEvents>
+{
 
     public CloudBPMNActivityEventImpl() {}
 

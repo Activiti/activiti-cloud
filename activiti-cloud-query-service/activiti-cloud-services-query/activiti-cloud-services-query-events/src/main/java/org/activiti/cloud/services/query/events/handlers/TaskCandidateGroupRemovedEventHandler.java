@@ -40,7 +40,8 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudTaskCandidateGroupRemovedEvent taskCandidateGroupRemovedEvent = (CloudTaskCandidateGroupRemovedEvent) event;
+        CloudTaskCandidateGroupRemovedEvent taskCandidateGroupRemovedEvent =
+            (CloudTaskCandidateGroupRemovedEvent) event;
         TaskCandidateGroup taskCandidateGroup = taskCandidateGroupRemovedEvent.getEntity();
         Optional<TaskEntity> findResult = entityManagerFinder.findTaskWithCandidateGroups(
             taskCandidateGroup.getTaskId()
@@ -54,12 +55,10 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
                     taskCandidateGroup.getTaskId(),
                     taskCandidateGroup.getGroupId()
                 );
-                Optional
-                    .ofNullable(entityManager.find(TaskCandidateGroupEntity.class, id))
-                    .ifPresent(entity -> {
-                        findResult.get().getTaskCandidateGroups().remove(entity);
-                        entityManager.remove(entity);
-                    });
+                Optional.ofNullable(entityManager.find(TaskCandidateGroupEntity.class, id)).ifPresent(entity -> {
+                    findResult.get().getTaskCandidateGroups().remove(entity);
+                    entityManager.remove(entity);
+                });
             } catch (Exception cause) {
                 LOGGER.debug("Error handling TaskCandidateGroupRemovedEvent[" + event + "]", cause);
             }

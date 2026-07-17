@@ -43,7 +43,8 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         boolean isNewEntity = result.isEmpty();
 
         // If entity doesn't exist (e.g., purged during migration), create a new one with the new PK format
-        IntegrationContextEntity entity = result.orElseGet(() -> createMissingIntegrationContextEntity(integrationEvent)
+        IntegrationContextEntity entity = result.orElseGet(() ->
+            createMissingIntegrationContextEntity(integrationEvent)
         );
 
         entity.setErrorDate(new Date(integrationEvent.getTimestamp()));

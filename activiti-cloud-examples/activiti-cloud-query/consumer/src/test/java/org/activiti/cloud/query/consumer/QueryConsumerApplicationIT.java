@@ -64,10 +64,12 @@ public class QueryConsumerApplicationIT {
 
     @Test
     void rabbitBinderCompression() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
-            .isEqualTo(9);
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
-            .isTrue();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class)
+        ).isEqualTo(9);
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class)
+        ).isTrue();
     }
 
     @Test
@@ -83,10 +85,12 @@ public class QueryConsumerApplicationIT {
 
     @Test
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isNullOrEmpty();
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isNullOrEmpty();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isNullOrEmpty();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isNullOrEmpty();
     }
 
     @Test

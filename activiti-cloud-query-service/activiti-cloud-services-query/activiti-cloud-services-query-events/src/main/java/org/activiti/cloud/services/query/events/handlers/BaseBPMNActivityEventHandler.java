@@ -63,23 +63,21 @@ public abstract class BaseBPMNActivityEventHandler {
         BaseBPMNActivityEntity bpmnActivityEntity;
 
         if ("serviceTask".equals(bpmnActivity.getActivityType())) {
-            bpmnActivityEntity =
-                new ServiceTaskEntity(
-                    event.getServiceName(),
-                    event.getServiceFullName(),
-                    event.getServiceVersion(),
-                    event.getAppName(),
-                    event.getAppVersion()
-                );
+            bpmnActivityEntity = new ServiceTaskEntity(
+                event.getServiceName(),
+                event.getServiceFullName(),
+                event.getServiceVersion(),
+                event.getAppName(),
+                event.getAppVersion()
+            );
         } else {
-            bpmnActivityEntity =
-                new BPMNActivityEntity(
-                    event.getServiceName(),
-                    event.getServiceFullName(),
-                    event.getServiceVersion(),
-                    event.getAppName(),
-                    event.getAppVersion()
-                );
+            bpmnActivityEntity = new BPMNActivityEntity(
+                event.getServiceName(),
+                event.getServiceFullName(),
+                event.getServiceVersion(),
+                event.getAppName(),
+                event.getAppVersion()
+            );
         }
 
         bpmnActivityEntity.setId(pkId);

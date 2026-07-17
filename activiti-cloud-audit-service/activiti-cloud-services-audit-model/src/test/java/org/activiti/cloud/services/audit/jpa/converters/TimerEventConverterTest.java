@@ -55,9 +55,8 @@ public class TimerEventConverterTest {
     private TimerFailedEventConverter eventConverterTimerFailed = new TimerFailedEventConverter(
         new EventContextInfoAppender()
     );
-    private TimerRetriesDecrementedEventConverter eventConverterTimerRetriesDecremented = new TimerRetriesDecrementedEventConverter(
-        new EventContextInfoAppender()
-    );
+    private TimerRetriesDecrementedEventConverter eventConverterTimerRetriesDecremented =
+        new TimerRetriesDecrementedEventConverter(new EventContextInfoAppender());
 
     @Test
     public void checkConvertToEntityTimerFiredEvent() {
@@ -65,9 +64,8 @@ public class TimerEventConverterTest {
         CloudBPMNTimerFiredEventImpl event = createTimerFiredEvent();
 
         //when
-        TimerFiredAuditEventEntity auditEventEntity = (TimerFiredAuditEventEntity) eventConverterTimerFired.convertToEntity(
-            event
-        );
+        TimerFiredAuditEventEntity auditEventEntity =
+            (TimerFiredAuditEventEntity) eventConverterTimerFired.convertToEntity(event);
 
         //then
         checkCloudAuditEvententity(auditEventEntity, event);
@@ -79,9 +77,8 @@ public class TimerEventConverterTest {
         CloudBPMNTimerScheduledEventImpl event = createTimerScheduledEvent();
 
         //when
-        TimerScheduledAuditEventEntity auditEventEntity = (TimerScheduledAuditEventEntity) eventConverterTimerScheduled.convertToEntity(
-            event
-        );
+        TimerScheduledAuditEventEntity auditEventEntity =
+            (TimerScheduledAuditEventEntity) eventConverterTimerScheduled.convertToEntity(event);
 
         //then
         checkCloudAuditEvententity(auditEventEntity, event);
@@ -93,9 +90,8 @@ public class TimerEventConverterTest {
         CloudBPMNTimerCancelledEventImpl event = createTimerCancelledEvent();
 
         //when
-        TimerCancelledAuditEventEntity auditEventEntity = (TimerCancelledAuditEventEntity) eventConverterTimerCancelled.convertToEntity(
-            event
-        );
+        TimerCancelledAuditEventEntity auditEventEntity =
+            (TimerCancelledAuditEventEntity) eventConverterTimerCancelled.convertToEntity(event);
 
         //then
         checkCloudAuditEvententity(auditEventEntity, event);
@@ -107,9 +103,8 @@ public class TimerEventConverterTest {
         CloudBPMNTimerExecutedEventImpl event = createTimerExecutedEvent();
 
         //when
-        TimerExecutedAuditEventEntity auditEventEntity = (TimerExecutedAuditEventEntity) eventConverterTimerExecuted.convertToEntity(
-            event
-        );
+        TimerExecutedAuditEventEntity auditEventEntity =
+            (TimerExecutedAuditEventEntity) eventConverterTimerExecuted.convertToEntity(event);
 
         //then
         checkCloudAuditEvententity(auditEventEntity, event);
@@ -121,9 +116,8 @@ public class TimerEventConverterTest {
         CloudBPMNTimerRetriesDecrementedEventImpl event = createTimerRetriesDecrementedEvent();
 
         //when
-        TimerRetriesDecrementedAuditEventEntity auditEventEntity = (TimerRetriesDecrementedAuditEventEntity) eventConverterTimerRetriesDecremented.convertToEntity(
-            event
-        );
+        TimerRetriesDecrementedAuditEventEntity auditEventEntity =
+            (TimerRetriesDecrementedAuditEventEntity) eventConverterTimerRetriesDecremented.convertToEntity(event);
 
         //then
         checkCloudAuditEvententity(auditEventEntity, event);
@@ -135,9 +129,8 @@ public class TimerEventConverterTest {
         CloudBPMNTimerFailedEventImpl event = createTimerFailedEvent();
 
         //when
-        TimerFailedAuditEventEntity auditEventEntity = (TimerFailedAuditEventEntity) eventConverterTimerFailed.convertToEntity(
-            event
-        );
+        TimerFailedAuditEventEntity auditEventEntity =
+            (TimerFailedAuditEventEntity) eventConverterTimerFailed.convertToEntity(event);
 
         //then
         checkCloudAuditEvententity(auditEventEntity, event);
@@ -146,9 +139,8 @@ public class TimerEventConverterTest {
     @Test
     public void checkConvertToAPITimerFiredEvent() {
         //given
-        TimerFiredAuditEventEntity auditEventEntity = (TimerFiredAuditEventEntity) eventConverterTimerFired.convertToEntity(
-            createTimerFiredEvent()
-        );
+        TimerFiredAuditEventEntity auditEventEntity =
+            (TimerFiredAuditEventEntity) eventConverterTimerFired.convertToEntity(createTimerFiredEvent());
 
         //when
         CloudBPMNTimerFiredEventImpl cloudEvent = (CloudBPMNTimerFiredEventImpl) eventConverterTimerFired.convertToAPI(
@@ -161,14 +153,12 @@ public class TimerEventConverterTest {
     @Test
     public void checkConvertToAPITimerScheduledEvent() {
         //given
-        TimerScheduledAuditEventEntity auditEventEntity = (TimerScheduledAuditEventEntity) eventConverterTimerScheduled.convertToEntity(
-            createTimerScheduledEvent()
-        );
+        TimerScheduledAuditEventEntity auditEventEntity =
+            (TimerScheduledAuditEventEntity) eventConverterTimerScheduled.convertToEntity(createTimerScheduledEvent());
 
         //when
-        CloudBPMNTimerScheduledEventImpl cloudEvent = (CloudBPMNTimerScheduledEventImpl) eventConverterTimerScheduled.convertToAPI(
-            auditEventEntity
-        );
+        CloudBPMNTimerScheduledEventImpl cloudEvent =
+            (CloudBPMNTimerScheduledEventImpl) eventConverterTimerScheduled.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
@@ -176,14 +166,12 @@ public class TimerEventConverterTest {
     @Test
     public void checkConvertToAPITimerCancelledEvent() {
         //given
-        TimerCancelledAuditEventEntity auditEventEntity = (TimerCancelledAuditEventEntity) eventConverterTimerCancelled.convertToEntity(
-            createTimerCancelledEvent()
-        );
+        TimerCancelledAuditEventEntity auditEventEntity =
+            (TimerCancelledAuditEventEntity) eventConverterTimerCancelled.convertToEntity(createTimerCancelledEvent());
 
         //when
-        CloudBPMNTimerCancelledEventImpl cloudEvent = (CloudBPMNTimerCancelledEventImpl) eventConverterTimerCancelled.convertToAPI(
-            auditEventEntity
-        );
+        CloudBPMNTimerCancelledEventImpl cloudEvent =
+            (CloudBPMNTimerCancelledEventImpl) eventConverterTimerCancelled.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
@@ -191,14 +179,12 @@ public class TimerEventConverterTest {
     @Test
     public void checkConvertToAPITimerExecutedEvent() {
         //given
-        TimerExecutedAuditEventEntity auditEventEntity = (TimerExecutedAuditEventEntity) eventConverterTimerExecuted.convertToEntity(
-            createTimerExecutedEvent()
-        );
+        TimerExecutedAuditEventEntity auditEventEntity =
+            (TimerExecutedAuditEventEntity) eventConverterTimerExecuted.convertToEntity(createTimerExecutedEvent());
 
         //when
-        CloudBPMNTimerExecutedEventImpl cloudEvent = (CloudBPMNTimerExecutedEventImpl) eventConverterTimerExecuted.convertToAPI(
-            auditEventEntity
-        );
+        CloudBPMNTimerExecutedEventImpl cloudEvent =
+            (CloudBPMNTimerExecutedEventImpl) eventConverterTimerExecuted.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
@@ -206,14 +192,12 @@ public class TimerEventConverterTest {
     @Test
     public void checkConvertToAPITimerFailedEvent() {
         //given
-        TimerFailedAuditEventEntity auditEventEntity = (TimerFailedAuditEventEntity) eventConverterTimerFailed.convertToEntity(
-            createTimerFailedEvent()
-        );
+        TimerFailedAuditEventEntity auditEventEntity =
+            (TimerFailedAuditEventEntity) eventConverterTimerFailed.convertToEntity(createTimerFailedEvent());
 
         //when
-        CloudBPMNTimerFailedEventImpl cloudEvent = (CloudBPMNTimerFailedEventImpl) eventConverterTimerFailed.convertToAPI(
-            auditEventEntity
-        );
+        CloudBPMNTimerFailedEventImpl cloudEvent =
+            (CloudBPMNTimerFailedEventImpl) eventConverterTimerFailed.convertToAPI(auditEventEntity);
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
@@ -221,14 +205,16 @@ public class TimerEventConverterTest {
     @Test
     public void checkConvertToAPITimerRetriesDecrementedEvent() {
         //given
-        TimerRetriesDecrementedAuditEventEntity auditEventEntity = (TimerRetriesDecrementedAuditEventEntity) eventConverterTimerRetriesDecremented.convertToEntity(
-            createTimerRetriesDecrementedEvent()
-        );
+        TimerRetriesDecrementedAuditEventEntity auditEventEntity =
+            (TimerRetriesDecrementedAuditEventEntity) eventConverterTimerRetriesDecremented.convertToEntity(
+                createTimerRetriesDecrementedEvent()
+            );
 
         //when
-        CloudBPMNTimerRetriesDecrementedEventImpl cloudEvent = (CloudBPMNTimerRetriesDecrementedEventImpl) eventConverterTimerRetriesDecremented.convertToAPI(
-            auditEventEntity
-        );
+        CloudBPMNTimerRetriesDecrementedEventImpl cloudEvent =
+            (CloudBPMNTimerRetriesDecrementedEventImpl) eventConverterTimerRetriesDecremented.convertToAPI(
+                auditEventEntity
+            );
 
         checkCloudAuditEvententity(auditEventEntity, cloudEvent);
     }
@@ -384,10 +370,12 @@ public class TimerEventConverterTest {
         assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(event.getProcessDefinitionKey());
         assertThat(auditEventEntity.getBusinessKey()).isEqualTo(event.getBusinessKey());
         assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(event.getParentProcessInstanceId());
-        assertThat(auditEventEntity.getTimer().getProcessInstanceId())
-            .isEqualTo(event.getEntity().getProcessInstanceId());
-        assertThat(auditEventEntity.getTimer().getProcessDefinitionId())
-            .isEqualTo(event.getEntity().getProcessDefinitionId());
+        assertThat(auditEventEntity.getTimer().getProcessInstanceId()).isEqualTo(
+            event.getEntity().getProcessInstanceId()
+        );
+        assertThat(auditEventEntity.getTimer().getProcessDefinitionId()).isEqualTo(
+            event.getEntity().getProcessDefinitionId()
+        );
         assertThat(auditEventEntity.getTimer().getTimerPayload()).isEqualTo(event.getEntity().getTimerPayload());
     }
 }

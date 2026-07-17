@@ -75,12 +75,11 @@ class ServiceTaskIntegrationCompletionHandlerTest {
 
     @Test
     void handlePropagationFailure_shouldBeTransactionalRequiresNew() throws Exception {
-        Method m =
-            ServiceTaskIntegrationCompletionHandler.class.getMethod(
-                    "handlePropagationFailure",
-                    IntegrationErrorImpl.class,
-                    IntegrationContextEntity.class
-                );
+        Method m = ServiceTaskIntegrationCompletionHandler.class.getMethod(
+            "handlePropagationFailure",
+            IntegrationErrorImpl.class,
+            IntegrationContextEntity.class
+        );
         Transactional tx = m.getAnnotation(Transactional.class);
         assertNotNull(tx, "Transactional annotation missing");
         assertEquals(Propagation.REQUIRES_NEW, tx.propagation(), "Propagation should be REQUIRES_NEW");

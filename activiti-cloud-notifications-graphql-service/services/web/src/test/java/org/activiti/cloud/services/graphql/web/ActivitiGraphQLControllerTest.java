@@ -69,14 +69,17 @@ public class ActivitiGraphQLControllerTest {
      */
     @BeforeEach
     public void setUp() {
-        when(executor.execute(Mockito.anyString()))
-            .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
+        when(executor.execute(Mockito.anyString())).thenReturn(
+            new ExecutionResultImpl(new HashMap<>(), new ArrayList<>())
+        );
 
-        when(executor.execute(Mockito.anyString(), Mockito.nullable(Map.class)))
-            .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
+        when(executor.execute(Mockito.anyString(), Mockito.nullable(Map.class))).thenReturn(
+            new ExecutionResultImpl(new HashMap<>(), new ArrayList<>())
+        );
 
-        when(executor.execute(Mockito.anyString(), Mockito.nullable(String.class), Mockito.nullable(Map.class)))
-            .thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
+        when(
+            executor.execute(Mockito.anyString(), Mockito.nullable(String.class), Mockito.nullable(Map.class))
+        ).thenReturn(new ExecutionResultImpl(new HashMap<>(), new ArrayList<>()));
     }
 
     private void ok(final GraphQLQueryRequest query) throws Exception, JacksonException {

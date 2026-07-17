@@ -30,6 +30,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -98,6 +99,9 @@ class ServiceTaskIntegrationContextAdminControllerIT {
     private ProcessInstanceService processInstanceService;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @MockitoBean
@@ -114,21 +118,22 @@ class ServiceTaskIntegrationContextAdminControllerIT {
                 eq("exec1"),
                 any(Pageable.class)
             )
-        )
-            .willReturn(new PageImpl<>(List.of()));
+        ).willReturn(new PageImpl<>(List.of()));
 
         //when
         mockMvc
             .perform(
-                get("/admin/v1/service-tasks/{serviceTaskId}/integration-context", serviceTaskId)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/service-tasks/{serviceTaskId}/integration-context", serviceTaskId).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.entry.code").value(404))
             .andExpect(
-                jsonPath("$.entry.message")
-                    .value("Unable to find integration context entity for the given id:'" + serviceTaskId + "'")
+                jsonPath("$.entry.message").value(
+                    "Unable to find integration context entity for the given id:'" + serviceTaskId + "'"
+                )
             );
     }
 }

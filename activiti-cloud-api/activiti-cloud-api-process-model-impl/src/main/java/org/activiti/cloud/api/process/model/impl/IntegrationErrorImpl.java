@@ -45,18 +45,23 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         this.integrationRequest = integrationRequest;
         this.integrationContext = integrationRequest.getIntegrationContext();
         this.errorClassName = error.getClass().getName();
-        this.errorCode =
-            Optional
-                .of(error)
-                .filter(CloudBpmnError.class::isInstance)
-                .map(CloudBpmnError.class::cast)
-                .map(CloudBpmnError::getErrorCode)
-                .orElse(null);
+        this.errorCode = Optional.of(error)
+            .filter(CloudBpmnError.class::isInstance)
+            .map(CloudBpmnError.class::cast)
+            .map(CloudBpmnError::getErrorCode)
+            .orElse(null);
 
         Throwable cause = findRootCause(error);
 
         this.errorMessage = this.getDetailedErrorMessage(error);
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
+    }
+
+    public IntegrationErrorImpl(IntegrationRequest integrationRequest, Throwable error, String customErrorMessage) {
+        this(integrationRequest, error);
+        if (StringUtils.hasText(customErrorMessage)) {
+            this.errorMessage = customErrorMessage;
+        }
     }
 
     @Override
@@ -118,8 +123,7 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         final int prime = 31;
         int result = super.hashCode();
         result =
-            prime *
-            result +
+            prime * result +
             Objects.hash(errorClassName, errorMessage, integrationContext, integrationRequest, stackTraceElements);
         return result;
     }

@@ -20,6 +20,7 @@ import java.util.Map;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.webmvc.error.DefaultErrorAttributes;
@@ -31,10 +32,12 @@ import org.springframework.web.context.request.WebRequest;
 
 @AutoConfiguration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class ErrorAttributesAutoConfiguration {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
+    @ConditionalOnMissingBean
     public ErrorAttributes errorAttributes(List<ErrorAttributesCustomizer> errorAttributesCustomizers) {
         return new DefaultErrorAttributes() {
             @Override

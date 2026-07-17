@@ -43,41 +43,39 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
         CloudTaskCreatedEvent taskCreatedEvent = CloudTaskCreatedEvent.class.cast(event);
         var taskId = taskCreatedEvent.getEntity().getId();
 
-        Optional
-            .ofNullable(entityManager.find(TaskEntity.class, taskId))
-            .ifPresentOrElse(
-                taskEntity -> LOGGER.warn("Task instance entity already exists for: " + taskId + "!"),
-                () -> {
-                    TaskEntity queryTaskEntity = new TaskEntity(taskCreatedEvent);
+        Optional.ofNullable(entityManager.find(TaskEntity.class, taskId)).ifPresentOrElse(
+            taskEntity -> LOGGER.warn("Task instance entity already exists for: " + taskId + "!"),
+            () -> {
+                TaskEntity queryTaskEntity = new TaskEntity(taskCreatedEvent);
 
-                    if (!queryTaskEntity.isStandalone()) {
-                        entityManagerFinder
-                            .findProcessInstanceWithTasks(queryTaskEntity.getProcessInstanceId())
-                            .ifPresentOrElse(
-                                processInstanceEntity -> {
-                                    queryTaskEntity.setProcessInstance(processInstanceEntity);
-                                    queryTaskEntity.setProcessDefinitionName(
-                                        processInstanceEntity.getProcessDefinitionName()
-                                    );
-                                    queryTaskEntity.setProcessVariables(processInstanceEntity.getVariables());
-                                    queryTaskEntity.setRootProcessInstanceId(
-                                        processInstanceEntity.getRootProcessInstanceId()
-                                    );
+                if (!queryTaskEntity.isStandalone()) {
+                    entityManagerFinder
+                        .findProcessInstanceWithTasks(queryTaskEntity.getProcessInstanceId())
+                        .ifPresentOrElse(
+                            processInstanceEntity -> {
+                                queryTaskEntity.setProcessInstance(processInstanceEntity);
+                                queryTaskEntity.setProcessDefinitionName(
+                                    processInstanceEntity.getProcessDefinitionName()
+                                );
+                                queryTaskEntity.setProcessVariables(processInstanceEntity.getVariables());
+                                queryTaskEntity.setRootProcessInstanceId(
+                                    processInstanceEntity.getRootProcessInstanceId()
+                                );
 
-                                    processInstanceEntity.getTasks().add(queryTaskEntity);
-                                },
-                                () -> {
-                                    throw new QueryException(
-                                        "Unable to find task process instance with id: " +
+                                processInstanceEntity.getTasks().add(queryTaskEntity);
+                            },
+                            () -> {
+                                throw new QueryException(
+                                    "Unable to find task process instance with id: " +
                                         queryTaskEntity.getProcessInstanceId()
-                                    );
-                                }
-                            );
-                    }
-
-                    persistIntoDatabase(event, queryTaskEntity);
+                                );
+                            }
+                        );
                 }
-            );
+
+                persistIntoDatabase(event, queryTaskEntity);
+            }
+        );
     }
 
     private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event, TaskEntity queryTaskEntity) {

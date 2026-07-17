@@ -21,7 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEven
 
 public class CloudIntegrationRequestedEventImpl
     extends CloudIntegrationEventImpl
-    implements CloudIntegrationRequestedEvent {
+    implements CloudIntegrationRequestedEvent
+{
 
     private static final long serialVersionUID = 1L;
 

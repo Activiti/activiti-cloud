@@ -33,6 +33,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -107,6 +108,9 @@ public class ProcessModelControllerIT {
     private ProcessInstanceService processInstanceService;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -126,17 +130,20 @@ public class ProcessModelControllerIT {
         processDefinition.setKey("processKey");
         processDefinition.setServiceName("serviceName");
 
-        given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
-            .willReturn(true);
+        given(
+            securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName())
+        ).willReturn(true);
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-            .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString())).willReturn(
+            new ProcessModelEntity(processDefinition, "<model/>")
+        );
 
         //when
         mockMvc
             .perform(
-                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId)
-                    .accept(MediaType.APPLICATION_XML_VALUE)
+                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId).accept(
+                    MediaType.APPLICATION_XML_VALUE
+                )
             )
             //then
             .andExpect(status().isOk())
@@ -153,17 +160,20 @@ public class ProcessModelControllerIT {
         processDefinition.setKey("processKey");
         processDefinition.setServiceName("serviceName");
 
-        given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
-            .willReturn(false);
+        given(
+            securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName())
+        ).willReturn(false);
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-            .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString())).willReturn(
+            new ProcessModelEntity(processDefinition, "<model/>")
+        );
 
         //when
         mockMvc
             .perform(
-                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId)
-                    .accept(MediaType.APPLICATION_XML_VALUE)
+                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId).accept(
+                    MediaType.APPLICATION_XML_VALUE
+                )
             )
             //then
             .andExpect(status().isForbidden())

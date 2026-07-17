@@ -21,7 +21,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>>
     extends RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE>
-    implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
+    implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE>
+{
 
     private String appName;
     private String serviceFullName;
@@ -32,6 +33,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     private String entityId;
     private Integer sequenceNumber;
     private String messageId;
+    private String commandId;
     private String actor = "service_user";
 
     public CloudRuntimeEventImpl() {}
@@ -126,6 +128,15 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     }
 
     @Override
+    public String getCommandId() {
+        return commandId;
+    }
+
+    public void setCommandId(String commandId) {
+        this.commandId = commandId;
+    }
+
+    @Override
     public String getActor() {
         return this.actor;
     }
@@ -156,6 +167,8 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
             .append(sequenceNumber)
             .append(", messageId=")
             .append(messageId)
+            .append(", commandId=")
+            .append(commandId)
             .append(", actor=")
             .append(actor)
             .append(", toString()=")
@@ -169,6 +182,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
         return Objects.hash(
             appName,
             appVersion,
+            commandId,
             entityId,
             messageId,
             actor,
@@ -199,6 +213,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
         return (
             Objects.equals(appName, other.appName) &&
             Objects.equals(appVersion, other.appVersion) &&
+            Objects.equals(commandId, other.commandId) &&
             Objects.equals(entityId, other.entityId) &&
             Objects.equals(messageId, other.messageId) &&
             Objects.equals(actor, other.actor) &&

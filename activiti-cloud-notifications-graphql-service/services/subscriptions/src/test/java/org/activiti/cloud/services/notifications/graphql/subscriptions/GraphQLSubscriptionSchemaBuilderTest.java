@@ -31,13 +31,15 @@ public class GraphQLSubscriptionSchemaBuilderTest {
         assertThat(schemaBuilder.getGraphQLSchema()).isNotNull();
         assertThat(schemaBuilder.getGraphQLSchema().getSubscriptionType()).isNotNull();
         assertThat(schemaBuilder.getGraphQLSchema().getSubscriptionType().getName()).isEqualTo("Subscription");
-        assertThat(schemaBuilder.getGraphQLSchema().getSubscriptionType().getFieldDefinition("engineEvents"))
-            .isNotNull();
+        assertThat(
+            schemaBuilder.getGraphQLSchema().getSubscriptionType().getFieldDefinition("engineEvents")
+        ).isNotNull();
     }
 
     @Test
     public void testNotificationsSchemaBuilderParsesSchemaNotFoundRuntimeException() {
-        assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> new GraphQLSubscriptionSchemaBuilder("http://notfound.com//activiti.graphqls"));
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+            new GraphQLSubscriptionSchemaBuilder("http://notfound.com//activiti.graphqls")
+        );
     }
 }

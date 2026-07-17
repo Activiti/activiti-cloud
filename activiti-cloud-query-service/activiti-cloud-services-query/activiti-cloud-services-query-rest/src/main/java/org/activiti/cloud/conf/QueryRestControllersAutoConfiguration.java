@@ -43,6 +43,7 @@ import org.activiti.cloud.services.query.rest.TaskController;
 import org.activiti.cloud.services.query.rest.TaskDeleteController;
 import org.activiti.cloud.services.query.rest.TaskVariableAdminController;
 import org.activiti.cloud.services.query.rest.TaskVariableController;
+import org.activiti.cloud.services.query.rest.advice.SerializationViewResponseBodyAdvice;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -58,6 +59,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 @Import(
     {
         CommonExceptionHandlerQuery.class,
+        SerializationViewResponseBodyAdvice.class,
         ProcessDefinitionAdminController.class,
         ProcessDefinitionController.class,
         ProcessInstanceAdminController.class,

@@ -209,8 +209,9 @@ class ProcessInstanceControllerImplIT {
     @Test
     void startCreatedProcess() throws Exception {
         StartProcessPayload payload = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
-        when(processRuntime.startCreatedProcess(eq("1"), any(StartProcessPayload.class)))
-            .thenReturn(defaultProcessInstance());
+        when(processRuntime.startCreatedProcess(eq("1"), any(StartProcessPayload.class))).thenReturn(
+            defaultProcessInstance()
+        );
 
         mockMvc
             .perform(
@@ -279,14 +280,16 @@ class ProcessInstanceControllerImplIT {
     void getProcessDiagram() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance(anyString())).thenReturn(processInstance);
-        when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId()))
-            .thenReturn(mock(BpmnModel.class));
+        when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId())).thenReturn(
+            mock(BpmnModel.class)
+        );
         ProcessInstanceMeta processInstanceMeta = mock(ProcessInstanceMeta.class);
         when(processRuntime.processInstanceMeta(any())).thenReturn(processInstanceMeta);
         when(processInstanceMeta.getActiveActivitiesIds()).thenReturn(emptyList());
 
-        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class), anyList(), anyList(), anyList()))
-            .thenReturn("diagram".getBytes());
+        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class), anyList(), anyList(), anyList())).thenReturn(
+            "diagram".getBytes()
+        );
 
         mockMvc
             .perform(get("/v1/process-instances/{processInstanceId}/model", 1).contentType("image/svg+xml"))
@@ -381,8 +384,7 @@ class ProcessInstanceControllerImplIT {
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.update(any())).thenReturn(defaultProcessInstance());
 
-        UpdateProcessPayload cmd = ProcessPayloadBuilder
-            .update()
+        UpdateProcessPayload cmd = ProcessPayloadBuilder.update()
             .withProcessInstanceId("1")
             .withBusinessKey("businessKey")
             .withName("name")
@@ -410,8 +412,7 @@ class ProcessInstanceControllerImplIT {
 
     @Test
     void receiveMessage() throws Exception {
-        ReceiveMessagePayload cmd = MessagePayloadBuilder
-            .receive("messageName")
+        ReceiveMessagePayload cmd = MessagePayloadBuilder.receive("messageName")
             .withCorrelationKey("correlationId")
             .withVariable("name", "value")
             .build();
@@ -427,8 +428,7 @@ class ProcessInstanceControllerImplIT {
 
     @Test
     void startMessage() throws Exception {
-        StartMessagePayload cmd = MessagePayloadBuilder
-            .start("messageName")
+        StartMessagePayload cmd = MessagePayloadBuilder.start("messageName")
             .withBusinessKey("buisinessId")
             .withVariable("name", "value")
             .build();

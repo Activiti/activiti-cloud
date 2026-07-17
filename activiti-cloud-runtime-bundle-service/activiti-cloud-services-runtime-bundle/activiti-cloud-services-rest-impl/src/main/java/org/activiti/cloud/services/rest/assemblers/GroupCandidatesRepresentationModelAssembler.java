@@ -20,7 +20,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class GroupCandidatesRepresentationModelAssembler
-    implements RepresentationModelAssembler<CandidateGroup, EntityModel<CandidateGroup>> {
+    implements RepresentationModelAssembler<CandidateGroup, EntityModel<CandidateGroup>>
+{
 
     private String taskId;
 

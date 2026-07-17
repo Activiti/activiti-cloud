@@ -89,11 +89,12 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         integrationContext.addInBoundVariables(Map.of("inboundVar1", "value1", "inboundVar2", "value2"));
         integrationContext.addOutBoundVariables(Map.of("outboundVar1", "value1", "outboundVar2", "value2"));
 
-        AggregateIntegrationResultReceivedEventCmd aggregateIntegrationResultReceivedEventCmd = new AggregateIntegrationResultReceivedEventCmd(
-            integrationContext,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
-        );
+        AggregateIntegrationResultReceivedEventCmd aggregateIntegrationResultReceivedEventCmd =
+            new AggregateIntegrationResultReceivedEventCmd(
+                integrationContext,
+                runtimeBundleProperties,
+                processEngineEventsAggregator
+            );
 
         //when
         aggregateIntegrationResultReceivedEventCmd.execute(null);
@@ -116,11 +117,12 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         integrationContext.addInBoundVariables(Map.of("inboundVar1", "value1", "inboundVar2", "value2"));
         integrationContext.addOutBoundVariables(Map.of("outboundVar1", "value1", "outboundVar2", "value2"));
 
-        AggregateIntegrationResultReceivedEventCmd aggregateIntegrationResultReceivedEventCmd = new AggregateIntegrationResultReceivedEventCmd(
-            integrationContext,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
-        );
+        AggregateIntegrationResultReceivedEventCmd aggregateIntegrationResultReceivedEventCmd =
+            new AggregateIntegrationResultReceivedEventCmd(
+                integrationContext,
+                runtimeBundleProperties,
+                processEngineEventsAggregator
+            );
 
         //when
         aggregateIntegrationResultReceivedEventCmd.execute(null);
@@ -129,9 +131,11 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         verify(processEngineEventsAggregator).add(messageCaptor.capture());
         CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
         IntegrationContext sanitizedContext = event.getEntity();
-        assertThat(sanitizedContext.getInBoundVariables())
-            .containsExactlyInAnyOrderEntriesOf(Map.of("inboundVar1", "value1", "inboundVar2", "value2"));
-        assertThat(sanitizedContext.getOutBoundVariables())
-            .containsExactlyInAnyOrderEntriesOf(Map.of("outboundVar1", "value1", "outboundVar2", "value2"));
+        assertThat(sanitizedContext.getInBoundVariables()).containsExactlyInAnyOrderEntriesOf(
+            Map.of("inboundVar1", "value1", "inboundVar2", "value2")
+        );
+        assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(
+            Map.of("outboundVar1", "value1", "outboundVar2", "value2")
+        );
     }
 }

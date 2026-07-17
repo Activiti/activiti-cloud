@@ -88,8 +88,9 @@ public class CloudApplicationDeployedProducerTest {
             new ApplicationDeployedEventImpl(deployment1),
             new ApplicationDeployedEventImpl(deployment2)
         );
-        given(messageBuilderAppenderChain.withPayload(any()))
-            .willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
+        given(messageBuilderAppenderChain.withPayload(any())).willReturn(
+            MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2])
+        );
 
         //when
         cloudApplicationDeployedProducer.sendApplicationDeployedEvents(
@@ -101,8 +102,9 @@ public class CloudApplicationDeployedProducerTest {
         verify(auditProducer).send(any());
 
         verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
-        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays
-            .stream(messagePayloadCaptor.getValue())
+        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays.stream(
+            messagePayloadCaptor.getValue()
+        )
             .map(CloudApplicationDeployedEvent.class::cast)
             .collect(Collectors.toList());
         assertThat(cloudApplicationDeployedEvents)
@@ -121,8 +123,9 @@ public class CloudApplicationDeployedProducerTest {
         List<ApplicationDeployedEvent> applicationDeployedEventList = List.of(
             new ApplicationDeployedEventImpl(deployment, ApplicationEvents.APPLICATION_ROLLBACK)
         );
-        given(messageBuilderAppenderChain.withPayload(any()))
-            .willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[1]));
+        given(messageBuilderAppenderChain.withPayload(any())).willReturn(
+            MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[1])
+        );
 
         //when
         cloudApplicationDeployedProducer.sendApplicationDeployedEvents(
@@ -134,8 +137,9 @@ public class CloudApplicationDeployedProducerTest {
         verify(auditProducer).send(any());
 
         verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
-        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays
-            .stream(messagePayloadCaptor.getValue())
+        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays.stream(
+            messagePayloadCaptor.getValue()
+        )
             .map(CloudApplicationDeployedEvent.class::cast)
             .collect(Collectors.toList());
         assertThat(cloudApplicationDeployedEvents)

@@ -17,6 +17,7 @@ package org.activiti.cloud.services.audit.jpa.converters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
@@ -24,14 +25,21 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskCandidateUserAddedEventEntity;
 import org.junit.jupiter.api.Test;
 
-public class TaskCandidateUserAddedEventConverterTest {
+class TaskCandidateUserAddedEventConverterTest {
 
-    private TaskCandidateUserAddedEventConverter eventConverter = new TaskCandidateUserAddedEventConverter(
+    private final TaskCandidateUserAddedEventConverter eventConverter = new TaskCandidateUserAddedEventConverter(
         new EventContextInfoAppender()
     );
 
     @Test
-    public void checkConvertToEntityTaskCandidateUserAddedEvent() {
+    void should_returnTaskCandidateUserAdded_when_getSupportedEvent() {
+        assertThat(eventConverter.getSupportedEvent()).isEqualTo(
+            TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name()
+        );
+    }
+
+    @Test
+    void should_buildEntityWithCandidateUserAndProcessContext_when_convertToEntity() {
         //given
         CloudTaskCandidateUserAddedEventImpl event = createTaskCandidateUserAddedEvent();
 
@@ -39,41 +47,51 @@ public class TaskCandidateUserAddedEventConverterTest {
         AuditEventEntity auditEventEntity = eventConverter.convertToEntity(event);
 
         //then
-        assertThat(auditEventEntity).isNotNull();
-        assertThat(((TaskCandidateUserAddedEventEntity) auditEventEntity).getCandidateUser().getTaskId())
-            .isEqualTo(event.getEntity().getTaskId());
-        assertThat(((TaskCandidateUserAddedEventEntity) auditEventEntity).getCandidateUser().getUserId())
-            .isEqualTo(event.getEntity().getUserId());
-        assertThat(auditEventEntity.getEntityId()).isEqualTo(event.getEntityId());
-        assertThat(auditEventEntity.getProcessInstanceId()).isEqualTo(event.getProcessInstanceId());
-        assertThat(auditEventEntity.getProcessDefinitionId()).isEqualTo(event.getProcessDefinitionId());
-        assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(event.getProcessDefinitionKey());
-        assertThat(auditEventEntity.getBusinessKey()).isEqualTo(event.getBusinessKey());
-        assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(event.getParentProcessInstanceId());
+        assertThat(auditEventEntity)
+            .isNotNull()
+            .isInstanceOf(TaskCandidateUserAddedEventEntity.class)
+            .returns(event.getEntity().getTaskId(), e ->
+                ((TaskCandidateUserAddedEventEntity) e).getCandidateUser().getTaskId()
+            )
+            .returns(event.getEntity().getUserId(), e ->
+                ((TaskCandidateUserAddedEventEntity) e).getCandidateUser().getUserId()
+            )
+            .returns(event.getEntityId(), AuditEventEntity::getEntityId)
+            .returns(event.getProcessInstanceId(), AuditEventEntity::getProcessInstanceId)
+            .returns(event.getProcessDefinitionId(), AuditEventEntity::getProcessDefinitionId)
+            .returns(event.getProcessDefinitionKey(), AuditEventEntity::getProcessDefinitionKey)
+            .returns(event.getBusinessKey(), AuditEventEntity::getBusinessKey)
+            .returns(event.getParentProcessInstanceId(), AuditEventEntity::getParentProcessInstanceId);
     }
 
     @Test
-    public void checkConvertToAPITaskCandidateUserAddedEvent() {
+    void should_buildCloudEventWithCandidateUserAndProcessContext_when_convertToAPI() {
         //given
         AuditEventEntity auditEventEntity = eventConverter.convertToEntity(createTaskCandidateUserAddedEvent());
+        TaskCandidateUserAddedEventEntity entity = (TaskCandidateUserAddedEventEntity) auditEventEntity;
 
         //when
         CloudRuntimeEvent cloudEvent = eventConverter.convertToAPI(auditEventEntity);
-        assertThat(cloudEvent).isNotNull();
-        assertThat(((TaskCandidateUserAddedEventEntity) auditEventEntity).getCandidateUser().getTaskId())
-            .isEqualTo(((CloudTaskCandidateUserAddedEventImpl) cloudEvent).getEntity().getTaskId());
-        assertThat(((TaskCandidateUserAddedEventEntity) auditEventEntity).getCandidateUser().getUserId())
-            .isEqualTo(((CloudTaskCandidateUserAddedEventImpl) cloudEvent).getEntity().getUserId());
-        assertThat(auditEventEntity.getEntityId()).isEqualTo(cloudEvent.getEntityId());
-        assertThat(auditEventEntity.getProcessInstanceId()).isEqualTo(cloudEvent.getProcessInstanceId());
-        assertThat(auditEventEntity.getProcessDefinitionId()).isEqualTo(cloudEvent.getProcessDefinitionId());
-        assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(cloudEvent.getProcessDefinitionKey());
-        assertThat(auditEventEntity.getBusinessKey()).isEqualTo(cloudEvent.getBusinessKey());
-        assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(cloudEvent.getParentProcessInstanceId());
+
+        //then
+        assertThat(cloudEvent)
+            .isNotNull()
+            .isInstanceOf(CloudTaskCandidateUserAddedEventImpl.class)
+            .returns(entity.getCandidateUser().getTaskId(), e ->
+                ((CloudTaskCandidateUserAddedEventImpl) e).getEntity().getTaskId()
+            )
+            .returns(entity.getCandidateUser().getUserId(), e ->
+                ((CloudTaskCandidateUserAddedEventImpl) e).getEntity().getUserId()
+            )
+            .returns(entity.getEntityId(), CloudRuntimeEvent::getEntityId)
+            .returns(entity.getProcessInstanceId(), CloudRuntimeEvent::getProcessInstanceId)
+            .returns(entity.getProcessDefinitionId(), CloudRuntimeEvent::getProcessDefinitionId)
+            .returns(entity.getProcessDefinitionKey(), CloudRuntimeEvent::getProcessDefinitionKey)
+            .returns(entity.getBusinessKey(), CloudRuntimeEvent::getBusinessKey)
+            .returns(entity.getParentProcessInstanceId(), CloudRuntimeEvent::getParentProcessInstanceId);
     }
 
     private CloudTaskCandidateUserAddedEventImpl createTaskCandidateUserAddedEvent() {
-        //given
         TaskCandidateUserImpl taskCandidateUser = new TaskCandidateUserImpl("userId", "1234-abc-5678-def");
 
         CloudTaskCandidateUserAddedEventImpl candidateUserAddedEvent = new CloudTaskCandidateUserAddedEventImpl(

@@ -16,8 +16,6 @@
 
 import { randomUUID } from 'node:crypto';
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
-import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import type { EngineEventsSubscription } from '../../services/notifications';
@@ -59,7 +57,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             );
 
             await activiti.step('And the user starts CONNECTOR_PROCESS_INSTANCE', async () => {
-                const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
+                const processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
                     processDefinitionKey,
                     businessKey,
                 });
@@ -94,15 +92,11 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the process instance status is COMPLETED', async () => {
-                await expect
-                    .poll(async () => {
-                        const instance = await getQueryProcessInstanceWhenSynced(
-                            queryServiceTestAdmin,
-                            processInstanceId!
-                        );
-                        return instance?.status;
-                    }, pollOptions('querySync'))
-                    .toBe(ProcessInstanceStatus.COMPLETED);
+                const instance = await queryServiceTestAdmin.waitForProcessInstanceStatus(
+                    processInstanceId!,
+                    ProcessInstanceStatus.COMPLETED
+                );
+                expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
     );
@@ -137,7 +131,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             );
 
             await activiti.step('And the user starts PROCESS_INSTANCE_WITH_VARIABLES', async () => {
-                const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
+                const processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
                     processDefinitionKey,
                     businessKey,
                 });
@@ -161,9 +155,9 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the admin completes the task', async () => {
-                const tasks = await taskServiceTestAdmin.getTasksByProcessInstanceId(processInstanceId!);
+                const tasks = await taskServiceTestAdmin.tasks.getTasksByProcessInstanceId(processInstanceId!);
                 expect(tasks.length).toBeGreaterThan(0);
-                await taskAdminServiceTestAdmin.completeTask(tasks[0].id);
+                await taskAdminServiceTestAdmin.tasks.completeTask(tasks[0].id);
             });
 
             await activiti.step('And PROCESS_COMPLETED notification payload with actor filter is received', async () => {
@@ -178,12 +172,11 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the process instance status is COMPLETED', async () => {
-                await expect
-                    .poll(async () => {
-                        const instance = await queryServiceTestAdmin.getProcessInstance(processInstanceId!);
-                        return instance?.status;
-                    }, pollOptions('querySync'))
-                    .toBe(ProcessInstanceStatus.COMPLETED);
+                const instance = await queryServiceTestAdmin.waitForProcessInstanceStatus(
+                    processInstanceId!,
+                    ProcessInstanceStatus.COMPLETED
+                );
+                expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
     );
@@ -209,7 +202,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the user starts SIGNAL_THROW_PROCESS_INSTANCE', async () => {
-                const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
+                const processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
                     processDefinitionKey: signalThrowProcessKey,
                 });
                 expect(processInstance.id).toBeTruthy();
@@ -235,12 +228,12 @@ activiti.describe('Runtime — Notifications Actions', () => {
             );
 
             await activiti.step('And the process instance status is COMPLETED', async () => {
-                await expect
-                    .poll(async () => {
-                        const instance = await queryServiceTestAdmin.getProcessInstance(processInstanceId!);
-                        return instance?.status;
-                    }, pollOptions('signalProcess'))
-                    .toBe(ProcessInstanceStatus.COMPLETED);
+                const instance = await queryServiceTestAdmin.waitForProcessInstanceStatus(
+                    processInstanceId!,
+                    ProcessInstanceStatus.COMPLETED,
+                    'signalProcess'
+                );
+                expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
     );
@@ -267,7 +260,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             );
 
             await activiti.step('And the user starts INTERMEDIATE_TIMER_EVENT_PROCESS', async () => {
-                const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
+                const processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
                     processDefinitionKey,
                     businessKey,
                 });
@@ -302,12 +295,12 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the process instance status is COMPLETED', async () => {
-                await expect
-                    .poll(async () => {
-                        const instance = await queryServiceTestAdmin.getProcessInstance(processInstanceId!);
-                        return instance?.status;
-                    }, pollOptions('processStatus'))
-                    .toBe(ProcessInstanceStatus.COMPLETED);
+                const instance = await queryServiceTestAdmin.waitForProcessInstanceStatus(
+                    processInstanceId!,
+                    ProcessInstanceStatus.COMPLETED,
+                    'processStatus'
+                );
+                expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
     );
@@ -334,7 +327,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             );
 
             await activiti.step('And the user starts BOUNDARY_TIMER_EVENT_PROCESS', async () => {
-                const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
+                const processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
                     processDefinitionKey,
                     businessKey,
                 });
@@ -369,12 +362,12 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the process instance status is COMPLETED', async () => {
-                await expect
-                    .poll(async () => {
-                        const instance = await queryServiceTestAdmin.getProcessInstance(processInstanceId!);
-                        return instance?.status;
-                    }, pollOptions('processStatus'))
-                    .toBe(ProcessInstanceStatus.COMPLETED);
+                const instance = await queryServiceTestAdmin.waitForProcessInstanceStatus(
+                    processInstanceId!,
+                    ProcessInstanceStatus.COMPLETED,
+                    'processStatus'
+                );
+                expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
     );
@@ -399,7 +392,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             );
 
             await activiti.step('And the user sends startMessage with the session businessId', async () => {
-                const processInstance = await runtimeBundleServiceTestAdmin.sendStartMessage({
+                const processInstance = await runtimeBundleServiceTestAdmin.processInstances.sendStartMessage({
                     name: 'startMessage',
                     businessKey: businessId,
                 });
@@ -427,7 +420,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the user sends boundaryMessage with the session businessId', async () => {
-                await runtimeBundleServiceTestAdmin.sendReceiveMessage({
+                await runtimeBundleServiceTestAdmin.processInstances.sendReceiveMessage({
                     name: 'boundaryMessage',
                     correlationKey: businessId,
                 });
@@ -448,7 +441,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the user sends catchMessage with the session businessId', async () => {
-                await runtimeBundleServiceTestAdmin.sendReceiveMessage({
+                await runtimeBundleServiceTestAdmin.processInstances.sendReceiveMessage({
                     name: 'catchMessage',
                     correlationKey: businessId,
                 });
@@ -469,12 +462,11 @@ activiti.describe('Runtime — Notifications Actions', () => {
             });
 
             await activiti.step('And the process instance status is COMPLETED', async () => {
-                await expect
-                    .poll(async () => {
-                        const instance = await queryServiceTestAdmin.getProcessInstance(processInstanceId!);
-                        return instance?.status;
-                    }, pollOptions('querySync'))
-                    .toBe(ProcessInstanceStatus.COMPLETED);
+                const instance = await queryServiceTestAdmin.waitForProcessInstanceStatus(
+                    processInstanceId!,
+                    ProcessInstanceStatus.COMPLETED
+                );
+                expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
     );

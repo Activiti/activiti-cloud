@@ -34,11 +34,10 @@ public class IntegrationResultDestinationBuilderImpl implements IntegrationResul
         String resultDestinationOverride = connectorProperties.getResultDestinationOverride();
 
         String destination = ObjectUtils.isEmpty(resultDestinationOverride)
-            ? Optional
-                .of(event)
-                .map(IntegrationRequest::getResultDestination)
-                .filter(Predicate.not(ObjectUtils::isEmpty))
-                .orElseGet(() -> getServiceDestination(event))
+            ? Optional.of(event)
+                  .map(IntegrationRequest::getResultDestination)
+                  .filter(Predicate.not(ObjectUtils::isEmpty))
+                  .orElseGet(() -> getServiceDestination(event))
             : resultDestinationOverride;
 
         return destination;

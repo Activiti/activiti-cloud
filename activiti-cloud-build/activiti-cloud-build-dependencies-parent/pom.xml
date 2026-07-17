@@ -17,13 +17,16 @@
     <graphql-java.version>25.0</graphql-java.version>
     <postgresql.version>42.7.11</postgresql.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
-    <netty.version>4.2.13.Final</netty.version>
-    <jackson.version>3.0.4</jackson.version>
+    <netty.version>4.2.15.Final</netty.version>
+    <jackson.version>3.1.4</jackson.version>
+    <jackson2.version>2.21.4</jackson2.version>
     <rest-assured.version>6.0.0</rest-assured.version>
     <!-- AAE-43864 temporary update for security issue -->
     <plexus-utils.version>4.0.3</plexus-utils.version>
     <!-- Security fix: CVE in BouncyCastle 1.81 https://hyland.atlassian.net/browse/AAE-44983 -->
     <bcprov.version>1.84</bcprov.version>
+    <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
+    <spring-kafka.version>4.0.6</spring-kafka.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -51,6 +54,22 @@
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
         <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- AAE-47587 Jackson 3.x BOM override -->
+      <dependency>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- AAE-47589 Jackson BOM override -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson2.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -126,6 +145,13 @@
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk18on</artifactId>
         <version>${bcprov.version}</version>
+      </dependency>
+
+      <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
+      <dependency>
+        <groupId>org.springframework.kafka</groupId>
+        <artifactId>spring-kafka</artifactId>
+        <version>${spring-kafka.version}</version>
       </dependency>
 
       <dependency>

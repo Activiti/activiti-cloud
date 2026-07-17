@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
@@ -41,6 +42,9 @@ public class ProcessCreatedEventHandlerTest {
     @Mock
     EntityManager entityManager;
 
+    @Mock
+    ProcessInstanceHierarchyService hierarchyService;
+
     @Test
     public void handleShouldCreateAndStoreProcessInstanceEntity() {
         //given
@@ -59,10 +63,31 @@ public class ProcessCreatedEventHandlerTest {
 
         assertThat(processInstanceEntity.getId()).isEqualTo(expectedEventEntity.getId());
         assertThat(processInstanceEntity.getName()).isEqualTo(expectedEventEntity.getName());
-        assertThat(processInstanceEntity.getProcessDefinitionId())
-            .isEqualTo(expectedEventEntity.getProcessDefinitionId());
-        assertThat(processInstanceEntity.getRootProcessInstanceId())
-            .isEqualTo(expectedEventEntity.getRootProcessInstanceId());
+        assertThat(processInstanceEntity.getProcessDefinitionId()).isEqualTo(
+            expectedEventEntity.getProcessDefinitionId()
+        );
+        assertThat(processInstanceEntity.getRootProcessInstanceId()).isEqualTo(
+            expectedEventEntity.getRootProcessInstanceId()
+        );
+
+        verify(hierarchyService).registerProcess("id");
+        verifyNoMoreInteractions(hierarchyService);
+    }
+
+    @Test
+    void handleShouldRegisterSubprocessWhenParentIdIsPresent() {
+        ProcessInstanceImpl subprocess = buildProcess();
+        subprocess.setId("child");
+        subprocess.setParentId("parent");
+        CloudProcessCreatedEvent event = new CloudProcessCreatedEventImpl(subprocess);
+
+        when(entityManager.find(ProcessInstanceEntity.class, "child")).thenReturn(null);
+
+        handler.handle(event);
+
+        verify(entityManager).persist(ArgumentCaptor.forClass(ProcessInstanceEntity.class).capture());
+        verify(hierarchyService).registerSubprocess("child", "parent");
+        verifyNoMoreInteractions(hierarchyService);
     }
 
     private static ProcessInstanceImpl buildProcess() {

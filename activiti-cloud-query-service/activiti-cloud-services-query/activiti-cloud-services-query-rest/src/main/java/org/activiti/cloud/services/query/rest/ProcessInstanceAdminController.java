@@ -24,15 +24,19 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.api.process.model.ProcessInstanceSearchResult;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.advice.SerializationViewResponseBodyAdvice;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceSearchResultRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
@@ -43,7 +47,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,7 +67,11 @@ public class ProcessInstanceAdminController {
 
     private final ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
+    private final ProcessInstanceSearchResultRepresentationModelAssembler processInstanceSearchResultRepresentationModelAssembler;
+
     private final AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
+
+    private final AlfrescoPagedModelAssembler<ProcessInstanceSearchResult> pagedSearchResultCollectionModelAssembler;
 
     private final ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper;
 
@@ -72,12 +79,17 @@ public class ProcessInstanceAdminController {
     public ProcessInstanceAdminController(
         ProcessInstanceAdminService processInstanceAdminService,
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+        ProcessInstanceSearchResultRepresentationModelAssembler processInstanceSearchResultRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessInstanceSearchResult> pagedSearchResultCollectionModelAssembler,
         ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper
     ) {
         this.processInstanceAdminService = processInstanceAdminService;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
+        this.processInstanceSearchResultRepresentationModelAssembler =
+            processInstanceSearchResultRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
+        this.pagedSearchResultCollectionModelAssembler = pagedSearchResultCollectionModelAssembler;
         this.processInstanceAdminControllerHelper = processInstanceAdminControllerHelper;
     }
 
@@ -123,12 +135,13 @@ public class ProcessInstanceAdminController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public MappingJacksonValue findAllFromBodyProcessAdmin(
+    public PagedModel<EntityModel<QueryCloudProcessInstance>> findAllFromBodyProcessAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessInstanceEntity.class
         ) Predicate predicate,
         @RequestBody(required = false) ProcessInstanceQueryBody payload,
-        Pageable pageable
+        Pageable pageable,
+        HttpServletRequest request
     ) {
         ProcessInstanceQueryBody queryBody = Optional.ofNullable(payload).orElse(new ProcessInstanceQueryBody());
 
@@ -143,27 +156,25 @@ public class ProcessInstanceAdminController {
             processInstanceRepresentationModelAssembler
         );
 
-        MappingJacksonValue result = new MappingJacksonValue(pagedModel);
-        if (queryBody.hasVariableKeys()) {
-            result.setSerializationView(JsonViews.ProcessVariables.class);
-        } else {
-            result.setSerializationView(JsonViews.General.class);
-        }
+        request.setAttribute(
+            SerializationViewResponseBodyAdvice.SERIALIZATION_VIEW_ATTRIBUTE,
+            queryBody.hasVariableKeys() ? JsonViews.ProcessVariables.class : JsonViews.General.class
+        );
 
-        return result;
+        return pagedModel;
     }
 
     @Operation(summary = "Search process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/search")
-    public PagedModel<EntityModel<QueryCloudProcessInstance>> searchProcessInstances(
+    public PagedModel<EntityModel<ProcessInstanceSearchResult>> searchProcessInstances(
         @RequestBody ProcessInstanceSearchRequest searchRequest,
         Pageable pageable
     ) {
-        return pagedCollectionModelAssembler.toModel(
+        return pagedSearchResultCollectionModelAssembler.toModel(
             pageable,
             processInstanceAdminControllerHelper.searchProcessInstances(searchRequest, pageable),
-            processInstanceRepresentationModelAssembler
+            processInstanceSearchResultRepresentationModelAssembler
         );
     }
 

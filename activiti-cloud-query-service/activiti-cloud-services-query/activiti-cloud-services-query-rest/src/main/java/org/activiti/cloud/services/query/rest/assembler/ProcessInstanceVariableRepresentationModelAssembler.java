@@ -21,7 +21,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class ProcessInstanceVariableRepresentationModelAssembler
-    implements RepresentationModelAssembler<ProcessVariableEntity, EntityModel<CloudVariableInstance>> {
+    implements RepresentationModelAssembler<ProcessVariableEntity, EntityModel<CloudVariableInstance>>
+{
 
     @Override
     public EntityModel<CloudVariableInstance> toModel(ProcessVariableEntity entity) {

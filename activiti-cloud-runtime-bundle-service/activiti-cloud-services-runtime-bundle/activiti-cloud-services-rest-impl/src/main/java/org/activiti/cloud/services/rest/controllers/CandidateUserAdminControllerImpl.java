@@ -82,8 +82,9 @@ public class CandidateUserAdminControllerImpl implements CandidateUserAdminContr
         return resourcesAssembler.toCollectionModel(
             toCandidateUserConverter.from(taskAdminRuntime.userCandidates(taskId)),
             userCandidatesRepresentationModelAssembler,
-            linkTo(methodOn(this.getClass()).getUserCandidates(userCandidatesRepresentationModelAssembler.getTaskId()))
-                .withSelfRel()
+            linkTo(
+                methodOn(this.getClass()).getUserCandidates(userCandidatesRepresentationModelAssembler.getTaskId())
+            ).withSelfRel()
         );
     }
 }

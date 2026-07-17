@@ -70,8 +70,7 @@ public class JsonSchemaGeneratorTest {
 
     @Test
     public void cloudEventRegistryShouldContainAllEnumValues() {
-        Set<String> eventTypeStringSet = EnumSet
-            .allOf(CloudRuntimeEventType.class)
+        Set<String> eventTypeStringSet = EnumSet.allOf(CloudRuntimeEventType.class)
             .stream()
             .map(Enum::name)
             .collect(Collectors.toSet());

@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 public class ProcessVariableDeletedEventHandler {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ProcessVariableDeletedEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessVariableDeletedEventHandler.class);
 
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
@@ -49,23 +49,18 @@ public class ProcessVariableDeletedEventHandler {
                     .getVariable(variableName)
                     .ifPresentOrElse(
                         variableEntity -> {
-                            // Persist into database
                             processInstanceEntity.getVariables().remove(variableEntity);
-
                             entityManager.remove(variableEntity);
                         },
-                        () -> {
+                        () ->
                             LOGGER.warn(
-                                "Unable to find variableEntity with name '" +
-                                variableName +
-                                "' for process instance '" +
-                                processInstanceId +
-                                "'"
-                            );
-                        }
+                                "Unable to find variableEntity with name '{}' for process instance '{}'",
+                                variableName,
+                                processInstanceId
+                            )
                     );
             } catch (Exception cause) {
-                LOGGER.error("Error handling ProcessVariableDeletedEvent[" + event + "]", cause);
+                LOGGER.error("Error handling ProcessVariableDeletedEvent[{}]", event, cause);
             }
         }
     }

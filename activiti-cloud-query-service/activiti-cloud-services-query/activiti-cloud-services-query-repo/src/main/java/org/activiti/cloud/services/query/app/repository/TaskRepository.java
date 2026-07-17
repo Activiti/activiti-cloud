@@ -34,7 +34,8 @@ public interface TaskRepository
         QuerydslPredicateExecutor<TaskEntity>,
         QuerydslBinderCustomizer<QTaskEntity>,
         CustomizedTaskRepository,
-        CrudRepository<TaskEntity, String> {
+        CrudRepository<TaskEntity, String>
+{
     @Override
     default void customize(QuerydslBindings bindings, QTaskEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));

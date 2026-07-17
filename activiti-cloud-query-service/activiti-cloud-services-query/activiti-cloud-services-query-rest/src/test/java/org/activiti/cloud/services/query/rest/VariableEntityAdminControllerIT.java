@@ -34,6 +34,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -107,6 +108,9 @@ public class VariableEntityAdminControllerIT {
     private ProcessInstanceService processInstanceService;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -138,14 +142,16 @@ public class VariableEntityAdminControllerIT {
         );
         variableEntity.setValue("John");
 
-        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12)
+        );
 
         //when
         MvcResult result = mockMvc
             .perform(
-                get("/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10", variableEntity.getTaskId())
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10", variableEntity.getTaskId()).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isOk())

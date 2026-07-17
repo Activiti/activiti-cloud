@@ -46,9 +46,11 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
     );
 
     private final EntityManager entityManager;
+    private final ProcessInstanceHierarchyService hierarchyService;
 
-    public ProcessDeletedEventHandler(EntityManager entityManager) {
+    public ProcessDeletedEventHandler(EntityManager entityManager, ProcessInstanceHierarchyService hierarchyService) {
         this.entityManager = entityManager;
+        this.hierarchyService = hierarchyService;
     }
 
     @Override
@@ -57,11 +59,11 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
 
         var eventProcessInstanceId = deletedEvent.getEntity().getId();
 
-        ProcessInstanceEntity processInstanceEntity = Optional
-            .ofNullable(entityManager.find(ProcessInstanceEntity.class, eventProcessInstanceId))
-            .orElseThrow(() ->
-                new QueryException("Unable to find process instance with the given id: " + eventProcessInstanceId)
-            );
+        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(
+            entityManager.find(ProcessInstanceEntity.class, eventProcessInstanceId)
+        ).orElseThrow(() ->
+            new QueryException("Unable to find process instance with the given id: " + eventProcessInstanceId)
+        );
 
         if (ALLOWED_STATUS.contains(processInstanceEntity.getStatus())) {
             remove(
@@ -89,6 +91,7 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
             remove(ServiceTaskEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(BPMNActivityEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(BPMNSequenceFlowEntity.class, "processInstanceId", eventProcessInstanceId);
+            hierarchyService.removeProcess(eventProcessInstanceId);
             remove(ProcessInstanceEntity.class, "id", eventProcessInstanceId);
         } else {
             throw new IllegalStateException(

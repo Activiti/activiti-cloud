@@ -57,7 +57,9 @@ class AuthorizationConfigurerTest {
     private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl;
 
     @Captor
-    private ArgumentCaptor<Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>> authorizeHttpRequestsCustomizer;
+    private ArgumentCaptor<
+        Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>
+    > authorizeHttpRequestsCustomizer;
 
     @Captor
     private ArgumentCaptor<String[]> requestMatchers;
@@ -92,22 +94,16 @@ class AuthorizationConfigurerTest {
         inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
         assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/c");
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
+        );
 
         inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
         assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/a", "/b");
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager ->
-                    assertThat(manager.getAuthoritiesWithAccess())
-                        .containsExactlyInAnyOrder("ROLE_ROLE_1", "ROLE_ROLE_2")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1", "ROLE_ROLE_2")
+        );
     }
 
     @Test
@@ -141,23 +137,19 @@ class AuthorizationConfigurerTest {
         inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
         assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/c");
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager ->
-                    assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("PERMISSION_PERMISSION_3")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("PERMISSION_PERMISSION_3")
+        );
 
         inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
         assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/a", "/b");
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager ->
-                    assertThat(manager.getAuthoritiesWithAccess())
-                        .containsExactlyInAnyOrder("PERMISSION_PERMISSION_1", "PERMISSION_PERMISSION_2")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder(
+                "PERMISSION_PERMISSION_1",
+                "PERMISSION_PERMISSION_2"
+            )
+        );
     }
 
     @Test
@@ -189,11 +181,9 @@ class AuthorizationConfigurerTest {
         inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
         assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/c");
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
+        );
     }
 
     @Test
@@ -223,43 +213,33 @@ class AuthorizationConfigurerTest {
 
         inOrder.verify(authorizeRequests).requestMatchers(eq(GET), eq("/c"));
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+        );
 
         inOrder.verify(authorizeRequests).requestMatchers(eq(HEAD), eq("/c"));
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+        );
 
         inOrder.verify(authorizeRequests).requestMatchers(eq(PATCH), eq("/c"));
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+        );
 
         inOrder.verify(authorizeRequests).requestMatchers(eq(OPTIONS), eq("/c"));
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+        );
 
         inOrder.verify(authorizeRequests).requestMatchers(eq(TRACE), eq("/c"));
         inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .isInstanceOfSatisfying(
-                CustomAuthorizationManager.class,
-                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
-            );
+        assertThat(argumentCaptor.getValue()).isInstanceOfSatisfying(CustomAuthorizationManager.class, manager ->
+            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+        );
     }
 
     private SecurityConstraint createSecurityConstraintWithRolesAndPatterns(String[] roles, String[] patterns) {

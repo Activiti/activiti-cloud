@@ -22,7 +22,8 @@ import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent
 
 public class CloudApplicationDeployedEventImpl
     extends CloudRuntimeEventImpl<Deployment, ApplicationEvent.ApplicationEvents>
-    implements CloudApplicationDeployedEvent {
+    implements CloudApplicationDeployedEvent
+{
 
     private final ApplicationEvents eventType;
 

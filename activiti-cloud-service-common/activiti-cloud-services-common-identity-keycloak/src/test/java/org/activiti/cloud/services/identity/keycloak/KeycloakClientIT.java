@@ -427,13 +427,11 @@ public class KeycloakClientIT {
 
         keycloakClient.addRealmLevelUserRoleMapping(ADMIN_USER_ID, List.of(activitiModelerRole));
 
-        Awaitility
-            .await()
-            .untilAsserted(() ->
-                assertThat(keycloakClient.getUserRoles(ADMIN_USER_ID).getRealmMappings())
-                    .extracting(KeycloakRoleMapping::getName)
-                    .contains(ACTIVITI_MODELER)
-            );
+        Awaitility.await().untilAsserted(() ->
+            assertThat(keycloakClient.getUserRoles(ADMIN_USER_ID).getRealmMappings())
+                .extracting(KeycloakRoleMapping::getName)
+                .contains(ACTIVITI_MODELER)
+        );
     }
 
     @Test

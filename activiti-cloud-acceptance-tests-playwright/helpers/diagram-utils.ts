@@ -22,3 +22,13 @@ export function isDiagramShown(diagram: string): boolean {
 export function isDiagramEmpty(diagram: string): boolean {
     return !diagram?.trim();
 }
+
+export function normalizeSvg(svg: string): string {
+    return svg
+        .replace(/<path\b[^>]*\/>/g, '')
+        .replace(/<path\b[^>]*>[\s\S]*?<\/path>/g, '')
+        .replace(/\sstyle="[^"]*"/g, '')
+        .replace(/>\s+</g, '><')
+        .replace(/\s+/g, ' ')
+        .trim();
+}

@@ -477,9 +477,8 @@ public class ActivitiCloudMessagingProperties {
                 .values()
                 .forEach(it -> {
                     it.forEach((key, value) ->
-                        result.compute(
-                            key,
-                            (k, v) -> v == null ? value : Stream.concat(v.stream(), value.stream()).distinct().toList()
+                        result.compute(key, (k, v) ->
+                            v == null ? value : Stream.concat(v.stream(), value.stream()).distinct().toList()
                         )
                     );
                 });
@@ -526,15 +525,13 @@ public class ActivitiCloudMessagingProperties {
         }
 
         public boolean isExcludeRequiredProducerGroup(String bindingName) {
-            return Optional
-                .ofNullable(routes.get(bindingName))
+            return Optional.ofNullable(routes.get(bindingName))
                 .map(BindingFunctionRouterProperties::isExcludeRequiredProducerGroups)
                 .orElse(false);
         }
 
         public boolean isOverrideRequiredProducerGroup(String bindingName) {
-            return Optional
-                .ofNullable(routes.get(bindingName))
+            return Optional.ofNullable(routes.get(bindingName))
                 .map(BindingFunctionRouterProperties::getOverrideRequiredProducerGroups)
                 .map(it -> !it.isEmpty())
                 .orElse(false);
@@ -560,8 +557,7 @@ public class ActivitiCloudMessagingProperties {
             destinations
                 .keySet()
                 .forEach(routingContext ->
-                    Optional
-                        .ofNullable(destinations.get(routingContext))
+                    Optional.ofNullable(destinations.get(routingContext))
                         .map(it -> it.get(bindingName))
                         .ifPresent(destination -> {
                             registrations(routingContext)
@@ -576,12 +572,10 @@ public class ActivitiCloudMessagingProperties {
             destinations
                 .keySet()
                 .forEach(routingContext ->
-                    Optional
-                        .ofNullable(destinations.get(routingContext))
+                    Optional.ofNullable(destinations.get(routingContext))
                         .map(it -> it.get(bindingName))
                         .ifPresent(destinations ->
-                            Stream
-                                .of(destinations.split(","))
+                            Stream.of(destinations.split(","))
                                 .filter(connectorType::equals)
                                 .findFirst()
                                 .ifPresent(destination -> {

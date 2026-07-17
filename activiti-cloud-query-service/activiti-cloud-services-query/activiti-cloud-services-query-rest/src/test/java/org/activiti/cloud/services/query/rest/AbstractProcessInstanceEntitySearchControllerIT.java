@@ -88,9 +88,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
     @Test
     void should_returnProcessInstances_filteredById() {
-        IntStream
-            .range(0, 3)
-            .forEach(i -> queryTestUtils.buildProcessInstance().withId("id" + i).withInitiator(USER).buildAndSave());
+        IntStream.range(0, 3).forEach(i ->
+            queryTestUtils.buildProcessInstance().withId("id" + i).withInitiator(USER).buildAndSave()
+        );
 
         ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequestBuilder().withIds("id0", "id2").build();
 
@@ -162,8 +162,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withName("Ugly process instance name").buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withNames("amazing", "beautiful");
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withNames(
+            "amazing",
+            "beautiful"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -200,8 +202,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withAppVersion("3.0.0").buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withAppVersions("1.0.0", "2.0.0");
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withAppVersions(
+            "1.0.0",
+            "2.0.0"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -244,8 +248,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED)
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING, ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withStatus(
+            ProcessInstance.ProcessInstanceStatus.RUNNING,
+            ProcessInstance.ProcessInstanceStatus.COMPLETED
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -277,8 +283,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withLastModified(new Date(1000)).buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withLastModifiedFrom(new Date(1000));
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withLastModifiedFrom(new Date(1000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -309,8 +315,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withLastModified(new Date(2000)).buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withLastModifiedTo(new Date(2000));
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withLastModifiedTo(new Date(2000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -341,8 +347,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withStartDate(new Date(1000)).buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withStartFrom(new Date(1000));
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withStartFrom(
+            new Date(1000)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -373,8 +380,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withStartDate(new Date(2000)).buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withStartTo(new Date(2000));
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withStartTo(
+            new Date(2000)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -405,8 +413,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withCompletedDate(new Date(1000)).buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withCompletedFrom(new Date(1000));
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withCompletedFrom(new Date(1000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -437,8 +445,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withCompletedDate(new Date(2000)).buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withCompletedTo(new Date(2000));
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withCompletedTo(
+            new Date(2000)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -469,8 +478,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withSuspendedDate(new Date(1000)).buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSuspendedFrom(new Date(1000));
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withSuspendedFrom(new Date(1000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -501,8 +510,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator(USER).withSuspendedDate(new Date(2000)).buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSuspendedTo(new Date(2000));
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSuspendedTo(
+            new Date(2000)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -677,8 +687,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             )
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableKeys(
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableKeys(
                 new ProcessVariableKey(PROCESS_DEFINITION_KEY, VAR_NAME),
                 new ProcessVariableKey(PROCESS_DEFINITION_KEY, "var3")
             );
@@ -734,8 +744,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(matchingFilter1, matchingFilter2);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(matchingFilter1, matchingFilter2);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -785,8 +795,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(matchingFilter, nonMatchingFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(matchingFilter, nonMatchingFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -831,8 +841,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(requestBuilder.buildJson())
@@ -877,8 +887,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -924,8 +934,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LIKE
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -971,8 +981,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1018,8 +1028,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1065,8 +1075,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1112,8 +1122,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1160,8 +1170,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1207,8 +1217,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1270,8 +1280,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(filterGt, filterLt);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(filterGt, filterLt);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1356,8 +1366,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1403,8 +1413,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1450,8 +1460,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1497,8 +1507,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1545,8 +1555,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1592,8 +1602,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1655,8 +1665,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(filterGt, filterLt);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(filterGt, filterLt);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1741,8 +1751,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1788,8 +1798,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1835,8 +1845,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1882,8 +1892,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1930,8 +1940,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1977,8 +1987,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2040,8 +2050,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(filterGt, filterLt);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(filterGt, filterLt);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2130,8 +2140,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2181,8 +2191,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2232,8 +2242,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2283,8 +2293,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2335,8 +2345,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2386,8 +2396,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2455,8 +2465,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(filterGt, filterLt);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(filterGt, filterLt);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2541,8 +2551,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             FilterOperator.EQUALS
         );
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2590,8 +2600,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(new CloudRuntimeEntitySort("name", Sort.Direction.ASC, false, null, null));
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort("name", Sort.Direction.ASC, false, null, null)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2614,9 +2625,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort("startDate", Sort.Direction.DESC, false, null, null));
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort("startDate", Sort.Direction.DESC, false, null, null)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2663,16 +2674,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "beautiful"))
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.STRING
-                )
-            );
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.STRING)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2696,17 +2700,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.STRING
-                    )
-                );
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.DESC, true, PROCESS_DEFINITION_KEY, VariableType.STRING)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2754,16 +2750,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 1))
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.INTEGER
-                )
-            );
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.INTEGER)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2787,17 +2776,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.INTEGER
-                    )
-                );
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.DESC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.INTEGER
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2845,16 +2832,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("5.1")))
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.BIGDECIMAL
-                )
-            );
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.ASC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.BIGDECIMAL
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2878,17 +2864,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.BIGDECIMAL
-                    )
-                );
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.DESC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.BIGDECIMAL
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2936,16 +2920,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.DATE
-                )
-            );
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.DATE)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2969,17 +2946,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.DATE
-                    )
-                );
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.DESC, true, PROCESS_DEFINITION_KEY, VariableType.DATE)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3033,16 +3002,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             )
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.DATETIME
-                )
-            );
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.ASC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.DATETIME
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3066,17 +3034,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.DATETIME
-                    )
-                );
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.DESC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.DATETIME
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3124,16 +3090,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BOOLEAN, true))
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.BOOLEAN
-                )
-            );
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.BOOLEAN)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3161,17 +3120,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.BOOLEAN
-                    )
-                );
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.DESC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.BOOLEAN
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3304,8 +3261,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
     @Test
     void should_returnBadRequest_when_sortParameterIsInvalid() {
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, null, VariableType.STRING));
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, null, VariableType.STRING)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3324,9 +3282,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(equalTo("0"));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)

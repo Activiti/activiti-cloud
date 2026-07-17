@@ -41,6 +41,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -131,6 +132,9 @@ class TaskEntityControllerIT {
     private ProcessInstanceService processInstanceService;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -145,8 +149,9 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12));
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12)
+        );
 
         //when
         MvcResult result = mockMvc
@@ -169,8 +174,9 @@ class TaskEntityControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
-        when(taskRepository.findAll(nullable(Predicate.class), any(Pageable.class)))
-            .thenReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
+        when(taskRepository.findAll(nullable(Predicate.class), any(Pageable.class))).thenReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11)
+        );
 
         //when
         mockMvc
@@ -211,10 +217,11 @@ class TaskEntityControllerIT {
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
-        MvcResult mvcResult =
-            this.mockMvc.perform(get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult mvcResult = this.mockMvc.perform(
+                get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(mvcResult.getResponse().getContentAsString())
             .inPath("entry.candidateUsers")
@@ -262,11 +269,12 @@ class TaskEntityControllerIT {
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
-        MvcResult mvcResult =
-            this.mockMvc.perform(get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                //then
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult mvcResult = this.mockMvc.perform(
+                get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
         assertThatJson(mvcResult.getResponse().getContentAsString())
             .inPath("entry.permissions")
             .isArray()
@@ -279,8 +287,9 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
-        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000)
+        );
 
         //when
         mockMvc
@@ -294,8 +303,9 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
-        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000)
+        );
 
         //when
         mockMvc
@@ -309,8 +319,9 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(0, 1000, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001)
+        );
 
         //when
         mockMvc
@@ -323,8 +334,9 @@ class TaskEntityControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(0, 1000);
 
-        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001)
+        );
 
         //when
         mockMvc

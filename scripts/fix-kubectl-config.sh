@@ -95,6 +95,9 @@ echo -e "${YELLOW}Using cluster ID: $CLUSTER_ID${NC}"
 if rancher clusters kubeconfig "$CLUSTER_ID" > ~/.kube/config; then
     echo -e "${GREEN}✓ kubectl config generated successfully${NC}"
 
+    # Use the config we just wrote for kubectl checks in this script (callers must export KUBECONFIG themselves).
+    export KUBECONFIG="${HOME}/.kube/config"
+
     # Test the configuration
     if kubectl cluster-info >/dev/null 2>&1; then
         echo -e "${GREEN}✓ kubectl can now connect to cluster${NC}"

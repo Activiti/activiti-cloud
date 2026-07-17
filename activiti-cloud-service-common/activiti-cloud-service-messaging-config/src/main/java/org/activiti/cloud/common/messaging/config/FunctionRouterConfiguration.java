@@ -106,15 +106,13 @@ public class FunctionRouterConfiguration {
     @Bean
     DeclarableCustomizer functionRouterAnonymousQueueCustomizer(ActivitiCloudMessagingProperties messagingProperties) {
         final var groupPrefix = messagingProperties.getFunctionRouter().groupPrefix();
-        final var queuePrefix = Optional
-            .ofNullable(messagingProperties.getRabbitmq().getPrefix())
+        final var queuePrefix = Optional.ofNullable(messagingProperties.getRabbitmq().getPrefix())
             .map(prefix -> prefix.concat(groupPrefix))
             .orElse(groupPrefix);
 
         return declarable -> {
             if (declarable instanceof Queue queue) {
-                Optional
-                    .ofNullable(queue.getName())
+                Optional.ofNullable(queue.getName())
                     .filter(it -> it.startsWith(queuePrefix))
                     .ifPresent(name -> queue.setLeaderLocator("client-local"));
             }
@@ -146,8 +144,7 @@ public class FunctionRouterConfiguration {
     @Bean
     Function<Message<?>, String> functionRegistrationSelector() {
         return message ->
-            Optional
-                .ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
+            Optional.ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
                 .filter(Predicate.not(String::isBlank))
                 .orElseThrow(() ->
                     new MessageDispatchingException(
@@ -176,16 +173,13 @@ public class FunctionRouterConfiguration {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
         return (message, routingContext) -> {
-            Optional
-                .ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
+            Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
                 .or(() ->
-                    Optional
-                        .ofNullable(messagingProperties.getRabbitmq().getPrefix())
+                    Optional.ofNullable(messagingProperties.getRabbitmq().getPrefix())
                         .filter(Predicate.not(String::isBlank))
                         .flatMap(prefix ->
-                            Optional
-                                .ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class))
+                            Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class))
                                 .filter(exchange -> exchange.startsWith(prefix))
                                 .map(exchange -> exchange.substring(prefix.length()))
                         )
@@ -206,13 +200,9 @@ public class FunctionRouterConfiguration {
                                 .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
                                 .map(BindingProperties::getContentType)
                                 .orElse(null);
-                            return MessageBuilder
-                                .fromMessage(
-                                    messageContentTypeNormalizer.normalizeToExpected(
-                                        functionMessage,
-                                        expectedContentType
-                                    )
-                                )
+                            return MessageBuilder.fromMessage(
+                                messageContentTypeNormalizer.normalizeToExpected(functionMessage, expectedContentType)
+                            )
                                 .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
                                 .build();
                         };
@@ -222,14 +212,14 @@ public class FunctionRouterConfiguration {
                             .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
                             .map(functionRequest ->
                                 supplyAsyncWithRetry(
-                                        () ->
-                                            CompletableFuture.supplyAsync(
-                                                () -> routingFunction.apply(functionRequest),
-                                                functionExecutorSelector.apply(functionRequest)
-                                            ),
-                                        functionRouter.getMaxRetries(),
-                                        functionRouter.getRetryInterval()
-                                    )
+                                    () ->
+                                        CompletableFuture.supplyAsync(
+                                            () -> routingFunction.apply(functionRequest),
+                                            functionExecutorSelector.apply(functionRequest)
+                                        ),
+                                    functionRouter.getMaxRetries(),
+                                    functionRouter.getRetryInterval()
+                                )
                                     .thenApply(result -> {
                                         var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
                                         log.debug(
@@ -252,9 +242,9 @@ public class FunctionRouterConfiguration {
                             )
                             .toArray(CompletableFuture[]::new);
 
-                        var completed = CompletableFuture
-                            .allOf(functions)
-                            .thenApply(v -> Stream.of(functions).map(CompletableFuture::join).toList());
+                        var completed = CompletableFuture.allOf(functions).thenApply(v ->
+                            Stream.of(functions).map(CompletableFuture::join).toList()
+                        );
 
                         completed.thenAccept(results -> {
                             var errors = results
@@ -271,8 +261,7 @@ public class FunctionRouterConfiguration {
                             if (!errors.isEmpty()) {
                                 log.debug("Errors handling function route message request {}", errors);
 
-                                Optional
-                                    .ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
+                                Optional.ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
                                     .filter(StringUtils::hasText)
                                     .map(functionCatalog::lookup)
                                     .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
@@ -303,8 +292,7 @@ public class FunctionRouterConfiguration {
                     () -> {
                         final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
 
-                        final var registration = Optional
-                            .ofNullable(destination)
+                        final var registration = Optional.ofNullable(destination)
                             .map(it -> messagingProperties.getFunctionRouter().registrations(routingContext).get(it))
                             .orElse(List.of());
 
@@ -338,18 +326,15 @@ public class FunctionRouterConfiguration {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) {
                 if (bean instanceof DirectChannel messageChannel) {
-                    Optional
-                        .ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class))
-                        .ifPresent(outputBinding -> {
+                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class)).ifPresent(
+                        outputBinding -> {
                             messageChannel.addInterceptor(
                                 new ChannelInterceptor() {
                                     @Override
                                     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                                        return Optional
-                                            .ofNullable(bindingServiceProperties.getBindings().get(beanName))
+                                        return Optional.ofNullable(bindingServiceProperties.getBindings().get(beanName))
                                             .<Message<?>>map(binding ->
-                                                MessageBuilder
-                                                    .fromMessage(message)
+                                                MessageBuilder.fromMessage(message)
                                                     .setHeader(FUNCTION_DESTINATION, binding.getDestination())
                                                     .build()
                                             )
@@ -357,7 +342,8 @@ public class FunctionRouterConfiguration {
                                     }
                                 }
                             );
-                        });
+                        }
+                    );
                 }
                 return bean;
             }

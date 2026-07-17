@@ -59,12 +59,11 @@ class ProcessStartedActorProviderEventListenerTest {
     void beforeEach() {
         when(this.principalIdentityProvider.getUserId(this.principal)).thenReturn(USER_ID);
         when(this.securityContextPrincipalProvider.getCurrentPrincipal()).thenReturn(Optional.of(this.principal));
-        this.processStartedActorProviderEventListener =
-            new ProcessStartedActorProviderEventListener(
-                this.runtimeService,
-                this.securityContextPrincipalProvider,
-                this.principalIdentityProvider
-            );
+        this.processStartedActorProviderEventListener = new ProcessStartedActorProviderEventListener(
+            this.runtimeService,
+            this.securityContextPrincipalProvider,
+            this.principalIdentityProvider
+        );
     }
 
     @Test
@@ -74,13 +73,12 @@ class ProcessStartedActorProviderEventListenerTest {
 
         this.processStartedActorProviderEventListener.onEvent(cloudProcessCreatedEvent);
 
-        verify(this.runtimeService)
-            .addUserIdentityLink(
-                cloudProcessCreatedEvent.getProcessInstanceId(),
-                USER_ID,
-                ActorConstants.ACTOR_TYPE,
-                USERNAME_GUID.getBytes()
-            );
+        verify(this.runtimeService).addUserIdentityLink(
+            cloudProcessCreatedEvent.getProcessInstanceId(),
+            USER_ID,
+            ActorConstants.ACTOR_TYPE,
+            USERNAME_GUID.getBytes()
+        );
     }
 
     @NotNull

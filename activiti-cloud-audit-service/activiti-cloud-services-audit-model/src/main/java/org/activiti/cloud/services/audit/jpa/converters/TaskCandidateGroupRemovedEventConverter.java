@@ -22,8 +22,12 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEv
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskCandidateGroupRemovedEventEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaskCandidateGroupRemovedEventConverter extends BaseEventToEntityConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskCandidateGroupRemovedEventConverter.class);
 
     public TaskCandidateGroupRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
@@ -36,7 +40,16 @@ public class TaskCandidateGroupRemovedEventConverter extends BaseEventToEntityCo
 
     @Override
     public TaskCandidateGroupRemovedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new TaskCandidateGroupRemovedEventEntity((CloudTaskCandidateGroupRemovedEvent) cloudRuntimeEvent);
+        CloudTaskCandidateGroupRemovedEvent cloudEvent = (CloudTaskCandidateGroupRemovedEvent) cloudRuntimeEvent;
+        LOGGER.debug(
+            "[audit] TASK_CANDIDATE_GROUP_REMOVED received: taskId={}, groupId={}, processInstanceId={}, processDefinitionId={}, eventId={}",
+            cloudEvent.getEntity() != null ? cloudEvent.getEntity().getTaskId() : null,
+            cloudEvent.getEntity() != null ? cloudEvent.getEntity().getGroupId() : null,
+            cloudEvent.getProcessInstanceId(),
+            cloudEvent.getProcessDefinitionId(),
+            cloudEvent.getId()
+        );
+        return new TaskCandidateGroupRemovedEventEntity(cloudEvent);
     }
 
     @Override

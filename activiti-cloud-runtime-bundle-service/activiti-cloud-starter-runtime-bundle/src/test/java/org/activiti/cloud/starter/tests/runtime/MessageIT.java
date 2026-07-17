@@ -57,8 +57,7 @@ public class MessageIT {
     @Test
     public void shouldDeliverMessagesViaRestApi() {
         //given
-        StartMessagePayload startMessage = MessagePayloadBuilder
-            .start("startMessage")
+        StartMessagePayload startMessage = MessagePayloadBuilder.start("startMessage")
             .withBusinessKey("businessId")
             .withVariable("correlationKey", "correlationId")
             .build();
@@ -81,8 +80,7 @@ public class MessageIT {
             .contains("correlationId");
 
         //given
-        ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder
-            .receive("boundaryMessage")
+        ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder.receive("boundaryMessage")
             .withCorrelationKey("correlationId")
             .withVariable("customerKey", "customerId")
             .build();
@@ -104,8 +102,7 @@ public class MessageIT {
             .extracting("customerKey")
             .contains("customerId");
         //given
-        ReceiveMessagePayload catchMessage = MessagePayloadBuilder
-            .receive("catchMessage")
+        ReceiveMessagePayload catchMessage = MessagePayloadBuilder.receive("catchMessage")
             .withCorrelationKey("customerId")
             .build();
 
@@ -116,15 +113,13 @@ public class MessageIT {
         assertThat(catchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(
             runtimeService.createProcessInstanceQuery().processInstanceId(startResponse.getBody().getId()).list()
-        )
-            .isEmpty();
+        ).isEmpty();
     }
 
     @Test
     public void shouldReceive404NotFoundIfWrongMessageName() {
         //given
-        StartMessagePayload startMessage = MessagePayloadBuilder
-            .start("notFound")
+        StartMessagePayload startMessage = MessagePayloadBuilder.start("notFound")
             .withBusinessKey("businessId")
             .withVariable("correlationKey", "correlationId")
             .build();
@@ -138,8 +133,7 @@ public class MessageIT {
     @Test
     public void shouldPersistNullVariablesWhenStartingProcessViaMessage() {
         //given
-        StartMessagePayload startMessage = MessagePayloadBuilder
-            .start("startMessage")
+        StartMessagePayload startMessage = MessagePayloadBuilder.start("startMessage")
             .withBusinessKey("nullVarBusiness")
             .withVariable("correlationKey", "nullVarCorrelation")
             .withVariable("numbertest", null)
@@ -163,8 +157,7 @@ public class MessageIT {
     @Test
     public void shouldPersistNullVariablesWhenReceivingMessage() {
         //given
-        StartMessagePayload startMessage = MessagePayloadBuilder
-            .start("startMessage")
+        StartMessagePayload startMessage = MessagePayloadBuilder.start("startMessage")
             .withBusinessKey("nullVarReceiveBusiness")
             .withVariable("correlationKey", "nullVarReceiveCorrelation")
             .build();
@@ -172,8 +165,7 @@ public class MessageIT {
         assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         String processInstanceId = startResponse.getBody().getId();
 
-        ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder
-            .receive("boundaryMessage")
+        ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder.receive("boundaryMessage")
             .withCorrelationKey("nullVarReceiveCorrelation")
             .withVariable("customerKey", "nullVarCustomerId")
             .withVariable("numbertest", null)

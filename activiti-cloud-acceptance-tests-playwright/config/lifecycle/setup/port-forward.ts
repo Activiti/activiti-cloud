@@ -18,6 +18,7 @@ import { timeouts } from '../../runtime/timeouts';
 import { paths } from '../../paths';
 
 const execAsync = promisify(exec);
+const LOCAL_LOOPBACK = '127.0.0.1';
 
 export async function checkKubectlAvailable(): Promise<void> {
     try {
@@ -37,20 +38,19 @@ async function checkPortForwardingActive(localPort: string, throwOnError: boolea
         if (stdout.trim()) {
             acceptanceLog('traefik', '✓ kubectl port-forward process detected');
         } else {
-            acceptanceLog('traefik', 'No port-forward process in ps — probing localhost anyway');
+            acceptanceLog('traefik', `No port-forward process in ps — probing ${LOCAL_LOOPBACK} anyway`);
         }
     } catch {
-        acceptanceLog('traefik', 'Could not detect port-forward process — probing localhost anyway');
+        acceptanceLog('traefik', `Could not detect port-forward process — probing ${LOCAL_LOOPBACK} anyway`);
     }
 
+    const context = await request.newContext();
     try {
-        const context = await request.newContext();
-        const response = await context.get(`http://localhost:${localPort}`, {
+        const response = await context.get(`http://${LOCAL_LOOPBACK}:${localPort}`, {
             timeout: timeouts.http.localPortProbe,
             ignoreHTTPSErrors: true,
         });
-        acceptanceLog('traefik', `✓ localhost:${localPort} reachable (HTTP ${response.status()})`);
-        await context.dispose();
+        acceptanceLog('traefik', `✓ ${LOCAL_LOOPBACK}:${localPort} reachable (HTTP ${response.status()})`);
         return true;
     } catch (error) {
         const pfCmd = getPortForwardHelpCommand(localPort);
@@ -64,8 +64,10 @@ Error: ${error}`;
         if (throwOnError) {
             throw new Error(errorMessage);
         }
-        acceptanceLog('traefik', 'localhost not reachable yet — will start port-forward automatically');
+        acceptanceLog('traefik', `${LOCAL_LOOPBACK} not reachable yet — will start port-forward automatically`);
         return false;
+    } finally {
+        await context.dispose();
     }
 }
 
@@ -137,10 +139,10 @@ Error: ${error}`);
 }
 
 async function checkGatewayConnectivity(localPort: string, expectedGatewayHost: string): Promise<void> {
+    const hostWithoutPort = expectedGatewayHost.replace(/:\d+$/, '');
+    const context = await request.newContext();
     try {
-        const hostWithoutPort = expectedGatewayHost.replace(/:\d+$/, '');
-        const context = await request.newContext();
-        const response = await context.get(`http://localhost:${localPort}`, {
+        const response = await context.get(`http://${LOCAL_LOOPBACK}:${localPort}`, {
             timeout: timeouts.http.healthCheck,
             ignoreHTTPSErrors: true,
             headers: { Host: hostWithoutPort },
@@ -148,18 +150,19 @@ async function checkGatewayConnectivity(localPort: string, expectedGatewayHost: 
 
         acceptanceLog(
             'traefik',
-            `✓ Gateway reachable via tunnel (HTTP ${response.status()}) — ${hostWithoutPort} → localhost:${localPort}`
+            `✓ Gateway reachable via tunnel (HTTP ${response.status()}) — ${hostWithoutPort} → ${LOCAL_LOOPBACK}:${localPort}`
         );
-        await context.dispose();
     } catch (error) {
         const pfCmd = getPortForwardHelpCommand(localPort);
         throw new Error(`Cannot reach gateway through port-forward.
 
    ${pfCmd}
    kubectl get pods -n ${process.env.PREVIEW_NAME || '<PREVIEW_NAME>'}
-   curl -H "Host: ${expectedGatewayHost.replace(/:\d+$/, '')}" http://localhost:${localPort}/rb/actuator/health
+   curl -H "Host: ${expectedGatewayHost.replace(/:\d+$/, '')}" http://${LOCAL_LOOPBACK}:${localPort}/rb/actuator/health
 
 Error: ${error}`);
+    } finally {
+        await context.dispose();
     }
 }
 
@@ -176,7 +179,7 @@ export async function setupPortForwarding(): Promise<void> {
     acceptancePhase('traefik', 'Local gateway tunnel');
     acceptanceStep(
         'traefik',
-        `API traffic: http://localhost:${localPort} + Host: ${hostWithoutPort} (auto port-forward — no second terminal)`
+        `API traffic: http://${LOCAL_LOOPBACK}:${localPort} + Host: ${hostWithoutPort} (auto port-forward — no second terminal)`
     );
 
     await checkKubectlAvailable();

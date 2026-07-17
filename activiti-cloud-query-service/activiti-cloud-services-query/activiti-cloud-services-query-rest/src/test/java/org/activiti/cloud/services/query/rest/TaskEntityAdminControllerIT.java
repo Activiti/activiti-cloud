@@ -36,6 +36,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -118,6 +119,9 @@ public class TaskEntityAdminControllerIT {
     private ProcessInstanceService processInstanceService;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -132,8 +136,9 @@ public class TaskEntityAdminControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12));
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12)
+        );
 
         //when
         MvcResult result = mockMvc
@@ -156,8 +161,9 @@ public class TaskEntityAdminControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11)
+        );
 
         //when
         mockMvc

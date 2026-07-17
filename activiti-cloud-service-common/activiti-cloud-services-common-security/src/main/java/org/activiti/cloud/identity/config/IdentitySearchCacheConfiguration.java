@@ -37,8 +37,7 @@ public class IdentitySearchCacheConfiguration {
     public CaffeineCache userSearchCache() {
         return new CaffeineCache(
             "userSearch",
-            Caffeine
-                .newBuilder()
+            Caffeine.newBuilder()
                 .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
                 .maximumSize(cacheMaxSize)
                 .build()
@@ -49,8 +48,7 @@ public class IdentitySearchCacheConfiguration {
     public CaffeineCache groupSearchCache() {
         return new CaffeineCache(
             "groupSearch",
-            Caffeine
-                .newBuilder()
+            Caffeine.newBuilder()
                 .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
                 .maximumSize(cacheMaxSize)
                 .build()

@@ -16,10 +16,17 @@
 package org.activiti.cloud.services.query.rest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository.RelatedProcessCountProjection;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
@@ -35,14 +42,18 @@ public class ProcessInstanceSearchService {
 
     private final SecurityManager securityManager;
 
+    private final ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
     public ProcessInstanceSearchService(
         ProcessInstanceRepository processInstanceRepository,
         ProcessVariableService processVariableService,
-        SecurityManager securityManager
+        SecurityManager securityManager,
+        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processVariableService = processVariableService;
         this.securityManager = securityManager;
+        this.processInstanceHierarchyRepository = processInstanceHierarchyRepository;
     }
 
     @Transactional(readOnly = true)
@@ -66,12 +77,6 @@ public class ProcessInstanceSearchService {
         );
     }
 
-    /**
-     * @param processVariableKeys the process variables to fetch for each process instance, each represented by process definition key and variable name
-     * @param pageable            the page request. N.B. the sort contained in this pageable will be ignored and the sort from the search request will be used instead
-     * @param specification       the specification to use for the search. It includes the sorting parameter.
-     * @return the page of process instances
-     */
     private Page<ProcessInstanceEntity> search(
         Set<ProcessVariableKey> processVariableKeys,
         Pageable pageable,
@@ -111,9 +116,8 @@ public class ProcessInstanceSearchService {
             return Page.empty(pageable);
         }
 
-        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceIds
-        );
+        ProcessInstanceSpecification unrestrictedSpecification =
+            ProcessInstanceSpecification.unrestrictedLinkedProcesses(linkedProcessInstanceIds);
 
         return processInstanceRepository.findAll(unrestrictedSpecification, pageable);
     }
@@ -124,10 +128,115 @@ public class ProcessInstanceSearchService {
             return List.of();
         }
 
-        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceIds
-        );
+        ProcessInstanceSpecification unrestrictedSpecification =
+            ProcessInstanceSpecification.unrestrictedLinkedProcesses(linkedProcessInstanceIds);
 
         return processInstanceRepository.findAll(unrestrictedSpecification);
+    }
+
+    /**
+     * Populates {@code subprocesses} and {@code linkedProcesses} on every entity in the page
+     * restricting the descendant batch-fetch to processes visible to the currently authenticated
+     * user (user-facing endpoint use).
+     */
+    @Transactional(readOnly = true)
+    public void enrichWithRelatedProcessesRestricted(Page<ProcessInstanceEntity> processInstances) {
+        doEnrich(processInstances, securityManager.getAuthenticatedUserId());
+    }
+
+    /**
+     * Counts, for every ancestor in {@code ancestorIds}, how many descendants exist at any depth,
+     * grouped by relation type ({@code subprocess} / {@code linked}). One closure-table query, no
+     * descendant entities fetched — used by the admin search endpoint to expose counts only.
+     *
+     * @return ancestorId → (relationType → count); ancestors with no descendants are absent.
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Map<String, Long>> countRelatedProcessesByAncestor(Set<String> ancestorIds) {
+        if (ancestorIds == null || ancestorIds.isEmpty()) {
+            return Map.of();
+        }
+        return processInstanceHierarchyRepository
+            .countRelatedByAncestor(ancestorIds)
+            .stream()
+            .collect(
+                Collectors.groupingBy(
+                    RelatedProcessCountProjection::getAncestorId,
+                    Collectors.toMap(
+                        RelatedProcessCountProjection::getRelationType,
+                        RelatedProcessCountProjection::getRelatedCount
+                    )
+                )
+            );
+    }
+
+    private void doEnrich(Page<ProcessInstanceEntity> processInstances, String userId) {
+        List<ProcessInstanceEntity> content = processInstances.getContent();
+        if (content.isEmpty()) {
+            return;
+        }
+
+        Set<String> pageIds = content.stream().map(ProcessInstanceEntity::getId).collect(Collectors.toSet());
+
+        // One query: all descendants of every page-level process, at any depth (depth > 0 excludes self-rows)
+        List<ProcessInstanceHierarchyEntity> hierarchyRows =
+            processInstanceHierarchyRepository.findByAncestorIdInAndDepthGreaterThan(pageIds, 0);
+
+        Set<String> descendantIds = hierarchyRows
+            .stream()
+            .map(ProcessInstanceHierarchyEntity::getDescendantId)
+            .collect(Collectors.toSet());
+
+        Map<String, ProcessInstanceEntity> descendantById = fetchDescendants(descendantIds, userId);
+
+        // ancestorId → relationType → set of DTOs
+        Map<String, Map<String, Set<QueryCloudSubprocessInstance>>> grouped = hierarchyRows
+            .stream()
+            .filter(h -> descendantById.containsKey(h.getDescendantId()))
+            .collect(
+                Collectors.groupingBy(
+                    ProcessInstanceHierarchyEntity::getAncestorId,
+                    Collectors.groupingBy(
+                        ProcessInstanceHierarchyEntity::getRelationType,
+                        Collectors.mapping(
+                            h -> toSubprocessInstance(descendantById.get(h.getDescendantId())),
+                            Collectors.toSet()
+                        )
+                    )
+                )
+            );
+
+        content.forEach(pi -> {
+            Map<String, Set<QueryCloudSubprocessInstance>> byType = grouped.getOrDefault(pi.getId(), Map.of());
+            pi.setSubprocesses(byType.getOrDefault(ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, Set.of()));
+            pi.setLinkedProcesses(byType.getOrDefault(ProcessInstanceHierarchyEntity.RELATION_LINKED, Set.of()));
+        });
+    }
+
+    private Map<String, ProcessInstanceEntity> fetchDescendants(Set<String> descendantIds, String userId) {
+        if (descendantIds.isEmpty()) {
+            return Map.of();
+        }
+        if (userId == null) {
+            // Admin: unrestricted batch-fetch
+            return StreamSupport.stream(
+                processInstanceRepository.findAllById(descendantIds).spliterator(),
+                false
+            ).collect(Collectors.toMap(ProcessInstanceEntity::getId, pi -> pi));
+        }
+        // User: only descendants visible to the requesting user
+        ProcessInstanceSearchRequest descendantsRequest = new ProcessInstanceSearchRequest();
+        descendantsRequest.setId(descendantIds);
+        return processInstanceRepository
+            .findAll(ProcessInstanceSpecification.restricted(descendantsRequest, userId))
+            .stream()
+            .collect(Collectors.toMap(ProcessInstanceEntity::getId, pi -> pi));
+    }
+
+    private static QueryCloudSubprocessInstance toSubprocessInstance(ProcessInstanceEntity entity) {
+        QueryCloudSubprocessInstance dto = new QueryCloudSubprocessInstance();
+        dto.setId(entity.getId());
+        dto.setProcessDefinitionName(entity.getProcessDefinitionName());
+        return dto;
     }
 }

@@ -21,8 +21,12 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupRemovedEvent;
 
 public class CloudProcessCandidateStarterGroupRemovedEventImpl
-    extends CloudRuntimeEventImpl<ProcessCandidateStarterGroup, ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents>
-    implements CloudProcessCandidateStarterGroupRemovedEvent {
+    extends CloudRuntimeEventImpl<
+        ProcessCandidateStarterGroup,
+        ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents
+    >
+    implements CloudProcessCandidateStarterGroupRemovedEvent
+{
 
     public CloudProcessCandidateStarterGroupRemovedEventImpl() {}
 

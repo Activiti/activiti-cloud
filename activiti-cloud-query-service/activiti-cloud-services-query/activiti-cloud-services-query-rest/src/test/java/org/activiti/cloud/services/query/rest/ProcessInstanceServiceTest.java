@@ -79,16 +79,15 @@ class ProcessInstanceServiceTest {
 
     @BeforeEach
     void setUp() {
-        processInstanceService =
-            new ProcessInstanceService(
-                processInstanceRepository,
-                taskRepository,
-                processInstanceSearchService,
-                processInstanceRestrictionService,
-                securityPoliciesApplicationService,
-                securityManager,
-                entityFinder
-            );
+        processInstanceService = new ProcessInstanceService(
+            processInstanceRepository,
+            taskRepository,
+            processInstanceSearchService,
+            processInstanceRestrictionService,
+            securityPoliciesApplicationService,
+            securityManager,
+            entityFinder
+        );
     }
 
     @Test
@@ -138,8 +137,9 @@ class ProcessInstanceServiceTest {
 
         given(entityFinder.findById(any(), anyString(), anyString())).willReturn(mainProcess);
         given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
-        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class)))
-            .willReturn(List.of(orphan1, orphan2, orphan3));
+        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(
+            List.of(orphan1, orphan2, orphan3)
+        );
 
         // when
         processInstanceService.linkProcessInstances(
@@ -181,8 +181,9 @@ class ProcessInstanceServiceTest {
 
         given(entityFinder.findById(any(), anyString(), anyString())).willReturn(mainProcess);
         given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
-        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class)))
-            .willReturn(Collections.emptyList());
+        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(
+            Collections.emptyList()
+        );
 
         List<String> processInstanceIds = List.of("orphan-1", "orphan-2");
 

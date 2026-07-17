@@ -34,6 +34,7 @@ import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -108,6 +109,9 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
     private ProcessInstanceService processInstanceService;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -125,8 +129,9 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
 
         ProcessVariableEntity variableEntity = buildVariable();
 
-        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12)
+        );
 
         //when
         MvcResult result = mockMvc
@@ -134,8 +139,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
                 get(
                     "/v1/process-instances/{processInstanceId}/variables?skipCount=11&maxItems=10",
                     variableEntity.getProcessInstanceId()
-                )
-                    .accept(MediaType.APPLICATION_JSON)
+                ).accept(MediaType.APPLICATION_JSON)
             )
             //then
             .andExpect(status().isOk())
@@ -158,8 +162,9 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
 
         ProcessVariableEntity variableEntity = buildEphemeralVariable();
 
-        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12)
+        );
 
         //when
         MvcResult result = mockMvc
@@ -167,8 +172,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
                 get(
                     "/v1/process-instances/{processInstanceId}/variables?skipCount=11&maxItems=10",
                     variableEntity.getProcessInstanceId()
-                )
-                    .accept(MediaType.APPLICATION_JSON)
+                ).accept(MediaType.APPLICATION_JSON)
             )
             //then
             .andExpect(status().isOk())
@@ -193,8 +197,9 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
 
         ProcessVariableEntity variableEntity = buildVariable();
 
-        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 11));
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 11)
+        );
 
         //when
         mockMvc
@@ -202,8 +207,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
                 get(
                     "/v1/process-instances/{processInstanceId}/variables?page=1&size=10",
                     variableEntity.getProcessInstanceId()
-                )
-                    .accept(MediaTypes.HAL_JSON_VALUE)
+                ).accept(MediaTypes.HAL_JSON_VALUE)
             )
             //then
             .andExpect(status().isOk());

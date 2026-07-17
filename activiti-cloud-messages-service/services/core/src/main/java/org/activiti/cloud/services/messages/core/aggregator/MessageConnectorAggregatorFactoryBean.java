@@ -37,7 +37,8 @@ import org.springframework.scheduling.TaskScheduler;
  *
  */
 public class MessageConnectorAggregatorFactoryBean
-    extends AbstractSimpleMessageHandlerFactoryBean<MessageConnectorAggregator> {
+    extends AbstractSimpleMessageHandlerFactoryBean<MessageConnectorAggregator>
+{
 
     private MessageGroupProcessor processorBean;
 

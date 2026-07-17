@@ -33,8 +33,7 @@ public abstract class AbstractMessageHeadersRoutingKeyResolver implements Routin
         return (
             getPrefix() +
             DELIMITER +
-            Stream
-                .of(keys)
+            Stream.of(keys)
                 .map(headers::get)
                 .map(Optional::ofNullable)
                 .map(this::mapNullOrEmptyValue)

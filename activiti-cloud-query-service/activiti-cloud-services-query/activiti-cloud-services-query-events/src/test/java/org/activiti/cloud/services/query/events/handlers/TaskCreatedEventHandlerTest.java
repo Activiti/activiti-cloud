@@ -62,8 +62,9 @@ public class TaskCreatedEventHandlerTest {
         ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
 
         when(entityManager.find(TaskEntity.class, event.getEntity().getId())).thenReturn(null);
-        when(entityManagerFinder.findProcessInstanceWithTasks(event.getEntity().getProcessInstanceId()))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithTasks(event.getEntity().getProcessInstanceId())).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when
         handler.handle(event);

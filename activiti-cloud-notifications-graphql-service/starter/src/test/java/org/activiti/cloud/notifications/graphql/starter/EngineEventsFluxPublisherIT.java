@@ -108,8 +108,7 @@ class EngineEventsFluxPublisherIT {
             LOGGER.info("Second client count #{}", secondClientCount.incrementAndGet())
         );
 
-        StepVerifier
-            .create(engineEventsFlux)
+        StepVerifier.create(engineEventsFlux)
             .expectSubscription()
             .then(sendEngineEvent(event1))
             .expectNextCount(1)
@@ -131,12 +130,11 @@ class EngineEventsFluxPublisherIT {
             .log()
             .verify(Duration.ofSeconds(10));
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(firstClientCount).hasValue(1);
-                assertThat(secondClientCount).hasValue(2);
-                assertThat(thirdClientCount).hasValue(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(firstClientCount).hasValue(1);
+            assertThat(secondClientCount).hasValue(2);
+            assertThat(thirdClientCount).hasValue(1);
+        });
     }
 
     @Test
@@ -163,8 +161,7 @@ class EngineEventsFluxPublisherIT {
             .log()
             .subscribe(o -> LOGGER.info("Second client count: {}", secondClientCount.incrementAndGet()));
 
-        StepVerifier
-            .create(engineEventsFlux)
+        StepVerifier.create(engineEventsFlux)
             .then(sendEngineEvent(event1))
             .then(sendEngineEvent(event1))
             .expectNextCount(2)
@@ -175,10 +172,9 @@ class EngineEventsFluxPublisherIT {
 
         secondClient.dispose();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(secondClientCount).hasValue(2);
-            });
+        await().untilAsserted(() -> {
+            assertThat(secondClientCount).hasValue(2);
+        });
     }
 
     @Test
@@ -250,8 +246,7 @@ class EngineEventsFluxPublisherIT {
                 }
             });
 
-        StepVerifier
-            .create(engineEventsFlux)
+        StepVerifier.create(engineEventsFlux)
             .then(() -> IntStream.range(0, 300).forEach(i -> sendEngineEvent(event1).run()))
             .expectNextCount(300)
             .thenAwait(Duration.ofSeconds(1))
@@ -286,8 +281,7 @@ class EngineEventsFluxPublisherIT {
             .log()
             .subscribe(o -> LOGGER.info("Second client : {}", secondCount.incrementAndGet()));
 
-        StepVerifier
-            .create(engineEventsFlux)
+        StepVerifier.create(engineEventsFlux)
             .then(sendEngineEvent(event1))
             .expectNextCount(1)
             .then(sendEngineEvent(event1))
@@ -300,11 +294,10 @@ class EngineEventsFluxPublisherIT {
         firstClient.dispose();
         secondClient.dispose();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(firstCount).hasValue(1);
-                assertThat(secondCount).hasValue(2);
-            });
+        await().untilAsserted(() -> {
+            assertThat(firstCount).hasValue(1);
+            assertThat(secondCount).hasValue(2);
+        });
     }
 
     private Runnable sendEngineEvent(CloudRuntimeEvent... events) {

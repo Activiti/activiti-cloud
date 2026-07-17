@@ -67,16 +67,15 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
 
     @Override
     public List<User> findUsers(UserSearchParams userSearchParams) {
-        UserTypeSearchParam userTypeSearchParam = userSearchParams.getType() == null
-            ? DEFAULT_USERTYPE
-            : userSearchParams.getType();
+        UserTypeSearchParam userTypeSearchParam =
+            userSearchParams.getType() == null ? DEFAULT_USERTYPE : userSearchParams.getType();
 
         List<User> users = ObjectUtils.isEmpty(userSearchParams.getGroups())
             ? searchUsers(
-                userSearchParams.getSearchKey(),
-                userTypeSearchParam,
-                userSearchParams.isFilterDeactivatedUsers()
-            )
+                  userSearchParams.getSearchKey(),
+                  userTypeSearchParam,
+                  userSearchParams.isFilterDeactivatedUsers()
+              )
             : searchUsers(userSearchParams.getGroups(), userSearchParams.getSearchKey());
 
         if (!StringUtils.isEmpty(userSearchParams.getApplication())) {
@@ -129,7 +128,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
         Predicate<User> maybeMatchSearchKey = user ->
             !StringUtils.isEmpty(searchKey)
                 ? StringUtils.contains(user.getUsername(), searchKey) ||
-                StringUtils.contains(user.getEmail(), searchKey)
+                  StringUtils.contains(user.getEmail(), searchKey)
                 : true;
         try {
             List<User> users = new ArrayList<>();
@@ -244,8 +243,8 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     private boolean filterByRoles(List<Role> currentRoles, Set<String> filterRoles) {
         return (
             CollectionUtils.isEmpty(filterRoles) ||
-            currentRoles != null &&
-            currentRoles.stream().map(Role::getName).collect(Collectors.toSet()).containsAll(filterRoles)
+            (currentRoles != null &&
+                currentRoles.stream().map(Role::getName).collect(Collectors.toSet()).containsAll(filterRoles))
         );
     }
 
@@ -268,8 +267,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
 
     @Override
     public User findUserById(String userId) {
-        return Optional
-            .of(keycloakClient.getUserById(userId))
+        return Optional.of(keycloakClient.getUserById(userId))
             .map(KeycloakUserToUser::toUser)
             .orElseThrow(() -> new IdentityInvalidUserException(userId));
     }
@@ -281,8 +279,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     }
 
     private Group findGroupStrictlyEqualToGroupName(String groupName) {
-        return Optional
-            .ofNullable(groupName)
+        return Optional.ofNullable(groupName)
             .filter(Predicate.not(String::isEmpty))
             .map(g -> searchGroups(g).stream())
             .orElse(Stream.empty())
@@ -369,7 +366,8 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
             if (securityRepresentation.getGroups() != null) {
                 securityRepresentation
                     .getGroups()
-                    .forEach(groupName -> validatedGroups.add(validateGroupApplicationPermissions(groupName, roleName))
+                    .forEach(groupName ->
+                        validatedGroups.add(validateGroupApplicationPermissions(groupName, roleName))
                     );
             }
             addApplicationRolePermissions(keycloakRoleMapping, validatedUsers, validatedGroups, clientId);
@@ -420,7 +418,9 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     }
 
     private boolean userHasRole(String userId, String role) {
-        return getUserRealmRoles(userId).stream().anyMatch(userRole -> userRole.getName().equals(role));
+        return getUserRealmRoles(userId)
+            .stream()
+            .anyMatch(userRole -> userRole.getName().equals(role));
     }
 
     private String validateGroupApplicationPermissions(String groupName, String roleName) {
@@ -441,7 +441,9 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     }
 
     private boolean groupHasRole(String groupId, String role) {
-        return getGroupRealmRoles(groupId).stream().anyMatch(groupRole -> groupRole.getName().equals(role));
+        return getGroupRealmRoles(groupId)
+            .stream()
+            .anyMatch(groupRole -> groupRole.getName().equals(role));
     }
 
     private boolean filterByApplication(List<Role> applicationRoles) {

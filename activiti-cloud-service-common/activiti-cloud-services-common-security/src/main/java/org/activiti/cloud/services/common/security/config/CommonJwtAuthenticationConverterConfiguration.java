@@ -86,8 +86,7 @@ public class CommonJwtAuthenticationConverterConfiguration {
     public CaffeineCache userInfoApiCallCache() {
         return new CaffeineCache(
             "userInfoApiCall",
-            Caffeine
-                .newBuilder()
+            Caffeine.newBuilder()
                 .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
                 .maximumSize(cacheMaxSize)
                 .build()

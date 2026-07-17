@@ -34,6 +34,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -111,6 +112,9 @@ class ProcessInstanceEntityAdminControllerIT {
     private VariableRepository processVariableRepository;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -128,8 +132,9 @@ class ProcessInstanceEntityAdminControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
         //when
         mockMvc
@@ -151,8 +156,9 @@ class ProcessInstanceEntityAdminControllerIT {
             1
         );
 
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
@@ -162,8 +168,9 @@ class ProcessInstanceEntityAdminControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$._embedded.processInstances.[0].id").value(parentProcessInstance.getId()))
             .andExpect(
-                jsonPath("$._embedded.processInstances[0].processDefinitionId")
-                    .value(parentProcessInstance.getProcessDefinitionId())
+                jsonPath("$._embedded.processInstances[0].processDefinitionId").value(
+                    parentProcessInstance.getProcessDefinitionId()
+                )
             );
     }
 

@@ -157,7 +157,8 @@ class ToCloudProcessRuntimeEventConverterTest {
         assertThat(processCompleted.getActor()).isEqualTo(USERNAME_GUID);
 
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
-        verify(this.processAuditServiceInfoAppender, never())
-            .appendAuditServiceInfoTo(any(CloudProcessCompletedEventImpl.class));
+        verify(this.processAuditServiceInfoAppender, never()).appendAuditServiceInfoTo(
+            any(CloudProcessCompletedEventImpl.class)
+        );
     }
 }

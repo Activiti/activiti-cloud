@@ -30,7 +30,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 public class QueryConsumerMessageHandler
     extends QueryConsumerChannelHandler
-    implements Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> {
+    implements Consumer<Message<List<CloudRuntimeEvent<?, ?>>>>
+{
 
     private final MessageChannel queryEventsChannel;
 
@@ -48,7 +49,7 @@ public class QueryConsumerMessageHandler
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
         beforeCommit(() -> queryEventsChannel.send(message));
-        receive(message.getPayload());
+        receive(message.getPayload(), message.getHeaders());
     }
 
     private static void beforeCommit(Runnable action) {

@@ -83,9 +83,8 @@ class IncidentServiceTest {
     };
 
     @Spy
-    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory = new ExecutionContextIncidentEventMessageBuilderFactory(
-        properties
-    );
+    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory =
+        new ExecutionContextIncidentEventMessageBuilderFactory(properties);
 
     @Captor
     private ArgumentCaptor<Message<?>> messageArgumentCaptor;
@@ -94,14 +93,13 @@ class IncidentServiceTest {
     void setUp() {
         when(this.producer.auditProducerIncidents()).thenReturn(this.auditIncidentsChannel);
 
-        this.incidentService =
-            new IncidentService(
-                producer,
-                messageBuilderChainIncidentFactory,
-                runtimeBundleInfoAppender,
-                managementService,
-                runtimeService
-            );
+        this.incidentService = new IncidentService(
+            producer,
+            messageBuilderChainIncidentFactory,
+            runtimeBundleInfoAppender,
+            managementService,
+            runtimeService
+        );
     }
 
     @Test
@@ -154,8 +152,9 @@ class IncidentServiceTest {
         );
 
         var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
-        when(this.managementService.executeCommand(any(CreateIncidentEventFromIntegrationCmd.class)))
-            .thenReturn(message);
+        when(this.managementService.executeCommand(any(CreateIncidentEventFromIntegrationCmd.class))).thenReturn(
+            message
+        );
         var exception = new IllegalArgumentException("Test exception");
 
         this.incidentService.createAndSendIncidentEvent(integrationContext, exception);
@@ -222,8 +221,9 @@ class IncidentServiceTest {
         );
 
         var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
-        when(this.managementService.executeCommand(any(CreateIncidentEventFromIntegrationCmd.class)))
-            .thenReturn(message);
+        when(this.managementService.executeCommand(any(CreateIncidentEventFromIntegrationCmd.class))).thenReturn(
+            message
+        );
         var exception = new IllegalArgumentException("Test exception");
 
         this.incidentService.createAndSendIncidentEvent(integrationContext, exception, IncidentSeverity.WARNING);

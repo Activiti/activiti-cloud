@@ -28,8 +28,10 @@ public class IntegrationContextRoutingKeyResolverTest {
     @Test
     public void testResolveRoutingKeyFromValidHeadersInAnyOrder() {
         // given
-        Map<String, Object> headers = MapBuilder
-            .<String, Object>map(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name")
+        Map<String, Object> headers = MapBuilder.<String, Object>map(
+            RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
+            "service-name"
+        )
             .with(IntegrationContextMessageHeaders.PROCESS_INSTANCE_ID, "process-instance-id")
             .with(RuntimeBundleInfoMessageHeaders.APP_NAME, "app-name")
             .with(IntegrationContextMessageHeaders.CONNECTOR_TYPE, "connector-type")
@@ -38,8 +40,9 @@ public class IntegrationContextRoutingKeyResolverTest {
         String routingKey = subject.resolve(headers);
 
         // then
-        assertThat(routingKey)
-            .isEqualTo("integrationContext.service-name.app-name.connector-type.process-instance-id.business-key");
+        assertThat(routingKey).isEqualTo(
+            "integrationContext.service-name.app-name.connector-type.process-instance-id.business-key"
+        );
     }
 
     private static class MapBuilder<K, V> extends java.util.HashMap<K, V> {

@@ -126,7 +126,8 @@ class ProcessInstanceIT {
     void setUp() {
         keycloakTestUser = "hruser";
         identityTokenProducer.withTestUser(keycloakTestUser);
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions =
+            processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -235,11 +236,11 @@ class ProcessInstanceIT {
         assertThat(entity).isNotNull();
 
         CloudProcessInstance startedProcessInstance = entity.getBody();
-        ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> failEntity = processInstanceRestTemplate.startCreatedProcessFailing(
-            startedProcessInstance.getId()
+        ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> failEntity =
+            processInstanceRestTemplate.startCreatedProcessFailing(startedProcessInstance.getId());
+        assertThat(failEntity.getBody().getEntry().getMessage()).isEqualTo(
+            "Process instance " + startedProcessInstance.getId() + " has already been started"
         );
-        assertThat(failEntity.getBody().getEntry().getMessage())
-            .isEqualTo("Process instance " + startedProcessInstance.getId() + " has already been started");
         assertThat(failEntity.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
@@ -268,8 +269,9 @@ class ProcessInstanceIT {
         //testuser does not have access to SIMPLE_PROCESS according to access-control.properties
         identityTokenProducer.withTestUser("testuser");
 
-        assertThatExceptionOfType(AssertionError.class)
-            .isThrownBy(() -> processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS)));
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+            processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS))
+        );
     }
 
     @Test
@@ -277,8 +279,7 @@ class ProcessInstanceIT {
         //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties
         identityTokenProducer.withTestUser("testadmin");
 
-        StartProcessPayload startProcess = ProcessPayloadBuilder
-            .start()
+        StartProcessPayload startProcess = ProcessPayloadBuilder.start()
             .withProcessDefinitionKey(SIMPLE_PROCESS)
             .withBusinessKey("business_key")
             .build();
@@ -328,21 +329,20 @@ class ProcessInstanceIT {
         assertThat(responseData).isNotNull();
 
         final InputStream byteArrayInputStream = new ByteArrayInputStream(
-            TestResourceUtil
-                .getProcessXml(startedProcessEntity.getBody().getProcessDefinitionId().split(":")[0])
-                .getBytes()
+            TestResourceUtil.getProcessXml(
+                startedProcessEntity.getBody().getProcessDefinitionId().split(":")[0]
+            ).getBytes()
         );
-        BpmnModel sourceModel = new BpmnXMLConverter()
-            .convertToBpmnModel(
-                new InputStreamProvider() {
-                    @Override
-                    public InputStream getInputStream() {
-                        return byteArrayInputStream;
-                    }
-                },
-                false,
-                false
-            );
+        BpmnModel sourceModel = new BpmnXMLConverter().convertToBpmnModel(
+            new InputStreamProvider() {
+                @Override
+                public InputStream getInputStream() {
+                    return byteArrayInputStream;
+                }
+            },
+            false,
+            false
+        );
         String activityFontName = processDiagramGenerator.getDefaultActivityFontName();
         String labelFontName = processDiagramGenerator.getDefaultLabelFontName();
         String annotationFontName = processDiagramGenerator.getDefaultAnnotationFontName();
@@ -370,7 +370,8 @@ class ProcessInstanceIT {
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
 
         //when
-        ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
+        ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage =
+            processInstanceRestTemplate.getPagedProcessInstances();
 
         //then
         assertThat(processInstancesPage).isNotNull();
@@ -390,7 +391,8 @@ class ProcessInstanceIT {
         identityTokenProducer.withTestUser("testadmin");
 
         //when
-        ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = processInstanceRestTemplate.getPagedProcessInstances();
+        ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage =
+            processInstanceRestTemplate.getPagedProcessInstances();
 
         //then
         assertThat(processInstancesPage).isNotNull();
@@ -423,8 +425,9 @@ class ProcessInstanceIT {
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(
             startProcessEntity
         );
-        assertThat(processInstanceEntity.getBody().getStatus())
-            .isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
+        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(
+            ProcessInstance.ProcessInstanceStatus.SUSPENDED
+        );
     }
 
     @Test
@@ -454,8 +457,9 @@ class ProcessInstanceIT {
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(
             startProcessEntity
         );
-        assertThat(processInstanceEntity.getBody().getStatus())
-            .isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
+        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(
+            ProcessInstance.ProcessInstanceStatus.SUSPENDED
+        );
     }
 
     @Test
@@ -474,8 +478,9 @@ class ProcessInstanceIT {
         ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.getProcessInstance(
             startProcessEntity
         );
-        assertThat(processInstanceEntity.getBody().getStatus())
-            .isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(
+            ProcessInstance.ProcessInstanceStatus.RUNNING
+        );
     }
 
     @Test
@@ -497,8 +502,9 @@ class ProcessInstanceIT {
             startProcessEntity
         );
         //Check that process is really in a suspended state
-        assertThat(processInstanceEntity.getBody().getStatus())
-            .isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
+        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(
+            ProcessInstance.ProcessInstanceStatus.SUSPENDED
+        );
 
         //when
         //change user
@@ -520,8 +526,9 @@ class ProcessInstanceIT {
         // switch back to initiator user to access the process instance
         identityTokenProducer.withTestUser("hruser");
         processInstanceEntity = processInstanceRestTemplate.getProcessInstance(startProcessEntity);
-        assertThat(processInstanceEntity.getBody().getStatus())
-            .isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        assertThat(processInstanceEntity.getBody().getStatus()).isEqualTo(
+            ProcessInstance.ProcessInstanceStatus.RUNNING
+        );
     }
 
     @Test
@@ -541,12 +548,14 @@ class ProcessInstanceIT {
         assertThat(returnedProcInst.getBusinessKey()).contains("business_key");
 
         //when
-        String newBusinessKey = startProcessEntity.getBody().getBusinessKey() != null
-            ? startProcessEntity.getBody().getBusinessKey() + " UPDATED"
-            : " UPDATED";
-        String newName = startProcessEntity.getBody().getName() != null
-            ? startProcessEntity.getBody().getName() + " UPDATED"
-            : " UPDATED";
+        String newBusinessKey =
+            startProcessEntity.getBody().getBusinessKey() != null
+                ? startProcessEntity.getBody().getBusinessKey() + " UPDATED"
+                : " UPDATED";
+        String newName =
+            startProcessEntity.getBody().getName() != null
+                ? startProcessEntity.getBody().getName() + " UPDATED"
+                : " UPDATED";
 
         ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.update(
             startProcessEntity,
@@ -581,12 +590,14 @@ class ProcessInstanceIT {
         assertThat(returnedProcInst.getBusinessKey()).contains("business_key");
 
         //when
-        String newBusinessKey = startProcessEntity.getBody().getBusinessKey() != null
-            ? startProcessEntity.getBody().getBusinessKey() + " UPDATED"
-            : " UPDATED";
-        String newName = startProcessEntity.getBody().getName() != null
-            ? startProcessEntity.getBody().getName() + " UPDATED"
-            : " UPDATED";
+        String newBusinessKey =
+            startProcessEntity.getBody().getBusinessKey() != null
+                ? startProcessEntity.getBody().getBusinessKey() + " UPDATED"
+                : " UPDATED";
+        String newName =
+            startProcessEntity.getBody().getName() != null
+                ? startProcessEntity.getBody().getName() + " UPDATED"
+                : " UPDATED";
 
         identityTokenProducer.withTestUser("testadmin");
 
@@ -598,9 +609,8 @@ class ProcessInstanceIT {
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.adminGetProcessInstance(
-            responseEntity
-        );
+        ResponseEntity<CloudProcessInstance> processInstanceEntity =
+            processInstanceRestTemplate.adminGetProcessInstance(responseEntity);
 
         assertThat(processInstanceEntity.getBody().getBusinessKey()).isEqualTo(newBusinessKey);
         assertThat(processInstanceEntity.getBody().getName()).isEqualTo(newName);
@@ -625,8 +635,9 @@ class ProcessInstanceIT {
 
         assertThat(processInstancesPage.getBody().getContent().size()).isEqualTo(1);
 
-        assertThat(processInstancesPage.getBody().getContent().iterator().next().getProcessDefinitionKey())
-            .isEqualTo(SUB_PROCESS);
+        assertThat(processInstancesPage.getBody().getContent().iterator().next().getProcessDefinitionKey()).isEqualTo(
+            SUB_PROCESS
+        );
     }
 
     @Test
@@ -649,8 +660,9 @@ class ProcessInstanceIT {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThatExceptionOfType(AssertionError.class)
-            .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity));
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+            processInstanceRestTemplate.getProcessInstance(processEntity)
+        );
     }
 
     @Test
@@ -674,8 +686,9 @@ class ProcessInstanceIT {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThatExceptionOfType(AssertionError.class)
-            .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity));
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+            processInstanceRestTemplate.getProcessInstance(processEntity)
+        );
     }
 
     @Test
@@ -752,8 +765,9 @@ class ProcessInstanceIT {
     }
 
     private void assertEventActorIsSet(String processInstanceId) {
-        List<IdentityLink> identityLinksForProcessInstance =
-            this.runtimeService.getIdentityLinksForProcessInstance(processInstanceId);
+        List<IdentityLink> identityLinksForProcessInstance = this.runtimeService.getIdentityLinksForProcessInstance(
+            processInstanceId
+        );
         IdentityLink actorIdentityLink = identityLinksForProcessInstance
             .stream()
             .filter(identityLink -> identityLink.getType().equals(ActorConstants.ACTOR_TYPE))

@@ -99,6 +99,18 @@ When a new API operation is needed:
 
 Do not wrap service calls in test-level utility functions.
 
+Do **not** add separate helper modules under `services/` for API client logic. Shared HTTP utilities belong on `BaseService` in `base.service.ts` or in `services/<service>/shared/` when service-specific.
+
+Query and audit services follow the hxp-process-services layout:
+
+- `services/query/query.service.ts`, `services/audit/audit.service.ts` — single facades with user + admin endpoint fields (e.g. `tasks` / `adminTasks`, `events` / `adminEvents`)
+- `services/query/endpoints/*.endpoint.ts`, `services/audit/endpoints/*.endpoint.ts` — one class per REST resource area; user/admin share an endpoint class via an `admin: boolean` constructor flag where applicable
+- Admin-only query resources (`service-tasks`, `integration-contexts`) use dedicated endpoint classes under `endpoints/`
+- Admin fixtures use the same service type with `createQueryService(context, true)` for admin status-check builders; audit admin methods live on `AuditService.adminEvents`
+- **Specs call `service.<endpoint>.<method>()` for raw HTTP** (e.g. `queryServiceTestUser.tasks.getTask(id)`, `auditAdminServiceTestAdmin.adminEvents.exportEvents(...)`). Use facade methods only for orchestration: `waitFor*`, `find*`, `getProcessDefinitionByKey`, `checkServicesHealth`, and `build*StatusChecks`.
+
+**Specs must never contain REST paths or URLs or import service classes for status checks.** Call `build*StatusChecks()` on the fixture service instance.
+
 ### 4. Keep test data in `resources/`
 
 Static BPMN/DMN and modeling project files belong in `resources/modeling-projects/` — not inline in spec files.
@@ -108,9 +120,7 @@ Static BPMN/DMN and modeling project files belong in `resources/modeling-project
 const bpmn = `<?xml version="1.0" ...`;
 
 // ✅ APPROVE — use catalog processes via ProcessDefinitionRegistry
-const key = ProcessDefinitionRegistry.processDefinitionKeyMatcher(
-  "CONNECTOR_PROCESS_INSTANCE"
-);
+const key = ProcessDefinitionRegistry.processDefinitionKeyMatcher("CONNECTOR_PROCESS_INSTANCE");
 ```
 
 ### 5. No comments or JSDoc in generated code
@@ -354,18 +364,20 @@ npm run lint:fix
 
 ## Anti-Pattern Catalogue
 
-| #   | Anti-pattern                                       | Correct approach                                     |
-| --- | -------------------------------------------------- | ---------------------------------------------------- |
-| 1   | `tests/**/helpers/*.ts`                            | Service methods + inline spec / `flows/`             |
-| 2   | Local functions inside spec files                  | Inline code or service/flow methods                  |
-| 3   | Raw `fetch` / `context.get` in specs               | `activiti` fixture → service method                  |
-| 4   | BPMN/JSON as string templates in specs             | `resources/modeling-projects/`                       |
-| 5   | `try/catch` or `try/finally` in specs              | Playwright hooks + `helpers/query-sync`              |
-| 6   | JSDoc / inline comments on generated code          | Self-documenting names                               |
-| 7   | Cleanup after final `expect` in test body          | `afterEach` / `afterAll` hooks                       |
-| 8   | `import { test } from '@playwright/test'`          | Import `activiti`, `expect` from fixtures            |
-| 9   | `expect` inside `try/catch`, `if`, `switch`, loops | Unconditional assertions                             |
-| 10  | Multi-phase test without `activiti.step()`         | Wrap each phase in `activiti.step()`                 |
-| 11  | WebSocket cleanup in test body                     | `afterEach` with describe-scoped handle              |
-| 12  | Wrong GraphQL WS subprotocol                       | `graphql-transport-ws` via `services/notifications/` |
-| 13  | Inline `activiti.skip()` without ticket            | `pickScenarioTest` + Jira URL                        |
+| #   | Anti-pattern                                                                                          | Correct approach                                                          |
+| --- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 1   | `tests/**/helpers/*.ts`                                                                               | Service methods + inline spec / `flows/`                                  |
+| 2   | Local functions inside spec files                                                                     | Inline code or service/flow methods                                       |
+| 3   | Raw `fetch` / `context.get` in specs                                                                  | `activiti` fixture → service method                                       |
+| 4   | BPMN/JSON as string templates in specs                                                                | `resources/modeling-projects/`                                            |
+| 5   | `try/catch` or `try/finally` in specs                                                                 | Playwright hooks + `helpers/query-sync`                                   |
+| 6   | JSDoc / inline comments on generated code                                                             | Self-documenting names                                                    |
+| 7   | Cleanup after final `expect` in test body                                                             | `afterEach` / `afterAll` hooks                                            |
+| 8   | `import { test } from '@playwright/test'`                                                             | Import `activiti`, `expect` from fixtures                                 |
+| 9   | `expect` inside `try/catch`, `if`, `switch`, loops                                                    | Unconditional assertions                                                  |
+| 10  | Multi-phase test without `activiti.step()`                                                            | Wrap each phase in `activiti.step()`                                      |
+| 11  | WebSocket cleanup in test body                                                                        | `afterEach` with describe-scoped handle                                   |
+| 12  | Wrong GraphQL WS subprotocol                                                                          | `graphql-transport-ws` via `services/notifications/`                      |
+| 13  | Inline `activiti.skip()` without ticket                                                               | `pickScenarioTest` + Jira URL                                             |
+| 14  | Hardcoded `/query/...` or `/audit/...` in specs                                                       | Instance `build*StatusChecks()` via fixture service                       |
+| 15  | `services/*.helpers.ts`, free `build*` functions, or service class imports in specs for status checks | Shared on `BaseService`; builders as instance methods on fixture services |

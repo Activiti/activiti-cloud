@@ -106,8 +106,7 @@ public class EmbeddedSubProcessAuditIT {
         "serviceFullName",
         ROUTING_KEY_HEADER,
     };
-    private static final String[] ALL_REQUIRED_HEADERS = Stream
-        .of(RUNTIME_BUNDLE_INFO_HEADERS)
+    private static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS)
         .flatMap(Stream::of)
         .toArray(String[]::new);
 
@@ -144,61 +143,59 @@ public class EmbeddedSubProcessAuditIT {
         String processInstanceId = processInstance.getBody().getId();
         String rootRootProcessInstanceId = processInstance.getBody().getRootProcessInstanceId();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(TASK_CANDIDATE_GROUP_ADDED, null, null, null),
-                        tuple(TASK_CREATED, processInstanceId, rootRootProcessInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS)
-                    );
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(TASK_CANDIDATE_GROUP_ADDED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(TASK_CREATED, processInstanceId, rootRootProcessInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS)
+                );
 
-                assertThat(receivedEvents)
-                    .filteredOn(event -> TASK_CREATED.equals(event.getEventType()))
-                    .extracting(
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        event -> ((CloudTaskCreatedEvent) event).getEntity().getProcessInstanceId()
-                    )
-                    .containsExactly(tuple(processInstanceId, processInstanceId));
+            assertThat(receivedEvents)
+                .filteredOn(event -> TASK_CREATED.equals(event.getEventType()))
+                .extracting(CloudRuntimeEvent::getProcessInstanceId, event ->
+                    ((CloudTaskCreatedEvent) event).getEntity().getProcessInstanceId()
+                )
+                .containsExactly(tuple(processInstanceId, processInstanceId));
 
-                List<CloudRuntimeEvent<?, ?>> activitiStartedEvents = receivedEvents
-                    .stream()
-                    .filter(event -> ACTIVITY_STARTED.equals(event.getEventType()))
-                    .collect(Collectors.toList());
+            List<CloudRuntimeEvent<?, ?>> activitiStartedEvents = receivedEvents
+                .stream()
+                .filter(event -> ACTIVITY_STARTED.equals(event.getEventType()))
+                .collect(Collectors.toList());
 
-                assertThat(activitiStartedEvents)
-                    .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
-                    .extracting(
-                        event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType(),
-                        event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityName()
-                    )
-                    .containsExactly(
-                        tuple("startEvent", null),
-                        tuple("subProcess", "subProcess"),
-                        tuple("startEvent", null),
-                        tuple("userTask", "Task in subprocess")
-                    );
-            });
+            assertThat(activitiStartedEvents)
+                .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
+                .extracting(
+                    event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType(),
+                    event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityName()
+                )
+                .containsExactly(
+                    tuple("startEvent", null),
+                    tuple("subProcess", "subProcess"),
+                    tuple("startEvent", null),
+                    tuple("userTask", "Task in subprocess")
+                );
+        });
 
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstance);
         Task task = tasks.getBody().iterator().next();
@@ -206,70 +203,70 @@ public class EmbeddedSubProcessAuditIT {
         //when
         taskRestTemplate.claim(task);
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(TASK_ASSIGNED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(TASK_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS)
-                    );
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(TASK_ASSIGNED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(TASK_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS)
+                );
 
-                String entityProcessInstanceId =
-                    ((CloudTaskAssignedEvent) receivedEvents.getFirst()).getEntity().getProcessInstanceId();
-                assertThat(entityProcessInstanceId).isNotNull();
-                assertThat(entityProcessInstanceId).isEqualTo(processInstanceId);
-            });
+            String entityProcessInstanceId = (
+                (CloudTaskAssignedEvent) receivedEvents.getFirst()
+            ).getEntity().getProcessInstanceId();
+            assertThat(entityProcessInstanceId).isNotNull();
+            assertThat(entityProcessInstanceId).isEqualTo(processInstanceId);
+        });
 
         //when
         taskRestTemplate.complete(task);
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(TASK_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(TASK_CANDIDATE_GROUP_REMOVED, null, null),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS)/*subProcess*/,
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(PROCESS_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS)
-                    );
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(TASK_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(TASK_CANDIDATE_GROUP_REMOVED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS) /*subProcess*/,
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
+                    tuple(PROCESS_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS)
+                );
 
-                CloudBPMNActivityCompletedEvent subprocessCompletedEvent = (CloudBPMNActivityCompletedEvent) receivedEvents
-                    .stream()
-                    .filter(event ->
+            CloudBPMNActivityCompletedEvent subprocessCompletedEvent = (CloudBPMNActivityCompletedEvent) receivedEvents
+                .stream()
+                .filter(
+                    event ->
                         ACTIVITY_COMPLETED.equals(event.getEventType()) &&
                         "subProcess".equals(((CloudBPMNActivityCompletedEvent) event).getEntity().getActivityType())
-                    )
-                    .collect(Collectors.toList())
-                    .getFirst();
+                )
+                .collect(Collectors.toList())
+                .getFirst();
 
-                assertThat(subprocessCompletedEvent).isNotNull();
-                assertThat(subprocessCompletedEvent.getProcessInstanceId()).isEqualTo(processInstanceId);
-            });
+            assertThat(subprocessCompletedEvent).isNotNull();
+            assertThat(subprocessCompletedEvent.getProcessInstanceId()).isEqualTo(processInstanceId);
+        });
     }
 
     @Test
@@ -282,73 +279,57 @@ public class EmbeddedSubProcessAuditIT {
         String processInstanceId = processInstance.getBody().getId();
         String rootRootProcessInstanceId = processInstance.getBody().getRootProcessInstanceId();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(
+                        TASK_CANDIDATE_GROUP_ADDED,
+                        processInstanceId,
+                        null,
+                        SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
+                    ),
+                    tuple(
+                        TASK_CREATED,
+                        processInstanceId,
+                        rootRootProcessInstanceId,
+                        SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
                     )
-                    .containsExactly(
-                        tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
-                        ),
-                        tuple(
-                            SEQUENCE_FLOW_TAKEN,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
-                        ),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
-                        ),
-                        tuple(
-                            SEQUENCE_FLOW_TAKEN,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
-                        ),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(TASK_CANDIDATE_GROUP_ADDED, null, null, null),
-                        tuple(
-                            TASK_CREATED,
-                            processInstanceId,
-                            rootRootProcessInstanceId,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
-                        )
-                    );
+                );
 
-                assertThat(receivedEvents)
-                    .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
-                    .extracting(
-                        event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType(),
-                        event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityName()
-                    )
-                    .containsExactly(
-                        tuple("startEvent", null),
-                        tuple("subProcess", "subProcess"),
-                        tuple("startEvent", null),
-                        tuple("userTask", "Task in subprocess")
-                    );
-            });
+            assertThat(receivedEvents)
+                .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
+                .extracting(
+                    event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType(),
+                    event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityName()
+                )
+                .containsExactly(
+                    tuple("startEvent", null),
+                    tuple("subProcess", "subProcess"),
+                    tuple("startEvent", null),
+                    tuple("userTask", "Task in subprocess")
+                );
+        });
 
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(processInstance);
         Task task = tasks.getBody().iterator().next();
@@ -360,23 +341,22 @@ public class EmbeddedSubProcessAuditIT {
         //when
         taskRestTemplate.claim(task);
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(TASK_ASSIGNED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(TASK_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY)
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(TASK_ASSIGNED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(TASK_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY)
+                );
+        });
 
         //when
         taskRestTemplate.complete(task);
@@ -392,47 +372,42 @@ public class EmbeddedSubProcessAuditIT {
         assertThat(processes.getBody()).isNotNull();
         assertThat(processes.getBody().getContent().size()).isEqualTo(1);
 
-        assertThat(processes.getBody().getContent().iterator().next().getProcessDefinitionKey())
-            .isEqualTo(SIMPLE_SUB_PROCESS1);
+        assertThat(processes.getBody().getContent().iterator().next().getProcessDefinitionKey()).isEqualTo(
+            SIMPLE_SUB_PROCESS1
+        );
         String callActivityProcessId = processes.getBody().getContent().iterator().next().getId();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(TASK_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(TASK_CANDIDATE_GROUP_REMOVED, null, null, null),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
-                        ),
-                        tuple(
-                            SEQUENCE_FLOW_TAKEN,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
-                        ),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(PROCESS_CREATED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
-                        tuple(PROCESS_STARTED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
-                        tuple(ACTIVITY_STARTED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
-                        tuple(ACTIVITY_COMPLETED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
-                        tuple(SEQUENCE_FLOW_TAKEN, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
-                        tuple(ACTIVITY_STARTED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
-                        tuple(TASK_CREATED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1)
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(TASK_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(
+                        TASK_CANDIDATE_GROUP_REMOVED,
+                        processInstanceId,
+                        null,
+                        SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
+                    ),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
+                    tuple(PROCESS_CREATED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
+                    tuple(PROCESS_STARTED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
+                    tuple(ACTIVITY_STARTED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
+                    tuple(ACTIVITY_COMPLETED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
+                    tuple(SEQUENCE_FLOW_TAKEN, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
+                    tuple(ACTIVITY_STARTED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1),
+                    tuple(TASK_CREATED, callActivityProcessId, processInstanceId, SIMPLE_SUB_PROCESS1)
+                );
+        });
 
         // Clean up
         runtimeService.deleteProcessInstance(callActivityProcessId, "Clean up");
@@ -449,124 +424,67 @@ public class EmbeddedSubProcessAuditIT {
         String processInstanceId = processInstance.getBody().getId();
         String rootRootProcessInstanceId = processInstance.getBody().getRootProcessInstanceId();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(
+                        TASK_CREATED,
+                        processInstanceId,
+                        rootRootProcessInstanceId,
+                        SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
                     )
-                    .containsExactly(
-                        tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(
-                            SEQUENCE_FLOW_TAKEN,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(
-                            SEQUENCE_FLOW_TAKEN,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(
-                            SEQUENCE_FLOW_TAKEN,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(
-                            TASK_CREATED,
-                            processInstanceId,
-                            rootRootProcessInstanceId,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        )
-                    );
-            });
+                );
+        });
 
         SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("mySignal").build();
 
         //when
         signalRestTemplate.signal(signalProcessInstancesCmd);
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(SIGNAL_RECEIVED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(
-                            SEQUENCE_FLOW_TAKEN,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(
-                            SEQUENCE_FLOW_TAKEN,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        ),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(
-                            ACTIVITY_COMPLETED,
-                            processInstanceId,
-                            null,
-                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
-                        )
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(SIGNAL_RECEIVED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT)
+                );
+        });
 
         runtimeService.deleteProcessInstance(processInstanceId, "Clean up");
     }
@@ -581,40 +499,39 @@ public class EmbeddedSubProcessAuditIT {
         String processInstanceId = processInstance.getBody().getId();
         String rootRootProcessInstanceId = processInstance.getBody().getRootProcessInstanceId();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(PROCESS_CREATED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(PROCESS_UPDATED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(PROCESS_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(MESSAGE_WAITING, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(
+                        TASK_CREATED,
+                        processInstanceId,
+                        rootRootProcessInstanceId,
+                        INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                    ),
+                    tuple(
+                        TASK_ASSIGNED,
+                        processInstanceId,
+                        rootRootProcessInstanceId,
+                        INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
                     )
-                    .containsExactly(
-                        tuple(PROCESS_CREATED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(PROCESS_UPDATED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(PROCESS_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(MESSAGE_WAITING, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(
-                            TASK_CREATED,
-                            processInstanceId,
-                            rootRootProcessInstanceId,
-                            INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
-                        ),
-                        tuple(
-                            TASK_ASSIGNED,
-                            processInstanceId,
-                            rootRootProcessInstanceId,
-                            INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
-                        )
-                    );
-            });
+                );
+        });
 
         Execution executionWithMessage = runtimeService
             .createExecutionQuery()
@@ -625,36 +542,35 @@ public class EmbeddedSubProcessAuditIT {
         // event-subprocess received interrupted message event
         runtimeService.messageEventReceived("messageName", executionWithMessage.getId());
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(MESSAGE_RECEIVED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_CANCELLED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_CANCELLED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(
-                            MESSAGE_SUBSCRIPTION_CANCELLED,
-                            processInstanceId,
-                            null,
-                            INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
-                        ),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(PROCESS_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(MESSAGE_RECEIVED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_CANCELLED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(TASK_CANCELLED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(
+                        MESSAGE_SUBSCRIPTION_CANCELLED,
+                        processInstanceId,
+                        null,
+                        INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                    ),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(PROCESS_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                );
+        });
     }
 
     @Test
@@ -666,40 +582,39 @@ public class EmbeddedSubProcessAuditIT {
 
         String processInstanceId = processInstance.getBody().getId();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(PROCESS_CREATED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(PROCESS_UPDATED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(PROCESS_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(MESSAGE_WAITING, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(
+                        TASK_CREATED,
+                        processInstanceId,
+                        processInstanceId,
+                        NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                    ),
+                    tuple(
+                        TASK_ASSIGNED,
+                        processInstanceId,
+                        processInstanceId,
+                        NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
                     )
-                    .containsExactly(
-                        tuple(PROCESS_CREATED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(PROCESS_UPDATED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(PROCESS_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(MESSAGE_WAITING, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(
-                            TASK_CREATED,
-                            processInstanceId,
-                            processInstanceId,
-                            NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
-                        ),
-                        tuple(
-                            TASK_ASSIGNED,
-                            processInstanceId,
-                            processInstanceId,
-                            NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
-                        )
-                    );
-            });
+                );
+        });
 
         Execution executionWithMessage = runtimeService
             .createExecutionQuery()
@@ -710,64 +625,64 @@ public class EmbeddedSubProcessAuditIT {
         // event-subprocess received non interrupted message event
         runtimeService.messageEventReceived("messageName", executionWithMessage.getId());
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(MESSAGE_RECEIVED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(
-                            MESSAGE_SUBSCRIPTION_CANCELLED,
-                            processInstanceId,
-                            null,
-                            NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
-                        ),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(MESSAGE_RECEIVED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(
+                        MESSAGE_SUBSCRIPTION_CANCELLED,
+                        processInstanceId,
+                        null,
+                        NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                    ),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                );
+        });
 
         Collection<CloudTask> tasks = processInstanceRestTemplate.getTasks(processInstance).getBody().getContent();
         assertThat(tasks.size()).isEqualTo(1);
 
         taskRestTemplate.complete((Task) tasks.toArray()[0]);
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+        await().untilAsserted(() -> {
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getParentProcessInstanceId,
-                        CloudRuntimeEvent::getProcessDefinitionKey
-                    )
-                    .containsExactly(
-                        tuple(TASK_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(PROCESS_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getParentProcessInstanceId,
+                    CloudRuntimeEvent::getProcessDefinitionKey
+                )
+                .containsExactly(
+                    tuple(TASK_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
+                    tuple(PROCESS_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                );
+        });
     }
 
     private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<
+            PagedModel<CloudProcessDefinition>
+        >() {};
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL, HttpMethod.GET, null, responseType);
     }

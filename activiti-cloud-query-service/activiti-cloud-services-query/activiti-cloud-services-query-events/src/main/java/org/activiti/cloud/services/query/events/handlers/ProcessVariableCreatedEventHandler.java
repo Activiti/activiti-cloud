@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class ProcessVariableCreatedEventHandler {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ProcessVariableCreatedEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessVariableCreatedEventHandler.class);
 
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
@@ -41,15 +41,16 @@ public class ProcessVariableCreatedEventHandler {
 
         entityManagerFinder
             .findProcessInstanceWithVariables(processInstanceId)
-            .ifPresent(processInstanceEntity -> {
+            .ifPresent(processInstanceEntity ->
                 processInstanceEntity
                     .getVariable(variableName)
                     .ifPresentOrElse(
-                        variableEntity -> {
+                        variableEntity ->
                             LOGGER.warn(
-                                "Variable " + variableName + " already exists in the process " + processInstanceId + "!"
-                            );
-                        },
+                                "Variable {} already exists in the process {}!",
+                                variableName,
+                                processInstanceId
+                            ),
                         () -> {
                             ProcessVariableEntity variableEntity = createProcessVariableEntity(
                                 variableCreatedEvent,
@@ -58,8 +59,8 @@ public class ProcessVariableCreatedEventHandler {
                             processInstanceEntity.getVariables().add(variableEntity);
                             assignToTasks(processInstanceId, variableName, variableEntity);
                         }
-                    );
-            });
+                    )
+            );
     }
 
     private ProcessVariableEntity createProcessVariableEntity(
@@ -72,7 +73,6 @@ public class ProcessVariableCreatedEventHandler {
         variableEntity.setProcessDefinitionKey(variableCreatedEvent.getProcessDefinitionKey());
         variableEntity.setProcessInstance(processInstanceEntity);
         entityManager.persist(variableEntity);
-
         return variableEntity;
     }
 
@@ -82,9 +82,7 @@ public class ProcessVariableCreatedEventHandler {
             .forEach(taskEntity -> {
                 Set<ProcessVariableEntity> processVariables = taskEntity.getProcessVariables();
                 if (processVariables.stream().map(ProcessVariableEntity::getName).anyMatch(variableName::equals)) {
-                    LOGGER.warn(
-                        "Process variable " + variableName + " already exists in the task " + taskEntity.getId() + "!"
-                    );
+                    LOGGER.warn("Process variable {} already exists in the task {}!", variableName, taskEntity.getId());
                 } else {
                     taskEntity.getProcessVariables().add(variableEntity);
                 }

@@ -28,7 +28,9 @@ import org.springframework.http.ResponseEntity;
 
 public abstract class BaseProcessDefinitionRestTemplate {
 
-    private static final ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> PAGED_PROCESS_DEFINITION_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
+    private static final ParameterizedTypeReference<
+        PagedModel<CloudProcessDefinition>
+    > PAGED_PROCESS_DEFINITION_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
 
     private TestRestTemplate testRestTemplate;
 
@@ -73,6 +75,17 @@ public abstract class BaseProcessDefinitionRestTemplate {
             identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_PROCESS_DEFINITION_RESPONSE_TYPE,
             key
+        );
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
+    public ResponseEntity<PagedModel<CloudProcessDefinition>> getProcDefinitionsLatestVersion() {
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(
+            getProcessDefinitionsURL() + "?latestVersion=true",
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_PROCESS_DEFINITION_RESPONSE_TYPE
         );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;

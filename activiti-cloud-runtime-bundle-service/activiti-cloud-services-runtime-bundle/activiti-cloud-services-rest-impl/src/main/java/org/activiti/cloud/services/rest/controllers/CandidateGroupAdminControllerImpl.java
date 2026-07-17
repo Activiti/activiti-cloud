@@ -84,8 +84,7 @@ public class CandidateGroupAdminControllerImpl implements CandidateGroupAdminCon
             groupCandidatesRepresentationModelAssembler,
             linkTo(
                 methodOn(this.getClass()).getGroupCandidates(groupCandidatesRepresentationModelAssembler.getTaskId())
-            )
-                .withSelfRel()
+            ).withSelfRel()
         );
     }
 }

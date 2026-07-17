@@ -39,5 +39,4 @@ import org.springframework.context.annotation.Import;
         IdentitySearchCacheConfiguration.class,
     }
 )
-public @interface EnableIdentityManagementRestAPI {
-}
+public @interface EnableIdentityManagementRestAPI {}

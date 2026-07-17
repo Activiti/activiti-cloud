@@ -49,12 +49,10 @@ public class AssertZipContent {
         this.name = fileContent.getFilename();
         this.contentType = fileContent.getContentType();
         try (InputStream inputStream = new ByteArrayInputStream(fileContent.getFileContent())) {
-            ZipStream
-                .of(inputStream)
-                .forEach(zipEntry -> {
-                    entries.add(zipEntry.getName());
-                    zipEntry.getContent().ifPresent(bytes -> contentMap.put(zipEntry.getName(), bytes));
-                });
+            ZipStream.of(inputStream).forEach(zipEntry -> {
+                entries.add(zipEntry.getName());
+                zipEntry.getContent().ifPresent(bytes -> contentMap.put(zipEntry.getName(), bytes));
+            });
         }
     }
 
@@ -90,12 +88,9 @@ public class AssertZipContent {
     }
 
     public AssertZipContent hasContent(String entry, String expectedContent) {
-        hasContentSatisfying(
-            entry,
-            actualContent -> {
-                assertThat(actualContent).isEqualTo(expectedContent);
-            }
-        );
+        hasContentSatisfying(entry, actualContent -> {
+            assertThat(actualContent).isEqualTo(expectedContent);
+        });
         return this;
     }
 

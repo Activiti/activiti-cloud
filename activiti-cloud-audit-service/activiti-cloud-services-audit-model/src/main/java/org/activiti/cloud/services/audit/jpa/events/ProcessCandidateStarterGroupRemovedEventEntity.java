@@ -49,8 +49,10 @@ public class ProcessCandidateStarterGroupRemovedEventEntity extends AuditEventEn
     }
 
     public void setCandidateStarterGroup(ProcessCandidateStarterGroup candidateGroup) {
-        this.candidateStarterGroup =
-            new ProcessCandidateStarterGroupImpl(candidateGroup.getProcessDefinitionId(), candidateGroup.getGroupId());
+        this.candidateStarterGroup = new ProcessCandidateStarterGroupImpl(
+            candidateGroup.getProcessDefinitionId(),
+            candidateGroup.getGroupId()
+        );
     }
 
     @Override

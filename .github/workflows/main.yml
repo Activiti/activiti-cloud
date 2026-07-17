@@ -22,6 +22,7 @@ env:
   CLUSTER_NAME: activiti
   CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+  MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
 
 jobs:
   pre-checks:
@@ -30,265 +31,280 @@ jobs:
       skip: ${{ steps.dependabot.outputs.result }}
       skip-tests: ${{ steps.check-skip-tests.outputs.result }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Check dependabot build
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "Fork PRs cannot be validated in this repository."
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: "dependabot[bot]"
           label: github_actions
       - name: Check skip tests
         id: check-skip-tests
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           label: skip-tests
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
-        uses: hyland/github-actions-ensure-sha-pinned-actions@7d494b6b53e71f75194d74b4dd890a2266d060b5 # v2.0.0
+        uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
+      - name: Ensure all actions are covered by Dependabot
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
 
-  build:
+  create-tag:
     runs-on: ubuntu-latest
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
-    # Map a step output to a job output
+    permissions:
+      actions: read
+      contents: write
     outputs:
-      version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
-    env:
-      JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
-
+      version: ${{ steps.export-version.outputs.version }}
+      ref: ${{ steps.export-ref.outputs.ref }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
+        if: github.event_name == 'push'
+        id: tag
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          java-version: '25'
+          maven-version: '3.9.9'
+          git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          m2-cache-exclusion-pattern: org/activiti
 
-      - name: Setup Java JDK 25
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # 5.2.0
-        with:
-          java-version: 25
-          distribution: 'corretto'
-
-      - name: Resolve override VERSION
-        id: resolve-override-version
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
-          echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
-        id: update-pom-to-next-version
-        with:
-          version: ${{ steps.resolve-override-version.outputs.version }}
-
-      - name: Update VERSION file
-        run: |
-          echo ${{ steps.update-pom-to-next-version.outputs.next-prerelease }} > VERSION
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Enable testcontainers reuse option
-        run: |
-          echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
-          echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
-
-      - name: Maven Build and Test
+      - name: Export checkout ref
+        id: export-ref
         shell: bash
         run: |
-          TEST_OPTS=""
-          if [[ "${{ needs.pre-checks.outputs.skip-tests }}" == "true" ]]; then
-            TEST_OPTS="-DskipTests=true"
-            echo "::warning::Tests are being skipped due to 'skip-tests' label. This PR cannot be merged until the label is removed."
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "ref=${{ steps.tag.outputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=${GITHUB_REF}" >> "$GITHUB_OUTPUT"
           fi
-          mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install $TEST_OPTS ${{ env.MAVEN_CLI_OPTS }}
-        env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - name: Merge JaCoCo execution files
+      - name: Export build version
+        id: export-version
         shell: bash
-        run: mvn -N jacoco:merge -Djacoco.destFile=${{ env.JACOCO_MERGED_FILE }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "version=${{ steps.tag.outputs.version }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "pull_request" ] \
+            && [[ ",${{ join(github.event.pull_request.labels.*.name, ',') }}," == *",preview,"* ]]; then
+            echo "version=0.0.1-PR-${{ github.event.pull_request.number }}-SNAPSHOT" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$(yq e '.project.version' pom.xml)" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Generate coverage reports
-        shell: bash
-        run: mvn jacoco:report -Djacoco.dataFile=${{ env.JACOCO_MERGED_FILE }}
-
-      - name: Run SonarCloud analysis
-        if: ${{ env.SONAR_TOKEN != '' }}
-        shell: bash
-        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=activiti -Dsonar.projectKey=Activiti_activiti-cloud -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco*/jacoco.xml
-        env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: Remove running docker containers
-        run: docker rm -f $(docker ps -a -q)
-        continue-on-error: true
-
-      - name: Echo Longest Tests run
-        shell: bash
-        run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
-
-      - name: Login to DockerHub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Build Example Runtime Bundle
-        run: make docker/example-runtime-bundle
-
-      - name: Build Activiti Cloud Query
-        run: make docker/activiti-cloud-query
-
-      - name: Build Example Cloud Connector
-        run: make docker/example-cloud-connector
-
-      - name: Build Activiti Cloud Identity Adapter
-        run: make docker/activiti-cloud-identity-adapter
-
-  acceptance-tests:
+  maven-build-common:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre-checks.outputs.skip != 'true' && needs.pre-checks.outputs.skip-tests != 'true' }}
-    # Per matrix cell: unique namespace + Helm profile. Images: build job → VERSION → update-chart → Helm (Serenity flow).
     needs:
       - pre-checks
-      - build
-    env:
-      MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-      ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Bundled preview Keycloak users — repo variables (usernames) + secrets (passwords).
-      TESTUSER_USERNAME: ${{ vars.ACCEPTANCE_TESTUSER_USERNAME || 'testuser' }}
-      TESTUSER_PASSWORD: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
-      HRUSER_USERNAME: ${{ vars.ACCEPTANCE_HRUSER_USERNAME || 'hruser' }}
-      HRUSER_PASSWORD: ${{ secrets.ACCEPTANCE_HRUSER_PASSWORD }}
-      HRADMIN_USERNAME: ${{ vars.ACCEPTANCE_HRADMIN_USERNAME || 'hradmin' }}
-      HRADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_HRADMIN_PASSWORD }}
-      PROCESSADMINUSER_USERNAME: ${{ vars.ACCEPTANCE_PROCESSADMINUSER_USERNAME || 'processadminuser' }}
-      PROCESSADMINUSER_PASSWORD: ${{ secrets.ACCEPTANCE_PROCESSADMINUSER_PASSWORD }}
-      TESTADMIN_USERNAME: ${{ vars.ACCEPTANCE_TESTADMIN_USERNAME || 'testadmin' }}
-      TESTADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
-    strategy:
-      # One namespace per matrix cell (unique PREVIEW_NAME); parallel capped for shared cluster capacity.
-      max-parallel: 4
-      fail-fast: false
-      matrix:
-        messaging-broker: [rabbitmq, kafka]
-        messaging-partitioned: [partitioned, non-partitioned]
-        messaging-destinations: [default-destinations]
-        include:
-          - messaging-broker: kafka
-            messaging-partitioned: partitioned
-            messaging-destinations: override-destinations
-          - messaging-broker: rabbitmq
-            messaging-partitioned: non-partitioned
-            messaging-destinations: pdb
-          - messaging-broker: rabbitmq
-            messaging-partitioned: prefix
-            messaging-destinations: pdb
+      - create-tag
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          ref: ${{ needs.create-tag.outputs.ref }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - name: Setup Java JDK 25
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # 5.2.0
-        with:
-          java-version: 25
-          distribution: 'corretto'
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
-        with:
-          version: v1.19.6
-
-      - name: Set up Helm
-        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
-        with:
-          version: v3.5.2
-
-      - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
-        with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: ${{ env.CLUSTER_NAME }}
-
-      - uses: ./.github/actions/setup-env-for-broker
-        with:
-          messaging-broker: ${{ matrix.messaging-broker }}
-          messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
-          messaging-destinations-option: ${{ matrix.messaging-destinations }}
-          version: ${{ needs.build.outputs.version }}
-
-      - name: Cache Helm chart checkout
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: .git/activiti-cloud-full-chart
-          key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ needs.build.outputs.version }}
-
-      - name: Delete preview for ${{ matrix.messaging-broker }}
-        if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+      # -pl <aggregator> does NOT include its submodules in a filtered reactor.
+      # Enumerate every pom.xml under common parents so leaf modules (and tests) are in the reactor.
+      # Also include standalone library modules not pulled in by any docker-image cell (-pl -am).
+      # TODO: split these into a dedicated maven-build-libraries job when the graph grows further.
+      - name: Resolve common parent modules
+        id: common-modules
         run: |
-          kubectl delete ns $PREVIEW_NAME || true
+          STANDALONE_MODULES=(
+            activiti-cloud-messages-service/integration-tests
+            activiti-cloud-messages-service/starters/hazelcast
+            activiti-cloud-messages-service/starters/jdbc
+            activiti-cloud-messages-service/starters/redis
+            activiti-cloud-notifications-graphql-service/gatling
+            activiti-cloud-notifications-graphql-service/starter
+            activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-services-identity-basic
+            activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-runtime-bundle-rest-client
+            activiti-cloud-runtime-bundle-service/activiti-cloud-starter-runtime-bundle-it
+          )
+          MODULES=$(
+            {
+              find activiti-cloud-build activiti-cloud-api activiti-cloud-service-common -name 'pom.xml' \
+                -not -path '*/target/*' \
+                -exec dirname {} \;
+              printf '%s\n' "${STANDALONE_MODULES[@]}"
+            } | sort -u | tr '\n' ',' | sed 's/,$//'
+          )
+          echo "modules=$MODULES" >> $GITHUB_OUTPUT
 
-      - name: Install release for ${{ matrix.messaging-broker }}
-        run: bash scripts/ci/install-preview-release.sh
-
-      - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
-        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: bash scripts/ci/kafka-partitioned-consumer-check.sh
-
-      - uses: ./.github/actions/check-service-health
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
+          java-version: '25'
+          java-distribution: 'corretto'
+          maven-version: '3.9.9'
+          reuse-testcontainers: 'true'
+          maven-command: >-
+            install -T 1C -DunitTests.parallel=true
+            -pl ${{ steps.common-modules.outputs.modules }} -am
+          jacoco-report-name: jacoco-common
+          target-folder-upload-name: target-common
+          m2-cache-exclusion-pattern: org/activiti
+          uploaded-artifacts-retention-days: '1'
 
-      - uses: ./.github/actions/prepare-preview-for-playwright
+  scan-image-dirs:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    outputs:
+      transformed-json: ${{ steps.transform.outputs.transformed-json }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - uses: ./.github/actions/check-service-health
+      - id: scan
+        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
+
+      - id: transform
+        name: Transform docker image matrix
+        shell: bash
+        env:
+          DIRS_AS_JSON: ${{ steps.scan.outputs.image-dirs-with-metadata }}
+        run: bash scripts/ci/transform-docker-image-matrix.sh
+
+  maven-build:
+    needs:
+      - pre-checks
+      - create-tag
+      - scan-image-dirs
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    uses: ./.github/workflows/_reusable-maven-build.yml
+    with:
+      matrix-json: ${{ needs.scan-image-dirs.outputs.transformed-json }}
+      ref: ${{ needs.create-tag.outputs.ref }}
+    secrets:
+      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  maven-build-dependencies-bom:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - create-tag
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
+          ref: ${{ needs.create-tag.outputs.ref }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - name: Export Playwright CI environment
-        run: bash scripts/ci/export-playwright-ci-env.sh
-
-      - name: Run Playwright Acceptance Tests
-        uses: ./.github/actions/playwright-run
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
-          script-command: "npm run test"
+          java-version: '25'
+          java-distribution: 'corretto'
+          maven-command: >-
+            install -T 1C -pl activiti-cloud-dependencies -am
+            -DskipTests=true -DskipITs=true
+          m2-current-build-upload-name: m2-dependencies-bom
+          m2-cache-exclusion-pattern: org/activiti
+          uploaded-artifacts-retention-days: '1'
 
-      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: always()
-        run: |
-          echo "Delete Helm release"
-          make delete
+  maven-test:
+    needs:
+      - pre-checks
+      - create-tag
+      - scan-image-dirs
+    if: >-
+      needs.pre-checks.outputs.skip != 'true'
+      && needs.pre-checks.outputs.skip-tests != 'true'
+    uses: ./.github/workflows/_reusable-maven-test.yml
+    with:
+      matrix-json: ${{ needs.scan-image-dirs.outputs.transformed-json }}
+      ref: ${{ needs.create-tag.outputs.ref }}
+    secrets:
+      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+  sonar:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - create-tag
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+      - maven-test
+    if: >-
+      needs.pre-checks.outputs.skip != 'true'
+      && needs.pre-checks.outputs.skip-tests != 'true'
+      && needs.maven-build-common.result == 'success'
+      && needs.maven-build.result == 'success'
+      && needs.maven-build-dependencies-bom.result == 'success'
+      && needs.maven-test.result == 'success'
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ needs.create-tag.outputs.ref }}
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          sonar-project: Activiti_activiti-cloud
+          sonar-organization: activiti
+          m2-uploaded-group-path: ~/.m2/repository/org/activiti/cloud
+          ghcr-username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          ghcr-password: ${{ secrets.BOT_GITHUB_TOKEN }}
+          java-version: '25'
+
+  playwright-tests:
+    needs:
+      - pre-checks
+      - create-tag
+      - maven-build
+    if: >-
+      needs.pre-checks.outputs.skip != 'true'
+      && needs.pre-checks.outputs.skip-tests != 'true'
+      && needs.maven-build.result == 'success'
+    uses: ./.github/workflows/_reusable-playwright-tests.yml
+    with:
+      ref: ${{ needs.create-tag.outputs.ref }}
+      version: ${{ needs.create-tag.outputs.version }}
+    secrets:
+      ACCEPTANCE_TESTUSER_PASSWORD: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
+      ACCEPTANCE_HRUSER_PASSWORD: ${{ secrets.ACCEPTANCE_HRUSER_PASSWORD }}
+      ACCEPTANCE_HRADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_HRADMIN_PASSWORD }}
+      ACCEPTANCE_PROCESSADMINUSER_PASSWORD: ${{ secrets.ACCEPTANCE_PROCESSADMINUSER_PASSWORD }}
+      ACCEPTANCE_TESTADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
+      RANCHER2_URL: ${{ secrets.RANCHER2_URL }}
+      RANCHER2_ACCESS_KEY: ${{ secrets.RANCHER2_ACCESS_KEY }}
+      RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
+      REPORT_PORTAL_TOKEN: ${{ secrets.REPORT_PORTAL_TOKEN }}
+      REPORT_PORTAL_URL: ${{ secrets.REPORT_PORTAL_URL }}
 
   build-summary:
     runs-on: ubuntu-latest
@@ -296,19 +312,32 @@ jobs:
     if: ${{ always() && needs.pre-checks.outputs.skip != 'true' }}
     needs:
       - pre-checks
-      - build
-      - acceptance-tests
+      - create-tag
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+      - maven-test
+      - sonar
+      - playwright-tests
     steps:
-      - name: Check build and acceptance-tests results
+      - name: Check CI results
         if: >-
           ${{
-              contains(needs.build.result, 'failure')
-           || contains(needs.build.result, 'cancelled')
-           || contains(needs.acceptance-tests.result, 'failure')
-           || contains(needs.acceptance-tests.result, 'cancelled')
+              contains(needs.maven-build-common.result, 'failure')
+           || contains(needs.maven-build-common.result, 'cancelled')
+           || contains(needs.maven-build.result, 'failure')
+           || contains(needs.maven-build.result, 'cancelled')
+           || contains(needs.maven-build-dependencies-bom.result, 'failure')
+           || contains(needs.maven-build-dependencies-bom.result, 'cancelled')
+           || contains(needs.maven-test.result, 'failure')
+           || contains(needs.maven-test.result, 'cancelled')
+           || contains(needs.sonar.result, 'failure')
+           || contains(needs.sonar.result, 'cancelled')
+           || contains(needs.playwright-tests.result, 'failure')
+           || contains(needs.playwright-tests.result, 'cancelled')
           }}
         run: |
-          echo "Build or acceptance tests have failed or been cancelled. Exiting ..."
+          echo "CI jobs have failed or been cancelled. Exiting ..."
           exit 1
 
       - name: Check if tests were skipped
@@ -326,18 +355,16 @@ jobs:
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     needs:
       - pre-checks
-      - acceptance-tests
-      # dependency needed for build.outputs env variables resolution
-      - build
+      - create-tag
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-          VERSION: ${{ needs.build.outputs.version }}
+          VERSION: ${{ needs.create-tag.outputs.version }}
         run: |
           if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
           then
@@ -348,93 +375,101 @@ jobs:
               make docker-delete-all
           fi
 
+  publish-preview:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - create-tag
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+    if: >-
+      github.event_name == 'pull_request'
+      && contains(github.event.pull_request.labels.*.name, 'preview')
+      && needs.pre-checks.outputs.skip != 'true'
+      && needs.maven-build-common.result == 'success'
+      && needs.maven-build.result == 'success'
+      && needs.maven-build-dependencies-bom.result == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ needs.create-tag.outputs.ref }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+      - uses: ./.github/actions/maven-deploy
+        with:
+          version: ${{ needs.create-tag.outputs.version }}
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+
   publish:
     runs-on: ubuntu-latest
     needs:
       - pre-checks
-      - build
+      - create-tag
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+      - build-summary
       - delete-test-images
-    if: ${{ github.event_name == 'push' && needs.pre-checks.outputs.skip != 'true' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
-    env:
-      VERSION: ${{ needs.build.outputs.version }}
-
+    if: >-
+      github.event_name == 'push' && needs.pre-checks.outputs.skip != 'true'
+      && needs.maven-build-common.result == 'success'
+      && needs.maven-build.result == 'success'
+      && needs.maven-build-dependencies-bom.result == 'success'
+      && (
+        needs.build-summary.result == 'success'
+        || needs.pre-checks.outputs.skip-tests == 'true'
+      )
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-      - name: Setup Java JDK 25
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      - uses: ./.github/actions/maven-deploy
         with:
-          java-version: 25
-          distribution: 'corretto'
-
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Update pom files to the new version
-        run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
-
-      - name: Maven Deploy
-        shell: bash
-        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}} ${{env.MAVEN_CLI_CONNECTION_OPTS}}
-        env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-          MAVEN_CLI_CONNECTION_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
-        with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          add-options: -u
-          commit-message: "Release $VERSION"
-
-      - name: Create release tag
-        if: github.event_name == 'push'
-        run: |
-          git tag -fa $VERSION -m "Release version $VERSION"
-          git push origin $VERSION
+          version: ${{ needs.create-tag.outputs.version }}
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 
   propagate-maven:
     runs-on: ubuntu-latest
     needs:
-      - build
+      - create-tag
       - publish
     if: github.event_name == 'push'
     env:
-      VERSION: ${{ needs.build.outputs.version }}
+      VERSION: ${{ needs.create-tag.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
-          version: ${{ needs.build.outputs.version }}
+          version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "true"
           labels: "be-propagation,${{ env.DEVELOPMENT_BRANCH }}"
           base-branch-name: ${{ env.DEVELOPMENT_BRANCH }}
-          git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          git-username: ${{ vars.HXPS_GIT_USERNAME }}
           git-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          git-author-name: ${{ secrets.BOT_GITHUB_USERNAME }}
+          git-author-name: ${{ vars.HXPS_GIT_USERNAME }}
+          git-author-email: ${{ vars.HXPS_GIT_EMAIL }}
+          gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
 
   propagate-helm:
     runs-on: ubuntu-latest
     needs:
-      - build
+      - create-tag
       - publish
     if: github.event_name == 'push' && github.ref_name == 'develop'
     env:
-      VERSION: ${{ needs.build.outputs.version }}
+      VERSION: ${{ needs.create-tag.outputs.version }}
       FULL_CHART_DIR: full-chart
       FULL_CHART_BASE_BRANCH: develop
-      FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
+      FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.create-tag.outputs.version }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           path: ${{ env.FULL_CHART_DIR }}
           repository: Activiti/activiti-cloud-full-chart
@@ -450,19 +485,43 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
-        with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          add-options: -u
-          repository-directory: ${{ env.FULL_CHART_DIR}}
-          commit-message: "Update docker image tags to $VERSION"
+      - name: Configure commit signing
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_FINGERPRINT: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
+          GIT_USERNAME: ${{ vars.HXPS_GIT_USERNAME }}
+          GIT_USEREMAIL: ${{ vars.HXPS_GIT_EMAIL }}
+        run: |
+          GNUPGHOME="$(mktemp -d)"
+          chmod 700 "$GNUPGHOME"
+          export GNUPGHOME
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --yes --pinentry-mode loopback --import
+          git config --global user.name "$GIT_USERNAME"
+          git config --global user.email "$GIT_USEREMAIL"
+          git config --global user.signingkey "$GPG_PRIVATE_KEY_FINGERPRINT"
+          git config --global commit.gpgsign true
+
+      - name: Commit signed chart changes
+        id: commit
+        working-directory: ${{ env.FULL_CHART_DIR }}
+        run: |
+          git add -u
+          if git diff --cached --quiet; then
+            echo "No chart changes to commit; skipping."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Update docker image tags to $VERSION"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create propagation PR
+        if: steps.commit.outputs.changed == 'true'
         working-directory: ${{ env.FULL_CHART_DIR}}
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -478,6 +537,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}

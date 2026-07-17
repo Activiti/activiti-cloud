@@ -59,6 +59,7 @@ yarn.lock
 # Playwright
 test-results/
 playwright-report/
+activiti-cloud-acceptance-tests-playwright/playswag-coverage/
 playwright/.cache/
 screenshots/
 videos/

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 
 public class ProcessVariableUpdateEventHandler {
@@ -25,12 +26,14 @@ public class ProcessVariableUpdateEventHandler {
         this.variableUpdater = variableUpdater;
     }
 
-    public void handle(ProcessVariableEntity updatedVariableEntity) {
-        String variableName = updatedVariableEntity.getName();
-        String processInstanceId = updatedVariableEntity.getProcessInstanceId();
+    public void handle(CloudVariableUpdatedEvent event) {
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity(event);
+        variableEntity.setValue(event.getEntity().getValue());
+        String variableName = variableEntity.getName();
+        String processInstanceId = variableEntity.getProcessInstanceId();
 
         variableUpdater.update(
-            updatedVariableEntity,
+            variableEntity,
             "Unable to find variable named '" + variableName + "' for process instance '" + processInstanceId + "'"
         );
     }

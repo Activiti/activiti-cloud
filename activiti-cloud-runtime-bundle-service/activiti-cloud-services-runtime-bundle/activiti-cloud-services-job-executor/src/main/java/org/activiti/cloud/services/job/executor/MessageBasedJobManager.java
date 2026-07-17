@@ -63,7 +63,7 @@ public class MessageBasedJobManager extends DefaultJobManager {
             jobEntity.setLockExpirationTime(
                 new Date(
                     processEngineConfiguration.getClock().getCurrentTime().getTime() +
-                    processEngineConfiguration.getAsyncExecutor().getAsyncJobLockTimeInMillis()
+                        processEngineConfiguration.getAsyncExecutor().getAsyncJobLockTimeInMillis()
                 )
             );
         }

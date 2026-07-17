@@ -30,7 +30,7 @@ public @interface ConnectorBinding {
     String input() default "";
 
     String condition() default "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version}" +
-    " and (T(Integer).valueOf(headers['appVersion']) <= ${application.max.version} or ${application.max.version} == -1)";
+        " and (T(Integer).valueOf(headers['appVersion']) <= ${application.max.version} or ${application.max.version} == -1)";
 
     String outputHeader() default "resultDestination";
 
@@ -40,4 +40,6 @@ public @interface ConnectorBinding {
 
     // Time to wait before retry in second
     long retryDelay() default 0;
+
+    String integrationResultTimeout() default "";
 }

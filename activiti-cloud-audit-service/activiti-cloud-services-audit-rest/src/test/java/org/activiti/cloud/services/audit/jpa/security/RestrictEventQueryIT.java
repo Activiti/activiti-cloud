@@ -166,8 +166,9 @@ public class RestrictEventQueryIT {
         while (iterator.hasNext()) {
             AuditEventEntity auditEventEntity = iterator.next();
             assertThat(auditEventEntity.getServiceName()).isNotEqualToIgnoringCase("audit-dontmatchthisone");
-            assertThat(auditEventEntity.getServiceName().replace("-", ""))
-                .isEqualToIgnoringCase("audit".replace("-", ""));
+            assertThat(auditEventEntity.getServiceName().replace("-", "")).isEqualToIgnoringCase(
+                "audit".replace("-", "")
+            );
         }
 
         assertThat(eventsRepository.count(spec)).isEqualTo(2);

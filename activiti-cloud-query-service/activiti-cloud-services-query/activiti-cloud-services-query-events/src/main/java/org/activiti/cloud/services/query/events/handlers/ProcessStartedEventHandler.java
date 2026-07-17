@@ -32,9 +32,11 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessStartedEventHandler.class);
 
     private final EntityManager entityManager;
+    private final ProcessInstanceHierarchyService hierarchyService;
 
-    public ProcessStartedEventHandler(EntityManager entityManager) {
+    public ProcessStartedEventHandler(EntityManager entityManager, ProcessInstanceHierarchyService hierarchyService) {
         this.entityManager = entityManager;
+        this.hierarchyService = hierarchyService;
     }
 
     @Override
@@ -59,6 +61,10 @@ public class ProcessStartedEventHandler implements QueryEventHandler {
             //linkedProcessInstance is not available in ProcessCreatedEvent, so we need to updated it here
             processInstanceEntity.setLinkedProcessInstanceId(startedEvent.getLinkedProcessInstanceId());
             processInstanceEntity.setLinkedProcessInstanceType(startedEvent.getLinkedProcessInstanceType());
+
+            if (startedEvent.getLinkedProcessInstanceId() != null) {
+                hierarchyService.registerLinkedProcess(processInstanceId, startedEvent.getLinkedProcessInstanceId());
+            }
 
             entityManager.persist(processInstanceEntity);
         }

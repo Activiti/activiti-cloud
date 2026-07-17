@@ -21,7 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecremen
 
 public class CloudBPMNTimerRetriesDecrementedEventImpl
     extends CloudBPMNTimerEventImpl
-    implements CloudBPMNTimerRetriesDecrementedEvent {
+    implements CloudBPMNTimerRetriesDecrementedEvent
+{
 
     public CloudBPMNTimerRetriesDecrementedEventImpl() {}
 

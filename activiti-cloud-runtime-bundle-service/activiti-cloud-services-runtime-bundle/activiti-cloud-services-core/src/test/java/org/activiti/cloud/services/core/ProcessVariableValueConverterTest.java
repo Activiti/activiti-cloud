@@ -63,53 +63,43 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterIntegerValue() {
         assertThat(
-            Stream
-                .of("10", 10, 10.0, 10L, 10f)
+            Stream.of("10", 10, 10.0, 10L, 10f)
                 .map(value -> new ProcessVariableValue("int", value))
                 .map(variableValueConverter::convert)
-        )
-            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10));
+        ).allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10));
 
         assertThat(
-            Stream
-                .of("10", 10, 10.0, 10L, 10f)
+            Stream.of("10", 10, 10.0, 10L, 10f)
                 .map(value -> new ProcessVariableValue("integer", value))
                 .map(variableValueConverter::convert)
-        )
-            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10));
+        ).allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10));
     }
 
     @Test
     void testProcessVariableValueConverterLongValue() {
         assertThat(
-            Stream
-                .of("10", 10, 10.0, 10L, 10f)
+            Stream.of("10", 10, 10.0, 10L, 10f)
                 .map(value -> new ProcessVariableValue("long", value))
                 .map(variableValueConverter::convert)
-        )
-            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10L));
+        ).allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10L));
     }
 
     @Test
     void testProcessVariableValueConverterBooleanValue() {
         assertThat(
-            Stream
-                .of(true, "true")
+            Stream.of(true, "true")
                 .map(value -> new ProcessVariableValue("boolean", value))
                 .map(variableValueConverter::convert)
-        )
-            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(true));
+        ).allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(true));
     }
 
     @Test
     void testProcessVariableValueConverterDoubleValue() {
         assertThat(
-            Stream
-                .of("10", "10.0", 10, 10.0, 10L, 10f)
+            Stream.of("10", "10.0", 10, 10.0, 10L, 10f)
                 .map(value -> new ProcessVariableValue("double", value))
                 .map(variableValueConverter::convert)
-        )
-            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10.0));
+        ).allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10.0));
     }
 
     @Test
@@ -146,14 +136,12 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterBigDecimalValue() {
         assertThat(
-            Stream
-                .of("10", 10, 10.0, 10L, 10f)
+            Stream.of("10", 10, 10.0, 10L, 10f)
                 .map(value -> new ProcessVariableValue("bigdecimal", value))
                 .map(variableValueConverter::convert)
-        )
-            .allSatisfy(convertedValue ->
-                assertThat((BigDecimal) convertedValue).isEqualByComparingTo(BigDecimal.valueOf(10))
-            );
+        ).allSatisfy(convertedValue ->
+            assertThat((BigDecimal) convertedValue).isEqualByComparingTo(BigDecimal.valueOf(10))
+        );
     }
 
     @Test

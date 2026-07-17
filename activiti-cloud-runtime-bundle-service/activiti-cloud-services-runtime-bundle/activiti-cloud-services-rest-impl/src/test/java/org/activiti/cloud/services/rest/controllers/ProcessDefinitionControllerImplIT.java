@@ -179,8 +179,9 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class), anyList()))
-            .thenReturn(processDefinitionPage);
+        when(
+            processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class), anyList())
+        ).thenReturn(processDefinitionPage);
 
         mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(status().isOk());
     }
@@ -200,8 +201,7 @@ class ProcessDefinitionControllerImplIT {
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
         given(
             processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class), anyList())
-        )
-            .willReturn(processDefinitionPage);
+        ).willReturn(processDefinitionPage);
 
         //when
         MvcResult result = mockMvc
@@ -241,8 +241,7 @@ class ProcessDefinitionControllerImplIT {
                 any(GetProcessDefinitionsPayload.class),
                 eq(List.of("variables"))
             )
-        )
-            .thenReturn(processDefinitionPage);
+        ).thenReturn(processDefinitionPage);
 
         Extension extension = new Extension();
         VariableDefinition givenVariableDefinition = new VariableDefinition();
@@ -271,8 +270,9 @@ class ProcessDefinitionControllerImplIT {
     void shouldGetProcessDefinitionById() throws Exception {
         //given
         String processId = UUID.randomUUID().toString();
-        given(processRuntime.processDefinition(processId))
-            .willReturn(buildProcessDefinition(processId, "my process", "this is my process", 1));
+        given(processRuntime.processDefinition(processId)).willReturn(
+            buildProcessDefinition(processId, "my process", "this is my process", 1)
+        );
 
         mockMvc
             .perform(get("/v1/process-definitions/{id}", processId).accept(MediaTypes.HAL_JSON_VALUE))
@@ -282,8 +282,9 @@ class ProcessDefinitionControllerImplIT {
     @Test
     void getProcessDefinitionShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         String procDefId = UUID.randomUUID().toString();
-        given(processRuntime.processDefinition(procDefId))
-            .willReturn(buildProcessDefinition(procDefId, "my process", "This is my process", 1));
+        given(processRuntime.processDefinition(procDefId)).willReturn(
+            buildProcessDefinition(procDefId, "my process", "This is my process", 1)
+        );
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}", procDefId).accept(MediaType.APPLICATION_JSON_VALUE))

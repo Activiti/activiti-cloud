@@ -20,7 +20,8 @@ import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 
 public class CloudProcessSuspendedEventImpl
     extends CloudProcessInstanceEventImpl
-    implements CloudProcessSuspendedEvent {
+    implements CloudProcessSuspendedEvent
+{
 
     public CloudProcessSuspendedEventImpl() {}
 

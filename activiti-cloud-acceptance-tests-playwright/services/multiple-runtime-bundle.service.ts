@@ -15,72 +15,67 @@
  */
 
 import { timeouts } from '../config/runtime/timeouts';
-import { waitForProcessInstanceStatus } from '../helpers/multiple-runtime.assertions';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import { TestScope } from '../helpers/test-isolation';
-import { RuntimeBundleService } from './runtime-bundle.service';
-import { QueryService } from './query.service';
+import { RuntimeBundleService } from './runtime-bundle/runtime-bundle.service';
+import { QueryService } from './query/query.service';
 import { CloudProcessInstance, ProcessInstanceStatus } from '../models/runtime-bundle.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
-/**
- * Serenity uses /rb-other-app for a second runtime. Preview installs often expose only /rb;
- * both processes still complete on one engine (signals via RabbitMQ). Set SECONDARY_RUNTIME_BASE_PATH=/rb-other-app when deployed.
- */
 const SECONDARY_RUNTIME_BASE_PATH = process.env.SECONDARY_RUNTIME_BASE_PATH?.trim() || '/rb';
 
 export class MultipleRuntimeBundleService extends BaseService {
-    private readonly primaryRuntimeService: RuntimeBundleService;
-    private readonly secondaryRuntimeService: RuntimeBundleService;
-    private readonly queryService: QueryService;
+    readonly primary: RuntimeBundleService;
+    readonly secondary: RuntimeBundleService;
+    readonly query: QueryService;
 
     constructor(context: CustomAPIRequest) {
         super(context);
-        this.primaryRuntimeService = new RuntimeBundleService(context);
-        this.secondaryRuntimeService = new RuntimeBundleService(context, SECONDARY_RUNTIME_BASE_PATH);
-        this.queryService = new QueryService(context);
+        this.primary = new RuntimeBundleService(context);
+        this.secondary = new RuntimeBundleService(context, SECONDARY_RUNTIME_BASE_PATH);
+        this.query = new QueryService(context);
     }
 
     attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {
         super.attachIsolation(dirtyRegistry, testScope);
-        this.primaryRuntimeService.attachIsolation(dirtyRegistry, testScope, '/rb/v1');
-        this.secondaryRuntimeService.attachIsolation(
+        this.primary.attachIsolation(dirtyRegistry, testScope, '/rb/v1');
+        this.secondary.attachIsolation(
             dirtyRegistry,
             testScope,
             `${SECONDARY_RUNTIME_BASE_PATH.replace(/\/$/, '')}/v1`
         );
     }
 
-    async startProcessOnPrimary(processDefinitionKey: string): Promise<CloudProcessInstance> {
-        return this.primaryRuntimeService.startProcess({ processDefinitionKey });
-    }
-
-    async startProcessOnSecondary(processDefinitionKey: string): Promise<CloudProcessInstance> {
-        return this.secondaryRuntimeService.startProcess({ processDefinitionKey });
-    }
-
-    async getProcessInstanceFromPrimary(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.queryService.getProcessInstance(processInstanceId);
-    }
-
-    async getProcessInstanceFromSecondary(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.queryService.getProcessInstance(processInstanceId);
-    }
-
     async waitForProcessInstanceStatusOnPrimary(
         processInstanceId: string,
-        expectedStatus: ProcessInstanceStatus,
-        timeoutMs: number = timeouts.poll.signalProcess
+        expectedStatus: ProcessInstanceStatus
     ): Promise<CloudProcessInstance> {
-        return waitForProcessInstanceStatus(this.queryService, processInstanceId, expectedStatus, timeoutMs);
+        const instance = await MultipleRuntimeBundleService.waitFor(
+            () => this.query.getProcessInstanceWhenSynced(processInstanceId),
+            (value) => value?.status === expectedStatus,
+            'signalProcess',
+            `process ${processInstanceId} to reach status ${expectedStatus} on primary runtime`,
+            timeouts.intervals.fast
+        );
+        return instance!;
     }
 
     async waitForProcessInstanceStatusOnSecondary(
         processInstanceId: string,
-        expectedStatus: ProcessInstanceStatus,
-        timeoutMs: number = timeouts.poll.signalProcess
+        expectedStatus: ProcessInstanceStatus
     ): Promise<CloudProcessInstance> {
-        return waitForProcessInstanceStatus(this.queryService, processInstanceId, expectedStatus, timeoutMs);
+        const instance = await MultipleRuntimeBundleService.waitFor(
+            () => this.query.getProcessInstanceWhenSynced(processInstanceId),
+            (value) => value?.status === expectedStatus,
+            'signalProcess',
+            `process ${processInstanceId} to reach status ${expectedStatus} on secondary runtime`,
+            timeouts.intervals.fast
+        );
+        return instance!;
+    }
+
+    get signalPollTimeoutMs(): number {
+        return timeouts.poll.signalProcess;
     }
 }

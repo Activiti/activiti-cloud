@@ -26,14 +26,14 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class ConnectorDefinitionRepresentationModelAssembler
-    implements RepresentationModelAssembler<ConnectorDefinition, EntityModel<ConnectorDefinition>> {
+    implements RepresentationModelAssembler<ConnectorDefinition, EntityModel<ConnectorDefinition>>
+{
 
     @Override
     public EntityModel<ConnectorDefinition> toModel(ConnectorDefinition connectorDefinition) {
         Link selfRel = linkTo(
             methodOn(ConnectorDefinitionControllerImpl.class).getConnectorDefinition(connectorDefinition.getId())
-        )
-            .withSelfRel();
+        ).withSelfRel();
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
 
         return EntityModel.of(connectorDefinition, selfRel, homeLink);

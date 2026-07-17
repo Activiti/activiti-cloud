@@ -20,7 +20,8 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 
 public class CloudProcessCancelledEventImpl
     extends CloudProcessInstanceEventImpl
-    implements CloudProcessCancelledEvent {
+    implements CloudProcessCancelledEvent
+{
 
     private String cause;
 

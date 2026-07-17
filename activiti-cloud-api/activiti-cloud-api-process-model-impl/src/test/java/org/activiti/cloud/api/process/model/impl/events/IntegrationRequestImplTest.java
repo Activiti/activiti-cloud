@@ -26,20 +26,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class IntegrationRequestImplTest {
+class IntegrationRequestImplTest {
 
     @Mock
     private IntegrationContext integrationContext;
 
     @Test
-    public void should_always_haveAppVersionSet() {
+    void should_always_haveAppVersionSet() {
         given(integrationContext.getAppVersion()).willReturn("1");
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         assertThat(integrationRequest.getAppVersion()).isEqualTo("1");
     }
 
     @Test
-    public void should_setAndGetIncidentDestination() {
+    void should_setAndGetIncidentDestination() {
         given(integrationContext.getAppVersion()).willReturn("1");
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setIncidentDestination("connectorIncident_myApp");
@@ -47,7 +47,7 @@ public class IntegrationRequestImplTest {
     }
 
     @Test
-    public void should_returnNullIncidentDestination_whenNotSet() {
+    void should_returnNullIncidentDestination_whenNotSet() {
         given(integrationContext.getAppVersion()).willReturn("1");
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         assertThat(integrationRequest.getIncidentDestination()).isNull();

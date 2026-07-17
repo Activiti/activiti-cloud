@@ -331,8 +331,19 @@ ALTER TABLE process_instance
 ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_type VARCHAR(255);
 
-CREATE SEQUENCE QUERY_INT_MESSAGE_SEQ START WITH 1 INCREMENT BY 1;
+create table process_instance_hierarchy
+(
+    ancestor_id   varchar(255) not null,
+    descendant_id varchar(255) not null,
+    depth         int          not null default 0,
+    relation_type varchar(20)  not null,
+    primary key (ancestor_id, descendant_id)
+);
+create index idx_pih_ancestor      on process_instance_hierarchy (ancestor_id);
+create index idx_pih_descendant    on process_instance_hierarchy (descendant_id);
+create index idx_pih_relation_type on process_instance_hierarchy (relation_type);
 
+CREATE SEQUENCE QUERY_INT_MESSAGE_SEQ START WITH 1 INCREMENT BY 1;
 CREATE TABLE QUERY_INT_CHANNEL_MESSAGE (
                                    MESSAGE_ID CHAR(36) NOT NULL,
                                    GROUP_KEY CHAR(36) NOT NULL,

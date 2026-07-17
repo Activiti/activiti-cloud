@@ -85,8 +85,7 @@ class EventsEngineEventsAdminControllerIT {
     private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";
     private static final String CSV_FILENAME = "20220710_testApp_audit.csv";
 
-    private static String CSV_CONTENT =
-        """
+    private static String CSV_CONTENT = """
         "ACTOR","APPNAME","APPVERSION","BUSINESSKEY","ENTITY","ENTITYID","EVENTTYPE","ID","MESSAGEID","PARENTPROCESSINSTANCEID","PROCESSDEFINITIONID","PROCESSDEFINITIONKEY","PROCESSDEFINITIONVERSION","PROCESSINSTANCEID","SEQUENCENUMBER","SERVICEFULLNAME","SERVICENAME","SERVICETYPE","SERVICEVERSION","TIME"
         "service_user","testApp","","","{""appVersion"":null,""businessKey"":null,""completedDate"":null,""id"":""10"",""initiator"":null,""name"":null,""parentId"":null,""processDefinitionId"":""1"",""processDefinitionKey"":null,""processDefinitionName"":null,""processDefinitionVersion"":null,""rootProcessInstanceId"":null,""startDate"":null,""status"":null}","","PROCESS_STARTED","processEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
         "service_user","testApp","","","{""name"":""var"",""type"":null,""value"":null,""processInstanceId"":""processId"",""taskId"":""taskId"",""taskVariable"":true}","var","VARIABLE_CREATED","variableEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
@@ -153,8 +152,9 @@ class EventsEngineEventsAdminControllerIT {
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(eventsRepository).findAll(pageableCaptor.capture());
 
-        assertThat(pageableCaptor.getValue().getSort())
-            .containsExactly(new Sort.Order(Sort.Direction.ASC, "timestamp"));
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(
+            new Sort.Order(Sort.Direction.ASC, "timestamp")
+        );
     }
 
     @Test
@@ -169,8 +169,9 @@ class EventsEngineEventsAdminControllerIT {
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(eventsRepository).findAll(pageableCaptor.capture());
 
-        assertThat(pageableCaptor.getValue().getSort())
-            .containsExactly(new Sort.Order(Sort.Direction.ASC, "eventType"));
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(
+            new Sort.Order(Sort.Direction.ASC, "eventType")
+        );
     }
 
     @Test
@@ -178,7 +179,10 @@ class EventsEngineEventsAdminControllerIT {
         List<AuditEventEntity> events = buildEventsData(1);
         events.add(buildVariableAuditEventEntity(2));
 
-        given(eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong())).willReturn(events);
+        Page<AuditEventEntity> page = new PageImpl<>(events);
+        given(
+            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
+        ).willReturn(page);
 
         MvcResult response = mockMvc
             .perform(
@@ -190,6 +194,61 @@ class EventsEngineEventsAdminControllerIT {
             .andReturn();
 
         assertCsv(response.getResponse(), CSV_CONTENT);
+    }
+
+    @Test
+    void exportEventsMultiplePages() throws Exception {
+        // First page with 1 event
+        List<AuditEventEntity> page1Events = buildEventsData(1);
+        PageRequest page1Request = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Page<AuditEventEntity> page1 = new PageImpl<>(page1Events, page1Request, 2000);
+
+        // Second page with 1 event
+        List<AuditEventEntity> page2Events = new ArrayList<>();
+        page2Events.add(buildVariableAuditEventEntity(2));
+        PageRequest page2Request = PageRequest.of(1, 1000, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Page<AuditEventEntity> page2 = new PageImpl<>(page2Events, page2Request, 2000);
+
+        given(
+            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
+        ).willReturn(page1, page2);
+
+        MvcResult response = mockMvc
+            .perform(
+                get("/admin/{version}/events/export/" + CSV_FILENAME, "v1")
+                    .param("from", "2024-07-22")
+                    .param("to", "2024-07-24")
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertCsv(response.getResponse(), CSV_CONTENT);
+    }
+
+    @Test
+    void exportEventsEmpty() throws Exception {
+        // Empty page
+        Page<AuditEventEntity> emptyPage = new PageImpl<>(List.of());
+        given(
+            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
+        ).willReturn(emptyPage);
+
+        MvcResult response = mockMvc
+            .perform(
+                get("/admin/{version}/events/export/" + CSV_FILENAME, "v1")
+                    .param("from", "2024-07-22")
+                    .param("to", "2024-07-24")
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        MockHttpServletResponse servletResponse = response.getResponse();
+        assertThat(servletResponse.getContentType()).isEqualTo("text/csv");
+        assertThat(servletResponse.getHeader(CONTENT_DISPOSITION)).isEqualTo(HEADER_ATTACHMENT_FILENAME + CSV_FILENAME);
+        // Should still have CSV header row even when empty
+        assertThat(servletResponse.getContentAsString()).contains(
+            "\"ACTOR\",\"APPNAME\",\"APPVERSION\",\"BUSINESSKEY\",\"ENTITY\",\"ENTITYID\",\"EVENTTYPE\",\"ID\",\"MESSAGEID\""
+        );
     }
 
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
@@ -243,8 +302,9 @@ class EventsEngineEventsAdminControllerIT {
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        given(eventsRepository.findAll(any(AlfrescoPageRequest.class)))
-            .willReturn(new PageImpl<>(events, pageRequest, 12));
+        given(eventsRepository.findAll(any(AlfrescoPageRequest.class))).willReturn(
+            new PageImpl<>(events, pageRequest, 12)
+        );
 
         MvcResult result = mockMvc
             .perform(get("/admin/{version}/events?skipCount=11&maxItems=10", "v1").accept(MediaType.APPLICATION_JSON))
@@ -276,8 +336,9 @@ class EventsEngineEventsAdminControllerIT {
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        given(eventsRepository.findAll(any(AlfrescoPageRequest.class)))
-            .willReturn(new PageImpl<>(events, pageRequest, 12));
+        given(eventsRepository.findAll(any(AlfrescoPageRequest.class))).willReturn(
+            new PageImpl<>(events, pageRequest, 12)
+        );
 
         mockMvc
             .perform(head("/admin/{version}/events?skipCount=11&maxItems=10", "v1").accept(MediaType.APPLICATION_JSON))

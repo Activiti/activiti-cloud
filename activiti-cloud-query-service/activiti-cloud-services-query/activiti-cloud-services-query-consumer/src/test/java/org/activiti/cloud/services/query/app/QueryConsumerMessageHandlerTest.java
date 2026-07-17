@@ -118,12 +118,12 @@ public class QueryConsumerMessageHandlerTest {
         //when
         TransactionTemplate transactionTemplate = new TransactionTemplate(new PseudoTransactionManager());
         assertThatThrownBy(() ->
-                transactionTemplate.executeWithoutResult(tx -> {
-                    consumer.accept(message);
+            transactionTemplate.executeWithoutResult(tx -> {
+                consumer.accept(message);
 
-                    throw new IllegalStateException("rollback");
-                })
-            )
+                throw new IllegalStateException("rollback");
+            })
+        )
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("rollback");
 

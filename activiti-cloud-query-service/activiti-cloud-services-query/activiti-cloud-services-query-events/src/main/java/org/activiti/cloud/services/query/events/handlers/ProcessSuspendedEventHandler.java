@@ -38,11 +38,11 @@ public class ProcessSuspendedEventHandler implements QueryEventHandler {
         CloudProcessSuspendedEvent suspendedEvent = (CloudProcessSuspendedEvent) event;
         String processInstanceId = suspendedEvent.getEntity().getId();
 
-        ProcessInstanceEntity processInstanceEntity = Optional
-            .ofNullable(entityManager.find(ProcessInstanceEntity.class, processInstanceId))
-            .orElseThrow(() ->
-                new QueryException("Unable to find process instance with the given id: " + processInstanceId)
-            );
+        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(
+            entityManager.find(ProcessInstanceEntity.class, processInstanceId)
+        ).orElseThrow(() ->
+            new QueryException("Unable to find process instance with the given id: " + processInstanceId)
+        );
         processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
         processInstanceEntity.setLastModified(new Date(suspendedEvent.getTimestamp()));
         processInstanceEntity.setSuspendedDate(new Date(suspendedEvent.getTimestamp()));

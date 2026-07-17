@@ -36,7 +36,9 @@ public class ProcessDefinitionRestTemplate {
     public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER = new LinkedMultiValueMap<>(
         Map.of("Content-type", List.of("application/json"))
     );
-    private static final ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {};
+    private static final ParameterizedTypeReference<
+        PagedModel<CloudProcessDefinition>
+    > PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {};
 
     private TestRestTemplate testRestTemplate;
 

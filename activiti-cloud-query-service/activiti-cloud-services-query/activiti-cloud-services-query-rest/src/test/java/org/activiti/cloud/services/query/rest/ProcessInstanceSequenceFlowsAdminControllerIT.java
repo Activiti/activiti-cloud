@@ -31,6 +31,7 @@ import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -75,6 +76,9 @@ class ProcessInstanceSequenceFlowsAdminControllerIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private TaskRepository taskRepository;
 
     @MockitoBean
@@ -108,19 +112,19 @@ class ProcessInstanceSequenceFlowsAdminControllerIT {
     void shouldReturnSequenceFlowsJsonWhenAcceptIsApplicationJson() throws Exception {
         BPMNSequenceFlowEntity sequenceFlow = buildSequenceFlow();
 
-        given(bpmnSequenceFlowRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(
-                    Collections.singletonList(sequenceFlow),
-                    new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)),
-                    1
-                )
-            );
+        given(bpmnSequenceFlowRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            new PageImpl<>(
+                Collections.singletonList(sequenceFlow),
+                new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)),
+                1
+            )
+        );
 
         MvcResult result = mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}/sequence-flows", PROCESS_INSTANCE_ID)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/process-instances/{processInstanceId}/sequence-flows", PROCESS_INSTANCE_ID).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             .andExpect(status().isOk())
             .andReturn();
@@ -135,15 +139,15 @@ class ProcessInstanceSequenceFlowsAdminControllerIT {
 
     @Test
     void shouldReturnEmptySequenceFlowsListWhenNoneExist() throws Exception {
-        given(bpmnSequenceFlowRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.emptyList(), new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)), 0)
-            );
+        given(bpmnSequenceFlowRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            new PageImpl<>(Collections.emptyList(), new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)), 0)
+        );
 
         MvcResult result = mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}/sequence-flows", PROCESS_INSTANCE_ID)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/process-instances/{processInstanceId}/sequence-flows", PROCESS_INSTANCE_ID).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             .andExpect(status().isOk())
             .andReturn();

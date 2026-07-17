@@ -24,7 +24,14 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
     - "/"
-    - "/.github/actions/*"
+    - "/.github/actions/check-service-health"
+    - "/.github/actions/load-acceptance-test-env"
+    - "/.github/actions/load-playwright-profile-config"
+    - "/.github/actions/load-preview-keycloak-secret"
+    - "/.github/actions/maven-deploy"
+    - "/.github/actions/playwright-run"
+    - "/.github/actions/prepare-preview-for-playwright"
+    - "/.github/actions/setup-env-for-broker"
     schedule:
       interval: "weekly"
     cooldown:
@@ -53,6 +60,7 @@ updates:
       framework:
         patterns:
           - "@playwright/test"
+          - "@reportportal/agent-js-playwright"
         update-types:
           - "minor"
           - "patch"

@@ -46,12 +46,10 @@ public class ProcessVariablesPayloadConverter {
     }
 
     public StartProcessPayload convert(StartProcessPayload payload) {
-        return Optional
-            .ofNullable(payload)
+        return Optional.ofNullable(payload)
             .map(StartProcessPayload::getVariables)
             .map(variables ->
-                ProcessPayloadBuilder
-                    .start()
+                ProcessPayloadBuilder.start()
                     .withBusinessKey(payload.getBusinessKey())
                     .withName(payload.getName())
                     .withProcessDefinitionId(payload.getProcessDefinitionId())
@@ -65,12 +63,10 @@ public class ProcessVariablesPayloadConverter {
     }
 
     public CompleteTaskPayload convert(CompleteTaskPayload payload) {
-        return Optional
-            .ofNullable(payload)
+        return Optional.ofNullable(payload)
             .map(CompleteTaskPayload::getVariables)
             .map(variables ->
-                TaskPayloadBuilder
-                    .complete()
+                TaskPayloadBuilder.complete()
                     .withTaskId(payload.getTaskId())
                     .withVariables(mapVariableValues(variables))
                     .build()
@@ -79,12 +75,10 @@ public class ProcessVariablesPayloadConverter {
     }
 
     public SaveTaskPayload convert(SaveTaskPayload payload) {
-        return Optional
-            .ofNullable(payload)
+        return Optional.ofNullable(payload)
             .map(SaveTaskPayload::getVariables)
             .map(variables ->
-                TaskPayloadBuilder
-                    .save()
+                TaskPayloadBuilder.save()
                     .withTaskId(payload.getTaskId())
                     .withVariables(mapVariableValues(variables))
                     .build()
@@ -93,8 +87,7 @@ public class ProcessVariablesPayloadConverter {
     }
 
     public StartMessagePayload convert(StartMessagePayload payload) {
-        return Optional
-            .ofNullable(payload)
+        return Optional.ofNullable(payload)
             .map(StartMessagePayload::getVariables)
             .map(variables -> MessagePayloadBuilder.from(payload).withVariables(mapVariableValues(variables)).build())
             .orElse(payload);

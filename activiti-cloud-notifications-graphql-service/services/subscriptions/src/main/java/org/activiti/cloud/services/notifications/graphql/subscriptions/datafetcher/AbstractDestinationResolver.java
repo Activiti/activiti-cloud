@@ -45,8 +45,7 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
 
         // Build destinations from arguments
         if (environment.getArguments().size() > 0) {
-            List<List<String>> arguments = Stream
-                .of(argumentNames)
+            List<List<String>> arguments = Stream.of(argumentNames)
                 .map(name -> resolveArgument(environment, name))
                 .collect(Collectors.toList());
 

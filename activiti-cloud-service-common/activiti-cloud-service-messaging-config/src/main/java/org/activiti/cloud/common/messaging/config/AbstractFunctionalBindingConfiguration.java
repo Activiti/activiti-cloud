@@ -111,8 +111,11 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
         functionRegistration.setBeanName(beanName);
 
-        GenericApplicationContext.class.cast(applicationContext)
-            .registerBean(beanName, FunctionRegistration.class, () -> functionRegistration);
+        GenericApplicationContext.class.cast(applicationContext).registerBean(
+            beanName,
+            FunctionRegistration.class,
+            () -> functionRegistration
+        );
 
         return beanName;
     }
@@ -144,8 +147,9 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
     protected String registerConnectorFlowFunction(IntegrationFlow connectorFlow, String beanName) {
         final Consumer<Message<?>> connectorFlowFunction = connectorFlow.getInputChannel()::send;
 
-        final var connectorFlowFunctionRegistration = new FunctionRegistration<>(connectorFlowFunction)
-            .type(new MessageConsumerParametrizedType());
+        final var connectorFlowFunctionRegistration = new FunctionRegistration<>(connectorFlowFunction).type(
+            new MessageConsumerParametrizedType()
+        );
 
         return registerFunctionRegistration(beanName, connectorFlowFunctionRegistration);
     }

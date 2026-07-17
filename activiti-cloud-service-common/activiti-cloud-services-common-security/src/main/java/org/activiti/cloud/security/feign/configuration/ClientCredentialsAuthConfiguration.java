@@ -45,18 +45,18 @@ public class ClientCredentialsAuthConfiguration {
         ClientRegistration clientRegistration,
         OAuth2AuthorizedClientProvider provider
     ) {
-        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager = new AuthorizedClientServiceOAuth2AuthorizedClientManager(
-            clientRegistrationRepository,
-            oAuth2AuthorizedClientService
-        );
+        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
+            new AuthorizedClientServiceOAuth2AuthorizedClientManager(
+                clientRegistrationRepository,
+                oAuth2AuthorizedClientService
+            );
 
-        OAuth2AuthorizedClientProviderBuilder oAuth2AuthorizedClientProviderBuilder = OAuth2AuthorizedClientProviderBuilder
-            .builder()
-            .refreshToken()
-            .clientCredentials();
-        OAuth2AuthorizedClientProvider authorizedClientProvider = provider == null
-            ? oAuth2AuthorizedClientProviderBuilder.build()
-            : oAuth2AuthorizedClientProviderBuilder.provider(provider).build();
+        OAuth2AuthorizedClientProviderBuilder oAuth2AuthorizedClientProviderBuilder =
+            OAuth2AuthorizedClientProviderBuilder.builder().refreshToken().clientCredentials();
+        OAuth2AuthorizedClientProvider authorizedClientProvider =
+            provider == null
+                ? oAuth2AuthorizedClientProviderBuilder.build()
+                : oAuth2AuthorizedClientProviderBuilder.provider(provider).build();
 
         authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 

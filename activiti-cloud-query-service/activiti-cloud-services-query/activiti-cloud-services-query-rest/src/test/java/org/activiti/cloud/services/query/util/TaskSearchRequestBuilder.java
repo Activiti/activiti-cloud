@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,10 +25,16 @@ import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.introspect.VisibilityChecker;
+import tools.jackson.databind.json.JsonMapper;
 
 public class TaskSearchRequestBuilder {
+
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder()
+        .changeDefaultVisibility((VisibilityChecker checker) ->
+            checker.withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+        )
+        .build();
 
     private boolean onlyStandalone;
     private boolean onlyRoot;
@@ -202,14 +207,13 @@ public class TaskSearchRequestBuilder {
 
     public TaskSearchRequestBuilder invertSort() {
         if (sort != null) {
-            sort =
-                new CloudRuntimeEntitySort(
-                    sort.field(),
-                    sort.direction().isAscending() ? "desc" : "asc",
-                    sort.isProcessVariable(),
-                    sort.processDefinitionKey(),
-                    sort.type()
-                );
+            sort = new CloudRuntimeEntitySort(
+                sort.field(),
+                sort.direction().isAscending() ? "desc" : "asc",
+                sort.isProcessVariable(),
+                sort.processDefinitionKey(),
+                sort.type()
+            );
         }
         return this;
     }
@@ -262,12 +266,6 @@ public class TaskSearchRequestBuilder {
     }
 
     public String buildJson() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-            return objectMapper.writeValueAsString(build());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return JSON_MAPPER.writeValueAsString(build());
     }
 }

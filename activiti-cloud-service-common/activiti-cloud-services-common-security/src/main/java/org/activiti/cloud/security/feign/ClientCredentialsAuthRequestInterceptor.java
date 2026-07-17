@@ -40,8 +40,9 @@ public class ClientCredentialsAuthRequestInterceptor implements AuthTokenRequest
 
     @Override
     public Optional<String> getToken() {
-        OAuth2AuthorizeRequest oAuth2AuthorizeRequest = OAuth2AuthorizeRequest
-            .withClientRegistrationId(clientRegistration.getRegistrationId())
+        OAuth2AuthorizeRequest oAuth2AuthorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId(
+            clientRegistration.getRegistrationId()
+        )
             .principal("activiti")
             .build();
 

@@ -33,6 +33,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -109,6 +110,9 @@ public class ProcessInstanceEntityTasksControllerIT {
     private ProcessInstanceService processInstanceService;
 
     @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -124,14 +128,13 @@ public class ProcessInstanceEntityTasksControllerIT {
         TaskEntity taskEntity = buildDefaultTask();
         Predicate restrictionPredicate = mock(Predicate.class);
         given(taskLookupRestrictionService.restrictTaskQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.findInProcessInstanceScope(any(), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(
-                    Collections.singletonList(taskEntity),
-                    new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
-                    12
-                )
-            );
+        given(taskRepository.findInProcessInstanceScope(any(), any(Pageable.class))).willReturn(
+            new PageImpl<>(
+                Collections.singletonList(taskEntity),
+                new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
+                12
+            )
+        );
 
         //when
         MvcResult result = mockMvc
@@ -139,8 +142,7 @@ public class ProcessInstanceEntityTasksControllerIT {
                 get(
                     "/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
                     taskEntity.getProcessInstanceId()
-                )
-                    .accept(MediaType.APPLICATION_JSON)
+                ).accept(MediaType.APPLICATION_JSON)
             )
             //then
             .andExpect(status().isOk())

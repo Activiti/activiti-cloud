@@ -39,14 +39,13 @@ public class ApplicationSecuritySpecification implements Specification<AuditEven
     ) {
         Expression<String> replacedServiceName = root.get("serviceName");
 
-        replacedServiceName =
-            criteriaBuilder.function(
-                "REPLACE",
-                String.class,
-                replacedServiceName,
-                criteriaBuilder.literal("-"),
-                criteriaBuilder.literal("")
-            );
+        replacedServiceName = criteriaBuilder.function(
+            "REPLACE",
+            String.class,
+            replacedServiceName,
+            criteriaBuilder.literal("-"),
+            criteriaBuilder.literal("")
+        );
 
         return criteriaBuilder.equal(
             criteriaBuilder.upper(replacedServiceName),

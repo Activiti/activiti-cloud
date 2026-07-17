@@ -42,8 +42,7 @@ public class MessageEventsDispatcher {
             ProcessEngineChannels.COMMAND_CONSUMER
         );
 
-        Message<?> dispatchMessage = MessageBuilder
-            .fromMessage(message)
+        Message<?> dispatchMessage = MessageBuilder.fromMessage(message)
             .setHeader(MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION, messageEventOutputDestination)
             .build();
 

@@ -112,9 +112,11 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
             try {
                 throw new Error("Mock Error");
             } catch (Error error) {
-                Message<IntegrationError> message = IntegrationErrorBuilder
-                    .errorFor(integrationRequest, connectorProperties, error)
-                    .buildMessage();
+                Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(
+                    integrationRequest,
+                    connectorProperties,
+                    error
+                ).buildMessage();
                 integrationErrorSender.send(message);
             }
         };
@@ -130,9 +132,11 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
             try {
                 raiseErrorCause("Error code message");
             } catch (Error cause) {
-                Message<IntegrationError> message = IntegrationErrorBuilder
-                    .errorFor(integrationRequest, connectorProperties, new CloudBpmnError("ERROR_CODE"))
-                    .buildMessage();
+                Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(
+                    integrationRequest,
+                    connectorProperties,
+                    new CloudBpmnError("ERROR_CODE")
+                ).buildMessage();
                 integrationErrorSender.send(message);
             }
         };
@@ -148,9 +152,11 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
             try {
                 raiseErrorCause("Error cause message");
             } catch (Error cause) {
-                Message<IntegrationError> message = IntegrationErrorBuilder
-                    .errorFor(integrationRequest, connectorProperties, new CloudBpmnError("ERROR_CODE", cause))
-                    .buildMessage();
+                Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(
+                    integrationRequest,
+                    connectorProperties,
+                    new CloudBpmnError("ERROR_CODE", cause)
+                ).buildMessage();
                 integrationErrorSender.send(message);
             }
         };
@@ -166,13 +172,11 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
             try {
                 raiseErrorCause("Error code message");
             } catch (Error cause) {
-                Message<IntegrationError> message = IntegrationErrorBuilder
-                    .errorFor(
-                        integrationRequest,
-                        connectorProperties,
-                        new CloudBpmnError("ERROR_CODE", cause.getMessage())
-                    )
-                    .buildMessage();
+                Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(
+                    integrationRequest,
+                    connectorProperties,
+                    new CloudBpmnError("ERROR_CODE", cause.getMessage())
+                ).buildMessage();
                 integrationErrorSender.send(message);
             }
         };
@@ -186,8 +190,14 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     public Consumer<IntegrationRequest> mockTypeNullVariablesConnector() {
         return event -> {
             NULL_VARIABLES_RECEIVED_REQUEST.set(event);
-            event.getIntegrationContext().getInBoundVariables().forEach((key, value) -> {});
-            event.getIntegrationContext().getOutBoundVariables().forEach((key, value) -> {});
+            event
+                .getIntegrationContext()
+                .getInBoundVariables()
+                .forEach((key, value) -> {});
+            event
+                .getIntegrationContext()
+                .getOutBoundVariables()
+                .forEach((key, value) -> {});
         };
     }
 

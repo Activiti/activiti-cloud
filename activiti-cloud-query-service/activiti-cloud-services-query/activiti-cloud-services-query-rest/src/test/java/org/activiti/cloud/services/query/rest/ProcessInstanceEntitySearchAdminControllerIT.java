@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
@@ -24,8 +23,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import java.util.List;
-import java.util.Map;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -56,10 +53,14 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @WithMockUser(username = AbstractProcessInstanceEntitySearchControllerIT.USER, roles = "ACTIVITI_ADMIN")
 class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstanceEntitySearchControllerIT {
 
+    private static final String SUBPROCESSES_COUNT_PATH = "_embedded.processInstances.subprocessesCount";
+    private static final String LINKED_PROCESSES_COUNT_PATH = "_embedded.processInstances.linkedProcessesCount";
+
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Override
     protected String getSearchEndpoint() {
@@ -74,10 +75,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
     @Test
     void should_return_OnlyMainProcesses_WhenIncludeSubProcessIsFalse() {
         ProcessInstanceEntity processInstance1 = queryTestUtils.buildProcessInstance().buildAndSave();
-        ProcessInstanceEntity processInstance2 = queryTestUtils
-            .buildProcessInstance()
-            .subprocessOf(processInstance1)
-            .buildAndSave();
+        queryTestUtils.buildProcessInstance().subprocessOf(processInstance1).buildAndSave();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +86,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of(Map.of("id", processInstance2.getId()))));
+            .body(SUBPROCESSES_COUNT_PATH, hasItem(1));
     }
 
     @Test
@@ -108,7 +106,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of()));
+            .body(SUBPROCESSES_COUNT_PATH, hasItem(0));
     }
 
     @Test
@@ -132,9 +130,9 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of()))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of(Map.of("id", processInstance2.getId()))));
+            .body(SUBPROCESSES_COUNT_PATH, hasSize(2))
+            .body(SUBPROCESSES_COUNT_PATH, hasItem(0))
+            .body(SUBPROCESSES_COUNT_PATH, hasItem(1));
     }
 
     @Test
@@ -203,8 +201,8 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of()))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of(Map.of("id", processInstance2.getId()))));
+            .body(SUBPROCESSES_COUNT_PATH, hasItem(0))
+            .body(SUBPROCESSES_COUNT_PATH, hasItem(1));
     }
 
     @Test
@@ -242,8 +240,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(subProcessInstance.getId())))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(subSubProcessInstance.getId())))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH + "[0]", hasItem(Map.of("id", subProcessInstance.getId())))
-            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH + "[0]", hasItem(Map.of("id", subSubProcessInstance.getId())));
+            .body(SUBPROCESSES_COUNT_PATH, hasItem(2));
     }
 
     @Test
@@ -258,8 +255,10 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator("user3").buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withInitiators("user1", "user2");
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withInitiators(
+            "user1",
+            "user2"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -323,14 +322,6 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
                 .buildAndSave();
         }
 
-        var linkedProcesses = queryTestUtils
-            .buildProcessInstance()
-            .findProcessInstanceByFilter(
-                new ProcessInstanceSearchRequestBuilder()
-                    .withLinkedProcessInstanceId(rootProcessInstance.getId())
-                    .build()
-            );
-
         var response = given()
             .contentType(MediaType.APPLICATION_JSON)
             .body("{}")
@@ -342,17 +333,35 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
         assertThat(response.body().jsonPath().getList(PROCESS_INSTANCES_JSON_PATH)).hasSize(19);
 
-        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH))
-            .contains(rootProcessInstance.getId());
+        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH)).contains(
+            rootProcessInstance.getId()
+        );
 
-        for (ProcessInstanceEntity linkedProcessInstance : linkedProcesses) {
-            assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH))
-                .contains(linkedProcessInstance.getId());
-            assertThat(response.body().jsonPath().getList(linkedProcessesPath("root-process")))
-                .contains(Map.of("id", linkedProcessInstance.getId()));
-            assertThat(response.body().jsonPath().getList(linkedProcessesPath(linkedProcessInstance.getName())))
-                .isEmpty();
-        }
+        Integer rootLinkedCount = response
+            .body()
+            .jsonPath()
+            .getList(
+                PROCESS_INSTANCES_JSON_PATH +
+                    ".findAll { it.id == '" +
+                    rootProcessInstance.getId() +
+                    "' }.linkedProcessesCount",
+                Integer.class
+            )
+            .get(0);
+        assertThat(rootLinkedCount).isEqualTo(18);
+
+        assertThat(
+            response
+                .body()
+                .jsonPath()
+                .getList(
+                    PROCESS_INSTANCES_JSON_PATH +
+                        ".findAll { it.id != '" +
+                        rootProcessInstance.getId() +
+                        "' }.linkedProcessesCount",
+                    Integer.class
+                )
+        ).containsOnly(0);
     }
 
     @Test
@@ -373,14 +382,6 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
                 .buildAndSave();
         }
 
-        var linkedProcesses = queryTestUtils
-            .buildProcessInstance()
-            .findProcessInstanceByFilter(
-                new ProcessInstanceSearchRequestBuilder()
-                    .withLinkedProcessInstanceId(rootProcessInstance.getId())
-                    .build()
-            );
-
         var response = given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(
@@ -394,13 +395,22 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
         assertThat(response.body().jsonPath().getList(PROCESS_INSTANCES_JSON_PATH)).hasSize(4);
 
-        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH))
-            .contains(rootProcessInstance.getId());
+        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH)).contains(
+            rootProcessInstance.getId()
+        );
 
-        for (ProcessInstanceEntity linkedProcessInstance : linkedProcesses) {
-            assertThat(response.body().jsonPath().getList(linkedProcessesPath("root-process")))
-                .contains(Map.of("id", linkedProcessInstance.getId()));
-        }
+        Integer rootLinkedCount = response
+            .body()
+            .jsonPath()
+            .getList(
+                PROCESS_INSTANCES_JSON_PATH +
+                    ".findAll { it.id == '" +
+                    rootProcessInstance.getId() +
+                    "' }.linkedProcessesCount",
+                Integer.class
+            )
+            .get(0);
+        assertThat(rootLinkedCount).isEqualTo(18);
     }
 
     @Test
@@ -432,8 +442,8 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .withLinkedProcessInstanceType("form-type")
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessRelatedTo(rootProcessInstance.getId());
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessRelatedTo(rootProcessInstance.getId());
 
         given()
             .contentType(MediaType.APPLICATION_JSON)

@@ -39,23 +39,19 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
         ActivitiCloudMessagingProperties.DestinationProperties destinationProperties = messagingProperties
             .getDestinations()
             .get(source);
-        String prefix = Optional
-            .ofNullable(destinationProperties)
+        String prefix = Optional.ofNullable(destinationProperties)
             .map(ActivitiCloudMessagingProperties.DestinationProperties::getPrefix)
             .orElseGet(this::getPrefix);
 
-        String separator = Optional
-            .ofNullable(destinationProperties)
+        String separator = Optional.ofNullable(destinationProperties)
             .map(ActivitiCloudMessagingProperties.DestinationProperties::getSeparator)
             .orElseGet(this::getSeparator);
 
-        String scope = Optional
-            .ofNullable(destinationProperties)
+        String scope = Optional.ofNullable(destinationProperties)
             .map(ActivitiCloudMessagingProperties.DestinationProperties::getScope)
             .orElse(null);
 
-        String name = Optional
-            .ofNullable(destinationProperties)
+        String name = Optional.ofNullable(destinationProperties)
             .map(it -> it.getName())
             .filter(StringUtils::hasText)
             .orElse(source);
@@ -69,8 +65,7 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
             scope
         );
 
-        var target = Stream
-            .of(name.split(","))
+        var target = Stream.of(name.split(","))
             .map(it -> {
                 var value = new StringBuilder();
 

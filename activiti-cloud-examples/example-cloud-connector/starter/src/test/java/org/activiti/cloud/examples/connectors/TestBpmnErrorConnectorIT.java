@@ -65,8 +65,7 @@ public class TestBpmnErrorConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder
-            .withPayload(payload)
+        Message<?> message = MessageBuilder.withPayload(payload)
             .setHeader("connectorType", "test-bpmn-error-connector.throwError")
             .build();
 

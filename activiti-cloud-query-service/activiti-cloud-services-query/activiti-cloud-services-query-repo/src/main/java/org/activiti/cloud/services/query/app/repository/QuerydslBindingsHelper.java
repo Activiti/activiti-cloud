@@ -46,8 +46,7 @@ public class QuerydslBindingsHelper {
     }
 
     public void apply(QuerydslBindings bindings) {
-        Arrays
-            .stream(root.getClass().getDeclaredFields())
+        Arrays.stream(root.getClass().getDeclaredFields())
             .filter(field -> !Modifier.isStatic(field.getModifiers()))
             .filter(field -> !EntityPath.class.isAssignableFrom(field.getType()))
             .filter(field -> Path.class.isAssignableFrom(field.getType()))

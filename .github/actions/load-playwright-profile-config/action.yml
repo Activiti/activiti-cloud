@@ -1,0 +1,43 @@
+name: Load Playwright profile config
+description: Resolve broker Helm settings from .github/ci/playwright-profiles.json.
+inputs:
+  profile:
+    description: Playwright CI profile id
+    required: true
+
+outputs:
+  messaging-broker:
+    description: Messaging broker (rabbitmq or kafka)
+    value: ${{ steps.load.outputs.messaging_broker }}
+  messaging-partitioned:
+    description: Partitioning option (partitioned, non-partitioned, or prefix)
+    value: ${{ steps.load.outputs.messaging_partitioned }}
+  messaging-destinations:
+    description: Destinations option (default-destinations, override-destinations, or pdb)
+    value: ${{ steps.load.outputs.messaging_destinations }}
+
+runs:
+  using: composite
+  steps:
+    - name: Load Playwright profile (${{ inputs.profile }})
+      id: load
+      shell: bash
+      env:
+        PROFILE: ${{ inputs.profile }}
+      run: |
+        set -euo pipefail
+        CONFIG="${GITHUB_WORKSPACE}/.github/ci/playwright-profiles.json"
+        if ! jq -e --arg profile "${PROFILE}" '.[$profile]' "${CONFIG}" >/dev/null; then
+          echo "::error::Unknown Playwright profile: ${PROFILE}"
+          exit 1
+        fi
+        write_output() {
+          local json_key="$1"
+          local output_key="$2"
+          local value
+          value="$(jq -r --arg profile "${PROFILE}" --arg field "${json_key}" '.[$profile][$field]' "${CONFIG}")"
+          echo "${output_key}=${value}" >> "${GITHUB_OUTPUT}"
+        }
+        write_output messagingBroker messaging_broker
+        write_output messagingPartitioned messaging_partitioned
+        write_output messagingDestinations messaging_destinations

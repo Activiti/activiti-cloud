@@ -30,20 +30,21 @@ public class QueryRestApplicationRabbitmqPrefixIT extends QueryRestApplicationIT
 
     @Test
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isEqualTo("default-app.");
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isEqualTo("default-app.");
     }
 
     @Test
     @Override
     void anonymousRabbitQueues() {
-        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
-            .satisfies(map ->
-                assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.queryEvents.anonymous."))
-            );
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).satisfies(map ->
+            assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.queryEvents.anonymous."))
+        );
     }
 
     @Test

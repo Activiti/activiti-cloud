@@ -154,16 +154,16 @@ public class ProcessInstanceService {
         if (!canReadOrAdmin(processInstanceEntity)) {
             LOGGER.debug(
                 "User " +
-                securityManager.getAuthenticatedUserId() +
-                " not permitted to access definition " +
-                processInstanceEntity.getProcessDefinitionKey() +
-                " and/or process instance id " +
-                processInstanceId
+                    securityManager.getAuthenticatedUserId() +
+                    " not permitted to access definition " +
+                    processInstanceEntity.getProcessDefinitionKey() +
+                    " and/or process instance id " +
+                    processInstanceId
             );
             throw new ActivitiForbiddenException(
                 "Operation not permitted for " +
-                processInstanceEntity.getProcessDefinitionKey() +
-                " and/or process instance"
+                    processInstanceEntity.getProcessDefinitionKey() +
+                    " and/or process instance"
             );
         }
 
@@ -189,10 +189,8 @@ public class ProcessInstanceService {
                 processInstanceEntity.getProcessDefinitionKey(),
                 processInstanceEntity.getServiceName()
             ) &&
-            (
-                securityManager.getAuthenticatedUserId().equals(processInstanceEntity.getInitiator()) ||
-                isInvolvedInATask(processInstanceEntity.getId())
-            )
+            (securityManager.getAuthenticatedUserId().equals(processInstanceEntity.getInitiator()) ||
+                isInvolvedInATask(processInstanceEntity.getId()))
         );
     }
 

@@ -44,8 +44,7 @@ public class ProcessStartedActorProviderEventListener implements ProcessEventLis
         securityContextPrincipalProvider
             .getCurrentPrincipal()
             .ifPresent(principal ->
-                Optional
-                    .ofNullable(principal.getName())
+                Optional.ofNullable(principal.getName())
                     .map(String::getBytes)
                     .ifPresent(details ->
                         runtimeService.addUserIdentityLink(

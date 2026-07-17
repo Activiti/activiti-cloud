@@ -76,8 +76,7 @@ public class ProcessRuntimeGatewayTest {
         @Bean
         Function<SyncCloudProcessDefinitionsPayload, SyncCloudProcessDefinitionsResult> testCommandExecutor() {
             return payload -> {
-                var result = Stream
-                    .of("foo:1", "foo:2", "bar:1", "bar:2", "baz")
+                var result = Stream.of("foo:1", "foo:2", "bar:1", "bar:2", "baz")
                     .filter(it -> payload.getProcessDefinitionKeys().stream().anyMatch(it::startsWith))
                     .filter(Predicate.not(payload.getExcludedProcessDefinitionIds()::contains))
                     .toList();
@@ -106,10 +105,12 @@ public class ProcessRuntimeGatewayTest {
         assertThat(processRuntimeGatewayProperties.getGroup()).isEqualTo("query");
         assertThat(bindingServiceProperties.getGroup(PROCESS_RUNTIME_GATEWAY_RESULTS)).isEqualTo("query");
 
-        assertThat(bindingServiceProperties.getBindingDestination(PROCESS_RUNTIME_GATEWAY_PRODUCER))
-            .isEqualTo("commandConsumer_my-app");
-        assertThat(bindingServiceProperties.getBindingDestination(PROCESS_RUNTIME_GATEWAY_RESULTS))
-            .isEqualTo("commandResults_my-app");
+        assertThat(bindingServiceProperties.getBindingDestination(PROCESS_RUNTIME_GATEWAY_PRODUCER)).isEqualTo(
+            "commandConsumer_my-app"
+        );
+        assertThat(bindingServiceProperties.getBindingDestination(PROCESS_RUNTIME_GATEWAY_RESULTS)).isEqualTo(
+            "commandResults_my-app"
+        );
     }
 
     @Test
@@ -120,8 +121,7 @@ public class ProcessRuntimeGatewayTest {
 
         // when
         var result = processRuntimeGateway.syncProcessDefinitions(
-            SyncCloudProcessDefinitionsPayload
-                .builder()
+            SyncCloudProcessDefinitionsPayload.builder()
                 .processDefinitionKeys(processDefinitionKeys)
                 .excludedProcessDefinitionIds(excludedProcessDefinitionIds)
                 .build()

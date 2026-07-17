@@ -60,10 +60,8 @@ public class ActivitiGraphQLAutoConfiguration {
         @Bean
         public JsonMapperBuilderCustomizer graphqlIncludeAlwaysCustomizer() {
             return builder ->
-                builder.withConfigOverride(
-                    Map.class,
-                    override ->
-                        override.setInclude(Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.ALWAYS))
+                builder.withConfigOverride(Map.class, override ->
+                    override.setInclude(Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.ALWAYS))
                 );
         }
 
