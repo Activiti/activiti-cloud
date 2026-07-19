@@ -63,6 +63,7 @@ public class QueryLiquibaseApplicationIT {
         assertThat(entityManager.getMetamodel().getEntities())
             .hasSizeGreaterThan(0)
             .extracting(EntityType::getName)
-            .contains("AuditEvent", "ProcessInstance");
+            .contains("AuditEvent", "ProcessInstance")
+            .doesNotContain("ProcessVariableHistory");
     }
 }
