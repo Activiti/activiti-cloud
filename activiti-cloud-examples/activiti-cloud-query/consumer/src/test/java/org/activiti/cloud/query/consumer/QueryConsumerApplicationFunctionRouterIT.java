@@ -18,7 +18,6 @@ package org.activiti.cloud.query.consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
@@ -30,9 +29,11 @@ public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerAppli
             .doesNotContainKeys("auditConsumer", "queryConsumer")
             .containsOnlyKeys("functionRouterInput", "producer", "queryEventsProducer");
 
-        assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
-            .extracting(BindingProperties::getGroup)
-            .isEqualTo("consumer");
+        assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput")).satisfies(binding -> {
+            assertThat(binding.getGroup()).isEqualTo("consumer");
+            assertThat(binding.getConsumer()).isNotNull();
+            assertThat(binding.getConsumer().getConcurrency()).isEqualTo(1);
+        });
     }
 
     @Test
