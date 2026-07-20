@@ -442,7 +442,7 @@ public class ActivitiCloudMessagingProperties {
 
         private Duration retryInterval = Duration.ofMillis(10);
 
-        private Duration requestTimeout = Duration.ofSeconds(120);
+        private Duration requestTimeout = Duration.ofSeconds(600);
 
         @NestedConfigurationProperty
         private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();

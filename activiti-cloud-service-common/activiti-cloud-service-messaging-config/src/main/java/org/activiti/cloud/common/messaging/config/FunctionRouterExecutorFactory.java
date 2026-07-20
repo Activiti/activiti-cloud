@@ -30,10 +30,8 @@ import java.util.function.Function;
 
 public class FunctionRouterExecutorFactory implements Function<String, ExecutorService> {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FunctionRouterExecutorFactory.class);
-
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
-    private Duration timeout = Duration.ofSeconds(120);
+    private Duration timeout = Duration.ofSeconds(600);
     private static final int SINGLE_THREAD_POOL_SIZE = 1;
 
     public FunctionRouterExecutorFactory() {}
@@ -47,31 +45,14 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             throw new RejectedExecutionException("Executor has been shutdown");
         }
 
-        log.warn(
-            "AAE-47841: Queue FULL! Blocking thread: {}. QueueSize: {}/{}. ActiveThreads: {}/{}. Timeout: {}",
-            Thread.currentThread().getName(),
-            executor.getQueue().size(),
-            1,
-            executor.getActiveCount(),
-            executor.getPoolSize(),
-            timeout
-        );
-
         try {
             // This forces the submitting thread to block and wait
             // until the queue can accept the task.
-            long startWait = System.currentTimeMillis();
             if (!executor.getQueue().offer(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 throw new RejectedExecutionException(
                     "Timeout after %s duration because the queue is full".formatted(timeout)
                 );
             }
-            long waitTime = System.currentTimeMillis() - startWait;
-            log.info(
-                "AAE-47841: Task accepted after waiting {}ms. Thread: {}",
-                waitTime,
-                Thread.currentThread().getName()
-            );
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
 
@@ -79,8 +60,8 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         }
     };
 
-    private final Function<String, ExecutorService> executorServiceFactory = registration -> {
-        var executor = new ThreadPoolExecutor(
+    private final Function<String, ExecutorService> executorServiceFactory = registration ->
+        new ThreadPoolExecutor(
             SINGLE_THREAD_POOL_SIZE,
             SINGLE_THREAD_POOL_SIZE,
             0L,
@@ -88,36 +69,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             new ArrayBlockingQueue<>(1, true),
             Thread.ofPlatform().name(registration).factory(),
             taskExecutionHandler
-        ) {
-            @Override
-            public void execute(Runnable command) {
-                super.execute(() -> {
-                    log.info("AAE-47841: Starting task execution in thread: {}", Thread.currentThread().getName());
-                    long start = System.currentTimeMillis();
-                    try {
-                        command.run();
-                        long duration = System.currentTimeMillis() - start;
-                        log.info(
-                            "AAE-47841: Task completed in {}ms. Thread: {}",
-                            duration,
-                            Thread.currentThread().getName()
-                        );
-                    } catch (Exception e) {
-                        long duration = System.currentTimeMillis() - start;
-                        log.error(
-                            "AAE-47841: Task FAILED after {}ms. Thread: {}",
-                            duration,
-                            Thread.currentThread().getName(),
-                            e
-                        );
-                        throw e;
-                    }
-                });
-            }
-        };
-        log.info("AAE-47841: Created new executor for registration: {}", registration);
-        return executor;
-    };
+        );
 
     @Override
     public ExecutorService apply(String key) {
