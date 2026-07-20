@@ -37,7 +37,7 @@
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>9.1.0-alpha.48</activiti.version>
+    <activiti.version>0.0.1-PR-5478-3129-SNAPSHOT</activiti.version>
     <!-- See activiti-cloud-api/pom.xml: skip.common.tests for per-service CI builds -->
     <skip.common.tests>false</skip.common.tests>
     <java-semver.version>0.10.2</java-semver.version>

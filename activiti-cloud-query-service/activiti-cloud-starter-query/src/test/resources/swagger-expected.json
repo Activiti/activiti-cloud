@@ -8977,8 +8977,8 @@
           "connectorType" : {
             "type" : "string"
           },
-          "externalizedDataConfig" : {
-            "$ref" : "#/components/schemas/ExternalizedDataConfig"
+          "externalizedContextReference" : {
+            "$ref" : "#/components/schemas/ExternalizedContextReference"
           },
           "clientType" : {
             "type" : "string"
@@ -9004,17 +9004,17 @@
         },
         "title" : "CloudIntegrationContext"
       },
-      "ExternalizedDataConfig" : {
+      "ExternalizedContextReference": {
         "type" : "object",
-        "properties" : {
-          "providerType" : {
-            "type" : "string"
-          },
+        "properties": {
           "url" : {
+            "type" :"string"
+          },
+          "providerType" : {
             "type" : "string"
           }
         },
-        "title" : "ExternalizedDataConfig"
+        "title" : "ExternalizedContextReference"
       },
       "EntriesResponseContentCloudIntegrationContext" : {
         "type" : "object",
