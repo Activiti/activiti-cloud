@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.activiti.api.process.model.ExternalizedDataConfig;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 
@@ -54,7 +53,6 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     private Map<String, Object> inBoundVariables = new HashMap<>();
     private Map<String, Object> outBoundVariables = new HashMap<>();
     private Boolean ephemeralVariables;
-    private ExternalizedDataConfig externalizedDataConfig;
 
     public CloudIntegrationContextImpl() {}
 
@@ -318,15 +316,6 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
-    public ExternalizedDataConfig getExternalizedDataConfig() {
-        return externalizedDataConfig;
-    }
-
-    public void setExternalizedDataConfig(ExternalizedDataConfig externalizedDataConfig) {
-        this.externalizedDataConfig = externalizedDataConfig;
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
@@ -356,8 +345,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                 resultDate,
                 stackTraceElements,
                 status,
-                ephemeralVariables,
-                externalizedDataConfig
+                ephemeralVariables
             );
         return result;
     }
@@ -398,8 +386,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
             Objects.equals(resultDate, other.resultDate) &&
             Objects.equals(stackTraceElements, other.stackTraceElements) &&
             status == other.status &&
-            Objects.equals(ephemeralVariables, other.ephemeralVariables) &&
-            Objects.equals(externalizedDataConfig, other.externalizedDataConfig)
+            Objects.equals(ephemeralVariables, other.ephemeralVariables)
         );
     }
 
@@ -456,8 +443,6 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
             .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
             .append(", ephemeralVariables=")
             .append(ephemeralVariables)
-            .append(", externalizedDataConfig=")
-            .append(externalizedDataConfig)
             .append("]");
         return builder.toString();
     }

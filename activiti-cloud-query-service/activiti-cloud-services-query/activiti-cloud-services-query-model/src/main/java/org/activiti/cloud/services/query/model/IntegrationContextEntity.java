@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -43,7 +42,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import org.activiti.api.process.model.ExternalizedDataConfig;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.hibernate.annotations.DynamicInsert;
@@ -94,9 +92,6 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private String clientName;
     private String clientType;
     private String connectorType;
-
-    @Embedded
-    private ExternalizedDataConfigEmbeddable externalizedDataConfig;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Temporal(TIMESTAMP)
@@ -216,15 +211,6 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     public void setConnectorType(String connectorType) {
         this.connectorType = connectorType;
-    }
-
-    @Override
-    public ExternalizedDataConfig getExternalizedDataConfig() {
-        return externalizedDataConfig;
-    }
-
-    public void setExternalizedDataConfig(ExternalizedDataConfigEmbeddable externalizedDataConfig) {
-        this.externalizedDataConfig = externalizedDataConfig;
     }
 
     @Override

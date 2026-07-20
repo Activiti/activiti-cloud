@@ -228,9 +228,6 @@ create table integration_context
     connector_type            	varchar(255),
     status                      varchar(255),
 
-    externalized_data_provider_type varchar(255),
-    externalized_data_url           varchar(255),
-
     request_date               	timestamp,
     result_date                	timestamp,
     error_date                 	timestamp,
