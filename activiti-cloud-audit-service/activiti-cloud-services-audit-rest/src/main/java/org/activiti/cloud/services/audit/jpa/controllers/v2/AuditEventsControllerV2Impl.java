@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.audit.jpa.controllers.v2;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
 import org.activiti.cloud.services.audit.api.search.SearchParams;
@@ -36,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
     value = "/v2/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-public class AuditEventsControllerV2Impl {
+public class AuditEventsControllerV2Impl implements AuditEventsController {
 
     private final AuditEventsService auditEventsService;
 
@@ -46,12 +47,21 @@ public class AuditEventsControllerV2Impl {
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findByIdV2(@PathVariable String eventId) {
+    public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId) {
         return auditEventsService.findEventById(eventId);
     }
 
+    /**
+     * Searches audit events using slice-based pagination.
+     * <p>
+     * Unlike the v1 endpoint, this version fetches results as a {@link org.springframework.data.domain.Slice}
+     * rather than a full {@link org.springframework.data.domain.Page}. It therefore avoids the expensive
+     * {@code COUNT} query: instead of an exact total, it fetches one extra element to determine whether a
+     * next page exists and reports an estimated element count derived from the current offset. This trades
+     * an exact {@code totalElements} value for better performance on large audit datasets.
+     */
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> searchV2(
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
         SearchParams searchParams,
         Pageable pageable
     ) {
