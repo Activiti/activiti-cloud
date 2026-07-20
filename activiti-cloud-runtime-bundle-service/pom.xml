@@ -20,9 +20,20 @@
   <properties>
     <activiti.version>0.0.1-PR-5478-3129-SNAPSHOT</activiti.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
+    <shedlock.version>7.7.0</shedlock.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>net.javacrumbs.shedlock</groupId>
+        <artifactId>shedlock-spring</artifactId>
+        <version>${shedlock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.javacrumbs.shedlock</groupId>
+        <artifactId>shedlock-provider-jdbc-template</artifactId>
+        <version>${shedlock.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>

@@ -65,7 +65,7 @@ jobs:
           - profile: rabbitmq-prefix-pdb
             concurrency-slot: 1
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ inputs.ref }}
 
@@ -93,12 +93,12 @@ jobs:
           version: v1.19.6
 
       - name: Set up Helm
-        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@a8bc14631a9ce72275346e536607c4527591112a # v18.18.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -113,7 +113,7 @@ jobs:
           version: ${{ inputs.version }}
 
       - name: Cache Helm chart checkout
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .git/activiti-cloud-full-chart
           key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ inputs.version }}

@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.app.repository;
+package org.activiti.cloud.services.audit.jpa.streams.config;
 
-import java.util.List;
-import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
-import org.springframework.data.repository.CrudRepository;
+import java.util.function.Function;
+import org.springframework.messaging.Message;
 
-public interface ProcessVariableHistoryRepository extends CrudRepository<ProcessVariableHistoryEntity, Long> {
-    List<ProcessVariableHistoryEntity> findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
-        String processInstanceId,
-        String variableName
-    );
+@FunctionalInterface
+public interface AuditConsumerPartitionedChannelKeySelector extends Function<Message<?>, Object> {
+    public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
 }
