@@ -37,10 +37,10 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -72,20 +72,10 @@ class AuditEventsServiceTest {
     @Mock
     private AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler;
 
+    @InjectMocks
     private AuditEventsService auditEventsService;
 
     private final SearchParams emptySearch = new SearchParams(null, null, null);
-
-    @BeforeEach
-    void setUp() {
-        auditEventsService = new AuditEventsService(
-            eventsRepository,
-            eventRepresentationModelAssembler,
-            eventConverters,
-            securityPoliciesApplicationService,
-            pagedCollectionModelAssembler
-        );
-    }
 
     @Test
     void should_throwNotFound_when_eventIdDoesNotExist() {

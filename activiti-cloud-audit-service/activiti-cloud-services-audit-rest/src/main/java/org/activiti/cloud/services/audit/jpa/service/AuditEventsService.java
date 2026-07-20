@@ -55,6 +55,8 @@ public class AuditEventsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventsService.class);
 
+    private static final String TIMESTAMP = "timestamp";
+
     private final EventsRepository<AuditEventEntity> eventsRepository;
 
     private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
@@ -145,7 +147,7 @@ public class AuditEventsService {
 
     private Pageable applyDefaultSort(Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
-            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            Sort defaultSort = Sort.by(Sort.Direction.DESC, TIMESTAMP);
             if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
                 Pageable inner = alfrescoPageRequest.getPageable();
                 return new AlfrescoPageRequest(
@@ -175,7 +177,7 @@ public class AuditEventsService {
             if (converterByEventTypeName != null) {
                 events.add(converterByEventTypeName.convertToAPI(aee));
             } else {
-                LOGGER.warn("Converter not found for Event Type: " + aee.getEventType());
+                LOGGER.warn("Converter not found for Event Type: {}", aee.getEventType());
             }
         }
         return events;
@@ -197,10 +199,10 @@ public class AuditEventsService {
             }
         }
         if (searchParams.eventTimeFrom() != null) {
-            builder.with("timestamp", ">=", searchParams.eventTimeFrom().getTime(), null, null);
+            builder.with(TIMESTAMP, ">=", searchParams.eventTimeFrom().getTime(), null, null);
         }
         if (searchParams.eventTimeTo() != null) {
-            builder.with("timestamp", "<=", searchParams.eventTimeTo().getTime(), null, null);
+            builder.with(TIMESTAMP, "<=", searchParams.eventTimeTo().getTime(), null, null);
         }
         return builder.build();
     }

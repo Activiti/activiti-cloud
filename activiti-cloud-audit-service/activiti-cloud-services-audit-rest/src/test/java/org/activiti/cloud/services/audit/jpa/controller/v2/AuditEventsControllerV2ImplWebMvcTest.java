@@ -97,7 +97,7 @@ class AuditEventsControllerV2ImplWebMvcTest {
     private UserGroupManager userGroupManager;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
     }
 
