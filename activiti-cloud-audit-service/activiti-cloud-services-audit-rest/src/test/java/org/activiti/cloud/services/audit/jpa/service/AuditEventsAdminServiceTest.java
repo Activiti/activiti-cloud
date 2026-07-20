@@ -15,24 +15,54 @@
  */
 package org.activiti.cloud.services.audit.jpa.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.function.Function;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
+import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
+import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
+import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor.SpecificationFluentQuery;
 
 @ExtendWith(MockitoExtension.class)
 class AuditEventsAdminServiceTest {
 
     @Mock
-    private EventsRepository eventsRepository;
+    private EventsRepository<AuditEventEntity> eventsRepository;
+
+    @Mock
+    private APIEventToEntityConverters eventConverters;
+
+    @Mock
+    private EventRepresentationModelAssembler eventRepresentationModelAssembler;
+
+    @Mock
+    private AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler;
 
     @InjectMocks
     private AuditEventsAdminService auditEventsAdminService;
@@ -78,5 +108,35 @@ class AuditEventsAdminServiceTest {
 
         // then
         verify(eventsRepository).findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_useSliceAndComputeKnownElements_when_findingAllSliced() {
+        AuditEventEntity entity = mock(AuditEventEntity.class);
+        given(entity.getEventType()).willReturn("PROCESS_STARTED");
+        Pageable pageable = PageRequest.of(2, 2);
+        givenSlice(new SliceImpl<>(List.of(entity, entity), pageable, true));
+        EventToEntityConverter converter = mock(EventToEntityConverter.class);
+        given(converter.convertToAPI(entity)).willReturn(mock(CloudRuntimeEvent.class));
+        given(eventConverters.getConverterByEventTypeName("PROCESS_STARTED")).willReturn(converter);
+
+        auditEventsAdminService.findAllSliced(pageable);
+
+        ArgumentCaptor<Page<CloudRuntimeEvent<?, CloudRuntimeEventType>>> pageCaptor = ArgumentCaptor.forClass(
+            Page.class
+        );
+        verify(pagedCollectionModelAssembler).toModel(any(Pageable.class), pageCaptor.capture(), any());
+        assertThat(pageCaptor.getValue().getTotalElements()).isEqualTo(pageable.getOffset() + 2 + 1);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void givenSlice(Slice<AuditEventEntity> slice) {
+        SpecificationFluentQuery<AuditEventEntity> fluentQuery = mock(SpecificationFluentQuery.class);
+        given(fluentQuery.slice(any(Pageable.class))).willReturn(slice);
+        given(eventsRepository.findBy(any(Specification.class), any())).willAnswer(invocation -> {
+            Function<SpecificationFluentQuery<AuditEventEntity>, Object> queryFunction = invocation.getArgument(1);
+            return queryFunction.apply(fluentQuery);
+        });
     }
 }

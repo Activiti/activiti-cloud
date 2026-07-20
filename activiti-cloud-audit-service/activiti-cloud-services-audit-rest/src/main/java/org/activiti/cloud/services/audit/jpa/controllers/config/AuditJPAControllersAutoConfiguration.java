@@ -25,6 +25,7 @@ import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControl
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
+import org.activiti.cloud.services.audit.jpa.controllers.v2.AuditEventsAdminControllerV2Impl;
 import org.activiti.cloud.services.audit.jpa.controllers.v2.AuditEventsControllerV2Impl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
@@ -47,6 +48,7 @@ import tools.jackson.databind.ObjectMapper;
         AuditEventsAdminControllerImpl.class,
         AuditEventsControllerImpl.class,
         AuditEventsControllerV2Impl.class,
+        AuditEventsAdminControllerV2Impl.class,
         AuditEventsDeleteController.class,
     }
 )
@@ -72,11 +74,19 @@ public class AuditJPAControllersAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public AuditEventsAdminService auditEventsAdminService(
-        EventsRepository eventsRepository,
+        EventsRepository<AuditEventEntity> eventsRepository,
         APIEventToEntityConverters eventConverters,
-        AuditEventsExporter auditEventsExporter
+        AuditEventsExporter auditEventsExporter,
+        EventRepresentationModelAssembler eventRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler
     ) {
-        return new AuditEventsAdminService(eventsRepository, eventConverters, auditEventsExporter);
+        return new AuditEventsAdminService(
+            eventsRepository,
+            eventConverters,
+            auditEventsExporter,
+            eventRepresentationModelAssembler,
+            pagedCollectionModelAssembler
+        );
     }
 
     @Bean
