@@ -15,40 +15,13 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers.v2;
 
-import static java.util.stream.Collectors.joining;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.activiti.api.runtime.shared.NotFoundException;
-import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
-import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
-import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
 import org.activiti.cloud.services.audit.api.search.SearchParams;
-import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
-import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuilder;
-import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.activiti.cloud.services.audit.jpa.repository.SearchOperation;
-import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationServiceImpl;
-import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
-import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
@@ -65,57 +38,16 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class AuditEventsControllerV2Impl {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(AuditEventsControllerV2Impl.class);
-
-    private final EventsRepository<AuditEventEntity> eventsRepository;
-
-    private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
-
-    private final AlfrescoPagedModelAssembler<
-        CloudRuntimeEvent<?, CloudRuntimeEventType>
-    > pagedCollectionModelAssembler;
-
-    private final SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
-
-    private final APIEventToEntityConverters eventConverters;
+    private final AuditEventsService auditEventsService;
 
     @Autowired
-    public AuditEventsControllerV2Impl(
-        EventsRepository<AuditEventEntity> eventsRepository,
-        EventRepresentationModelAssembler eventRepresentationModelAssembler,
-        APIEventToEntityConverters eventConverters,
-        SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
-        AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler
-    ) {
-        this.eventsRepository = eventsRepository;
-        this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
-        this.eventConverters = eventConverters;
-        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.securityPoliciesApplicationService = securityPoliciesApplicationService;
+    public AuditEventsControllerV2Impl(AuditEventsService auditEventsService) {
+        this.auditEventsService = auditEventsService;
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
     public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findByIdV2(@PathVariable String eventId) {
-        Optional<AuditEventEntity> findResult = eventsRepository.findByEventId(eventId);
-        if (!findResult.isPresent()) {
-            throw new NotFoundException("Unable to find event for the given id:'" + eventId + "'");
-        }
-        AuditEventEntity auditEventEntity = findResult.get();
-        if (
-            !securityPoliciesApplicationService.canRead(
-                auditEventEntity.getProcessDefinitionId(),
-                auditEventEntity.getServiceFullName()
-            )
-        ) {
-            throw new ActivitiForbiddenException(
-                "Operation not permitted for " + auditEventEntity.getProcessDefinitionId()
-            );
-        }
-
-        CloudRuntimeEvent cloudRuntimeEvent = eventConverters
-            .getConverterByEventTypeName(auditEventEntity.getEventType())
-            .convertToAPI(auditEventEntity);
-        return eventRepresentationModelAssembler.toModel(cloudRuntimeEvent);
+        return auditEventsService.findEventById(eventId);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -123,69 +55,6 @@ public class AuditEventsControllerV2Impl {
         SearchParams searchParams,
         Pageable pageable
     ) {
-        if (pageable.getSort().isUnsorted()) {
-            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
-            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
-                Pageable inner = alfrescoPageRequest.getPageable();
-                pageable = new AlfrescoPageRequest(
-                    alfrescoPageRequest.getOffset(),
-                    alfrescoPageRequest.getPageSize(),
-                    PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
-                );
-            } else {
-                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
-            }
-        }
-
-        Specification<AuditEventEntity> spec = createSearchSpec(searchParams);
-
-        spec = securityPoliciesApplicationService.createSpecWithSecurity(spec, SecurityPolicyAccess.READ);
-
-        Pageable slicePageable = pageable;
-        Slice<AuditEventEntity> allAuditInPage = eventsRepository.findBy(spec, query -> query.slice(slicePageable));
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
-
-        for (AuditEventEntity aee : allAuditInPage.getContent()) {
-            EventToEntityConverter converterByEventTypeName = eventConverters.getConverterByEventTypeName(
-                aee.getEventType()
-            );
-            if (converterByEventTypeName != null) {
-                events.add(converterByEventTypeName.convertToAPI(aee));
-            } else {
-                LOGGER.warn("Converter not found for Event Type: " + aee.getEventType());
-            }
-        }
-
-        long knownElements = pageable.getOffset() + events.size() + (allAuditInPage.hasNext() ? 1 : 0);
-
-        return pagedCollectionModelAssembler.toModel(
-            pageable,
-            new PageImpl<>(events, pageable, knownElements),
-            eventRepresentationModelAssembler
-        );
-    }
-
-    private Specification<AuditEventEntity> createSearchSpec(SearchParams searchParams) {
-        EventSpecificationsBuilder builder = new EventSpecificationsBuilder();
-        String search = searchParams.search();
-        if (search != null && !search.isEmpty()) {
-            String operationSetExpr = Arrays.asList(SearchOperation.SIMPLE_OPERATION_SET)
-                .stream()
-                .collect(joining("|"));
-            Pattern pattern = Pattern.compile(
-                "(\\w+?)(" + operationSetExpr + ")(\\p{Punct}?)([a-zA-Z0-9-_]+?)(\\p{Punct}?),"
-            );
-            Matcher matcher = pattern.matcher(search + ",");
-            while (matcher.find()) {
-                builder.with(matcher.group(1), matcher.group(2), matcher.group(4), matcher.group(3), matcher.group(5));
-            }
-        }
-        if (searchParams.eventTimeFrom() != null) {
-            builder.with("timestamp", ">=", searchParams.eventTimeFrom().getTime(), null, null);
-        }
-        if (searchParams.eventTimeTo() != null) {
-            builder.with("timestamp", "<=", searchParams.eventTimeTo().getTime(), null, null);
-        }
-        return builder.build();
+        return auditEventsService.searchEventsSliced(searchParams, pageable);
     }
 }

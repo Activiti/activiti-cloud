@@ -15,15 +15,22 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers.config;
 
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
+import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
 import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
 import org.activiti.cloud.services.audit.jpa.controllers.v2.AuditEventsControllerV2Impl;
+import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.activiti.cloud.services.audit.jpa.security.SecurityPoliciesApplicationServiceImpl;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -70,5 +77,23 @@ public class AuditJPAControllersAutoConfiguration {
         AuditEventsExporter auditEventsExporter
     ) {
         return new AuditEventsAdminService(eventsRepository, eventConverters, auditEventsExporter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AuditEventsService auditEventsService(
+        EventsRepository<AuditEventEntity> eventsRepository,
+        EventRepresentationModelAssembler eventRepresentationModelAssembler,
+        APIEventToEntityConverters eventConverters,
+        SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService,
+        AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler
+    ) {
+        return new AuditEventsService(
+            eventsRepository,
+            eventRepresentationModelAssembler,
+            eventConverters,
+            securityPoliciesApplicationService,
+            pagedCollectionModelAssembler
+        );
     }
 }
