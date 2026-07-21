@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import jakarta.el.ExpressionFactory;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
@@ -88,6 +90,9 @@ public class RuntimeBundleApplicationIT {
 
     @Autowired
     private ConnectorImplementationsProvider connectorImplementationsProvider;
+
+    @Autowired
+    private BindingServiceProperties bindingServiceProperties;
 
     @Test
     public void contextLoads() {
@@ -207,18 +212,18 @@ public class RuntimeBundleApplicationIT {
     @Test
     void transactedRuntimeProducerBindings() {
         assertThat(
-            environment.getProperty(
-                "spring.cloud.stream.rabbit.bindings.auditProducer.producer.transacted",
-                Boolean.class
+            Stream.of(
+                "asyncExecutorJobsOutput",
+                "auditProducer",
+                "auditProducerIncidents",
+                "commandResults",
+                "messageConnectorOutput",
+                "messageEventsOutput",
+                "signalProducer"
             )
-        ).isTrue();
-
-        assertThat(
-            environment.getProperty(
-                "spring.cloud.stream.rabbit.bindings.asyncExecutorJobsOutput.producer.transacted",
-                Boolean.class
-            )
-        ).isTrue();
+                .map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted)
+                .toList()
+        ).allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isTrue());
     }
 
     @Test
