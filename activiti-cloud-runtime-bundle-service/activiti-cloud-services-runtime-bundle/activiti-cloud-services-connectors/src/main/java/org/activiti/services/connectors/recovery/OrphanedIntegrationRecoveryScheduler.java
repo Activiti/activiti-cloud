@@ -110,11 +110,9 @@ public class OrphanedIntegrationRecoveryScheduler {
         }
     }
 
-    public String buildErrorMessage() {
-        return (
-            "Service task did not complete: the integration was not resolved within the expected time (threshold: %s). Possible causes include application shutdown, connector crash, or task interruption.".formatted(
-                formatThreshold()
-            )
+    private String buildErrorMessage() {
+        return "Service task did not complete: the integration was not resolved within the expected time (threshold: %s). Possible causes include application shutdown, connector crash, or task interruption.".formatted(
+            formatThreshold()
         );
     }
 
