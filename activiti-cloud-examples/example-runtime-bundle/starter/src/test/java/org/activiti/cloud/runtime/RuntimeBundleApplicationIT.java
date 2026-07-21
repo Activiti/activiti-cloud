@@ -239,7 +239,8 @@ public class RuntimeBundleApplicationIT {
                 "Movies.getMovieDesc",
                 "restconnector.POST",
                 "test-bpmn-error-connector.throwError",
-                "test-error-connector.throwError"
+                "test-error-connector.throwError",
+                "script.EXECUTE"
             )
             .satisfies(implementations ->
                 implementations

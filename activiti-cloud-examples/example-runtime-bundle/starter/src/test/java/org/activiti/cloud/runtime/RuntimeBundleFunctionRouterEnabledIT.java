@@ -100,7 +100,8 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
             "miCloudConnector",
             "Movies.getMovieDesc",
             "test-bpmn-error-connector.throwError",
-            "test-error-connector.throwError"
+            "test-error-connector.throwError",
+            "script.EXECUTE"
         );
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
