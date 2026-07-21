@@ -38,9 +38,9 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.binder.rabbit.properties.RabbitExtendedBindingProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -82,7 +82,7 @@ public class CloudConnectorsAutoConfigurationIT {
     private BuildProperties buildProperties;
 
     @Autowired
-    private RabbitExtendedBindingProperties rabbitExtendedBindingProperties;
+    private Environment environment;
 
     @Test
     void shouldProvideMQServiceTaskBehaviorBean() {
@@ -96,11 +96,9 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @Test
     void shouldInitializeConnectorBindingsRabbitProducerTransactedProperties() {
-        assertThat(rabbitExtendedBindingProperties.getBindings())
-            .extractingByKey(CONNECTOR_IMPLEMENTATION_NAME)
-            .satisfies(rabbitBindingProperties ->
-                assertThat(rabbitBindingProperties.getProducer().isTransacted()).isTrue()
-            );
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.bindings.[foo].producer.transacted", Boolean.class)
+        ).isTrue();
     }
 
     @EnableAutoConfiguration

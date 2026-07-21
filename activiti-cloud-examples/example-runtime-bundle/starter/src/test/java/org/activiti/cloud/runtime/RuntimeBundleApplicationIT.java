@@ -39,7 +39,6 @@ import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.cloud.stream.binder.rabbit.properties.RabbitExtendedBindingProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
@@ -86,9 +85,6 @@ public class RuntimeBundleApplicationIT {
 
     @Autowired
     private ProcessEngineConfigurationImpl processEngineConfiguration;
-
-    @Autowired
-    private RabbitExtendedBindingProperties rabbitExtendedBindingProperties;
 
     @Autowired
     private ConnectorImplementationsProvider connectorImplementationsProvider;
@@ -209,7 +205,7 @@ public class RuntimeBundleApplicationIT {
     }
 
     @Test
-    void transactedProducerBindings() {
+    void transactedRuntimeProducerBindings() {
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.auditProducer.producer.transacted",
@@ -226,7 +222,7 @@ public class RuntimeBundleApplicationIT {
     }
 
     @Test
-    void transactedConnectorRabbitProducerBindings() {
+    void transactedConnectorProducerBindings() {
         assertThat(connectorImplementationsProvider.getImplementations())
             .isNotEmpty()
             .containsOnly(
@@ -245,8 +241,8 @@ public class RuntimeBundleApplicationIT {
             .satisfies(implementations ->
                 implementations
                     .stream()
-                    .map(rabbitExtendedBindingProperties::getExtendedProducerProperties)
-                    .forEach(rabbitProducerProperties -> assertThat(rabbitProducerProperties.isTransacted()).isTrue())
+                    .map("spring.cloud.stream.rabbit.bindings.[%s].producer.transacted"::formatted)
+                    .forEach(name -> assertThat(environment.getProperty(name, Boolean.class)).isTrue())
             );
     }
 }

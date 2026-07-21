@@ -15,21 +15,23 @@
  */
 package org.activiti.services.connectors.conf;
 
-import java.util.HashMap;
+import static org.springframework.core.env.StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.activiti.engine.RepositoryService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.binder.rabbit.properties.RabbitBindingProperties;
 import org.springframework.cloud.stream.binder.rabbit.properties.RabbitExtendedBindingProperties;
-import org.springframework.cloud.stream.binder.rabbit.properties.RabbitProducerProperties;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
 
 @AutoConfiguration(after = BinderFactoryAutoConfiguration.class)
 @Import(ProcessEngineIntegrationChannelsConfiguration.class)
@@ -63,32 +65,30 @@ public class CloudConnectorsMessagingAutoConfiguration {
 
     @ConditionalOnClass(RabbitExtendedBindingProperties.class)
     @Configuration(proxyBeanMethods = false)
-    @EnableConfigurationProperties(RabbitExtendedBindingProperties.class)
     static class RabbitConnectorBindingsConfiguration {
 
         @Bean
         InitializingBean rabbitConnectorProducerBindingsInitializer(
-            RabbitExtendedBindingProperties rabbitExtendedBindingProperties,
-            ConnectorImplementationsProvider connectorImplementationsProvider
+            ConnectorImplementationsProvider connectorImplementationsProvider,
+            ConfigurableEnvironment configurableEnvironment
         ) {
             return () -> {
-                final var rabbitBindings = new HashMap<>(rabbitExtendedBindingProperties.getBindings());
-
-                connectorImplementationsProvider
+                final var connectorProperties = connectorImplementationsProvider
                     .getImplementations()
                     .stream()
-                    .map(implementation ->
-                        rabbitBindings.computeIfAbsent(implementation, key -> new RabbitBindingProperties())
-                    )
-                    .peek(rabbitBinding -> {
-                        if (rabbitBinding.getProducer() == null) {
-                            rabbitBinding.setProducer(new RabbitProducerProperties());
-                        }
-                    })
-                    .map(RabbitBindingProperties::getProducer)
-                    .forEach(producer -> producer.setTransacted(true));
+                    .map("spring.cloud.stream.rabbit.bindings.[%s].producer.transacted"::formatted)
+                    .<Map.Entry<String, Object>>map(property -> Map.entry(property, Boolean.TRUE))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-                rabbitExtendedBindingProperties.setBindings(rabbitBindings);
+                configurableEnvironment
+                    .getPropertySources()
+                    .addAfter(
+                        SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
+                        new MapPropertySource(
+                            RabbitConnectorBindingsConfiguration.class.getSimpleName(),
+                            connectorProperties
+                        )
+                    );
             };
         }
     }
