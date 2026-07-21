@@ -223,7 +223,9 @@ public class RuntimeBundleApplicationIT {
             )
                 .map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted)
                 .toList()
-        ).allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isTrue());
+        )
+            .isNotEmpty()
+            .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isTrue());
     }
 
     @Test
