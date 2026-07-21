@@ -109,9 +109,7 @@ class OrphanedIntegrationRecoverySchedulerTest {
         verify(errorEventHandler).receive(errorCaptor.capture());
         assertThat(errorCaptor.getValue()).satisfies(error -> {
             assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
-            assertThat(error.getErrorMessage()).isEqualTo(
-                OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
-            );
+            assertThat(error.getErrorMessage()).isEqualTo(scheduler.buildErrorMessage());
         });
     }
 

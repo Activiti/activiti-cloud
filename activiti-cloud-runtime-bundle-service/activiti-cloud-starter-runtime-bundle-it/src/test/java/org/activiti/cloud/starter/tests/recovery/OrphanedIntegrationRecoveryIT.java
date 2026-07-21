@@ -261,17 +261,16 @@ class OrphanedIntegrationRecoveryIT {
             ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)
         );
 
-        AopTestUtils.<OrphanedIntegrationRecoveryScheduler>getTargetObject(
+        var scheduler = AopTestUtils.<OrphanedIntegrationRecoveryScheduler>getTargetObject(
             ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class)
-        ).recoverOrphanedIntegrations();
+        );
+        scheduler.recoverOrphanedIntegrations();
 
         var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
         verify(errorHandler, atLeastOnce()).receive(errorCaptor.capture());
         assertThat(errorCaptor.getValue()).satisfies(error -> {
             assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
-            assertThat(error.getErrorMessage()).isEqualTo(
-                OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
-            );
+            assertThat(error.getErrorMessage()).isEqualTo(scheduler.buildErrorMessage());
         });
         assertThat(
             ctx2
