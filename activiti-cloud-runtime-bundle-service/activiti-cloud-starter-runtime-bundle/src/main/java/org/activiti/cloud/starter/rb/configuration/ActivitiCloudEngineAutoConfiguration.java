@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.rb.configuration;
 import static org.activiti.spring.boot.ProcessEngineAutoConfiguration.BEHAVIOR_FACTORY_MAPPING_CONFIGURER;
 
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
+import org.activiti.cloud.starter.rb.validation.InescapableLoopValidationConfigurer;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
@@ -58,5 +59,14 @@ public class ActivitiCloudEngineAutoConfiguration {
         ActivitiMessagingDestinationTransformer destinationTransformer
     ) {
         return new ActivitiConnectorDestinationMappingStrategy(destinationTransformer);
+    }
+
+    @Bean
+    //    @ConditionalOnProperty(
+    //        name = "activiti.cloud.validation.inescapable-loop.enabled",
+    //        havingValue = "true"
+    //    )
+    public InescapableLoopValidationConfigurer inescapableLoopValidationConfigurer() {
+        return new InescapableLoopValidationConfigurer();
     }
 }
