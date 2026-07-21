@@ -270,7 +270,10 @@ class OrphanedIntegrationRecoveryIT {
         verify(errorHandler, atLeastOnce()).receive(errorCaptor.capture());
         assertThat(errorCaptor.getValue()).satisfies(error -> {
             assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
-            assertThat(error.getErrorMessage()).isEqualTo(scheduler.buildErrorMessage());
+            assertThat(error.getErrorMessage()).isEqualTo(
+                "Service task did not complete: the integration was not resolved within the expected time (threshold: 0 sec). " +
+                    "Possible causes include application shutdown, connector crash, or task interruption."
+            );
         });
         assertThat(
             ctx2
