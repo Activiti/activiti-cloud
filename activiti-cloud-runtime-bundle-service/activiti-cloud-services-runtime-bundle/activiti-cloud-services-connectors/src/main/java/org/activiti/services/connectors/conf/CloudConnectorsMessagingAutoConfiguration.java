@@ -78,13 +78,15 @@ public class CloudConnectorsMessagingAutoConfiguration {
                     .getImplementations()
                     .stream()
                     .map(implementation ->
-                        rabbitBindings.computeIfAbsent(implementation, key -> {
-                            final var properties = new RabbitBindingProperties();
-                            properties.setProducer(new RabbitProducerProperties());
-                            return properties;
-                        })
+                        rabbitBindings.computeIfAbsent(implementation, key -> new RabbitBindingProperties())
                     )
-                    .forEach(rabbitBinding -> rabbitBinding.getProducer().setTransacted(true));
+                    .peek(rabbitBinding -> {
+                        if (rabbitBinding.getProducer() == null) {
+                            rabbitBinding.setProducer(new RabbitProducerProperties());
+                        }
+                    })
+                    .map(RabbitBindingProperties::getProducer)
+                    .forEach(producer -> producer.setTransacted(true));
 
                 rabbitExtendedBindingProperties.setBindings(rabbitBindings);
             };

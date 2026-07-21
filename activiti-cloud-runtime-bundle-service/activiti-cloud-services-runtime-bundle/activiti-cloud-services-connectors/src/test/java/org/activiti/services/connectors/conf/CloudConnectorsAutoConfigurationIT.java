@@ -90,6 +90,11 @@ public class CloudConnectorsAutoConfigurationIT {
     }
 
     @Test
+    void connectorImplementationsProvider() {
+        assertThat(connectorImplementationsProvider.getImplementations()).containsOnly(CONNECTOR_IMPLEMENTATION_NAME);
+    }
+
+    @Test
     void shouldInitializeConnectorBindingsRabbitProducerTransactedProperties() {
         assertThat(rabbitExtendedBindingProperties.getBindings())
             .extractingByKey(CONNECTOR_IMPLEMENTATION_NAME)
