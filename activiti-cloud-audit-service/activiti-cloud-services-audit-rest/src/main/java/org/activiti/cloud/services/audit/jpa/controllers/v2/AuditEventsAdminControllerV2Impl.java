@@ -26,8 +26,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -54,7 +54,7 @@ public class AuditEventsAdminControllerV2Impl implements AuditEventsAdminControl
      * an exact {@code totalElements} value for better performance on large audit datasets.
      */
     @Override
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
         return auditEventsAdminService.findAllSliced(pageable);
     }

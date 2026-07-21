@@ -46,7 +46,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -84,7 +83,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         this.auditEventsAdminService = auditEventsAdminService;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
             Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");

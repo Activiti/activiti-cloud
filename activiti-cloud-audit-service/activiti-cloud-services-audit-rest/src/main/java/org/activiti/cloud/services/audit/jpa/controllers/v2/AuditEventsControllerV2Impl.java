@@ -27,9 +27,9 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -46,7 +46,7 @@ public class AuditEventsControllerV2Impl implements AuditEventsController {
         this.auditEventsService = auditEventsService;
     }
 
-    @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
+    @GetMapping("/{eventId}")
     public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId) {
         return auditEventsService.findEventById(eventId);
     }
@@ -60,7 +60,7 @@ public class AuditEventsControllerV2Impl implements AuditEventsController {
      * next page exists and reports an estimated element count derived from the current offset. This trades
      * an exact {@code totalElements} value for better performance on large audit datasets.
      */
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
         SearchParams searchParams,
         Pageable pageable
