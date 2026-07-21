@@ -72,14 +72,7 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
 
                         String outputBindings = bindingServiceProperties.getOutputBindings();
 
-                        if (!StringUtils.hasText(outputBindings)) {
-                            outputBindings = beanOutName;
-                        } else {
-                            var bindingList = Arrays.asList(outputBindings.split(SEPARATOR));
-                            if (!bindingList.contains(beanOutName)) {
-                                outputBindings += SEPARATOR + beanOutName;
-                            }
-                        }
+                        outputBindings = addOutputBinding(outputBindings, beanOutName);
 
                         bindingServiceProperties.setOutputBindings(outputBindings);
 
@@ -113,6 +106,18 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
                 return bean;
             }
         };
+    }
+
+    private String addOutputBinding(String outputBindings, String beanOutName) {
+        if (!StringUtils.hasText(outputBindings)) {
+            outputBindings = beanOutName;
+        } else {
+            var bindingList = Arrays.asList(outputBindings.split(SEPARATOR));
+            if (!bindingList.contains(beanOutName)) {
+                outputBindings += SEPARATOR + beanOutName;
+            }
+        }
+        return outputBindings;
     }
 
     /**
