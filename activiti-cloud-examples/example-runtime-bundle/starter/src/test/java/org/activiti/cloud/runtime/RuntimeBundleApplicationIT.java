@@ -31,6 +31,7 @@ import org.activiti.engine.impl.delegate.invocation.DefaultDelegateInterceptor;
 import org.activiti.engine.impl.el.ExpressionManager;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.TaskEntityImpl;
+import org.activiti.services.connectors.conf.ConnectorImplementationsProvider;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.binder.rabbit.properties.RabbitExtendedBindingProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
@@ -84,6 +86,12 @@ public class RuntimeBundleApplicationIT {
 
     @Autowired
     private ProcessEngineConfigurationImpl processEngineConfiguration;
+
+    @Autowired
+    private RabbitExtendedBindingProperties rabbitExtendedBindingProperties;
+
+    @Autowired
+    private ConnectorImplementationsProvider connectorImplementationsProvider;
 
     @Test
     public void contextLoads() {
@@ -215,5 +223,29 @@ public class RuntimeBundleApplicationIT {
                 Boolean.class
             )
         ).isTrue();
+    }
+
+    @Test
+    void transactedConnectorRabbitProducerBindings() {
+        assertThat(connectorImplementationsProvider.getImplementations())
+            .isNotEmpty()
+            .containsOnly(
+                "content-service.SELECT_FILE",
+                "docgen-service.GENERATE",
+                "email-service.SEND",
+                "ExampleConnector",
+                "headers.GET",
+                "miCloudConnector",
+                "Movies.getMovieDesc",
+                "restconnector.POST",
+                "test-bpmn-error-connector.throwError",
+                "test-error-connector.throwError"
+            )
+            .satisfies(implementations ->
+                implementations
+                    .stream()
+                    .map(rabbitExtendedBindingProperties::getExtendedProducerProperties)
+                    .forEach(rabbitProducerProperties -> assertThat(rabbitProducerProperties.isTransacted()).isTrue())
+            );
     }
 }

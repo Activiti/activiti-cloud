@@ -15,12 +15,20 @@
  */
 package org.activiti.services.connectors.conf;
 
+import java.util.HashMap;
 import org.activiti.engine.RepositoryService;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.stream.binder.rabbit.properties.RabbitBindingProperties;
+import org.springframework.cloud.stream.binder.rabbit.properties.RabbitExtendedBindingProperties;
+import org.springframework.cloud.stream.binder.rabbit.properties.RabbitProducerProperties;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @AutoConfiguration(after = BinderFactoryAutoConfiguration.class)
@@ -51,5 +59,35 @@ public class CloudConnectorsMessagingAutoConfiguration {
             destinationMappingStrategy,
             bindingServiceProperties
         );
+    }
+
+    @ConditionalOnClass(RabbitExtendedBindingProperties.class)
+    @Configuration(proxyBeanMethods = false)
+    @EnableConfigurationProperties(RabbitExtendedBindingProperties.class)
+    static class RabbitConnectorBindingsConfiguration {
+
+        @Bean
+        InitializingBean rabbitConnectorProducerBindingsInitializer(
+            RabbitExtendedBindingProperties rabbitExtendedBindingProperties,
+            ConnectorImplementationsProvider connectorImplementationsProvider
+        ) {
+            return () -> {
+                final var rabbitBindings = new HashMap<>(rabbitExtendedBindingProperties.getBindings());
+
+                connectorImplementationsProvider
+                    .getImplementations()
+                    .stream()
+                    .map(implementation ->
+                        rabbitBindings.computeIfAbsent(implementation, key -> {
+                            final var properties = new RabbitBindingProperties();
+                            properties.setProducer(new RabbitProducerProperties());
+                            return properties;
+                        })
+                    )
+                    .forEach(rabbitBinding -> rabbitBinding.getProducer().setTransacted(true));
+
+                rabbitExtendedBindingProperties.setBindings(rabbitBindings);
+            };
+        }
     }
 }

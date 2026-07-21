@@ -17,9 +17,8 @@ package org.activiti.services.connectors.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.util.Collections;
+import java.util.List;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -33,19 +32,21 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.rabbit.properties.RabbitExtendedBindingProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
+
+    public static final String CONNECTOR_IMPLEMENTATION_NAME = "foo";
 
     @Autowired
     private MQServiceTaskBehavior behavior;
@@ -74,25 +75,37 @@ public class CloudConnectorsAutoConfigurationIT {
     @MockitoBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockitoBean
+    @Autowired
     private ConnectorImplementationsProvider connectorImplementationsProvider;
 
     @MockitoBean
     private BuildProperties buildProperties;
 
-    @BeforeEach
-    public void beforeEach() {
-        when(connectorImplementationsProvider.getImplementations()).thenReturn(Collections.emptyList());
+    @Autowired
+    private RabbitExtendedBindingProperties rabbitExtendedBindingProperties;
+
+    @Test
+    void shouldProvideMQServiceTaskBehaviorBean() {
+        assertThat(behavior).isNotNull();
     }
 
     @Test
-    public void shouldProvideMQServiceTaskBehaviorBean() {
-        assertThat(behavior).isNotNull();
+    void shouldInitializeConnectorBindingsRabbitProducerTransactedProperties() {
+        assertThat(rabbitExtendedBindingProperties.getBindings())
+            .extractingByKey(CONNECTOR_IMPLEMENTATION_NAME)
+            .satisfies(rabbitBindingProperties ->
+                assertThat(rabbitBindingProperties.getProducer().isTransacted()).isTrue()
+            );
     }
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
     static class CloudConnectorsAutoConfigurationITApplication {
+
+        @Bean
+        ConnectorImplementationsProvider connectorImplementationsProvider() {
+            return () -> List.of(CONNECTOR_IMPLEMENTATION_NAME);
+        }
 
         @Bean
         public RepositoryService repositoryService() {
