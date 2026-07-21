@@ -59,15 +59,15 @@ class ConnectorOutputBindingEnvironmentPostProcessorTest {
             )
             .run(context -> {
                 ConfigurableEnvironment environment = context.getEnvironment();
-                assertThat(environment.getProperty("spring.cloud.stream.bindings.myConsumer.destination")).isEqualTo(
+                assertThat(environment.getProperty("spring.cloud.stream.bindings.[myConsumer].destination")).isEqualTo(
                     "orders"
                 );
                 assertThat(
-                    environment.getProperty("spring.cloud.stream.bindings.myConsumer.producer.required-groups")
+                    environment.getProperty("spring.cloud.stream.bindings.[myConsumer].producer.required-groups")
                 ).isEqualTo("worker-a");
                 assertThat(
                     environment.getProperty(
-                        "spring.cloud.stream.rabbit.bindings.myConsumer.producer.queue-name-group-only"
+                        "spring.cloud.stream.rabbit.bindings.[myConsumer].producer.queue-name-group-only"
                     )
                 ).isEqualTo("true");
                 assertThat(environment.getProperty(OUTPUT_BINDINGS_KEY)).isEqualTo("myConsumer");
@@ -85,7 +85,9 @@ class ConnectorOutputBindingEnvironmentPostProcessorTest {
             )
             .run(context ->
                 assertThat(
-                    context.getEnvironment().getProperty("spring.cloud.stream.bindings.fanout.producer.required-groups")
+                    context
+                        .getEnvironment()
+                        .getProperty("spring.cloud.stream.bindings.[fanout].producer.required-groups")
                 ).isEqualTo("worker-a,worker-b,worker-c")
             );
     }
@@ -101,7 +103,9 @@ class ConnectorOutputBindingEnvironmentPostProcessorTest {
             .run(context -> {
                 ConfigurableEnvironment environment = context.getEnvironment();
                 assertThat(
-                    environment.getProperty("spring.cloud.stream.rabbit.bindings.plain.producer.queue-name-group-only")
+                    environment.getProperty(
+                        "spring.cloud.stream.rabbit.bindings.[plain].producer.queue-name-group-only"
+                    )
                 ).isNull();
                 assertThat(environment.getProperty(OUTPUT_BINDINGS_KEY)).isEqualTo("plain");
             });
@@ -148,11 +152,11 @@ class ConnectorOutputBindingEnvironmentPostProcessorTest {
                 "activiti.cloud.messaging.connectors.myConsumer.binding-key=myConsumer",
                 "activiti.cloud.messaging.connectors.myConsumer.destination=orders",
                 "activiti.cloud.messaging.connectors.myConsumer.required-groups=worker",
-                "spring.cloud.stream.bindings.myConsumer.destination=operator-orders"
+                "spring.cloud.stream.bindings.[myConsumer].destination=operator-orders"
             )
             .run(context ->
                 assertThat(
-                    context.getEnvironment().getProperty("spring.cloud.stream.bindings.myConsumer.destination")
+                    context.getEnvironment().getProperty("spring.cloud.stream.bindings.[myConsumer].destination")
                 ).isEqualTo("operator-orders")
             );
     }
@@ -167,22 +171,22 @@ class ConnectorOutputBindingEnvironmentPostProcessorTest {
             )
             .run(context -> {
                 ConfigurableEnvironment environment = context.getEnvironment();
-                assertThat(environment.getProperty("spring.cloud.stream.bindings.myBinding.destination")).isEqualTo(
+                assertThat(environment.getProperty("spring.cloud.stream.bindings.[myBinding].destination")).isEqualTo(
                     "orders"
                 );
                 assertThat(
-                    environment.getProperty("spring.cloud.stream.bindings.myBinding.producer.required-groups")
+                    environment.getProperty("spring.cloud.stream.bindings.[myBinding].producer.required-groups")
                 ).isEqualTo("worker");
-                assertThat(environment.getProperty("spring.cloud.stream.bindings.someMapKey.destination")).isNull();
+                assertThat(environment.getProperty("spring.cloud.stream.bindings.[someMapKey].destination")).isNull();
                 assertThat(environment.getProperty(OUTPUT_BINDINGS_KEY)).isEqualTo("myBinding");
             });
     }
 
     @Test
-    void should_emitRawBracketedPropertyKeys_when_bindingKeyIsBracketed() {
+    void should_emitBracketedPropertyKeys_when_bindingNameContainsDots() {
         contextRunner
             .withPropertyValues(
-                "activiti.cloud.messaging.connectors.idp.binding-key=[idp-connector-tmihg.CLASSIFICATION]",
+                "activiti.cloud.messaging.connectors.idp.binding-key=idp-connector-tmihg.CLASSIFICATION",
                 "activiti.cloud.messaging.connectors.idp.destination=orders-update",
                 "activiti.cloud.messaging.connectors.idp.required-groups=worker-a,worker-b",
                 "activiti.cloud.messaging.connectors.idp.queue-name-group-only=true"
@@ -203,15 +207,15 @@ class ConnectorOutputBindingEnvironmentPostProcessorTest {
                         "spring.cloud.stream.rabbit.bindings.[idp-connector-tmihg.CLASSIFICATION].producer.queue-name-group-only"
                     )
                 ).isEqualTo("true");
-                assertThat(source.getProperty(OUTPUT_BINDINGS_KEY)).isEqualTo("[idp-connector-tmihg.CLASSIFICATION]");
+                assertThat(source.getProperty(OUTPUT_BINDINGS_KEY)).isEqualTo("idp-connector-tmihg.CLASSIFICATION");
             });
     }
 
     @Test
-    void should_reconstructSingleBindingName_when_bindingKeyIsBracketed() {
+    void should_reconstructSingleBindingName_whenRelaxedBindingReadsProperties() {
         contextRunner
             .withPropertyValues(
-                "activiti.cloud.messaging.connectors.idp.binding-key=[idp-connector-tmihg.CLASSIFICATION]",
+                "activiti.cloud.messaging.connectors.idp.binding-key=idp-connector-tmihg.CLASSIFICATION",
                 "activiti.cloud.messaging.connectors.idp.destination=orders-update"
             )
             .run(context -> {

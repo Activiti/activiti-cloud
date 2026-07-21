@@ -50,13 +50,13 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
 
     private static final String OUTPUT_BINDINGS_SEPARATOR = ";";
 
-    private static final String BINDING_DESTINATION_FORMAT = "spring.cloud.stream.bindings.%s.destination";
+    private static final String BINDING_DESTINATION_FORMAT = "spring.cloud.stream.bindings.[%s].destination";
 
     private static final String BINDING_REQUIRED_GROUPS_FORMAT =
-        "spring.cloud.stream.bindings.%s.producer.required-groups";
+        "spring.cloud.stream.bindings.[%s].producer.required-groups";
 
     private static final String RABBIT_QUEUE_NAME_GROUP_ONLY_FORMAT =
-        "spring.cloud.stream.rabbit.bindings.%s.producer.queue-name-group-only";
+        "spring.cloud.stream.rabbit.bindings.[%s].producer.queue-name-group-only";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
