@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
 @AutoConfiguration(after = BinderFactoryAutoConfiguration.class, before = FunctionConfiguration.class)
 public class OutputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
-    private static final String SEPARATOR = ",";
+    private static final String SEPARATOR = ";";
     public static final String OUTPUT_BINDING = "_source";
 
     @Bean
