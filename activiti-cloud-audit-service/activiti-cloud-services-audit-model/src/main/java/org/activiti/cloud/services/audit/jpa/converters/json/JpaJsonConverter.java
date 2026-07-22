@@ -24,6 +24,7 @@ import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.api.process.model.BPMNTimer;
 import org.activiti.api.process.model.Deployment;
+import org.activiti.api.process.model.ExternalizedContextReference;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -35,6 +36,7 @@ import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
+import org.activiti.api.runtime.model.impl.ExternalizedContextReferenceImpl;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -74,7 +76,7 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
         resolver.addMapping(IntegrationContext.class, IntegrationContextImpl.class);
         resolver.addMapping(IncidentContext.class, IncidentContextImpl.class);
         resolver.addMapping(Deployment.class, DeploymentImpl.class);
-
+        resolver.addMapping(ExternalizedContextReference.class, ExternalizedContextReferenceImpl.class);
         module.setAbstractTypes(resolver);
 
         objectMapper = JsonMapper.builder().addModule(module).build();

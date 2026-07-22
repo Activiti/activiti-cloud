@@ -16,6 +16,7 @@
 package org.activiti.cloud.api.process.model.impl.conf;
 
 import org.activiti.api.process.model.Deployment;
+import org.activiti.api.process.model.ExternalizedContextReference;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
@@ -36,6 +37,7 @@ import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
+import org.activiti.api.runtime.model.impl.ExternalizedContextReferenceImpl;
 import org.activiti.cloud.api.model.shared.impl.conf.VariablesHolderMixIn;
 import org.activiti.cloud.api.process.model.CloudApplication;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
@@ -328,6 +330,7 @@ public class CloudProcessModelAutoConfiguration {
         resolver.addMapping(CloudApplication.class, CloudApplicationImpl.class);
         resolver.addMapping(QueryCloudProcessInstance.class, QueryCloudProcessInstanceImpl.class);
         resolver.addMapping(IncidentContext.class, IncidentContextImpl.class);
+        resolver.addMapping(ExternalizedContextReference.class, ExternalizedContextReferenceImpl.class);
 
         module.setAbstractTypes(resolver);
 
