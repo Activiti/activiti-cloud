@@ -37,10 +37,6 @@ public class OrphanedIntegrationRecoveryScheduler {
 
     public static final String ORPHANED_INTEGRATION_ERROR_CODE = "ORPHANED_INTEGRATION";
 
-    public static final String ORPHANED_INTEGRATION_ERROR_MESSAGE =
-        "Service task did not complete: the integration was not resolved within the expected time." +
-        " Possible causes include application shutdown, connector crash, or task interruption.";
-
     private final IntegrationContextService integrationContextService;
     private final IntegrationRequestBuilder integrationRequestBuilder;
     private final ServiceTaskIntegrationErrorEventHandler errorEventHandler;
@@ -99,7 +95,7 @@ public class OrphanedIntegrationRecoveryScheduler {
             var integrationRequest = integrationRequestBuilder.build(integrationContext);
             var integrationError = new IntegrationErrorImpl(
                 integrationRequest,
-                new CloudBpmnError(ORPHANED_INTEGRATION_ERROR_CODE, ORPHANED_INTEGRATION_ERROR_MESSAGE)
+                new CloudBpmnError(ORPHANED_INTEGRATION_ERROR_CODE, buildErrorMessage())
             );
 
             errorEventHandler.receive(integrationError);
@@ -112,5 +108,19 @@ public class OrphanedIntegrationRecoveryScheduler {
         } catch (Exception e) {
             LOGGER.error("Failed to recover orphaned integration context {}.", entity.getId(), e);
         }
+    }
+
+    private String buildErrorMessage() {
+        return "Service task did not complete: the integration was not resolved within the expected time (threshold: %s). Possible causes include application shutdown, connector crash, or task interruption.".formatted(
+            formatThreshold()
+        );
+    }
+
+    private String formatThreshold() {
+        var minutes = thresholdSeconds / 60;
+        var seconds = thresholdSeconds % 60;
+        if (minutes == 0) return seconds + " sec";
+        if (seconds == 0) return minutes + " min";
+        return minutes + " min " + seconds + " sec";
     }
 }
