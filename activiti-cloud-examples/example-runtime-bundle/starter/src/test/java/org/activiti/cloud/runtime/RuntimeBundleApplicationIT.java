@@ -16,10 +16,12 @@
 package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import jakarta.el.ExpressionFactory;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
@@ -37,10 +39,11 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
@@ -92,7 +95,10 @@ public class RuntimeBundleApplicationIT {
     private ConnectorImplementationsProvider connectorImplementationsProvider;
 
     @Autowired
-    private BindingServiceProperties bindingServiceProperties;
+    private CachingConnectionFactory cachingConnectionFactory;
+
+    @Autowired
+    private StreamBridge streamBridge;
 
     @Test
     public void contextLoads() {
@@ -215,7 +221,6 @@ public class RuntimeBundleApplicationIT {
             Stream.of(
                 "asyncExecutorJobsOutput",
                 "auditProducer",
-                "auditProducerIncidents",
                 "commandResults",
                 "messageConnectorOutput",
                 "messageEventsOutput",
@@ -226,6 +231,17 @@ public class RuntimeBundleApplicationIT {
         )
             .isNotEmpty()
             .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isTrue());
+    }
+
+    @Test
+    void nonTransactedRuntimeProducerBindings() {
+        assertThat(
+            Stream.of("auditProducerIncidents")
+                .map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted)
+                .toList()
+        )
+            .isNotEmpty()
+            .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isNull());
     }
 
     @Test
@@ -251,5 +267,16 @@ public class RuntimeBundleApplicationIT {
                     .map("spring.cloud.stream.rabbit.bindings.[%s].producer.transacted"::formatted)
                     .forEach(name -> assertThat(environment.getProperty(name, Boolean.class)).isTrue())
             );
+    }
+
+    @Test
+    void connectorBindingTransactedChannel() {
+        final var isTransactional = new AtomicBoolean(false);
+
+        cachingConnectionFactory.addChannelListener((channel, transactional) -> isTransactional.set(transactional));
+
+        assertThat(streamBridge.send("script.EXECUTE", "println('foobar')")).isTrue();
+
+        await().untilAsserted(() -> assertThat(isTransactional).isTrue());
     }
 }
