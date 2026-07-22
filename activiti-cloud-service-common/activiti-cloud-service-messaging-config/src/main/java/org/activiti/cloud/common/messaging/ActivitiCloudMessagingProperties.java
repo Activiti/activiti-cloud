@@ -186,7 +186,7 @@ public class ActivitiCloudMessagingProperties {
 
         private String[] requiredGroups;
         private String destination;
-        private boolean queueNameGroupOnly;
+        private Boolean queueNameGroupOnly;
         private String bindingKey;
 
         public String[] getRequiredGroups() {
@@ -205,11 +205,11 @@ public class ActivitiCloudMessagingProperties {
             this.destination = destination;
         }
 
-        public boolean isQueueNameGroupOnly() {
+        public Boolean isQueueNameGroupOnly() {
             return queueNameGroupOnly;
         }
 
-        public void setQueueNameGroupOnly(boolean queueNameGroupOnly) {
+        public void setQueueNameGroupOnly(Boolean queueNameGroupOnly) {
             this.queueNameGroupOnly = queueNameGroupOnly;
         }
 

@@ -242,6 +242,124 @@ class ConnectorOutputBindingEnvironmentPostProcessorTest {
             );
     }
 
+    @Test
+    void should_applyPrefixToRequiredGroups_when_queueNameGroupOnlyIsTrue() {
+        contextRunner
+            .withPropertyValues(
+                "activiti.cloud.messaging.rabbitmq.prefix=tenant-prefix.",
+                "activiti.cloud.messaging.connectors.rest.binding-key=restconnector.GET",
+                "activiti.cloud.messaging.connectors.rest.destination=restconnector.GET",
+                "activiti.cloud.messaging.connectors.rest.required-groups=rest-worker",
+                "activiti.cloud.messaging.connectors.rest.queue-name-group-only=true"
+            )
+            .run(context -> {
+                ConfigurableEnvironment environment = context.getEnvironment();
+                assertThat(
+                    environment.getProperty("spring.cloud.stream.bindings.[restconnector.GET].destination")
+                ).isEqualTo("restconnector.GET");
+                assertThat(
+                    environment.getProperty("spring.cloud.stream.bindings.[restconnector.GET].producer.required-groups")
+                ).isEqualTo("tenant-prefix.rest-worker");
+                assertThat(
+                    environment.getProperty(
+                        "spring.cloud.stream.rabbit.bindings.[restconnector.GET].producer.queue-name-group-only"
+                    )
+                ).isEqualTo("true");
+            });
+    }
+
+    @Test
+    void should_notApplyPrefixToRequiredGroups_when_queueNameGroupOnlyIsFalse() {
+        contextRunner
+            .withPropertyValues(
+                "activiti.cloud.messaging.rabbitmq.prefix=tenant-prefix.",
+                "activiti.cloud.messaging.connectors.movies.binding-key=Movies",
+                "activiti.cloud.messaging.connectors.movies.destination=Movies",
+                "activiti.cloud.messaging.connectors.movies.required-groups=movies-worker",
+                "activiti.cloud.messaging.connectors.movies.queue-name-group-only=false"
+            )
+            .run(context -> {
+                ConfigurableEnvironment environment = context.getEnvironment();
+                assertThat(environment.getProperty("spring.cloud.stream.bindings.[Movies].destination")).isEqualTo(
+                    "Movies"
+                );
+                assertThat(
+                    environment.getProperty("spring.cloud.stream.bindings.[Movies].producer.required-groups")
+                ).isEqualTo("movies-worker");
+                assertThat(
+                    environment.getProperty(
+                        "spring.cloud.stream.rabbit.bindings.[Movies].producer.queue-name-group-only"
+                    )
+                ).isEqualTo("false");
+            });
+    }
+
+    @Test
+    void should_applyPrefixToMultipleRequiredGroups_when_queueNameGroupOnlyIsTrue() {
+        contextRunner
+            .withPropertyValues(
+                "activiti.cloud.messaging.rabbitmq.prefix=app-prefix.",
+                "activiti.cloud.messaging.connectors.idp.binding-key=idp-connector.CLASSIFICATION",
+                "activiti.cloud.messaging.connectors.idp.destination=idp-connector.CLASSIFICATION",
+                "activiti.cloud.messaging.connectors.idp.required-groups=worker-a,worker-b,worker-c",
+                "activiti.cloud.messaging.connectors.idp.queue-name-group-only=true"
+            )
+            .run(context -> {
+                ConfigurableEnvironment environment = context.getEnvironment();
+                assertThat(
+                    environment.getProperty(
+                        "spring.cloud.stream.bindings.[idp-connector.CLASSIFICATION].producer.required-groups"
+                    )
+                ).isEqualTo("app-prefix.worker-a,app-prefix.worker-b,app-prefix.worker-c");
+            });
+    }
+
+    @Test
+    void should_notApplyPrefix_when_prefixIsNotConfigured() {
+        contextRunner
+            .withPropertyValues(
+                "activiti.cloud.messaging.connectors.rest.binding-key=restconnector.GET",
+                "activiti.cloud.messaging.connectors.rest.destination=restconnector.GET",
+                "activiti.cloud.messaging.connectors.rest.required-groups=rest-worker",
+                "activiti.cloud.messaging.connectors.rest.queue-name-group-only=true"
+            )
+            .run(context -> {
+                ConfigurableEnvironment environment = context.getEnvironment();
+                assertThat(
+                    environment.getProperty("spring.cloud.stream.bindings.[restconnector.GET].producer.required-groups")
+                ).isEqualTo("rest-worker");
+            });
+    }
+
+    @Test
+    void should_handleSharedQueue_when_multipleConnectorsWithSameRequiredGroup() {
+        contextRunner
+            .withPropertyValues(
+                "activiti.cloud.messaging.rabbitmq.prefix=tenant.",
+                "activiti.cloud.messaging.connectors.rest1.binding-key=restconnector.GET",
+                "activiti.cloud.messaging.connectors.rest1.destination=restconnector.GET",
+                "activiti.cloud.messaging.connectors.rest1.required-groups=rest-worker",
+                "activiti.cloud.messaging.connectors.rest1.queue-name-group-only=true",
+                "activiti.cloud.messaging.connectors.rest2.binding-key=restconnector.POST",
+                "activiti.cloud.messaging.connectors.rest2.destination=restconnector.POST",
+                "activiti.cloud.messaging.connectors.rest2.required-groups=rest-worker",
+                "activiti.cloud.messaging.connectors.rest2.queue-name-group-only=true"
+            )
+            .run(context -> {
+                ConfigurableEnvironment environment = context.getEnvironment();
+                assertThat(
+                    environment.getProperty("spring.cloud.stream.bindings.[restconnector.GET].producer.required-groups")
+                ).isEqualTo("tenant.rest-worker");
+                assertThat(
+                    environment.getProperty(
+                        "spring.cloud.stream.bindings.[restconnector.POST].producer.required-groups"
+                    )
+                ).isEqualTo("tenant.rest-worker");
+                assertThat(environment.getProperty(OUTPUT_BINDINGS_KEY)).contains("restconnector.GET");
+                assertThat(environment.getProperty(OUTPUT_BINDINGS_KEY)).contains("restconnector.POST");
+            });
+    }
+
     private String propertySourceName() {
         return ConnectorOutputBindingEnvironmentPostProcessor.class.getSimpleName();
     }

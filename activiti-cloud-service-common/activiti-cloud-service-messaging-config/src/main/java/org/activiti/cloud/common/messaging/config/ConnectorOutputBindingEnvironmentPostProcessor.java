@@ -58,6 +58,9 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
     private static final String RABBIT_QUEUE_NAME_GROUP_ONLY_FORMAT =
         "spring.cloud.stream.rabbit.bindings.[%s].producer.queue-name-group-only";
 
+    private static final String RABBITMQ_PREFIX_PROPERTY =
+        ActivitiCloudMessagingProperties.ACTIVITI_CLOUD_MESSAGING_PREFIX + ".rabbitmq.prefix";
+
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         Map<String, ConnectorProperties> connectors = Binder.get(environment)
@@ -67,6 +70,8 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
         if (connectors.isEmpty()) {
             return;
         }
+
+        String rabbitMqPrefix = environment.getProperty(RABBITMQ_PREFIX_PROPERTY, "");
 
         Map<String, Object> contributedProperties = new LinkedHashMap<>();
         Set<String> outputBindings = existingOutputBindings(environment);
@@ -87,28 +92,30 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
                 contributedProperties.put(BINDING_DESTINATION_FORMAT.formatted(bindingName), destination);
             }
 
+            Boolean queueNameGroupOnly = connectorProperties.isQueueNameGroupOnly();
             String[] requiredGroups = connectorProperties.getRequiredGroups();
             if (requiredGroups != null && requiredGroups.length > 0) {
+                String[] groups = getRequiredGroups(requiredGroups, queueNameGroupOnly, rabbitMqPrefix);
                 contributedProperties.put(
                     BINDING_REQUIRED_GROUPS_FORMAT.formatted(bindingName),
-                    String.join(",", requiredGroups)
+                    String.join(",", groups)
                 );
             }
 
-            boolean queueNameGroupOnly = connectorProperties.isQueueNameGroupOnly();
-            if (queueNameGroupOnly) {
+            if (queueNameGroupOnly != null) {
                 contributedProperties.put(
                     RABBIT_QUEUE_NAME_GROUP_ONLY_FORMAT.formatted(bindingName),
-                    Boolean.TRUE.toString()
+                    queueNameGroupOnly.toString()
                 );
             }
 
             LOG.info(
-                "Pre-provisioning producer binding '{}' (destination='{}', required-groups={}, queue-name-group-only={})",
+                "Pre-provisioning producer binding '{}' (destination='{}', required-groups={}, queue-name-group-only={}, prefix='{}')",
                 bindingName,
                 destination,
                 requiredGroups == null ? "[]" : String.join(",", requiredGroups),
-                queueNameGroupOnly
+                queueNameGroupOnly,
+                rabbitMqPrefix
             );
         });
 
@@ -122,6 +129,12 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
             );
     }
 
+    private String[] getRequiredGroups(String[] requiredGroups, Boolean queueNameGroupOnly, String rabbitMqPrefix) {
+        return Boolean.TRUE.equals(queueNameGroupOnly) && StringUtils.hasText(rabbitMqPrefix)
+            ? applyPrefixToRequiredGroups(requiredGroups, rabbitMqPrefix)
+            : requiredGroups;
+    }
+
     private Set<String> existingOutputBindings(ConfigurableEnvironment environment) {
         Set<String> bindings = new LinkedHashSet<>();
         String existing = environment.getProperty(OUTPUT_BINDINGS_KEY);
@@ -133,5 +146,13 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
             }
         }
         return bindings;
+    }
+
+    private String[] applyPrefixToRequiredGroups(String[] groups, String prefix) {
+        String[] prefixedGroups = new String[groups.length];
+        for (int i = 0; i < groups.length; i++) {
+            prefixedGroups[i] = prefix + groups[i];
+        }
+        return prefixedGroups;
     }
 }
