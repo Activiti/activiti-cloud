@@ -51,8 +51,8 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@michalfidor/playswag": "^1.10.1",
-    "@reportportal/agent-js-playwright": "^5.4.0",
-    "@playwright/test": "^1.57.0",
+    "@reportportal/agent-js-playwright": "^5.4.2",
+    "@playwright/test": "^1.61.1",
     "@types/node": "^22.0.0",
     "@types/ws": "^8.18.1",
     "tsx": "^4.19.4",
