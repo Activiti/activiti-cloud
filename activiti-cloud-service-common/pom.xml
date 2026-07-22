@@ -43,7 +43,7 @@
     <java-semver.version>0.10.2</java-semver.version>
     <resteasy.version>7.0.2.Final</resteasy.version>
     <logstash.version>9.0</logstash.version>
-    <springdoc.version>3.0.2</springdoc.version>
+    <springdoc.version>3.0.3</springdoc.version>
     <xstream.version>1.4.21</xstream.version>
     <java-jwt.version>4.5.2</java-jwt.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
