@@ -38,11 +38,23 @@ import org.springframework.integration.jdbc.store.channel.JsonChannelMessageStor
 import org.springframework.integration.jdbc.store.channel.JsonMessageRowMapper;
 import org.springframework.integration.jdbc.store.channel.OracleChannelMessageStoreQueryProvider;
 import org.springframework.integration.jdbc.store.channel.PostgresChannelMessageStoreQueryProvider;
+import org.springframework.integration.message.AdviceMessage;
 import org.springframework.integration.store.ChannelMessageStore;
+import org.springframework.integration.support.MutableMessage;
+import org.springframework.integration.support.json.AdviceMessageJsonDeserializer;
+import org.springframework.integration.support.json.ErrorMessageJsonDeserializer;
+import org.springframework.integration.support.json.GenericMessageJsonDeserializer;
 import org.springframework.integration.support.json.JacksonJsonObjectMapper;
 import org.springframework.integration.support.json.JacksonMessagingUtils;
+import org.springframework.integration.support.json.MutableMessageJsonDeserializer;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.messaging.support.ErrorMessage;
+import org.springframework.messaging.support.GenericMessage;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.cfg.ConstructorDetector;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 @AutoConfiguration(before = QueryConsumerAutoConfiguration.class, after = DataSourceAutoConfiguration.class)
 @PropertySource("classpath:query-messaging.properties")
@@ -89,11 +101,53 @@ public class ActivitiQueryConsumerAutoConfiguration {
             "${activiti.cloud.query.consumer.events.json.trusted-packages:org.activiti.api,org.activiti.cloud.api,java.math,java.time}"
         ) String[] trustedPackages
     ) {
-        final var jsonObjectMapper = new JacksonJsonObjectMapper(
-            JacksonMessagingUtils.messagingAwareMapper(trustedPackages)
-        );
+        return () -> new JacksonJsonObjectMapper(outboxMessageMapper(trustedPackages));
+    }
 
-        return () -> jsonObjectMapper;
+    /**
+     * Builds the {@link JsonMapper} used to persist and read back {@code queryEvents} outbox messages.
+     *
+     * <p>{@link JacksonMessagingUtils#messagingAwareMapper} captures the mapper instance it builds inside
+     * the message deserializers it registers (each {@code Message} payload is read with that captured
+     * instance). Calling {@code .rebuild()} on the returned mapper produces a <em>new</em> mapper whose
+     * deserializers still reference the original, so any configuration applied through {@code rebuild()}
+     * never reaches the payload. We therefore re-register fresh message deserializers, build the mapper
+     * with our settings, and wire that same instance back into them — so the configuration applies to the
+     * payload as well as the envelope. See AAE-41740.
+     *
+     * <p>{@code EXPLICIT_ONLY} is the actual fix: Jackson 3 otherwise auto-promotes a single all-args
+     * constructor to a properties-based creator, which looks up parameters by name (e.g. {@code isPublic})
+     * while the JSON carries the getter-derived property name ({@code public}); the parameter then arrives
+     * absent and a primitive blows up. {@code EXPLICIT_ONLY} keeps deserialization on the no-arg
+     * constructor + setters path, so every event type round-trips without per-class annotations. The
+     * {@code FAIL_ON_*} relaxations are retained as outbox forward-compatibility, not as the fix.
+     */
+    private static JsonMapper outboxMessageMapper(String[] trustedPackages) {
+        final var genericMessageDeserializer = new GenericMessageJsonDeserializer();
+        final var errorMessageDeserializer = new ErrorMessageJsonDeserializer();
+        final var adviceMessageDeserializer = new AdviceMessageJsonDeserializer();
+        final var mutableMessageDeserializer = new MutableMessageJsonDeserializer();
+
+        final var messageModule = new SimpleModule()
+            .addDeserializer(GenericMessage.class, genericMessageDeserializer)
+            .addDeserializer(ErrorMessage.class, errorMessageDeserializer)
+            .addDeserializer(AdviceMessage.class, adviceMessageDeserializer)
+            .addDeserializer(MutableMessage.class, mutableMessageDeserializer);
+
+        final var mapper = JacksonMessagingUtils.messagingAwareMapper(trustedPackages)
+            .rebuild()
+            .constructorDetector(ConstructorDetector.EXPLICIT_ONLY)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
+            .addModules(messageModule)
+            .build();
+
+        genericMessageDeserializer.setMapper(mapper);
+        errorMessageDeserializer.setMapper(mapper);
+        adviceMessageDeserializer.setMapper(mapper);
+        mutableMessageDeserializer.setMapper(mapper);
+
+        return mapper;
     }
 
     @Bean

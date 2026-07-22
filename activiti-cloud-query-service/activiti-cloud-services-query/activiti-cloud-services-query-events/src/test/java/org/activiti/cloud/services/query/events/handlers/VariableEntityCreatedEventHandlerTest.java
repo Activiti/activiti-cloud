@@ -33,11 +33,8 @@ import java.util.Set;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
@@ -67,9 +64,6 @@ class VariableEntityCreatedEventHandlerTest {
     @Mock
     private EntityManagerFinder entityManagerFinder;
 
-    @Mock
-    private FeatureToggle featureToggle;
-
     // Used by VariableCreatedEventHandler routing tests; also injected into `handler` by Mockito
     @Mock
     private ProcessVariableCreatedEventHandler processVariableCreatedEventHandlerMock;
@@ -80,7 +74,6 @@ class VariableEntityCreatedEventHandlerTest {
     @Test
     void handleShouldCreateAndStoreProcessInstanceVariable() {
         //given
-        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
         event.setVariableDefinitionId("variableDefId");
 
@@ -94,7 +87,7 @@ class VariableEntityCreatedEventHandlerTest {
 
         //then
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        verify(entityManager, times(2)).persist(captor.capture());
+        verify(entityManager).persist(captor.capture());
         List<Object> persisted = captor.getAllValues();
 
         ProcessVariableEntity variableEntity = (ProcessVariableEntity) persisted.get(0);
@@ -106,17 +99,10 @@ class VariableEntityCreatedEventHandlerTest {
             .isNotTaskVariable()
             .hasProcessInstance(processInstanceEntity)
             .hasVariableDefinitionId("variableDefId");
-
-        ProcessVariableHistoryEntity historyEntity = (ProcessVariableHistoryEntity) persisted.get(1);
-        assertThat(historyEntity.getProcessInstanceId()).isEqualTo(event.getEntity().getProcessInstanceId());
-        assertThat(historyEntity.getVariableName()).isEqualTo(event.getEntity().getName());
-        assertThat(historyEntity.getType()).isEqualTo(event.getEntity().getType());
-        assertThat(historyEntity.isDeleted()).isFalse();
-        assertThat((String) historyEntity.getValue()).isEqualTo(event.getEntity().getValue());
     }
 
     @Test
-    void handleShouldCreateVariableButSkipHistoryWhenVariableIsEphemeral() {
+    void handleShouldCreateVariableWhenVariableIsEphemeral() {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable(), true);
 
@@ -128,7 +114,7 @@ class VariableEntityCreatedEventHandlerTest {
         //when
         processVariableCreatedEventHandler.handle(event);
 
-        //then - only the variable entity is persisted, not the history entry
+        //then
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         verify(entityManager, times(1)).persist(captor.capture());
         assertThat(captor.getValue()).isInstanceOf(ProcessVariableEntity.class);
@@ -220,7 +206,6 @@ class VariableEntityCreatedEventHandlerTest {
     @Test
     void handleShouldAssignNewVariableToTask() {
         //given
-        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
@@ -234,15 +219,14 @@ class VariableEntityCreatedEventHandlerTest {
         //when
         processVariableCreatedEventHandler.handle(event);
 
-        //then - variable + history persisted, and variable added to task
-        verify(entityManager, times(2)).persist(any());
+        //then
+        verify(entityManager).persist(any());
         assertThat(taskEntity.getProcessVariables()).extracting(ProcessVariableEntity::getName).containsExactly("var");
     }
 
     @Test
     void handleShouldWarnAndSkipWhenVariableAlreadyExistsInTask() {
         //given
-        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessVariableEntity existingInTask = new ProcessVariableEntity();
@@ -260,8 +244,8 @@ class VariableEntityCreatedEventHandlerTest {
         //when
         processVariableCreatedEventHandler.handle(event);
 
-        //then - variable + history persisted; task unchanged (no duplicate added)
-        verify(entityManager, times(2)).persist(any());
+        //then
+        verify(entityManager).persist(any());
         assertThat(taskEntity.getProcessVariables()).containsExactly(existingInTask);
     }
 

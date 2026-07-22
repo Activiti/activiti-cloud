@@ -25,7 +25,7 @@ activiti.describe('Process Definition Admin Actions', () => {
             async () => {
                 const definition = await queryAdminServiceHradmin.getProcessDefinitionByKey(SINGLE_TASK_PROCESS);
 
-                const processModel = await queryAdminServiceHradmin.getProcessModel(definition.id);
+                const processModel = await queryAdminServiceHradmin.adminProcessInstances.getProcessModel(definition.id);
 
                 expect(processModel).not.toBe('');
                 expect(processModel).toContain(`bpmn2:process id="${SINGLE_TASK_PROCESS}"`);

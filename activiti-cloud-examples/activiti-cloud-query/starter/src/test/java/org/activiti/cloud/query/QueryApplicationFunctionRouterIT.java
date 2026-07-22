@@ -30,9 +30,11 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
             .doesNotContainKeys("auditConsumer", "queryConsumer")
             .containsOnlyKeys("functionRouterInput", "functionRouterAnonymousInput", "producer", "queryEventsProducer");
 
-        assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
-            .extracting(BindingProperties::getGroup)
-            .isEqualTo("consumer");
+        assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput")).satisfies(binding -> {
+            assertThat(binding.getGroup()).isEqualTo("consumer");
+            assertThat(binding.getConsumer()).isNotNull();
+            assertThat(binding.getConsumer().getConcurrency()).isEqualTo(1);
+        });
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterAnonymousInput"))
             .extracting(BindingProperties::getGroup)

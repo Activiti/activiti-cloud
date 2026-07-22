@@ -22,6 +22,7 @@ import { normalizeSvg } from '../../helpers/diagram-utils';
 
 const SINGLE_TASK_PROCESS = 'SingleTaskProcess';
 const BIG_PROCESS = 'bigProcess';
+const PROCESS_WITH_VARIABLES = 'ProcessWithVariables';
 
 activiti.describe('Process Definition Actions', () => {
     activiti('as a user I should be able to get process model', async ({ queryServiceTestUser }) => {
@@ -30,7 +31,7 @@ activiti.describe('Process Definition Actions', () => {
             async () => {
                 const definition = await queryServiceTestUser.getProcessDefinitionByKey(SINGLE_TASK_PROCESS);
 
-                const processModel = await queryServiceTestUser.getProcessModel(definition.id);
+                const processModel = await queryServiceTestUser.processInstances.getProcessModel(definition.id);
 
                 expect(processModel).not.toBe('');
                 expect(processModel).toContain(`bpmn2:process id="${SINGLE_TASK_PROCESS}"`);
@@ -46,7 +47,7 @@ activiti.describe('Process Definition Actions', () => {
             async () => {
                 const definition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(BIG_PROCESS);
 
-                const processDiagram = await runtimeBundleServiceTestUser.getProcessDefinitionDiagram(
+                const processDiagram = await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionDiagram(
                     definition.id
                 );
                 const expected = readFileSync(
@@ -57,5 +58,57 @@ activiti.describe('Process Definition Actions', () => {
                 expect(normalizeSvg(processDiagram)).toBe(normalizeSvg(expected));
             }
         );
+    });
+
+    activiti('should cover RB process definition metadata, home, and connector endpoints', async ({
+        runtimeBundleServiceTestUser,
+        runtimeAdminServiceTestAdmin,
+    }) => {
+        let processDefinitionId = '';
+        let connectorDefinitionId = '';
+
+        await activiti.step('When the user fetches RB home info', async () => {
+            const home = await runtimeBundleServiceTestUser.openApiSpec.getHomeInfo();
+            expect(home).toBeTruthy();
+        });
+
+        await activiti.step('And resolves a deployed process definition', async () => {
+            const definition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(PROCESS_WITH_VARIABLES);
+            processDefinitionId = definition.id;
+            expect(processDefinitionId).toBeTruthy();
+        });
+
+        await activiti.step('Then the user can fetch definition by id, meta, and mapping values', async () => {
+            const byId = await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionById(processDefinitionId);
+            expect(byId.id).toBe(processDefinitionId);
+
+            const meta = await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionMeta(processDefinitionId);
+            expect(Array.isArray(meta.userTasks)).toBe(true);
+            expect((meta.userTasks ?? []).length).toBeGreaterThan(0);
+
+            const staticValues =
+                await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionStaticValues(processDefinitionId);
+            const constantValues =
+                await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionConstantValues(processDefinitionId);
+            expect(staticValues).toEqual(expect.any(Object));
+            expect(constantValues).toEqual(expect.any(Object));
+        });
+
+        await activiti.step('When the user lists connector definitions', async () => {
+            const connectors = await runtimeBundleServiceTestUser.connectorDefinitions.getConnectorDefinitions();
+            expect(Array.isArray(connectors)).toBe(true);
+            expect(connectors.length).toBeGreaterThan(0);
+            connectorDefinitionId = connectors[0].id;
+        });
+
+        await activiti.step('Then the user fetches a connector definition by id', async () => {
+            const connector = await runtimeBundleServiceTestUser.connectorDefinitions.getConnectorDefinitionById(connectorDefinitionId);
+            expect(connector.id).toBe(connectorDefinitionId);
+        });
+
+        await activiti.step('And the admin lists process definitions', async () => {
+            const definitions = await runtimeAdminServiceTestAdmin.processDefinitions.getProcessDefinitions();
+            expect(definitions.map((definition) => definition.key)).toContain(PROCESS_WITH_VARIABLES);
+        });
     });
 });

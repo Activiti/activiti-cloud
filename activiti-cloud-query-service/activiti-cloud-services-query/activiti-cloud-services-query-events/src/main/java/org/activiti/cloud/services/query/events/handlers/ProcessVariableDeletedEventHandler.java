@@ -18,10 +18,7 @@ package org.activiti.cloud.services.query.events.handlers;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,16 +28,10 @@ public class ProcessVariableDeletedEventHandler {
 
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
-    private final FeatureToggle featureToggle;
 
-    public ProcessVariableDeletedEventHandler(
-        EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder,
-        FeatureToggle featureToggle
-    ) {
+    public ProcessVariableDeletedEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
         this.entityManagerFinder = entityManagerFinder;
-        this.featureToggle = featureToggle;
     }
 
     public void handle(CloudVariableDeletedEvent event) {
@@ -58,16 +49,6 @@ public class ProcessVariableDeletedEventHandler {
                     .getVariable(variableName)
                     .ifPresentOrElse(
                         variableEntity -> {
-                            if (
-                                !event.isEphemeralVariable() &&
-                                featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)
-                            ) {
-                                ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forDelete(
-                                    event
-                                );
-                                entityManager.persist(history);
-                            }
-
                             processInstanceEntity.getVariables().remove(variableEntity);
                             entityManager.remove(variableEntity);
                         },

@@ -36,10 +36,10 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'When the user starts an instance of process called RankMovieId with the provided variables',
             async () => {
-                const processInstance = await runtimeBundleServiceTestUser.startProcessWithVariables(
-                    RANK_MOVIE_PROCESS,
-                    { movieToRank }
-                );
+                const processInstance = await runtimeBundleServiceTestUser.processInstances.startProcess({
+                    processDefinitionKey: RANK_MOVIE_PROCESS,
+                    variables: { movieToRank },
+                });
                 processInstanceId = processInstance.id;
                 expect(processInstanceId).toBeTruthy();
             }
@@ -85,10 +85,10 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'When the user starts an instance of process called miParallelCloudConnector with the provided variables',
             async () => {
-                const processInstance = await runtimeBundleServiceTestUser.startProcessWithVariables(
-                    MI_PARALLEL_CLOUD_CONNECTOR_PROCESS,
-                    { instanceCount }
-                );
+                const processInstance = await runtimeBundleServiceTestUser.processInstances.startProcess({
+                    processDefinitionKey: MI_PARALLEL_CLOUD_CONNECTOR_PROCESS,
+                    variables: { instanceCount },
+                });
                 processInstanceId = processInstance.id;
                 expect(processInstanceId).toBeTruthy();
             }
@@ -145,10 +145,10 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'When the user starts an instance of process called testErrorConnectorProcess with the provided variables',
             async () => {
-                const processInstance = await runtimeBundleServiceTestUser.startProcessWithVariables(
-                    TEST_ERROR_CONNECTOR_PROCESS,
-                    { var: 'test' }
-                );
+                const processInstance = await runtimeBundleServiceTestUser.processInstances.startProcess({
+                    processDefinitionKey: TEST_ERROR_CONNECTOR_PROCESS,
+                    variables: { var: 'test' },
+                });
                 processInstanceId = processInstance.id;
                 expect(processInstanceId).toBeTruthy();
             }
@@ -189,10 +189,10 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'When the user starts an instance of process called testBpmnErrorConnectorProcess with the provided variables',
             async () => {
-                const processInstance = await runtimeBundleServiceTestUser.startProcessWithVariables(
-                    TEST_BPMN_ERROR_CONNECTOR_PROCESS,
-                    { var: 'test' }
-                );
+                const processInstance = await runtimeBundleServiceTestUser.processInstances.startProcess({
+                    processDefinitionKey: TEST_BPMN_ERROR_CONNECTOR_PROCESS,
+                    variables: { var: 'test' },
+                });
                 processInstanceId = processInstance.id;
                 processDefinitionId = processInstance.processDefinitionId;
                 processDefinitionKey = processInstance.processDefinitionKey;
@@ -245,7 +245,7 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
 
         await activiti.step('And the status of the process is changed to cancelled', async () => {
             await expect(async () => {
-                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
 
             const instance = await queryServiceTestUser.waitForProcessInstanceStatus(

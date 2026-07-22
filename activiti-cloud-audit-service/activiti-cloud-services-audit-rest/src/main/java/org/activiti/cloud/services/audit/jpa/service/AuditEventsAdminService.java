@@ -15,22 +15,146 @@
  */
 package org.activiti.cloud.services.audit.jpa.service;
 
+import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvChainedException;
+import com.opencsv.exceptions.CsvFieldAssignmentException;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
+import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.exceptions.AuditExportException;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 public class AuditEventsAdminService {
 
-    private final EventsRepository eventsRepository;
+    private record TimestampRange(long start, long end) {}
 
-    public AuditEventsAdminService(EventsRepository eventsRepository) {
+    private final EventsRepository<AuditEventEntity> eventsRepository;
+    private final APIEventToEntityConverters eventConverters;
+    private final AuditEventsExporter auditEventsExporter;
+    private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
+    private final AlfrescoPagedModelAssembler<
+        CloudRuntimeEvent<?, CloudRuntimeEventType>
+    > pagedCollectionModelAssembler;
+
+    public AuditEventsAdminService(
+        EventsRepository<AuditEventEntity> eventsRepository,
+        APIEventToEntityConverters eventConverters,
+        AuditEventsExporter auditEventsExporter,
+        EventRepresentationModelAssembler eventRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler
+    ) {
         this.eventsRepository = eventsRepository;
+        this.eventConverters = eventConverters;
+        this.auditEventsExporter = auditEventsExporter;
+        this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
+    }
+
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAllSliced(Pageable pageable) {
+        Pageable resolvedPageable = applyDefaultSort(pageable);
+        Slice<AuditEventEntity> slice = eventsRepository.findBy(
+            (root, query, criteriaBuilder) -> null,
+            query -> query.slice(resolvedPageable)
+        );
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(slice.getContent());
+
+        long knownElements = resolvedPageable.getOffset() + events.size() + (slice.hasNext() ? 1 : 0);
+
+        return pagedCollectionModelAssembler.toModel(
+            resolvedPageable,
+            new PageImpl<>(events, resolvedPageable, knownElements),
+            eventRepresentationModelAssembler
+        );
+    }
+
+    private Pageable applyDefaultSort(Pageable pageable) {
+        if (pageable.getSort().isUnsorted()) {
+            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
+                Pageable inner = alfrescoPageRequest.getPageable();
+                return new AlfrescoPageRequest(
+                    alfrescoPageRequest.getOffset(),
+                    alfrescoPageRequest.getPageSize(),
+                    PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                );
+            }
+            return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+        }
+        return pageable;
     }
 
     public Collection<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate) {
+        TimestampRange range = validateAndConvertDates(fromDate, toDate);
+        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(range.start(), range.end());
+    }
+
+    public void exportAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, HttpServletResponse response)
+        throws IOException, AuditExportException {
+        TimestampRange range = validateAndConvertDates(fromDate, toDate);
+
+        try {
+            CSVWriter csvWriter = auditEventsExporter.startExport(response);
+
+            final int PAGE_SIZE = 1000;
+            int pageNumber = 0;
+
+            Page<AuditEventEntity> auditPage;
+            do {
+                Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
+                auditPage = eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(
+                    range.start(),
+                    range.end(),
+                    pageable
+                );
+
+                if (auditPage == null || !auditPage.hasContent()) {
+                    break;
+                }
+
+                List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
+                auditEventsExporter.writeChunk(csvWriter, events);
+
+                pageNumber++;
+            } while (auditPage.hasNext());
+
+            auditEventsExporter.finishExport(csvWriter);
+        } catch (CsvFieldAssignmentException | CsvChainedException e) {
+            throw new AuditExportException("Failed writing CSV rows", e);
+        }
+    }
+
+    private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(
+        Iterable<? extends AuditEventEntity> auditEntities
+    ) {
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
+        for (AuditEventEntity aee : auditEntities) {
+            events.add(eventConverters.getConverterByEventTypeName(aee.getEventType()).convertToAPI(aee));
+        }
+        return events;
+    }
+
+    private TimestampRange validateAndConvertDates(LocalDate fromDate, LocalDate toDate) {
         if (fromDate.isAfter(toDate)) {
             throw new IllegalArgumentException("From date cannot be after to date");
         }
@@ -41,9 +165,9 @@ public class AuditEventsAdminService {
             throw new IllegalArgumentException("Difference between dates cannot be more than 31 days");
         }
 
-        Long startDateTime = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
-        Long endDateTime = toDate.atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli();
+        long startDateTime = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+        long endDateTime = toDate.atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli();
 
-        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(startDateTime, endDateTime);
+        return new TimestampRange(startDateTime, endDateTime);
     }
 }

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,7 @@ import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.advice.SerializationViewResponseBodyAdvice;
 import org.activiti.cloud.services.query.rest.advice.TaskControllerAdvice;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
@@ -50,7 +52,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -153,13 +154,14 @@ public class TaskAdminController extends TaskControllerAdvice {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public MappingJacksonValue findAllFromBodyTaskAdmin(
+    public PagedModel<EntityModel<QueryCloudTask>> findAllFromBodyTaskAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = TaskEntity.class
         ) Predicate predicate,
         @RequestBody(required = false) TasksQueryBody payload,
         VariableSearch variableSearch,
-        Pageable pageable
+        Pageable pageable,
+        HttpServletRequest request
     ) {
         TasksQueryBody queryBody = Optional.ofNullable(payload).orElse(new TasksQueryBody());
 
@@ -174,14 +176,12 @@ public class TaskAdminController extends TaskControllerAdvice {
             queryBody.getVariableKeys()
         );
 
-        MappingJacksonValue result = new MappingJacksonValue(pagedModel);
-        if (queryBody.hasVariableKeys()) {
-            result.setSerializationView(JsonViews.ProcessVariables.class);
-        } else {
-            result.setSerializationView(JsonViews.General.class);
-        }
+        request.setAttribute(
+            SerializationViewResponseBodyAdvice.SERIALIZATION_VIEW_ATTRIBUTE,
+            queryBody.hasVariableKeys() ? JsonViews.ProcessVariables.class : JsonViews.General.class
+        );
 
-        return result;
+        return pagedModel;
     }
 
     @JsonView(JsonViews.General.class)

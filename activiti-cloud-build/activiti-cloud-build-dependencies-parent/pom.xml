@@ -17,8 +17,9 @@
     <graphql-java.version>25.0</graphql-java.version>
     <postgresql.version>42.7.11</postgresql.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
-    <netty.version>4.2.15.Final</netty.version>
-    <jackson.version>3.0.4</jackson.version>
+    <netty.version>4.2.16.Final</netty.version>
+    <jackson.version>3.1.4</jackson.version>
+    <jackson2.version>2.21.4</jackson2.version>
     <rest-assured.version>6.0.0</rest-assured.version>
     <!-- AAE-43864 temporary update for security issue -->
     <plexus-utils.version>4.0.3</plexus-utils.version>
@@ -56,10 +57,11 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- AAE-47587 Jackson 3.x BOM override -->
       <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring-boot.version}</version>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -67,7 +69,14 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.21.4</version>
+        <version>${jackson2.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

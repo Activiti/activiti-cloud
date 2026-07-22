@@ -16,7 +16,7 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 import { isDiagramEmpty, isDiagramShown } from '../../helpers/diagram-utils';
 import { RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS } from '../../helpers/process-deployment-keys';
 
@@ -34,12 +34,12 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And the user deletes the process', async () => {
-            await runtimeBundleServiceTestUser.deleteProcessInstance(processInstanceId);
+            await runtimeBundleServiceTestUser.processInstances.deleteProcessInstance(processInstanceId);
         });
 
         await activiti.step('Then the process instance is deleted', async () => {
             await expect(async () => {
-                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
         });
     });
@@ -57,7 +57,7 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And the user suspends the process instance', async () => {
-            const suspended = await runtimeBundleServiceTestUser.suspendProcessInstance(processInstanceId);
+            const suspended = await runtimeBundleServiceTestUser.processInstances.suspendProcessInstance(processInstanceId);
             expect(suspended.status).toBe(ProcessInstanceStatus.SUSPENDED);
         });
 
@@ -70,7 +70,7 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And the user is able to resume the process instance', async () => {
-            await runtimeBundleServiceTestUser.resumeProcessInstance(processInstanceId);
+            await runtimeBundleServiceTestUser.processInstances.resumeProcessInstance(processInstanceId);
         });
 
         await activiti.step('Then the status of the process is changed to running', async () => {
@@ -91,16 +91,16 @@ activiti.describe('Runtime — Process Instance Actions', () => {
                 'PROCESS_INSTANCE_WITH_VARIABLES'
             );
             processInstanceId = processInstance.id;
-            await runtimeBundleServiceTestUser.suspendProcessInstance(processInstanceId);
+            await runtimeBundleServiceTestUser.processInstances.suspendProcessInstance(processInstanceId);
         });
 
         await activiti.step('When the user deletes the process', async () => {
-            await runtimeBundleServiceTestUser.deleteProcessInstance(processInstanceId);
+            await runtimeBundleServiceTestUser.processInstances.deleteProcessInstance(processInstanceId);
         });
 
         await activiti.step('Then the process cannot be activated anymore', async () => {
             await expect(
-                runtimeBundleServiceTestUser.resumeProcessInstance(processInstanceId)
+                runtimeBundleServiceTestUser.processInstances.resumeProcessInstance(processInstanceId)
             ).rejects.toThrow(/Unable to find process instance/);
         });
     });
@@ -110,8 +110,8 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         queryServiceTestUser,
     }) => {
         await activiti.step('When the user gets the process definitions', async () => {
-            const runtimeDefinitions = await runtimeBundleServiceTestUser.getProcessDefinitions();
-            const queryDefinitions = await queryServiceTestUser.getProcessDefinitions();
+            const runtimeDefinitions = await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitions();
+            const queryDefinitions = await queryServiceTestUser.processDefinitions.getProcessDefinitions();
             const runtimeKeys = runtimeDefinitions.map((def) => def.key);
             const queryKeys = queryDefinitions.map((def) => def.key);
 
@@ -133,7 +133,7 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And open the process diagram', async () => {
-            diagram = await runtimeBundleServiceTestUser.getProcessInstanceDiagram(processInstanceId);
+            diagram = await runtimeBundleServiceTestUser.processInstances.getProcessInstanceDiagram(processInstanceId);
         });
 
         await activiti.step('Then the diagram is shown', async () => {
@@ -156,7 +156,7 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And open the process diagram', async () => {
-            diagram = await runtimeBundleServiceTestUser.getProcessInstanceDiagram(processInstanceId);
+            diagram = await runtimeBundleServiceTestUser.processInstances.getProcessInstanceDiagram(processInstanceId);
         });
 
         await activiti.step('Then no diagram is shown', async () => {

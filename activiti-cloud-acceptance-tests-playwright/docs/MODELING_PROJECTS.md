@@ -1,6 +1,6 @@
 # Modeling projects (`resources/`)
 
-BPMN and extension JSON for acceptance tests live under **`resources/modeling-projects/`**, similar to modeling assets in other Hyland repos (e.g. `hxp-studio-services`).
+BPMN and extension JSON for acceptance tests live under **`resources/modeling-projects/`**.
 
 ## Layout
 

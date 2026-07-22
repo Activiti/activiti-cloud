@@ -39,7 +39,7 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             'When messages: the user sends a start message named startMessage with businessKey value of businessId session variable',
             async () => {
-                const processInstance = await runtimeBundleServiceHrUser.sendStartMessage({
+                const processInstance = await runtimeBundleServiceHrUser.processInstances.sendStartMessage({
                     name: 'startMessage',
                     businessKey: businessId,
                 });
@@ -75,7 +75,7 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             'And messages: the user sends a message named boundaryMessage with correlationKey value of businessId session variable',
             async () => {
-                const response = await runtimeBundleServiceHrUser.sendReceiveMessage({
+                const response = await runtimeBundleServiceHrUser.processInstances.sendReceiveMessage({
                     name: 'boundaryMessage',
                     correlationKey: businessId,
                 });
@@ -111,7 +111,7 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             'And messages: the user sends a message named catchMessage with correlationKey value of businessId session variable',
             async () => {
-                const response = await runtimeBundleServiceHrUser.sendReceiveMessage({
+                const response = await runtimeBundleServiceHrUser.processInstances.sendReceiveMessage({
                     name: 'catchMessage',
                     correlationKey: businessId,
                 });
@@ -163,7 +163,7 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             'When messages: the user sends a start message named startMessage with businessKey value of businessId session variable',
             async () => {
-                const processInstance = await runtimeBundleServiceHrUser.sendStartMessage({
+                const processInstance = await runtimeBundleServiceHrUser.processInstances.sendStartMessage({
                     name: 'startMessage',
                     businessKey: businessId,
                 });
@@ -199,7 +199,7 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             'And messages: the user gets not found error when sends a message named boundaryMessage with nonexisting correlationKey',
             async () => {
-                const response = await runtimeBundleServiceHrUser.sendReceiveMessage({
+                const response = await runtimeBundleServiceHrUser.processInstances.sendReceiveMessage({
                     name: 'boundaryMessage',
                     correlationKey: 'nonexistingkey',
                 });
@@ -221,7 +221,7 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             'When messages: the user sends a start message named startMessage with businessKey value of businessId session variable',
             async () => {
-                const processInstance = await runtimeBundleServiceHrUser.sendStartMessage({
+                const processInstance = await runtimeBundleServiceHrUser.processInstances.sendStartMessage({
                     name: 'startMessage',
                     businessKey: businessId,
                 });
@@ -257,7 +257,7 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             'And messages: the user gets internal server error when starting a process with message named startMessage and duplicate correlationKey businessId',
             async () => {
-                const response = await runtimeBundleServiceHrUser.trySendStartMessage({
+                const response = await runtimeBundleServiceHrUser.processInstances.trySendStartMessage({
                     name: 'startMessage',
                     businessKey: businessId,
                 });
@@ -281,7 +281,7 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
             await activiti.step(
                 'When messages: the user sends a start message named StartCloudMessage1 with businessKey value of businessId session variable',
                 async () => {
-                    const processInstance = await runtimeBundleServiceTestAdmin.sendStartMessage({
+                    const processInstance = await runtimeBundleServiceTestAdmin.processInstances.sendStartMessage({
                         name: 'StartCloudMessage1',
                         businessKey: businessId,
                     });

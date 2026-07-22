@@ -16,12 +16,8 @@
 
 import { applyResolvedHostsToEnv } from '../config/connection/env-hosts';
 import { ContextFactory } from '../fixtures/context-factory';
-import { RuntimeBundleService } from '../services/runtime-bundle.service';
+import { RuntimeBundleService } from '../services/runtime-bundle/runtime-bundle.service';
 
-/**
- * BPMN keys required for process-instance-actions.story parity (Serenity runtime-acceptance-tests).
- * Deployed from activiti/example-runtime-bundle on chart install.
- */
 export const RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS = [
     'SimpleProcess',
     'ProcessWithVariables',
@@ -31,7 +27,6 @@ export const RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS = [
     'HeadersConnectorProcess',
 ] as const;
 
-/** BPMN keys for task-actions.story wave 1 (Serenity runtime-acceptance-tests). */
 export const RUNTIME_TASK_ACTIONS_WAVE1_REQUIRED_KEYS = [
     'ProcessWithVariables',
     'SingleTaskProcess',

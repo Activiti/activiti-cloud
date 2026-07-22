@@ -1,0 +1,19 @@
+{
+  "./activiti-cloud-examples/example-runtime-bundle": {
+    "shortName": "example-runtime-bundle",
+    "extraModules": "activiti-cloud-runtime-bundle-service,activiti-cloud-examples/example-runtime-bundle/starter"
+  },
+  "./activiti-cloud-examples/example-cloud-connector": {
+    "shortName": "example-cloud-connector",
+    "extraModules": "activiti-cloud-connectors,activiti-cloud-examples/example-cloud-connector/starter"
+  },
+  "./activiti-cloud-examples/activiti-cloud-query": {
+    "shortName": "activiti-cloud-query",
+    "extraModules": "activiti-cloud-query-service,activiti-cloud-audit-service,activiti-cloud-messages-service,activiti-cloud-notifications-graphql-service,activiti-cloud-examples/activiti-cloud-query/liquibase,activiti-cloud-examples/activiti-cloud-query/starter,activiti-cloud-examples/activiti-cloud-query/rest,activiti-cloud-examples/activiti-cloud-query/consumer",
+    "testMavenFlags": "-T 1 -DunitTests.parallel=false"
+  },
+  "./activiti-cloud-examples/activiti-cloud-identity-adapter": {
+    "shortName": "activiti-cloud-identity-adapter",
+    "extraModules": ""
+  }
+}

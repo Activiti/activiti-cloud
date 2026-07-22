@@ -12,7 +12,12 @@
   <name>Activiti Cloud :: Runtime API Parent</name>
   <packaging>pom</packaging>
   <properties>
-    <activiti.version>9.1.0-alpha.39</activiti.version>
+    <activiti.version>9.1.0-alpha.54</activiti.version>
+    <!--
+      Set via -Dskip.common.tests=true in per-service CI builds so common API modules
+      are compiled (-am) but tests run only once in build-common.
+    -->
+    <skip.common.tests>false</skip.common.tests>
   </properties>
   <modules>
     <module>activiti-cloud-api-dependencies</module>
@@ -57,4 +62,24 @@
       <type>pom</type>
     </dependency>
   </dependencies>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <skipTests>${skip.common.tests}</skipTests>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <configuration>
+            <skipITs>${skip.common.tests}</skipITs>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
