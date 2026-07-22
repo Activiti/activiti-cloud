@@ -55,7 +55,7 @@
     "@playwright/test": "^1.61.1",
     "@types/node": "^22.0.0",
     "@types/ws": "^8.18.1",
-    "tsx": "^4.19.4",
+    "tsx": "^4.23.1",
     "typescript": "^5.5.4"
   },
   "engines": {
