@@ -23,12 +23,15 @@ import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteContro
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsDeleteService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import tools.jackson.databind.ObjectMapper;
 
@@ -68,5 +71,15 @@ public class AuditJPAControllersAutoConfiguration {
         AuditEventsExporter auditEventsExporter
     ) {
         return new AuditEventsAdminService(eventsRepository, eventConverters, auditEventsExporter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AuditEventsDeleteService auditEventsDeleteService(
+        EventsRepository eventsRepository,
+        TransactionTemplate transactionTemplate,
+        @Value("${activiti.audit.deletion.batch-size:1000}") int batchSize
+    ) {
+        return new AuditEventsDeleteService(eventsRepository, transactionTemplate, batchSize);
     }
 }
