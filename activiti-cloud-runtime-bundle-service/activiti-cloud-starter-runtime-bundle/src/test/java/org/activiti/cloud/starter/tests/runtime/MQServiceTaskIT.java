@@ -182,7 +182,7 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
     }
 
     @Test
-    void shouldNotRemoveInboundAndOutBoundVarsFromIntegrationEventsForNonEphemeralVariables() {
+    void shouldNotRemoveOutBoundVarsFromIntegrationEventsForNonEphemeralVariables() {
         auditConsumer.clear();
         processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder.start().withProcessDefinitionKey("ProcessWithRestConnectorNonEphemeralVars").build()
@@ -211,11 +211,7 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
                     IntegrationContext::getInBoundVariables,
                     IntegrationContext::getOutBoundVariables
                 )
-                .containsExactly(
-                    false,
-                    Map.of("restUrl", "https://jsonplaceholder.typicode.com/posts/1"),
-                    Map.of("restResult", "fromConnector")
-                );
+                .containsExactly(false, Map.of(), Map.of("restResult", "fromConnector"));
         });
     }
 }

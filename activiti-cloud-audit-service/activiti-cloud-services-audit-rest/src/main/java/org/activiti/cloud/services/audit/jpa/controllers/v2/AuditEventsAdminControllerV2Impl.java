@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.jpa.controllers;
+package org.activiti.cloud.services.audit.jpa.controllers.v2;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
+import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
-import org.activiti.cloud.services.audit.api.search.SearchParams;
-import org.activiti.cloud.services.audit.jpa.service.AuditEventsService;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -28,34 +27,35 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-    value = "/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
+    value = "/admin/v2/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-public class AuditEventsControllerImpl implements AuditEventsController {
+public class AuditEventsAdminControllerV2Impl implements AuditEventsAdminController {
 
-    private final AuditEventsService auditEventsService;
+    private final AuditEventsAdminService auditEventsAdminService;
 
     @Autowired
-    public AuditEventsControllerImpl(AuditEventsService auditEventsService) {
-        this.auditEventsService = auditEventsService;
+    public AuditEventsAdminControllerV2Impl(AuditEventsAdminService auditEventsAdminService) {
+        this.auditEventsAdminService = auditEventsAdminService;
     }
 
-    @GetMapping("/{eventId}")
-    public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId) {
-        return auditEventsService.findEventById(eventId);
-    }
-
+    /**
+     * Returns all audit events using slice-based pagination.
+     * <p>
+     * Unlike the v1 endpoint, this version fetches results as a {@link org.springframework.data.domain.Slice}
+     * rather than a full {@link org.springframework.data.domain.Page}. It therefore avoids the expensive
+     * {@code COUNT} query: instead of an exact total, it fetches one extra element to determine whether a
+     * next page exists and reports an estimated element count derived from the current offset. This trades
+     * an exact {@code totalElements} value for better performance on large audit datasets.
+     */
+    @Override
     @GetMapping
-    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
-        SearchParams searchParams,
-        Pageable pageable
-    ) {
-        return auditEventsService.searchEvents(searchParams, pageable);
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
+        return auditEventsAdminService.findAllSliced(pageable);
     }
 }

@@ -36,7 +36,7 @@ public class OrphanedIntegrationRecoveryConfiguration {
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
-        @Value("${activiti.orphaned-integration-recovery.threshold-seconds:1800}") int thresholdSeconds,
+        @Value("${activiti.orphaned-integration-recovery.threshold-seconds:10800}") int thresholdSeconds, // 3 hours
         FeatureToggle featureToggle
     ) {
         return new OrphanedIntegrationRecoveryScheduler(

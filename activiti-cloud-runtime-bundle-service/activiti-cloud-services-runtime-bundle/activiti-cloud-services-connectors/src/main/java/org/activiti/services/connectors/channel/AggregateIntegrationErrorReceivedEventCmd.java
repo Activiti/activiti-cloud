@@ -43,19 +43,16 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
     @Override
     public Void execute(CommandContext commandContext) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationErrorReceivedEventImpl integrationErrorReceived;
+            IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(
+                integrationError.getIntegrationContext()
+            );
+            sanitizedContext.clearInBoundVariables();
             if (integrationError.getIntegrationContext().hasEphemeralVariables()) {
-                IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(
-                    integrationError.getIntegrationContext()
-                );
                 sanitizedContext.clearOutBoundVariables();
-                sanitizedContext.clearInBoundVariables();
-                integrationErrorReceived = createIntegrationErrorReceivedEvent(sanitizedContext);
-            } else {
-                integrationErrorReceived = createIntegrationErrorReceivedEvent(
-                    integrationError.getIntegrationContext()
-                );
             }
+            CloudIntegrationErrorReceivedEventImpl integrationErrorReceived = createIntegrationErrorReceivedEvent(
+                sanitizedContext
+            );
             processEngineEventsAggregator.add(integrationErrorReceived);
         }
         return null;
