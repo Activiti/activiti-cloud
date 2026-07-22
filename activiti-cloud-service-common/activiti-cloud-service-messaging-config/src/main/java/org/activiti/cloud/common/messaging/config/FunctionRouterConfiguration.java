@@ -36,6 +36,7 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -228,6 +229,18 @@ public class FunctionRouterConfiguration {
                                         return Map.entry(functionDefinition, Optional.ofNullable(result));
                                     })
                                     .exceptionally(error -> {
+                                        var cause = error instanceof CompletionException ce ? ce.getCause() : error;
+
+                                        // Delivery failures should be requeued by AMQP,
+                                        // not sent as error messages to service task
+                                        if (cause instanceof ImmediateRequeueAmqpException) {
+                                            log.warn(
+                                                "Delivery error during message routing - message will be requeued for redelivery",
+                                                error
+                                            );
+                                            throw new CompletionException(cause);
+                                        }
+
                                         var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
                                         log.error(
                                             "Error routing message request {} to function registration {}",
@@ -244,48 +257,61 @@ public class FunctionRouterConfiguration {
                             Stream.of(functions).map(CompletableFuture::join).toList()
                         );
 
-                        completed.thenAccept(results -> {
-                            var errors = results
-                                .stream()
-                                .map(Map.Entry.class::cast)
-                                .filter(entry ->
-                                    Optional.class.cast(entry.getValue())
-                                        .filter(Exception.class::isInstance)
-                                        .isPresent()
-                                )
-                                .map(entry -> Optional.class.cast(entry.getValue()).get())
-                                .toList();
+                        completed
+                            .thenAccept(results -> {
+                                var errors = results
+                                    .stream()
+                                    .map(Map.Entry.class::cast)
+                                    .filter(entry ->
+                                        Optional.class.cast(entry.getValue())
+                                            .filter(Exception.class::isInstance)
+                                            .isPresent()
+                                    )
+                                    .map(entry -> Optional.class.cast(entry.getValue()).get())
+                                    // Filter out delivery failures - only handle execution errors
+                                    .filter(exception -> {
+                                        var cause =
+                                            exception instanceof CompletionException ce ? ce.getCause() : exception;
+                                        return !(cause instanceof ImmediateRequeueAmqpException);
+                                    })
+                                    .toList();
 
-                            if (!errors.isEmpty()) {
-                                log.debug("Errors handling function route message request {}", errors);
+                                if (!errors.isEmpty()) {
+                                    log.debug("Errors handling function route message request {}", errors);
 
-                                Optional.ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
-                                    .filter(StringUtils::hasText)
-                                    .map(functionCatalog::lookup)
-                                    .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
-                                    .ifPresent(errorHandlerDefinition -> {
-                                        errors
-                                            .stream()
-                                            .map(CompletionException.class::cast)
-                                            .map(CompletionException::getCause)
-                                            .map(exception -> {
-                                                if (exception instanceof MessagingException messagingException) {
-                                                    return new ErrorMessage(messagingException, message);
-                                                } else {
-                                                    return new ErrorMessage(
-                                                        new MessagingException(message, exception),
-                                                        message
-                                                    );
-                                                }
-                                            })
-                                            .forEach(errorMessage -> {
-                                                errorHandlerDefinition.accept(errorMessage);
-                                            });
-                                    });
-                            } else {
-                                log.debug("Successfully completed function route message request {}", message);
-                            }
-                        });
+                                    Optional.ofNullable(
+                                        messagingProperties.getFunctionRouter().getErrorHandlerDefinition()
+                                    )
+                                        .filter(StringUtils::hasText)
+                                        .map(functionCatalog::lookup)
+                                        .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
+                                        .ifPresent(errorHandlerDefinition -> {
+                                            errors
+                                                .stream()
+                                                .map(CompletionException.class::cast)
+                                                .map(CompletionException::getCause)
+                                                .map(exception -> {
+                                                    if (exception instanceof MessagingException messagingException) {
+                                                        return new ErrorMessage(messagingException, message);
+                                                    } else {
+                                                        return new ErrorMessage(
+                                                            new MessagingException(message, exception),
+                                                            message
+                                                        );
+                                                    }
+                                                })
+                                                .forEach(errorMessage -> {
+                                                    errorHandlerDefinition.accept(errorMessage);
+                                                });
+                                        });
+                                } else {
+                                    log.debug("Successfully completed function route message request {}", message);
+                                }
+                            })
+                            .exceptionally(completionError -> {
+                                log.debug("Delivery failure occurred, message will be requeued", completionError);
+                                return null;
+                            });
                     },
                     () -> {
                         final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
