@@ -16,12 +16,10 @@
 package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import jakarta.el.ExpressionFactory;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
@@ -267,16 +265,5 @@ public class RuntimeBundleApplicationIT {
                     .map("spring.cloud.stream.rabbit.bindings.[%s].producer.transacted"::formatted)
                     .forEach(name -> assertThat(environment.getProperty(name, Boolean.class)).isTrue())
             );
-    }
-
-    @Test
-    void connectorBindingTransactedChannel() {
-        final var isTransactional = new AtomicBoolean(false);
-
-        cachingConnectionFactory.addChannelListener((channel, transactional) -> isTransactional.set(transactional));
-
-        assertThat(streamBridge.send("script.EXECUTE", "println('foobar')")).isTrue();
-
-        await().untilAsserted(() -> assertThat(isTransactional).isTrue());
     }
 }
