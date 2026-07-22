@@ -61,6 +61,7 @@ import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEnti
 import org.activiti.cloud.services.audit.jpa.events.TimerFiredAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.security.config.AuditJPASecurityAutoConfiguration;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsService;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,6 +92,7 @@ import org.springframework.test.web.servlet.MvcResult;
         AuditJPAAutoConfiguration.class,
         AuditJPASecurityAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
+        AuditEventsService.class,
     }
 )
 class AuditEventsControllerImpWebMvcTest {
