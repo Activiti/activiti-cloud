@@ -26,34 +26,82 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
+import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.exceptions.AuditExportException;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 public class AuditEventsAdminService {
 
     private record TimestampRange(long start, long end) {}
 
-    private final EventsRepository eventsRepository;
+    private final EventsRepository<AuditEventEntity> eventsRepository;
     private final APIEventToEntityConverters eventConverters;
     private final AuditEventsExporter auditEventsExporter;
+    private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
+    private final AlfrescoPagedModelAssembler<
+        CloudRuntimeEvent<?, CloudRuntimeEventType>
+    > pagedCollectionModelAssembler;
 
     public AuditEventsAdminService(
-        EventsRepository eventsRepository,
+        EventsRepository<AuditEventEntity> eventsRepository,
         APIEventToEntityConverters eventConverters,
-        AuditEventsExporter auditEventsExporter
+        AuditEventsExporter auditEventsExporter,
+        EventRepresentationModelAssembler eventRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler
     ) {
         this.eventsRepository = eventsRepository;
         this.eventConverters = eventConverters;
         this.auditEventsExporter = auditEventsExporter;
+        this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
+    }
+
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAllSliced(Pageable pageable) {
+        Pageable resolvedPageable = applyDefaultSort(pageable);
+        Slice<AuditEventEntity> slice = eventsRepository.findBy(
+            (root, query, criteriaBuilder) -> null,
+            query -> query.slice(resolvedPageable)
+        );
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(slice.getContent());
+
+        long knownElements = resolvedPageable.getOffset() + events.size() + (slice.hasNext() ? 1 : 0);
+
+        return pagedCollectionModelAssembler.toModel(
+            resolvedPageable,
+            new PageImpl<>(events, resolvedPageable, knownElements),
+            eventRepresentationModelAssembler
+        );
+    }
+
+    private Pageable applyDefaultSort(Pageable pageable) {
+        if (pageable.getSort().isUnsorted()) {
+            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
+                Pageable inner = alfrescoPageRequest.getPageable();
+                return new AlfrescoPageRequest(
+                    alfrescoPageRequest.getOffset(),
+                    alfrescoPageRequest.getPageSize(),
+                    PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                );
+            }
+            return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+        }
+        return pageable;
     }
 
     public Collection<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate) {

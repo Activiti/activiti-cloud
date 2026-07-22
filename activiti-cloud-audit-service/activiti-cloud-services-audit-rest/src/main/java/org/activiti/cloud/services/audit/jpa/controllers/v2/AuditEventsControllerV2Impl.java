@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.jpa.controllers;
+package org.activiti.cloud.services.audit.jpa.controllers.v2;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
@@ -34,15 +34,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-    value = "/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
+    value = "/v2/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-public class AuditEventsControllerImpl implements AuditEventsController {
+public class AuditEventsControllerV2Impl implements AuditEventsController {
 
     private final AuditEventsService auditEventsService;
 
     @Autowired
-    public AuditEventsControllerImpl(AuditEventsService auditEventsService) {
+    public AuditEventsControllerV2Impl(AuditEventsService auditEventsService) {
         this.auditEventsService = auditEventsService;
     }
 
@@ -51,11 +51,20 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         return auditEventsService.findEventById(eventId);
     }
 
+    /**
+     * Searches audit events using slice-based pagination.
+     * <p>
+     * Unlike the v1 endpoint, this version fetches results as a {@link org.springframework.data.domain.Slice}
+     * rather than a full {@link org.springframework.data.domain.Page}. It therefore avoids the expensive
+     * {@code COUNT} query: instead of an exact total, it fetches one extra element to determine whether a
+     * next page exists and reports an estimated element count derived from the current offset. This trades
+     * an exact {@code totalElements} value for better performance on large audit datasets.
+     */
     @GetMapping
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
         SearchParams searchParams,
         Pageable pageable
     ) {
-        return auditEventsService.searchEvents(searchParams, pageable);
+        return auditEventsService.searchEventsSliced(searchParams, pageable);
     }
 }

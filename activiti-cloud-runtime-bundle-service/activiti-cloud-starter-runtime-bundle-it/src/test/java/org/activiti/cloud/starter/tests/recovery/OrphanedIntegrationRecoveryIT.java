@@ -261,16 +261,18 @@ class OrphanedIntegrationRecoveryIT {
             ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)
         );
 
-        AopTestUtils.<OrphanedIntegrationRecoveryScheduler>getTargetObject(
+        var scheduler = AopTestUtils.<OrphanedIntegrationRecoveryScheduler>getTargetObject(
             ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class)
-        ).recoverOrphanedIntegrations();
+        );
+        scheduler.recoverOrphanedIntegrations();
 
         var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
         verify(errorHandler, atLeastOnce()).receive(errorCaptor.capture());
         assertThat(errorCaptor.getValue()).satisfies(error -> {
             assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
             assertThat(error.getErrorMessage()).isEqualTo(
-                OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
+                "Service task did not complete: the integration was not resolved within the expected time (threshold: 0 sec). " +
+                    "Possible causes include application shutdown, connector crash, or task interruption."
             );
         });
         assertThat(
