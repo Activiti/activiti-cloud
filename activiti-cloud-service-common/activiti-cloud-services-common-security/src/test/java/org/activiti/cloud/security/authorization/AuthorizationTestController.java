@@ -16,6 +16,7 @@
 package org.activiti.cloud.security.authorization;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,7 @@ public class AuthorizationTestController {
     public static final String PERMISSION_DUMMY_ENDPOINT = "/permission/dummy-endpoint";
     public static final String ROLE_DUMMY_ENDPOINT_RESTRICTED = ROLE_DUMMY_ENDPOINT + "/restricted";
     public static final String PERMISSION_DUMMY_ENDPOINT_RESTRICTED = PERMISSION_DUMMY_ENDPOINT + "/restricted";
+    public static final String SCOPE_AUTHORITY = "/scope/authority";
 
     @GetMapping(PUBLIC_GET)
     public ResponseEntity<Void> publicGet() {
@@ -139,6 +141,12 @@ public class AuthorizationTestController {
 
     @DeleteMapping(PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
     public ResponseEntity<Void> permissionDummyEndpointRestrictedDelete() {
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(SCOPE_AUTHORITY)
+    @PreAuthorize("hasAuthority('SCOPE_hxps-internal-api')")
+    public ResponseEntity<Void> scopeAuthority() {
         return ResponseEntity.ok().build();
     }
 }

@@ -17,6 +17,7 @@ package org.activiti.cloud.security.authorization;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -58,6 +59,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         "authorizations.security-constraints[4].authPermissions[1]=OTHER_DUMMY_PERMISSION",
         "authorizations.security-constraints[4].securityCollections[0].patterns[0]=/permission/dummy-endpoint/*",
         "authorizations.security-constraints[4].securityCollections[0].omittedMethods[0]=DELETE",
+        "authorizations.security-constraints[5].securityCollections[0].patterns[0]=/v1/applications/pdb/migrate",
+        "authorizations.security-constraints[6].securityCollections[0].patterns[0]=/scope/authority",
     }
 )
 @EnableWebMvc
@@ -81,8 +84,13 @@ public class AuthorizationConfigurerIT {
 
     private DefaultMockMvcBuilder mockMvcBuilder;
 
+    @Autowired
+    private org.springframework.security.oauth2.jwt.Jwt mockJwt;
+
     @BeforeEach
     void setUp() {
+        reset(jwtDecoderMock);
+        when(jwtDecoderMock.decode(any())).thenReturn(mockJwt);
         mockMvcBuilder = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity());
     }
 
@@ -114,6 +122,49 @@ public class AuthorizationConfigurerIT {
         MockMvc mockMvc = mockMvcBuilder.alwaysExpect(status().isUnauthorized()).build();
         performRoleRestrictedRequests(mockMvc);
         performPermissionRestrictedRequests(mockMvc);
+    }
+
+    @Test
+    void should_return200OnPublicEndpoints_whenJwtIsInvalid() throws Exception {
+        when(jwtDecoderMock.decode(any())).thenThrow(new InvalidBearerTokenException(""));
+        MockMvc mockMvc = mockMvcBuilder.alwaysExpect(status().isOk()).build();
+        mockMvc.perform(get(AuthorizationTestController.PUBLIC_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(post(AuthorizationTestController.PUBLIC_POST).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(put(AuthorizationTestController.PUBLIC_PUT).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(delete(AuthorizationTestController.PUBLIC_DELETE).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+    }
+
+    @Test
+    void should_return403OnScopeAuthority_whenJwtIsInvalid() throws Exception {
+        when(jwtDecoderMock.decode(any())).thenThrow(new InvalidBearerTokenException(""));
+        MockMvc mockMvc = mockMvcBuilder.build();
+        mockMvc
+            .perform(post(AuthorizationTestController.SCOPE_AUTHORITY).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_return403OnScopeAuthority_whenAuthHeaderIsMissing() throws Exception {
+        MockMvc mockMvc = mockMvcBuilder.build();
+        mockMvc.perform(post(AuthorizationTestController.SCOPE_AUTHORITY)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_return200OnScopeAuthority_whenJwtContainsRequiredScope() throws Exception {
+        when(jwtAdapterMock.getScopes()).thenReturn(List.of("hxps-internal-api"));
+        MockMvc mockMvc = mockMvcBuilder.build();
+        mockMvc
+            .perform(post(AuthorizationTestController.SCOPE_AUTHORITY).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_return403OnScopeAuthority_whenJwtContainsWrongScope() throws Exception {
+        when(jwtAdapterMock.getScopes()).thenReturn(List.of("wrong-scope"));
+        MockMvc mockMvc = mockMvcBuilder.build();
+        mockMvc
+            .perform(post(AuthorizationTestController.SCOPE_AUTHORITY).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isForbidden());
     }
 
     @Test

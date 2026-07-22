@@ -76,6 +76,22 @@ public class AuthorizationConfigurer {
         }
     }
 
+    /**
+     * Returns the list of URL patterns that are declared as public (i.e. security constraints
+     * without {@code authRoles} nor {@code authPermissions}). Patterns are normalized the same
+     * way as when building the Spring Security matchers (trailing {@code /*} is expanded to
+     * {@code /**}), so callers can build request matchers that mirror the effective public paths.
+     */
+    public List<String> getPublicPatterns() {
+        return authorizationProperties
+            .getSecurityConstraints()
+            .stream()
+            .filter(sc -> !hasRoleOrPermissionConstraint(sc))
+            .flatMap(sc -> Arrays.stream(sc.getSecurityCollections()))
+            .flatMap(sc -> Arrays.stream(getPatterns(sc.getPatterns())))
+            .toList();
+    }
+
     public void configure(HttpSecurity http) throws Exception {
         List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(
             authorizationProperties.getSecurityConstraints()
