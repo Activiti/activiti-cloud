@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import jakarta.el.ExpressionFactory;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
@@ -37,11 +36,10 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
@@ -93,10 +91,7 @@ public class RuntimeBundleApplicationIT {
     private ConnectorImplementationsProvider connectorImplementationsProvider;
 
     @Autowired
-    private CachingConnectionFactory cachingConnectionFactory;
-
-    @Autowired
-    private StreamBridge streamBridge;
+    private BindingServiceProperties bindingServiceProperties;
 
     @Test
     public void contextLoads() {
@@ -215,15 +210,20 @@ public class RuntimeBundleApplicationIT {
 
     @Test
     void transactedRuntimeProducerBindings() {
+        final var transactedBindings = List.of(
+            "asyncExecutorJobsOutput",
+            "auditProducer",
+            "commandResults",
+            "messageConnectorOutput",
+            "messageEventsOutput",
+            "signalProducer"
+        );
+
+        assertThat(producerBindings()).isNotEmpty().containsAll(transactedBindings);
+
         assertThat(
-            Stream.of(
-                "asyncExecutorJobsOutput",
-                "auditProducer",
-                "commandResults",
-                "messageConnectorOutput",
-                "messageEventsOutput",
-                "signalProducer"
-            )
+            transactedBindings
+                .stream()
                 .map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted)
                 .toList()
         )
@@ -233,8 +233,13 @@ public class RuntimeBundleApplicationIT {
 
     @Test
     void nonTransactedRuntimeProducerBindings() {
+        final var nonTransactedBindings = List.of("auditProducerIncidents");
+
+        assertThat(producerBindings()).isNotEmpty().containsAll(nonTransactedBindings);
+
         assertThat(
-            Stream.of("auditProducerIncidents")
+            nonTransactedBindings
+                .stream()
                 .map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted)
                 .toList()
         )
@@ -244,7 +249,10 @@ public class RuntimeBundleApplicationIT {
 
     @Test
     void transactedConnectorProducerBindings() {
-        assertThat(connectorImplementationsProvider.getImplementations())
+        final var connectorBindings = connectorImplementationsProvider.getImplementations();
+        assertThat(producerBindings()).isNotEmpty().containsAll(connectorBindings);
+
+        assertThat(connectorBindings)
             .isNotEmpty()
             .containsOnly(
                 "content-service.SELECT_FILE",
@@ -265,5 +273,15 @@ public class RuntimeBundleApplicationIT {
                     .map("spring.cloud.stream.rabbit.bindings.[%s].producer.transacted"::formatted)
                     .forEach(name -> assertThat(environment.getProperty(name, Boolean.class)).isTrue())
             );
+    }
+
+    private List<String> producerBindings() {
+        return bindingServiceProperties
+            .getBindings()
+            .entrySet()
+            .stream()
+            .filter(it -> it.getValue().getConsumer() == null)
+            .map(Map.Entry::getKey)
+            .toList();
     }
 }
