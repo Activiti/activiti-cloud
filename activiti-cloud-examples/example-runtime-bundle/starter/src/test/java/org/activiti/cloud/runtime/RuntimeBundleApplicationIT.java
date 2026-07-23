@@ -210,49 +210,40 @@ public class RuntimeBundleApplicationIT {
 
     @Test
     void transactedRuntimeProducerBindings() {
-        final var transactedBindings = List.of(
-            "asyncExecutorJobsOutput",
-            "auditProducer",
-            "commandResults",
-            "messageConnectorOutput",
-            "messageEventsOutput",
-            "signalProducer"
-        );
-
-        assertThat(producerBindings()).isNotEmpty().containsAll(transactedBindings);
-
         assertThat(
-            transactedBindings
-                .stream()
-                .map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted)
-                .toList()
+            List.of(
+                "asyncExecutorJobsOutput",
+                "auditProducer",
+                "commandResults",
+                "messageConnectorOutput",
+                "messageEventsOutput",
+                "signalProducer"
+            )
         )
-            .isNotEmpty()
-            .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isTrue());
+            .satisfies(transactedBindings ->
+                assertThat(producerBindings()).isNotEmpty().containsAll(transactedBindings)
+            )
+            .satisfies(transactedBindings ->
+                assertThat(springCloudStreamRabbitBindingsProducerTransacted(transactedBindings))
+                    .isNotEmpty()
+                    .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isTrue())
+            );
     }
 
     @Test
     void nonTransactedRuntimeProducerBindings() {
-        final var nonTransactedBindings = List.of("auditProducerIncidents");
-
-        assertThat(producerBindings()).isNotEmpty().containsAll(nonTransactedBindings);
-
-        assertThat(
-            nonTransactedBindings
-                .stream()
-                .map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted)
-                .toList()
-        )
-            .isNotEmpty()
-            .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isNull());
+        assertThat(List.of("auditProducerIncidents"))
+            .satisfies(nonTransactedBindings -> assertThat(producerBindings()).containsAll(nonTransactedBindings))
+            .satisfies(nonTransactedBindings ->
+                assertThat(springCloudStreamRabbitBindingsProducerTransacted(nonTransactedBindings))
+                    .isNotEmpty()
+                    .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isFalse())
+            );
     }
 
     @Test
     void transactedConnectorProducerBindings() {
-        final var connectorBindings = connectorImplementationsProvider.getImplementations();
-        assertThat(producerBindings()).isNotEmpty().containsAll(connectorBindings);
-
-        assertThat(connectorBindings)
+        assertThat(connectorImplementationsProvider.getImplementations())
             .isNotEmpty()
             .containsOnly(
                 "content-service.SELECT_FILE",
@@ -267,6 +258,7 @@ public class RuntimeBundleApplicationIT {
                 "test-error-connector.throwError",
                 "script.EXECUTE"
             )
+            .satisfies(implementations -> assertThat(producerBindings()).containsAll(implementations))
             .satisfies(implementations ->
                 implementations
                     .stream()
@@ -283,5 +275,9 @@ public class RuntimeBundleApplicationIT {
             .filter(it -> it.getValue().getConsumer() == null)
             .map(Map.Entry::getKey)
             .toList();
+    }
+
+    private List<String> springCloudStreamRabbitBindingsProducerTransacted(List<? extends String> bindings) {
+        return bindings.stream().map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted).toList();
     }
 }
