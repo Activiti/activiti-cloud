@@ -101,10 +101,11 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * same service. {@code @SpringBootTest} cannot model this restart scenario because it manages a
  * single shared context for the whole test class.
  *
- * <p>Parameterised over {@code functionRouterEnabled} because ACK behaviour differs: with function-router
- * disabled the broker redelivers the unACKed message to ctx2's connector (which also never responds);
- * with function-router enabled the message is ACKed on receipt and lost on crash. Both paths leave an
- * orphaned record that the scheduler must clean up.
+ * <p>Parameterised over {@code functionRouterEnabled} to verify both configurations share the same
+ * ACK behaviour: both defer acknowledgment until the connector's processing genuinely completes, so
+ * {@code resetConnection()}/{@code ctx1.close()} leaves the message unacked and the broker redelivers
+ * it to ctx2's connector (which also never responds) either way. Both paths leave an orphaned record
+ * that the scheduler must clean up.
  *
  * <p>Also covers the distributed-locking contract: when two instances share the same database,
  * ShedLock ensures only one runs {@link OrphanedIntegrationRecoveryScheduler} at a time.
@@ -245,17 +246,10 @@ class OrphanedIntegrationRecoveryIT {
             )
             .isEqualTo(1L);
 
-        if (functionRouterEnabled) {
-            // Function router ACKs the message on receipt before routing it to the connector.
-            // On crash the message is already gone — ctx2's connector should never receive it.
-            await()
-                .during(Duration.ofSeconds(5))
-                .atMost(Duration.ofSeconds(6))
-                .until(() -> !integrationRequestReceived.get());
-        } else {
-            // MANUAL ACK + resetConnection causes the broker to redeliver the message to ctx2.
-            await().atMost(Duration.ofSeconds(30)).until(integrationRequestReceived::get);
-        }
+        // Both function-router-enabled and function-router-disabled paths now defer ack until
+        // the connector's processing genuinely completes, so resetConnection() leaves the message
+        // unacked and the broker redelivers it to ctx2's connector either way.
+        await().atMost(Duration.ofSeconds(30)).until(integrationRequestReceived::get);
 
         var errorHandler = AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(
             ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)

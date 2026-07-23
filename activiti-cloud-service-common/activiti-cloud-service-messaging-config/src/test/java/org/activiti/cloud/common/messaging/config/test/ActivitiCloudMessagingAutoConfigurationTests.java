@@ -16,10 +16,14 @@
 package org.activiti.cloud.common.messaging.config.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.AcknowledgeMode;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,6 +62,27 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
         assertThat(messagingProperties.getRabbitmq().getMissingDurableQueuesFatal()).isTrue();
 
         assertThat(activitiRabbitMqMessageListenerContainerCustomizer).isNotNull();
+    }
+
+    @Test
+    public void shouldForceManualAckModeForFunctionRouterConsumerGroup() {
+        var functionRouterGroup = messagingProperties.getFunctionRouter().getGroup();
+
+        var functionRouterContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
+        activitiRabbitMqMessageListenerContainerCustomizer.configure(
+            functionRouterContainer,
+            "some-destination",
+            functionRouterGroup
+        );
+        assertThat(functionRouterContainer.getAcknowledgeMode()).isEqualTo(AcknowledgeMode.MANUAL);
+
+        var otherContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
+        activitiRabbitMqMessageListenerContainerCustomizer.configure(
+            otherContainer,
+            "some-destination",
+            "some-other-group"
+        );
+        assertThat(otherContainer.getAcknowledgeMode()).isNotEqualTo(AcknowledgeMode.MANUAL);
     }
 
     @Test

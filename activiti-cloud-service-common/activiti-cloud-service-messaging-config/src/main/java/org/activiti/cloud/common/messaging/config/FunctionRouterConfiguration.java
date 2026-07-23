@@ -17,6 +17,7 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
 
+import com.rabbitmq.client.Channel;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -326,9 +327,21 @@ public class FunctionRouterConfiguration {
                                 } else {
                                     log.debug("Successfully completed function route message request {}", message);
                                 }
+
+                                // Whether it was a genuine success or a genuine execution error (already
+                                // delivered to the error handler above), the outcome is final - ack so
+                                // AMQP does not redeliver it.
+                                acknowledge(message);
                             })
                             .exceptionally(completionError -> {
+                                // Every per-registration delivery failure was rethrown by the
+                                // exceptionally() handler above, so CompletableFuture.allOf() -
+                                // and therefore `completed` - completes exceptionally here. Nack
+                                // with requeue=true so AMQP genuinely redelivers the message,
+                                // instead of acknowledging a message we never actually finished
+                                // handling.
                                 log.debug("Delivery failure occurred, message will be requeued", completionError);
+                                negativelyAcknowledgeAndRequeue(message);
                                 return null;
                             });
                     },
@@ -345,9 +358,53 @@ public class FunctionRouterConfiguration {
                             destination,
                             registration
                         );
+
+                        // No registration exists to handle this destination - redelivering will
+                        // never change that, so acknowledge rather than requeue indefinitely.
+                        acknowledge(message);
                     }
                 );
         };
+    }
+
+    /**
+     * Acknowledges the message if it was delivered with a manual-ack channel/delivery-tag (i.e.
+     * the consumer's {@code AcknowledgeMode} is {@code MANUAL} - see
+     * {@code ActivitiCloudMessagingAutoConfiguration}'s listener container customizer). A no-op
+     * otherwise, so this is safe to call regardless of binder/ack-mode configuration.
+     */
+    private static void acknowledge(Message<?> message) {
+        withChannelAndDeliveryTag(message, (channel, deliveryTag) -> {
+            try {
+                channel.basicAck(deliveryTag, false);
+            } catch (Exception e) {
+                log.warn("Failed to acknowledge message {}", message, e);
+            }
+        });
+    }
+
+    /**
+     * Negatively acknowledges the message with {@code requeue=true} if it was delivered with a
+     * manual-ack channel/delivery-tag, so AMQP genuinely redelivers it rather than the message
+     * being lost after an optimistic ack. A no-op otherwise.
+     */
+    private static void negativelyAcknowledgeAndRequeue(Message<?> message) {
+        withChannelAndDeliveryTag(message, (channel, deliveryTag) -> {
+            try {
+                channel.basicNack(deliveryTag, false, true);
+            } catch (Exception e) {
+                log.warn("Failed to negatively acknowledge message {}", message, e);
+            }
+        });
+    }
+
+    private static void withChannelAndDeliveryTag(Message<?> message, BiConsumer<Channel, Long> action) {
+        var channel = message.getHeaders().get(AmqpHeaders.CHANNEL, Channel.class);
+        var deliveryTag = message.getHeaders().get(AmqpHeaders.DELIVERY_TAG, Long.class);
+
+        if (channel != null && deliveryTag != null) {
+            action.accept(channel, deliveryTag);
+        }
     }
 
     @Bean

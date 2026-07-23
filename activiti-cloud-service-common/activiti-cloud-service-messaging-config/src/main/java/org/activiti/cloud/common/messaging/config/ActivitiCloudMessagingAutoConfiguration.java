@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.config;
 import com.rabbitmq.client.ConnectionFactory;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -42,6 +43,8 @@ public class ActivitiCloudMessagingAutoConfiguration {
         ListenerContainerCustomizer<MessageListenerContainer> activitiRabbitMqMessageListenerContainerCustomizer(
             ActivitiCloudMessagingProperties activitiCloudMessagingProperties
         ) {
+            var functionRouterGroup = activitiCloudMessagingProperties.getFunctionRouter().getGroup();
+
             return (container, destinationName, group) -> {
                 if (container instanceof AbstractMessageListenerContainer rabbitListenerContainer) {
                     if (group == null) {
@@ -52,6 +55,16 @@ public class ActivitiCloudMessagingAutoConfiguration {
                         Optional.ofNullable(activitiCloudMessagingProperties.getRabbitmq())
                             .map(ActivitiCloudMessagingProperties.RabbitMqProperties::getMissingDurableQueuesFatal)
                             .ifPresent(rabbitListenerContainer::setMissingQueuesFatal);
+                    }
+
+                    if (functionRouterGroup.equals(group)) {
+                        // The function router hands off processing to a per-connector executor and
+                        // returns without waiting for it to finish (see FunctionRouterConfiguration).
+                        // Auto-ack would acknowledge the message as soon as that fire-and-forget
+                        // handoff returns, regardless of whether the work it kicked off actually
+                        // succeeds. Manual ack lets FunctionRouterConfiguration decide ack vs.
+                        // nack-and-requeue once it genuinely knows the outcome.
+                        rabbitListenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
                     }
                 }
             };

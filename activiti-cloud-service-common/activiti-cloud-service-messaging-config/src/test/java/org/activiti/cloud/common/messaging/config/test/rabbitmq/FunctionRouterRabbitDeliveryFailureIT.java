@@ -27,6 +27,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.config.FunctionRouterExecutorFactory;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
@@ -72,22 +73,33 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
  * eventually exhausts, and only then does the difference between "delivery failure filtered
  * internally" and "exception escapes to the global error channel" become observable.
  *
- * <p>IMPORTANT - open finding from writing this test: for a delivery failure that never clears
- * (executor permanently shut down), the message is acknowledged and lost - never genuinely
- * redelivered by RabbitMQ, never reprocessed - in BOTH the fixed and the broken (reverted) state.
- * Confirmed via {@code rabbitmqctl list_queues}: queue depth drops to 0 and the message is never
- * seen by the connector again either way. This is because {@code AmqpInboundChannelAdapter}'s own
- * {@code RetryTemplate} is given a {@code RecoveryCallback} ({@code ErrorMessageSendingRecoverer}),
- * and Spring Retry's {@code RetryTemplate.execute(RetryCallback, RecoveryCallback)} contract is to
- * run that callback once its own retries are exhausted and return its result *without rethrowing* -
- * so the listener always returns normally and the container always acks, regardless of what this
- * module's own code does. The fix does not cause this loss and does not fix it either; what it
- * changes is the *window* before the loss happens: without the fix, the adapter's own retries give
- * the condition ~7-8s across ~4 attempts to clear before giving up; with the fix, this module's own
- * {@code CompletableFutureRetry} (max-retries=1, 10ms) exhausts almost immediately and the adapter's
- * retry never engages at all, since the listener no longer throws synchronously to trigger it. This
- * is a real message-loss gap, present on both develop and this branch, not introduced by this fix,
- * and not addressed in {@code FunctionRouterConfiguration} as of this writing.
+ * <p>Message-loss gap and its fix: for a delivery failure that never clears (executor permanently
+ * shut down), the previous auto-ack behavior acknowledged the message as soon as the (fire-and-
+ * forget) listener method returned, regardless of whether the work it kicked off actually
+ * succeeded - {@code AmqpInboundChannelAdapter}'s own {@code RetryTemplate}/{@code RecoveryCallback}
+ * ({@code ErrorMessageSendingRecoverer}) traps failures rather than rethrowing them once its own
+ * retries exhaust, so the listener always returned normally and the container always acked,
+ * confirmed via {@code rabbitmqctl list_queues} (queue depth dropped to 0, message never seen
+ * again) regardless of whether this module's own synchronous-throw fix was applied. This is fixed
+ * by switching the function-router's consumer to manual ack mode (see
+ * {@code ActivitiCloudMessagingAutoConfiguration}'s listener container customizer) and having
+ * {@code FunctionRouterConfiguration} explicitly ack on success/genuine-error and
+ * nack-with-requeue=true on a genuine delivery failure, once it actually knows the outcome -
+ * verified below by {@code should_absorbExecutorQueueOverflow_withoutErrorHandlerInvocation} (the
+ * overflowing message is no longer dropped) and
+ * {@code should_genuinelyRedeliverDeliveryFailure_soMessageSucceedsAfterExecutorRecovers} (a
+ * permanently-failing delivery is genuinely redelivered by RabbitMQ and succeeds once the executor
+ * recovers).
+ *
+ * <p>Deferring ack until this module's own async chain resolves means the underlying AMQP consumer
+ * (default prefetch=1) won't fetch a connector's next message until its current one is acked -
+ * {@code should_notBlockOtherConnectors_whileOneConnectorIsStillProcessing} confirms this only
+ * throttles a single connector's own throughput and does not block unrelated connectors sharing
+ * the function-router consumer group, since each connector binding gets its own listener
+ * container/consumer. Separately, a delivery failure that never clears now produces a tight nack
+ * -&gt; immediate broker redelivery -&gt; immediate re-rejection loop with no backoff (observed:
+ * tens of thousands of attempts within seconds) for as long as the underlying condition persists -
+ * a real operational consideration for a slow rolling upgrade, not addressed by this change.
  */
 @SpringBootTest(
     classes = { FunctionRouterRabbitTestApplication.class },
@@ -104,6 +116,10 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
         "spring.cloud.stream.bindings.testConnectorInput.group=test-connector-group",
         "spring.cloud.stream.bindings.testConnectorInput.content-type=text/plain",
         "activiti.cloud.messaging.function-router.routes.testConnectorInput.enabled=true",
+        "spring.cloud.stream.bindings.slowConnectorInput.destination=slow-connector-queue",
+        "spring.cloud.stream.bindings.slowConnectorInput.group=slow-connector-group",
+        "spring.cloud.stream.bindings.slowConnectorInput.content-type=text/plain",
+        "activiti.cloud.messaging.function-router.routes.slowConnectorInput.enabled=true",
     }
 )
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class })
@@ -124,6 +140,9 @@ class FunctionRouterRabbitDeliveryFailureIT {
     // name, i.e. the bean name plus Spring Cloud Function's registration suffix.
     private static final String REGISTRATION_NAME = "testConnector_registration";
 
+    private static final String SLOW_CONNECTOR_TYPE = "slow-connector-queue";
+    private static final String SLOW_EXCHANGE = "slow-connector-queue";
+
     @TestConfiguration
     static class TestConnectorConfig {
 
@@ -136,6 +155,17 @@ class FunctionRouterRabbitDeliveryFailureIT {
         @ConnectorBinding(input = "testConnectorInput", connectorType = CONNECTOR_TYPE, condition = "")
         Consumer<org.springframework.messaging.Message<String>> testConnector() {
             return TestConnectorState::handle;
+        }
+
+        @InputBinding("slowConnectorInput")
+        SubscribableChannel slowConnectorInput() {
+            return MessageChannels.publishSubscribe("slowConnectorInput").getObject();
+        }
+
+        @Bean("slowConnector")
+        @ConnectorBinding(input = "slowConnectorInput", connectorType = SLOW_CONNECTOR_TYPE, condition = "")
+        Consumer<org.springframework.messaging.Message<String>> slowConnector() {
+            return TestConnectorState::handleSlow;
         }
 
         @Bean("testErrorHandler")
@@ -152,6 +182,10 @@ class FunctionRouterRabbitDeliveryFailureIT {
 
         static final CopyOnWriteArrayList<String> processedPayloads = new CopyOnWriteArrayList<>();
         static final CopyOnWriteArrayList<ErrorMessage> capturedErrors = new CopyOnWriteArrayList<>();
+        static final AtomicReference<CountDownLatch> slowConnectorGate = new AtomicReference<>();
+        static final AtomicReference<CountDownLatch> slowConnectorStarted = new AtomicReference<>(
+            new CountDownLatch(1)
+        );
 
         static void handle(org.springframework.messaging.Message<String> message) {
             var payload = message.getPayload();
@@ -163,6 +197,19 @@ class FunctionRouterRabbitDeliveryFailureIT {
             processedPayloads.add(payload);
         }
 
+        static void handleSlow(org.springframework.messaging.Message<String> message) {
+            slowConnectorStarted.get().countDown();
+            var gate = slowConnectorGate.get();
+            if (gate != null) {
+                try {
+                    gate.await(30, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            processedPayloads.add(message.getPayload());
+        }
+
         static void recordError(ErrorMessage errorMessage) {
             capturedErrors.add(errorMessage);
         }
@@ -170,6 +217,8 @@ class FunctionRouterRabbitDeliveryFailureIT {
         static void reset() {
             processedPayloads.clear();
             capturedErrors.clear();
+            slowConnectorGate.set(null);
+            slowConnectorStarted.set(new CountDownLatch(1));
         }
     }
 
@@ -286,22 +335,45 @@ class FunctionRouterRabbitDeliveryFailureIT {
         // Free the executor so any overflow message still pending can be processed.
         releaseRunningTask.countDown();
 
-        // NOTE: overflow-1 (the message that actually hit the saturated queue) is deliberately
-        // NOT asserted here - see the class-level Javadoc for what this uncovered: this module's
-        // fix acks the original delivery before the async retry chain resolves, so once that
-        // chain's own short retry budget (max-retries=1) is exhausted for a failure that hasn't
-        // cleared yet, the message is dropped rather than genuinely redelivered by RabbitMQ.
-        // overflow-2/3 never overflow the queue in the first place (the executor frees up before
-        // they're dispatched), so they are a reliable, real-broker check that ordinary messages
-        // are unaffected and that no delivery failure ever reaches the error handler.
+        // overflow-1 (the message that actually hit the saturated queue) must also be genuinely
+        // redelivered and eventually processed, not silently dropped - a delivery failure must
+        // result in a real nack+requeue, not an optimistic ack of a message we haven't actually
+        // finished handling yet.
         await()
-            .atMost(Duration.ofSeconds(10))
-            .untilAsserted(() ->
-                assertThat(TestConnectorState.processedPayloads).contains(
-                    overflowPayloads.get(1),
-                    overflowPayloads.get(2)
-                )
-            );
+            .atMost(Duration.ofSeconds(15))
+            .untilAsserted(() -> assertThat(TestConnectorState.processedPayloads).containsAll(overflowPayloads));
+
+        assertThat(TestConnectorState.capturedErrors).isEmpty();
+    }
+
+    @Test
+    void should_genuinelyRedeliverDeliveryFailure_soMessageSucceedsAfterExecutorRecovers() throws InterruptedException {
+        // Reproduces the actual application-upgrade scenario end-to-end: the executor backing
+        // this connector's registration becomes permanently unavailable (simulating the old
+        // instance's executor shutting down) while a message is in flight, and later a *new*,
+        // healthy executor becomes available for the same registration (simulating the new
+        // instance/pod becoming ready). If the delivery failure was genuinely nacked and
+        // requeued by RabbitMQ (rather than optimistically acked and dropped), the message
+        // should be redelivered and processed successfully once the executor recovers.
+        var executor = functionRouterExecutorFactory.apply(REGISTRATION_NAME);
+        executor.shutdown();
+
+        var payload = uniquePayload("recovers-after-shutdown");
+        publish(payload);
+
+        // Give every dispatch attempt (this module's own retry, and - in the broken state -
+        // AmqpInboundChannelAdapter's outer retry) a chance to run against the permanently
+        // shut-down executor and exhaust.
+        Thread.sleep(12000);
+
+        // Simulate recovery: destroy() clears FunctionRouterExecutorFactory's executor map, so
+        // the next submission attempt for this registration creates a fresh, healthy executor -
+        // standing in for a new/recovered instance taking over.
+        functionRouterExecutorFactory.destroy();
+
+        await()
+            .atMost(Duration.ofSeconds(20))
+            .untilAsserted(() -> assertThat(TestConnectorState.processedPayloads).contains(payload));
 
         assertThat(TestConnectorState.capturedErrors).isEmpty();
     }
@@ -327,15 +399,14 @@ class FunctionRouterRabbitDeliveryFailureIT {
         var payload = uniquePayload("shutdown");
         publish(payload);
 
-        // AmqpInboundChannelAdapter's outer RetryTemplate takes several seconds to exhaust its
-        // attempts (observed: 4 in-process attempts with exponential backoff, ~7-8s total) before
-        // it gives up and - in the broken state - publishes the exception to the global error
-        // channel via its ErrorMessageSendingRecoverer. That recoverer traps the exception rather
-        // than rethrowing it, so the listener returns normally and the container acks the message
-        // on this single delivery (amqp_redelivered stays false throughout) - confirmed via
-        // rabbitmqctl that the queue depth drops to 0 and the message is never seen again. There
-        // is no broker-level redelivery loop to wait out; one window past the retry-exhaustion
-        // point is enough to observe whether the failure leaked to the global error channel.
+        // With manual ack, the message is now genuinely nacked and redelivered by RabbitMQ
+        // throughout this window (rather than acked-and-dropped after one delivery), so it keeps
+        // hitting the still-shut-down executor over and over. In the broken (synchronous-throw)
+        // state, each of those redeliveries also exhausts AmqpInboundChannelAdapter's own outer
+        // RetryTemplate (~4 in-process attempts with exponential backoff, ~7-8s total) before its
+        // ErrorMessageSendingRecoverer traps the failure and publishes it to the global error
+        // channel. Either way, one window past a full retry-exhaustion cycle is enough to observe
+        // whether the failure ever leaks there.
         Thread.sleep(12000);
 
         assertThat(TestConnectorState.processedPayloads).doesNotContain(payload);
@@ -345,16 +416,57 @@ class FunctionRouterRabbitDeliveryFailureIT {
             .isEmpty();
     }
 
+    @Test
+    void should_notBlockOtherConnectors_whileOneConnectorIsStillProcessing() throws InterruptedException {
+        // Manual ack defers acknowledgment until this module's own async chain resolves (see
+        // acknowledge()/negativelyAcknowledgeAndRequeue() in FunctionRouterConfiguration), rather
+        // than the previous fire-and-forget auto-ack that happened as soon as the listener
+        // returned. RabbitMQ's default consumer prefetch is 1, so if the slow connector's message
+        // being unacked blocked the shared function-router queue's consumer from fetching
+        // anything else, an unrelated, fast connector's message would be stuck behind it too.
+        TestConnectorState.slowConnectorGate.set(new CountDownLatch(1));
+
+        publishSlow(uniquePayload("slow"));
+        assertThat(TestConnectorState.slowConnectorStarted.get().await(5, TimeUnit.SECONDS))
+            .as("slow connector should have started processing and be holding its message unacked")
+            .isTrue();
+
+        var fastPayload = uniquePayload("fast-while-slow-in-flight");
+        publish(fastPayload);
+
+        try {
+            await()
+                .atMost(Duration.ofSeconds(5))
+                .untilAsserted(() ->
+                    assertThat(TestConnectorState.processedPayloads)
+                        .as("a message for a different, fast connector must not be blocked behind a slow one")
+                        .contains(fastPayload)
+                );
+        } finally {
+            TestConnectorState.slowConnectorGate.get().countDown();
+        }
+
+        assertThat(TestConnectorState.capturedErrors).isEmpty();
+    }
+
     private String uniquePayload(String label) {
         return label + "-" + UUID.randomUUID();
     }
 
     private void publish(String payload) {
+        publish(EXCHANGE, CONNECTOR_TYPE, payload);
+    }
+
+    private void publishSlow(String payload) {
+        publish(SLOW_EXCHANGE, SLOW_CONNECTOR_TYPE, payload);
+    }
+
+    private void publish(String exchange, String connectorType, String payload) {
         var messageProperties = new MessageProperties();
         messageProperties.setContentType("text/plain");
-        messageProperties.setHeader("connectorType", CONNECTOR_TYPE);
+        messageProperties.setHeader("connectorType", connectorType);
 
         var amqpMessage = new Message(payload.getBytes(StandardCharsets.UTF_8), messageProperties);
-        rabbitTemplate.send(EXCHANGE, "", amqpMessage);
+        rabbitTemplate.send(exchange, "", amqpMessage);
     }
 }
