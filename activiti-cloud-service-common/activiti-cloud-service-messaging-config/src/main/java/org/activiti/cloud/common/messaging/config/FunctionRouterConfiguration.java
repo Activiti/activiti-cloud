@@ -207,16 +207,30 @@ public class FunctionRouterConfiguration {
                                 .build();
                         };
 
+                        Function<Message<?>, CompletableFuture<Object>> submitFunctionRequest = functionRequest -> {
+                            // CompletableFuture.supplyAsync() calls executor.execute() synchronously
+                            // on the calling thread. Our executor's RejectedExecutionHandler throws
+                            // (rather than just recording rejection) when the queue is full or the
+                            // executor is shutting down, so that exception surfaces here rather than
+                            // asynchronously later. Without this try/catch, it would propagate straight
+                            // out of this handler - bypassing both the retry logic below and the
+                            // exceptionally() delivery-failure handling further down.
+                            try {
+                                return CompletableFuture.supplyAsync(
+                                    () -> routingFunction.apply(functionRequest),
+                                    functionExecutorSelector.apply(functionRequest)
+                                );
+                            } catch (RuntimeException e) {
+                                return CompletableFuture.failedFuture(e);
+                            }
+                        };
+
                         var functions = registrations
                             .stream()
                             .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
                             .map(functionRequest ->
                                 supplyAsyncWithRetry(
-                                    () ->
-                                        CompletableFuture.supplyAsync(
-                                            () -> routingFunction.apply(functionRequest),
-                                            functionExecutorSelector.apply(functionRequest)
-                                        ),
+                                    () -> submitFunctionRequest.apply(functionRequest),
                                     functionRouter.getMaxRetries(),
                                     functionRouter.getRetryInterval()
                                 )

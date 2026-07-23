@@ -19,9 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.ImmediateRequeueAmqpException;
@@ -138,5 +141,71 @@ class FunctionRouterDeliveryFailureIT {
 
         assertThat(shouldBeFiltered1).isFalse();
         assertThat(shouldBeFiltered2).isFalse();
+    }
+
+    @Test
+    void supplyAsync_throws_synchronously_when_executor_rejects_instead_of_failing_the_future()
+        throws InterruptedException {
+        // This test documents the root cause of why delivery failures previously bypassed
+        // the exceptionally() filtering in FunctionRouterConfiguration: CompletableFuture
+        // .supplyAsync(supplier, executor) calls executor.execute() on the CALLING thread.
+        // Since our executor's RejectedExecutionHandler throws instead of just recording
+        // rejection, that exception propagates out of supplyAsync() itself - it is NOT
+        // captured as a failed future - so any .exceptionally() chained afterwards never runs.
+        var executor = factory.apply("testConnector");
+        fillExecutorQueue(executor);
+
+        assertThatThrownBy(() -> CompletableFuture.supplyAsync(() -> "result", executor)).isInstanceOf(
+            RejectedExecutionException.class
+        );
+    }
+
+    @Test
+    void wrapping_supplyAsync_in_try_catch_converts_synchronous_rejection_to_failed_future()
+        throws InterruptedException {
+        // This is the fix applied in FunctionRouterConfiguration.functionRouterMessageHandler():
+        // wrap the executor submission in try/catch and convert any synchronous rejection into
+        // CompletableFuture.failedFuture(e), so it flows through the normal async exceptionally()
+        // pipeline (and therefore through our delivery-failure filtering) instead of crashing the
+        // caller synchronously.
+        var executor = factory.apply("testConnector");
+        fillExecutorQueue(executor);
+
+        CompletableFuture<String> future;
+        try {
+            future = CompletableFuture.supplyAsync(() -> "result", executor);
+        } catch (RuntimeException e) {
+            future = CompletableFuture.failedFuture(e);
+        }
+
+        var caughtCause = new AtomicReference<Throwable>();
+        future
+            .exceptionally(error -> {
+                var cause = error instanceof CompletionException ce ? ce.getCause() : error;
+                caughtCause.set(cause);
+                return null;
+            })
+            .join();
+
+        assertThat(caughtCause.get()).isInstanceOf(RejectedExecutionException.class);
+    }
+
+    private void fillExecutorQueue(java.util.concurrent.ExecutorService executor) throws InterruptedException {
+        var taskStarted = new CountDownLatch(1);
+        var releaseTask = new CountDownLatch(1);
+
+        executor.submit(() -> {
+            taskStarted.countDown();
+            try {
+                releaseTask.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        assertThat(taskStarted.await(1, TimeUnit.SECONDS)).isTrue();
+
+        // Queue a second task to fill the queue (size = 1)
+        executor.submit(() -> {});
     }
 }
