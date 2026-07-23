@@ -72,14 +72,22 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
  * eventually exhausts, and only then does the difference between "delivery failure filtered
  * internally" and "exception escapes to the global error channel" become observable.
  *
- * <p>IMPORTANT - open finding from writing this test: with the fix applied, the message that
- * actually experiences the executor rejection ("overflow-1" below) is acknowledged by the time
- * this module's own internal retry ({@code CompletableFutureRetry}, max-retries=1) exhausts, and
- * at that point the failure is only logged at DEBUG and dropped - it is never genuinely
- * redelivered by RabbitMQ, and never reprocessed. Confirmed via {@code rabbitmqctl list_queues}:
- * the queue depth is 0 and the message is never seen by the connector again. This is a real
- * message-loss gap distinct from the synchronous-throw bug this test suite otherwise verifies is
- * fixed, and it has not been addressed in {@code FunctionRouterConfiguration} as of this writing.
+ * <p>IMPORTANT - open finding from writing this test: for a delivery failure that never clears
+ * (executor permanently shut down), the message is acknowledged and lost - never genuinely
+ * redelivered by RabbitMQ, never reprocessed - in BOTH the fixed and the broken (reverted) state.
+ * Confirmed via {@code rabbitmqctl list_queues}: queue depth drops to 0 and the message is never
+ * seen by the connector again either way. This is because {@code AmqpInboundChannelAdapter}'s own
+ * {@code RetryTemplate} is given a {@code RecoveryCallback} ({@code ErrorMessageSendingRecoverer}),
+ * and Spring Retry's {@code RetryTemplate.execute(RetryCallback, RecoveryCallback)} contract is to
+ * run that callback once its own retries are exhausted and return its result *without rethrowing* -
+ * so the listener always returns normally and the container always acks, regardless of what this
+ * module's own code does. The fix does not cause this loss and does not fix it either; what it
+ * changes is the *window* before the loss happens: without the fix, the adapter's own retries give
+ * the condition ~7-8s across ~4 attempts to clear before giving up; with the fix, this module's own
+ * {@code CompletableFutureRetry} (max-retries=1, 10ms) exhausts almost immediately and the adapter's
+ * retry never engages at all, since the listener no longer throws synchronously to trigger it. This
+ * is a real message-loss gap, present on both develop and this branch, not introduced by this fix,
+ * and not addressed in {@code FunctionRouterConfiguration} as of this writing.
  */
 @SpringBootTest(
     classes = { FunctionRouterRabbitTestApplication.class },
@@ -229,13 +237,18 @@ class FunctionRouterRabbitDeliveryFailureIT {
         // dispatched by the real AMQP listener - the exact condition that produced
         // RejectedExecutionException in production during a rolling upgrade.
         //
-        // AmqpInboundChannelAdapter wraps this dispatch in its own RetryTemplate, so - as long as
-        // the executor frees up again before that outer retry budget is exhausted - the message
-        // is eventually delivered successfully regardless of whether this module's own
-        // synchronous-throw fix is applied. What IS specific to this module's fix is whether that
-        // delivery failure is ever forwarded to the function router's error handler while it's
-        // being retried: it must not be, since that would incorrectly fail the waiting service
-        // task instead of letting the retry play out.
+        // AmqpInboundChannelAdapter wraps this dispatch in its own RetryTemplate: without this
+        // module's fix, that outer retry engages (our code throws synchronously, exactly what
+        // triggers it) and gives the condition several seconds across ~4 attempts to clear - long
+        // enough for overflow-1 below to recover once we release the executor after 1s. With the
+        // fix applied, our own handler never throws synchronously, so the outer retry never
+        // engages at all; only this module's own much shorter internal retry
+        // (CompletableFutureRetry, max-retries=1, 10ms) gets a chance, which exhausts almost
+        // immediately - well before the 1s release - so overflow-1 is dropped instead (see the
+        // class-level Javadoc). What IS consistent regardless of the fix is whether a delivery
+        // failure is ever forwarded to the function router's error handler while retries are still
+        // in play: it must not be, since that would incorrectly fail the waiting service task
+        // instead of letting the retry (whichever layer's) play out.
         var executor = functionRouterExecutorFactory.apply(REGISTRATION_NAME);
 
         var runningTaskStarted = new CountDownLatch(1);
@@ -315,10 +328,14 @@ class FunctionRouterRabbitDeliveryFailureIT {
         publish(payload);
 
         // AmqpInboundChannelAdapter's outer RetryTemplate takes several seconds to exhaust its
-        // attempts (observed: 4 attempts with exponential backoff, ~7-8s total) before it gives
-        // up and - in the broken state - publishes the exception to the global error channel.
-        // Since the executor never recovers, RabbitMQ then redelivers the message and the whole
-        // cycle repeats indefinitely, so any window past one full cycle is enough to observe it.
+        // attempts (observed: 4 in-process attempts with exponential backoff, ~7-8s total) before
+        // it gives up and - in the broken state - publishes the exception to the global error
+        // channel via its ErrorMessageSendingRecoverer. That recoverer traps the exception rather
+        // than rethrowing it, so the listener returns normally and the container acks the message
+        // on this single delivery (amqp_redelivered stays false throughout) - confirmed via
+        // rabbitmqctl that the queue depth drops to 0 and the message is never seen again. There
+        // is no broker-level redelivery loop to wait out; one window past the retry-exhaustion
+        // point is enough to observe whether the failure leaked to the global error channel.
         Thread.sleep(12000);
 
         assertThat(TestConnectorState.processedPayloads).doesNotContain(payload);
