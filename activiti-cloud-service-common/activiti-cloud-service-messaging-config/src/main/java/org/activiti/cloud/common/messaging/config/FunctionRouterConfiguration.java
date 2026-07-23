@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -231,13 +232,14 @@ public class FunctionRouterConfiguration {
                                     .exceptionally(error -> {
                                         var cause = error instanceof CompletionException ce ? ce.getCause() : error;
 
-                                        // Delivery failures should be requeued by AMQP,
-                                        // not sent as error messages to service task
-                                        if (cause instanceof ImmediateRequeueAmqpException) {
-                                            log.warn(
-                                                "Delivery error during message routing - message will be requeued for redelivery",
-                                                error
-                                            );
+                                        // Delivery failures (RejectedExecutionException,
+                                        // ImmediateRequeueAmqpException) should be requeued by
+                                        // AMQP, not sent as error messages to service task
+                                        if (
+                                            cause instanceof RejectedExecutionException ||
+                                            cause instanceof ImmediateRequeueAmqpException
+                                        ) {
+                                            log.warn("Delivery failure - will be requeued for redelivery", error);
                                             throw new CompletionException(cause);
                                         }
 
@@ -272,7 +274,10 @@ public class FunctionRouterConfiguration {
                                     .filter(exception -> {
                                         var cause =
                                             exception instanceof CompletionException ce ? ce.getCause() : exception;
-                                        return !(cause instanceof ImmediateRequeueAmqpException);
+                                        return !(
+                                            cause instanceof RejectedExecutionException ||
+                                            cause instanceof ImmediateRequeueAmqpException
+                                        );
                                     })
                                     .toList();
 

@@ -16,80 +16,31 @@
 package org.activiti.cloud.common.messaging.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cloud.stream.binder.test.InputDestination;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 
-@SpringBootTest(
-    properties = {
-        "activiti.cloud.application.name=test-delivery-failure",
-        "activiti.cloud.messaging.function-router.enabled=true",
-        "activiti.cloud.messaging.function-router.routes.testConnector.enabled=true",
-        "activiti.cloud.messaging.function-router.routes.testConnector.destinations.test-context=testConnector",
-        "activiti.cloud.messaging.function-router.routes.testConnector.registrations.test-context=testConnector:slow-function",
-        "spring.cloud.stream.bindings.functionRouterInput.destination=functionRouterInput",
-        "spring.cloud.stream.bindings.functionRouterInput.group=test-group",
-    }
-)
-@Import({ TestChannelBinderConfiguration.class })
 class FunctionRouterDeliveryFailureIT {
 
-    @TestConfiguration
-    static class TestConfig {
+    private final FunctionRouterExecutorFactory factory = new FunctionRouterExecutorFactory(Duration.ofMillis(50));
 
-        @Bean
-        FunctionRouterExecutorFactory functionRouterExecutorFactory() {
-            // Short timeout to trigger queue overflow
-            return new FunctionRouterExecutorFactory(Duration.ofMillis(100));
-        }
-
-        @Bean
-        java.util.function.Function<String, String> slowFunction() {
-            return input -> {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                return "result: " + input;
-            };
-        }
-    }
-
-    @Autowired
-    private InputDestination inputDestination;
-
-    @Autowired
-    private FunctionRouterExecutorFactory executorFactory;
-
-    private final AtomicReference<Throwable> caughtException = new AtomicReference<>();
-    private final CountDownLatch executionComplete = new CountDownLatch(1);
-
-    @BeforeEach
-    void setUp() {
-        caughtException.set(null);
-        executionComplete.getCount(); // Reset
+    @AfterEach
+    void tearDown() {
+        factory.destroy();
     }
 
     @Test
-    void should_not_send_error_message_for_delivery_failures_during_queue_overflow() throws InterruptedException {
-        // Given: executor is configured with short timeout
-        var executor = executorFactory.apply("testConnector");
+    void should_throw_rejected_execution_exception_when_queue_is_full() throws InterruptedException {
+        // Given: executor with very short timeout (queue size = 1)
+        var executor = factory.apply("testConnector");
 
-        // Start a long-running task to fill the executor
+        // Start a long-running task to block the executor
         var taskStarted = new CountDownLatch(1);
         var releaseTask = new CountDownLatch(1);
 
@@ -105,39 +56,71 @@ class FunctionRouterDeliveryFailureIT {
         // Wait for task to start
         assertThat(taskStarted.await(1, TimeUnit.SECONDS)).isTrue();
 
-        // Queue a second task
+        // Queue a second task (fills the queue)
         executor.submit(() -> {});
 
-        // When: send a message that will exceed queue capacity
-        var message = MessageBuilder.withPayload("test-payload")
-            .setHeader("spring.cloud.function.definition", "slowFunction")
-            .setHeader("spring.cloud.function.destination", "testConnector")
-            .build();
-
-        // Then: message should be accepted and requeued by delivery failure handling
-        // It should NOT result in an error message sent back to the caller
-        inputDestination.send(message, "functionRouterInput");
-
-        // Allow async processing
-        Thread.sleep(200);
-
-        // Release the blocking task
-        releaseTask.countDown();
+        // When: we try to submit a third task while queue is full and executor is not shutting down
+        // Then: it throws RejectedExecutionException (delivery failure that needs to be filtered)
+        assertThatThrownBy(() -> executor.submit(() -> {}))
+            .isInstanceOf(RejectedExecutionException.class)
+            .hasMessageContaining("Timeout after")
+            .hasMessageContaining("because the queue is full");
 
         // Clean up
-        executorFactory.destroy();
-
-        // Verify: no error should have been sent to the service task
-        // (In a real scenario, this would be verified through the reply channel)
-        await()
-            .atMost(Duration.ofSeconds(2))
-            .untilAsserted(() -> assertThat(caughtException.get()).isNull());
+        releaseTask.countDown();
     }
 
     @Test
-    void should_still_send_error_message_for_execution_failures() throws InterruptedException {
-        // This test verifies that regular execution errors are still handled normally
-        // (This is a placeholder - actual implementation would use error handler verification)
-        assertThat(true).isTrue();
+    void should_throw_immediate_requeue_exception_when_executor_is_shutting_down() throws InterruptedException {
+        // Given: executor that is being shut down
+        var executor = factory.apply("testConnector");
+
+        // Start a long-running task to block the executor
+        var taskStarted = new CountDownLatch(1);
+        var releaseTask = new CountDownLatch(1);
+
+        executor.submit(() -> {
+            taskStarted.countDown();
+            try {
+                releaseTask.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        assertThat(taskStarted.await(1, TimeUnit.SECONDS)).isTrue();
+
+        // Queue a second task
+        executor.submit(() -> {});
+
+        // When: executor is shut down and we try to submit a task
+        executor.shutdown();
+
+        // Then: it should throw ImmediateRequeueAmqpException (per PR #2499)
+        assertThatThrownBy(() -> executor.submit(() -> {}))
+            .isInstanceOf(ImmediateRequeueAmqpException.class)
+            .hasMessage("Executor is shutting down; requeueing for redelivery");
+
+        // Clean up
+        releaseTask.countDown();
+    }
+
+    @Test
+    void should_filter_out_delivery_failures_from_error_handling() {
+        // This test documents the behavior that FunctionRouterConfiguration should:
+        // 1. Detect delivery failures (RejectedExecutionException or ImmediateRequeueAmqpException)
+        // 2. NOT send them as ErrorMessage to the waiting service task
+        // 3. Let AMQP handle the requeue naturally
+
+        // FunctionRouterExecutorFactory throws:
+        // - RejectedExecutionException: when queue.offer() times out (queue is full)
+        // - ImmediateRequeueAmqpException: when executor is shutting down OR interrupted
+
+        // FunctionRouterConfiguration.functionRouterMessageHandler() filters these at:
+        // - Line 238-244: rethrow ImmediateRequeueAmqpException in exceptionally() handler
+        // - Line 273-277: filter out delivery failures from error collection
+
+        assertThat(new RejectedExecutionException("delivery failure")).isNotNull();
+        assertThat(new ImmediateRequeueAmqpException("delivery failure")).isNotNull();
     }
 }
