@@ -31,7 +31,7 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
             .containsOnlyKeys(
                 "default-app.consumer",
                 "default-app.my-runtime-bundle",
-                "default-app.rest-get-worker",
+                "default-app.rest-worker",
                 "default-app.Movies.movies-worker"
             );
     }
@@ -53,7 +53,7 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
                 "default-app.connectorIncident",
                 "default-app.Movies",
                 "default-app.restconnector.GET",
-                "default-app.restconnector.GET-2"
+                "default-app.restconnector.POST"
             );
     }
 

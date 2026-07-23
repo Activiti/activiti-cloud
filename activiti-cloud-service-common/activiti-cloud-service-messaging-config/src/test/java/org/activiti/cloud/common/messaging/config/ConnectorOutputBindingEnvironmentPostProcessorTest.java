@@ -237,9 +237,29 @@ class ConnectorOutputBindingEnvironmentPostProcessorTest {
                 assertThat(context)
                     .hasFailed()
                     .getFailure()
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("binding-key is required")
+                    .rootCause()
+                    .hasMessageContaining("binding-key is required for connector configuration")
+                    .hasMessageContaining("bindingKey")
             );
+    }
+
+    @Test
+    void should_defaultDestinationToBindingKey_when_destinationNotSpecified() {
+        contextRunner
+            .withPropertyValues(
+                "activiti.cloud.messaging.connectors.myConnector.binding-key=myBinding",
+                "activiti.cloud.messaging.connectors.myConnector.required-groups=worker"
+            )
+            .run(context -> {
+                ConfigurableEnvironment environment = context.getEnvironment();
+                assertThat(environment.getProperty("spring.cloud.stream.bindings.[myBinding].destination")).isEqualTo(
+                    "myBinding"
+                );
+                assertThat(
+                    environment.getProperty("spring.cloud.stream.bindings.[myBinding].producer.required-groups")
+                ).isEqualTo("worker");
+                assertThat(environment.getProperty(OUTPUT_BINDINGS_KEY)).isEqualTo("myBinding");
+            });
     }
 
     @Test

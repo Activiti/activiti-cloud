@@ -60,7 +60,7 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
                 "default-app.integrationError_my-runtime-bundle.my-runtime-bundle",
                 "default-app.connectorIncident.my-runtime-bundle",
                 "default-app.Movies.movies-worker",
-                "default-app.rest-get-worker"
+                "default-app.rest-worker"
             );
     }
 
@@ -81,7 +81,7 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
                 "default-app.connectorIncident",
                 "default-app.Movies",
                 "default-app.restconnector.GET",
-                "default-app.restconnector.GET-2"
+                "default-app.restconnector.POST"
             );
     }
 

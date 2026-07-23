@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +23,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,8 +126,9 @@ public class ActivitiCloudMessagingProperties {
     @NestedConfigurationProperty
     private RabbitMqProperties rabbitmq = new RabbitMqProperties();
 
+    @Valid
     @NestedConfigurationProperty
-    private Map<String, ConnectorProperties> connectors = new HashMap<>();
+    private Map<String, ConnectorProperties> connectors = new LinkedCaseInsensitiveMap<>();
 
     public static class RabbitMqProperties {
 
@@ -184,10 +185,20 @@ public class ActivitiCloudMessagingProperties {
 
     public static class ConnectorProperties {
 
+        @NotEmpty(message = "binding-key is required for connector configuration")
+        private String bindingKey;
+
         private String[] requiredGroups;
         private String destination;
         private Boolean queueNameGroupOnly;
-        private String bindingKey;
+
+        public String getBindingKey() {
+            return bindingKey;
+        }
+
+        public void setBindingKey(String bindingKey) {
+            this.bindingKey = bindingKey;
+        }
 
         public String[] getRequiredGroups() {
             return requiredGroups;
@@ -211,14 +222,6 @@ public class ActivitiCloudMessagingProperties {
 
         public void setQueueNameGroupOnly(Boolean queueNameGroupOnly) {
             this.queueNameGroupOnly = queueNameGroupOnly;
-        }
-
-        public String getBindingKey() {
-            return bindingKey;
-        }
-
-        public void setBindingKey(String bindingKey) {
-            this.bindingKey = bindingKey;
         }
     }
 

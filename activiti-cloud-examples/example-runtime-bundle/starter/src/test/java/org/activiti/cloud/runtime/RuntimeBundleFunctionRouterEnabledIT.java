@@ -42,7 +42,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
     void rabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getQueues())
             .isNotEmpty()
-            .containsOnlyKeys("consumer", "my-runtime-bundle", "Movies.movies-worker", "rest-get-worker");
+            .containsOnlyKeys("consumer", "my-runtime-bundle", "Movies.movies-worker", "rest-worker");
     }
 
     @Test
@@ -62,7 +62,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
                 "connectorIncident",
                 "Movies",
                 "restconnector.GET",
-                "restconnector.GET-2"
+                "restconnector.POST"
             );
     }
 
@@ -89,9 +89,9 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
             "messageEventsOutput",
             "myCmdProducer",
             "signalProducer",
-            "Movies",
+            "movies-conn",
             "restconnector.GET",
-            "restconnector.GET-2"
+            "restconnector.POST"
         );
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))

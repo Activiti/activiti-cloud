@@ -139,7 +139,7 @@ public class RuntimeBundleApplicationIT {
                 "integrationError_my-runtime-bundle.my-runtime-bundle",
                 "connectorIncident.my-runtime-bundle",
                 "Movies.movies-worker",
-                "rest-get-worker"
+                "rest-worker"
             );
     }
 
@@ -164,7 +164,7 @@ public class RuntimeBundleApplicationIT {
                 "connectorIncident",
                 "Movies",
                 "restconnector.GET",
-                "restconnector.GET-2"
+                "restconnector.POST"
             );
     }
 

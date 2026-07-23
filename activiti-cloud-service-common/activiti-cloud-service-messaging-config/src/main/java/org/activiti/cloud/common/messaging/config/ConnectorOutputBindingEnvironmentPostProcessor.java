@@ -30,10 +30,12 @@ import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.bind.validation.ValidationBindHandler;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @Order
 public class ConnectorOutputBindingEnvironmentPostProcessor implements EnvironmentPostProcessor {
@@ -63,8 +65,15 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
+
         Map<String, ConnectorProperties> connectors = Binder.get(environment)
-            .bind(CONNECTORS_PREFIX, Bindable.mapOf(String.class, ConnectorProperties.class))
+            .bind(
+                CONNECTORS_PREFIX,
+                Bindable.mapOf(String.class, ConnectorProperties.class),
+                new ValidationBindHandler(validator)
+            )
             .orElseGet(Collections::emptyMap);
 
         if (connectors.isEmpty()) {
@@ -76,42 +85,39 @@ public class ConnectorOutputBindingEnvironmentPostProcessor implements Environme
         Map<String, Object> contributedProperties = new LinkedHashMap<>();
         Set<String> outputBindings = existingOutputBindings(environment);
 
-        connectors.forEach((connectorKey, connectorProperties) -> {
-            String bindingName = connectorProperties.getBindingKey();
+        connectors.forEach((_, connectorProperties) -> {
+            String bindingKey = connectorProperties.getBindingKey();
 
-            if (!StringUtils.hasText(bindingName)) {
-                throw new IllegalStateException(
-                    "%s.%s.binding-key is required".formatted(CONNECTORS_PREFIX, connectorKey)
-                );
-            }
-
-            outputBindings.add(bindingName);
+            outputBindings.add(bindingKey);
 
             String destination = connectorProperties.getDestination();
-            if (StringUtils.hasText(destination)) {
-                contributedProperties.put(BINDING_DESTINATION_FORMAT.formatted(bindingName), destination);
+
+            if (!StringUtils.hasText(destination)) {
+                destination = bindingKey;
             }
+
+            contributedProperties.put(BINDING_DESTINATION_FORMAT.formatted(bindingKey), destination);
 
             Boolean queueNameGroupOnly = connectorProperties.isQueueNameGroupOnly();
             String[] requiredGroups = connectorProperties.getRequiredGroups();
             if (requiredGroups != null && requiredGroups.length > 0) {
                 String[] groups = getRequiredGroups(requiredGroups, queueNameGroupOnly, rabbitMqPrefix);
                 contributedProperties.put(
-                    BINDING_REQUIRED_GROUPS_FORMAT.formatted(bindingName),
+                    BINDING_REQUIRED_GROUPS_FORMAT.formatted(bindingKey),
                     String.join(",", groups)
                 );
             }
 
             if (queueNameGroupOnly != null) {
                 contributedProperties.put(
-                    RABBIT_QUEUE_NAME_GROUP_ONLY_FORMAT.formatted(bindingName),
+                    RABBIT_QUEUE_NAME_GROUP_ONLY_FORMAT.formatted(bindingKey),
                     queueNameGroupOnly.toString()
                 );
             }
 
             LOG.info(
                 "Pre-provisioning producer binding '{}' (destination='{}', required-groups={}, queue-name-group-only={}, prefix='{}')",
-                bindingName,
+                bindingKey,
                 destination,
                 requiredGroups == null ? "[]" : String.join(",", requiredGroups),
                 queueNameGroupOnly,
