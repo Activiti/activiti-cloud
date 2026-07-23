@@ -14,7 +14,7 @@
   <properties>
     <spring-cloud.version>2025.1.1</spring-cloud.version>
     <testcontainers.version>2.0.3</testcontainers.version>
-    <graphql-java.version>25.0</graphql-java.version>
+    <graphql-java.version>26.0</graphql-java.version>
     <postgresql.version>42.7.11</postgresql.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <netty.version>4.2.16.Final</netty.version>
