@@ -71,6 +71,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         entity.setRequestDate(new Date(integrationEvent.getTimestamp()));
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
         entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
+        entity.setExternalizedContextReference(toEmbeddable(integrationContext.getExternalizedContextReference()));
 
         ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
         serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);

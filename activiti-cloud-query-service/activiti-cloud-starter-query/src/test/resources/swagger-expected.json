@@ -9153,6 +9153,18 @@
         },
         "title" : "ListResponseContentCloudServiceTask_General"
       },
+      "ExternalizedContextReference" : {
+        "type" : "object",
+        "properties" : {
+          "providerType" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "title" : "ExternalizedContextReference"
+      },
       "CloudIntegrationContext" : {
         "type" : "object",
         "properties" : {
@@ -9279,6 +9291,9 @@
           },
           "serviceName" : {
             "type" : "string"
+          },
+          "externalizedContextReference" : {
+            "$ref" : "#/components/schemas/ExternalizedContextReference"
           }
         },
         "title" : "CloudIntegrationContext"
