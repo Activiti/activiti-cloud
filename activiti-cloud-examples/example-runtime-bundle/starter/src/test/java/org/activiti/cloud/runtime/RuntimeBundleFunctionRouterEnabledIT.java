@@ -91,7 +91,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
             "signalProducer",
             "movies-conn",
             "restconnector.GET",
-            "restconnector.POST",            
+            "restconnector.POST",
             "content-service.SELECT_FILE",
             "docgen-service.GENERATE",
             "email-service.SEND",
