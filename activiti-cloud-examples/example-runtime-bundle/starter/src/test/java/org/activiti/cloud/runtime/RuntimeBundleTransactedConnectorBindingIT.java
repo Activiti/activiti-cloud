@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
 import org.activiti.cloud.starters.test.binder.EnableBinderFactoryListenerTestContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
@@ -75,11 +76,14 @@ class RuntimeBundleTransactedConnectorBindingIT {
     private static final AtomicBoolean isReceived = new AtomicBoolean();
     private static final AtomicBoolean isSent = new AtomicBoolean();
 
-    @Test
-    void should_commitConnectorBindingTransactedChannel() {
+    @BeforeEach
+    void beforeEach() {
         isReceived.set(false);
         isSent.set(false);
+    }
 
+    @Test
+    void should_commitConnectorBindingTransactedChannel() {
         transactionTemplate.executeWithoutResult(tx -> {
             isSent.set(streamBridge.send("script.EXECUTE", "println('foobar')"));
         });
@@ -90,9 +94,6 @@ class RuntimeBundleTransactedConnectorBindingIT {
 
     @Test
     void should_rollbackConnectorBindingTransactedChannel() {
-        isReceived.set(false);
-        isSent.set(false);
-
         transactionTemplate.executeWithoutResult(tx -> {
             isSent.set(streamBridge.send("script.EXECUTE", "println('foobar')"));
 
@@ -109,9 +110,6 @@ class RuntimeBundleTransactedConnectorBindingIT {
 
     @Test
     void should_rollbackBeforeCommitConnectorBindingTransactedChannel() {
-        isReceived.set(false);
-        isSent.set(false);
-
         assertThatThrownBy(() ->
             transactionTemplate.executeWithoutResult(tx -> {
                 TransactionSynchronizationManager.registerSynchronization(
