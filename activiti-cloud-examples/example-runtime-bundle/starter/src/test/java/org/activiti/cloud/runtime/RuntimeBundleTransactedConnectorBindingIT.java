@@ -53,7 +53,7 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
 @EnableBinderFactoryListenerTestContext
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @ResourceLocks(value = { @ResourceLock("rabbitmq"), @ResourceLock("postgres") })
-public class RuntimeBundleTransactedConnectorBindingIT {
+class RuntimeBundleTransactedConnectorBindingIT {
 
     @ServiceConnection
     static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
