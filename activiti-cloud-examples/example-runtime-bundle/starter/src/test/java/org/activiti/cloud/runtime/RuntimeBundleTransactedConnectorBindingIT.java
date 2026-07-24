@@ -16,6 +16,7 @@
 package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
@@ -38,6 +39,8 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -99,6 +102,36 @@ class RuntimeBundleTransactedConnectorBindingIT {
 
             tx.setRollbackOnly();
         });
+
+        assertThat(isSent).isTrue();
+        await().untilAsserted(() -> assertThat(isReceived).isFalse());
+    }
+
+    @Test
+    void should_rollbackBeforeCommitConnectorBindingTransactedChannel() {
+        isReceived.set(false);
+        isSent.set(false);
+
+        assertThatThrownBy(() ->
+            transactionTemplate.executeWithoutResult(tx -> {
+                TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void beforeCommit(boolean readOnly) {
+                            isSent.set(streamBridge.send("script.EXECUTE", "println('foobar')"));
+
+                            await()
+                                .pollDelay(Duration.ofSeconds(1))
+                                .untilAtomic(isSent, value -> assertThat(value).isTrue());
+
+                            throw new RuntimeException("Boom before commit");
+                        }
+                    }
+                );
+            })
+        )
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Boom before commit");
 
         assertThat(isSent).isTrue();
         await().untilAsserted(() -> assertThat(isReceived).isFalse());
