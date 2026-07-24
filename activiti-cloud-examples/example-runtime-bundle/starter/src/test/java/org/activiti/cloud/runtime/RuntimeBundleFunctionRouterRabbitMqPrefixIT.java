@@ -28,7 +28,12 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
     void rabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getQueues())
             .isNotEmpty()
-            .containsOnlyKeys("default-app.consumer", "default-app.my-runtime-bundle");
+            .containsOnlyKeys(
+                "default-app.consumer",
+                "default-app.my-runtime-bundle",
+                "default-app.rest-worker",
+                "default-app.Movies.movies-worker"
+            );
     }
 
     @Test
@@ -45,7 +50,10 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
                 "default-app.signalEvent",
                 "default-app.integrationResult_my-runtime-bundle",
                 "default-app.integrationError_my-runtime-bundle",
-                "default-app.connectorIncident"
+                "default-app.connectorIncident",
+                "default-app.Movies",
+                "default-app.restconnector.GET",
+                "default-app.restconnector.POST"
             );
     }
 

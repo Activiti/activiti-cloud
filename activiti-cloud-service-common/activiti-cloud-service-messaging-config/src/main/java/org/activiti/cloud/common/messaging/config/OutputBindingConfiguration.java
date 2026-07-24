@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.Arrays;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.beans.BeansException;
@@ -50,6 +51,7 @@ import org.springframework.util.StringUtils;
 @AutoConfiguration(after = BinderFactoryAutoConfiguration.class, before = FunctionConfiguration.class)
 public class OutputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
+    private static final String SEPARATOR = ";";
     public static final String OUTPUT_BINDING = "_source";
 
     @Bean
@@ -70,11 +72,7 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
 
                         String outputBindings = bindingServiceProperties.getOutputBindings();
 
-                        if (!StringUtils.hasText(outputBindings)) {
-                            outputBindings = beanOutName;
-                        } else {
-                            outputBindings += ";" + beanOutName;
-                        }
+                        outputBindings = addOutputBinding(outputBindings, beanOutName);
 
                         bindingServiceProperties.setOutputBindings(outputBindings);
 
@@ -108,6 +106,18 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
                 return bean;
             }
         };
+    }
+
+    private String addOutputBinding(String outputBindings, String beanOutName) {
+        if (!StringUtils.hasText(outputBindings)) {
+            outputBindings = beanOutName;
+        } else {
+            var bindingList = Arrays.asList(outputBindings.split(SEPARATOR));
+            if (!bindingList.contains(beanOutName)) {
+                outputBindings += SEPARATOR + beanOutName;
+            }
+        }
+        return outputBindings;
     }
 
     /**
