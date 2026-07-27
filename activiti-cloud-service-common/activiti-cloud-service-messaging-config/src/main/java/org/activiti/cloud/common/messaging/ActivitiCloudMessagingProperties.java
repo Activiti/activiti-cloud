@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -125,6 +126,10 @@ public class ActivitiCloudMessagingProperties {
     @NestedConfigurationProperty
     private RabbitMqProperties rabbitmq = new RabbitMqProperties();
 
+    @Valid
+    @NestedConfigurationProperty
+    private Map<String, ConnectorProperties> connectors = new LinkedCaseInsensitiveMap<>();
+
     public static class RabbitMqProperties {
 
         private Boolean missingAnonymousQueuesFatal;
@@ -175,6 +180,48 @@ public class ActivitiCloudMessagingProperties {
 
         public void setPrefix(String prefix) {
             this.prefix = prefix;
+        }
+    }
+
+    public static class ConnectorProperties {
+
+        @NotEmpty(message = "binding-key is required for connector configuration")
+        private String bindingKey;
+
+        private String[] requiredGroups;
+        private String destination;
+        private Boolean queueNameGroupOnly;
+
+        public String getBindingKey() {
+            return bindingKey;
+        }
+
+        public void setBindingKey(String bindingKey) {
+            this.bindingKey = bindingKey;
+        }
+
+        public String[] getRequiredGroups() {
+            return requiredGroups;
+        }
+
+        public void setRequiredGroups(String... requiredGroup) {
+            this.requiredGroups = requiredGroup;
+        }
+
+        public String getDestination() {
+            return destination;
+        }
+
+        public void setDestination(String destination) {
+            this.destination = destination;
+        }
+
+        public Boolean isQueueNameGroupOnly() {
+            return queueNameGroupOnly;
+        }
+
+        public void setQueueNameGroupOnly(Boolean queueNameGroupOnly) {
+            this.queueNameGroupOnly = queueNameGroupOnly;
         }
     }
 
@@ -292,6 +339,14 @@ public class ActivitiCloudMessagingProperties {
 
     public void setDestinationTransformers(List<String> destinationTransformers) {
         this.destinationTransformers = destinationTransformers;
+    }
+
+    public Map<String, ConnectorProperties> getConnectors() {
+        return connectors;
+    }
+
+    public void setConnectors(Map<String, ConnectorProperties> connectors) {
+        this.connectors = connectors;
     }
 
     @Override

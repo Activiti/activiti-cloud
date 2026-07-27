@@ -137,7 +137,9 @@ public class RuntimeBundleApplicationIT {
                 "asyncExecutorJobs_default-app.my-runtime-bundle",
                 "integrationResult_my-runtime-bundle.my-runtime-bundle",
                 "integrationError_my-runtime-bundle.my-runtime-bundle",
-                "connectorIncident.my-runtime-bundle"
+                "connectorIncident.my-runtime-bundle",
+                "Movies.movies-worker",
+                "rest-worker"
             );
     }
 
@@ -159,7 +161,10 @@ public class RuntimeBundleApplicationIT {
                 "signalEvent",
                 "integrationResult_my-runtime-bundle",
                 "integrationError_my-runtime-bundle",
-                "connectorIncident"
+                "connectorIncident",
+                "Movies",
+                "restconnector.GET",
+                "restconnector.POST"
             );
     }
 
