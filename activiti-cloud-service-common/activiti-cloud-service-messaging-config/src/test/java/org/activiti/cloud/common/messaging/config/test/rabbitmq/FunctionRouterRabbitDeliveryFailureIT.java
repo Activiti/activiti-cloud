@@ -203,7 +203,7 @@ class FunctionRouterRabbitDeliveryFailureIT {
             if (gate != null) {
                 try {
                     gate.await(30, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException _) {
                     Thread.currentThread().interrupt();
                 }
             }
@@ -274,7 +274,7 @@ class FunctionRouterRabbitDeliveryFailureIT {
         assertThat(TestConnectorState.capturedErrors.get(0).getPayload()).hasRootCauseMessage("boom: " + payload);
 
         // A genuine execution failure must not be silently swallowed as if it were a delivery failure.
-        assertThat(TestConnectorState.processedPayloads).doesNotContain(payload);
+        assertThat(payload).isNotIn(TestConnectorState.processedPayloads);
     }
 
     @Test
@@ -306,7 +306,7 @@ class FunctionRouterRabbitDeliveryFailureIT {
             runningTaskStarted.countDown();
             try {
                 releaseRunningTask.await(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
             }
         });
@@ -329,8 +329,12 @@ class FunctionRouterRabbitDeliveryFailureIT {
         overflowPayloads.forEach(this::publish);
 
         // Give the real AMQP listener time to dispatch each overflow message to the saturated
-        // executor and hit the RejectedExecutionHandler at least once.
-        Thread.sleep(1000);
+        // executor and hit the RejectedExecutionHandler at least once; none of them should be
+        // processed yet, since the running task is still holding the executor.
+        await()
+            .during(Duration.ofSeconds(1))
+            .atMost(Duration.ofSeconds(2))
+            .until(() -> overflowPayloads.stream().noneMatch(TestConnectorState.processedPayloads::contains));
 
         // Free the executor so any overflow message still pending can be processed.
         releaseRunningTask.countDown();
@@ -347,7 +351,7 @@ class FunctionRouterRabbitDeliveryFailureIT {
     }
 
     @Test
-    void should_genuinelyRedeliverDeliveryFailure_soMessageSucceedsAfterExecutorRecovers() throws InterruptedException {
+    void should_genuinelyRedeliverDeliveryFailure_soMessageSucceedsAfterExecutorRecovers() {
         // Reproduces the actual application-upgrade scenario end-to-end: the executor backing
         // this connector's registration becomes permanently unavailable (simulating the old
         // instance's executor shutting down) while a message is in flight, and later a *new*,
@@ -363,8 +367,12 @@ class FunctionRouterRabbitDeliveryFailureIT {
 
         // Give every dispatch attempt (this module's own retry, and - in the broken state -
         // AmqpInboundChannelAdapter's outer retry) a chance to run against the permanently
-        // shut-down executor and exhaust.
-        Thread.sleep(12000);
+        // shut-down executor and exhaust; the message must not sneak through and get processed
+        // while the executor is still down.
+        await()
+            .during(Duration.ofSeconds(12))
+            .atMost(Duration.ofSeconds(13))
+            .until(() -> !TestConnectorState.processedPayloads.contains(payload));
 
         // Simulate recovery: destroy() clears FunctionRouterExecutorFactory's executor map, so
         // the next submission attempt for this registration creates a fresh, healthy executor -
@@ -379,8 +387,7 @@ class FunctionRouterRabbitDeliveryFailureIT {
     }
 
     @Test
-    void should_notLeakDeliveryFailureToGlobalErrorChannel_whenExecutorIsPermanentlyShutDown()
-        throws InterruptedException {
+    void should_notLeakDeliveryFailureToGlobalErrorChannel_whenExecutorIsPermanentlyShutDown() {
         // Unlike a transiently full queue, a shut-down executor never recovers on its own - so
         // this reproduces the actual application-upgrade scenario: the old instance's executor is
         // shutting down while a message for that connector is still in flight. Every dispatch
@@ -406,10 +413,19 @@ class FunctionRouterRabbitDeliveryFailureIT {
         // RetryTemplate (~4 in-process attempts with exponential backoff, ~7-8s total) before its
         // ErrorMessageSendingRecoverer traps the failure and publishes it to the global error
         // channel. Either way, one window past a full retry-exhaustion cycle is enough to observe
-        // whether the failure ever leaks there.
-        Thread.sleep(12000);
+        // whether the failure ever leaks there; poll throughout so a leak fails fast instead of
+        // only being caught by the assertions below.
+        await()
+            .during(Duration.ofSeconds(12))
+            .atMost(Duration.ofSeconds(13))
+            .until(
+                () ->
+                    TestConnectorState.capturedErrors.isEmpty() &&
+                    globalErrorChannelMessages.isEmpty() &&
+                    !TestConnectorState.processedPayloads.contains(payload)
+            );
 
-        assertThat(TestConnectorState.processedPayloads).doesNotContain(payload);
+        assertThat(payload).isNotIn(TestConnectorState.processedPayloads);
         assertThat(TestConnectorState.capturedErrors).isEmpty();
         assertThat(globalErrorChannelMessages)
             .as("no delivery failure should ever escape as an unhandled exception on the global error channel")
