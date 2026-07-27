@@ -138,7 +138,9 @@ public class FunctionRouterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    FunctionRouterExecutorFactory functionRouterExecutorFactory(ActivitiCloudMessagingProperties messagingProperties) {
+    Function<String, ExecutorService> functionRouterExecutorFactory(
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
         return new FunctionRouterExecutorFactory(messagingProperties.getFunctionRouter().getRequestTimeout());
     }
 
@@ -254,7 +256,11 @@ public class FunctionRouterConfiguration {
                                             cause instanceof RejectedExecutionException ||
                                             cause instanceof ImmediateRequeueAmqpException
                                         ) {
-                                            log.warn("Delivery failure - will be requeued for redelivery", error);
+                                            // debug, not warn: a delivery failure that never
+                                            // clears is redelivered in a tight nack/requeue loop
+                                            // with no backoff, so this can log tens of thousands
+                                            // of times per second while the condition persists.
+                                            log.debug("Delivery failure - will be requeued for redelivery", error);
                                             throw new CompletionException(cause);
                                         }
 

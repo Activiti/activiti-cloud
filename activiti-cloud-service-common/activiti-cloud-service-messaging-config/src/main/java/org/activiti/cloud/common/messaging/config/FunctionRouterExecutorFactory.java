@@ -61,7 +61,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
 
-            throw new ImmediateRequeueAmqpException("Interrupted during shutdown; requeueing for redelivery", e);
+            throw new ImmediateRequeueAmqpException(
+                "Interrupted while waiting for queue capacity; requeueing for redelivery",
+                e
+            );
         }
     };
 
