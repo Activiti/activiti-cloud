@@ -55,51 +55,17 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 
 /**
- * Real-broker regression test for the function router's handling of delivery failures
- * (executor queue overflow / shutdown) versus genuine connector execution failures.
+ * Real-broker (RabbitMQ Testcontainer) regression test for the function router's handling of
+ * delivery failures (executor queue overflow / shutdown) versus genuine connector execution
+ * failures - the production code path that {@code TestChannelBinderConfiguration}-based suites
+ * cannot reproduce.
  *
- * Unlike the other Function Router IT suites in this module (which import
- * {@code TestChannelBinderConfiguration} and never touch a real broker), this test runs against
- * a real RabbitMQ instance via {@link RabbitMQContainerApplicationInitializer}, so it exercises the
- * exact code path that produced the production incident: {@code CompletableFuture.supplyAsync()}
- * submitting to a saturated {@code FunctionRouterExecutorFactory} executor from a real AMQP listener
- * thread.
- *
- * Note on the queue-overflow scenario: {@code AmqpInboundChannelAdapter} wraps message handling in
- * its own {@code RetryTemplate}, independent of this module's {@code CompletableFutureRetry}. That
- * outer retry self-heals a transient queue-full condition regardless of whether the synchronous-throw
- * fix is applied, so it cannot be used to tell fixed and broken code apart. The executor-shutdown
- * scenario below is the one that matters: the failure never clears on its own, so the outer retry
- * eventually exhausts, and only then does the difference between "delivery failure filtered
- * internally" and "exception escapes to the global error channel" become observable.
- *
- * <p>Message-loss gap and its fix: for a delivery failure that never clears (executor permanently
- * shut down), the previous auto-ack behavior acknowledged the message as soon as the (fire-and-
- * forget) listener method returned, regardless of whether the work it kicked off actually
- * succeeded - {@code AmqpInboundChannelAdapter}'s own {@code RetryTemplate}/{@code RecoveryCallback}
- * ({@code ErrorMessageSendingRecoverer}) traps failures rather than rethrowing them once its own
- * retries exhaust, so the listener always returned normally and the container always acked,
- * confirmed via {@code rabbitmqctl list_queues} (queue depth dropped to 0, message never seen
- * again) regardless of whether this module's own synchronous-throw fix was applied. This is fixed
- * by switching the function-router's consumer to manual ack mode (see
- * {@code ActivitiCloudMessagingAutoConfiguration}'s listener container customizer) and having
- * {@code FunctionRouterConfiguration} explicitly ack on success/genuine-error and
- * nack-with-requeue=true on a genuine delivery failure, once it actually knows the outcome -
- * verified below by {@code should_absorbExecutorQueueOverflow_withoutErrorHandlerInvocation} (the
- * overflowing message is no longer dropped) and
- * {@code should_genuinelyRedeliverDeliveryFailure_soMessageSucceedsAfterExecutorRecovers} (a
- * permanently-failing delivery is genuinely redelivered by RabbitMQ and succeeds once the executor
- * recovers).
- *
- * <p>Deferring ack until this module's own async chain resolves means the underlying AMQP consumer
- * (default prefetch=1) won't fetch a connector's next message until its current one is acked -
- * {@code should_notBlockOtherConnectors_whileOneConnectorIsStillProcessing} confirms this only
- * throttles a single connector's own throughput and does not block unrelated connectors sharing
- * the function-router consumer group, since each connector binding gets its own listener
- * container/consumer. Separately, a delivery failure that never clears now produces a tight nack
- * -&gt; immediate broker redelivery -&gt; immediate re-rejection loop with no backoff (observed:
- * tens of thousands of attempts within seconds) for as long as the underlying condition persists -
- * a real operational consideration for a slow rolling upgrade, not addressed by this change.
+ * <p>With manual ack, a delivery failure is nacked-with-requeue rather than acked-and-dropped, so
+ * the message is genuinely redelivered and eventually processed once the executor recovers, and it
+ * never leaks to the function router's error handler or the global error channel. Since ack is
+ * deferred until the async chain resolves (consumer prefetch=1), a permanently failing delivery
+ * loops nack -&gt; redelivery -&gt; re-rejection with no backoff - a known operational trade-off,
+ * not addressed here.
  */
 @SpringBootTest(
     classes = { FunctionRouterRabbitTestApplication.class },
@@ -130,14 +96,11 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
 @Import(FunctionRouterRabbitDeliveryFailureIT.TestConnectorConfig.class)
 class FunctionRouterRabbitDeliveryFailureIT {
 
-    // The function-router registers a connector by matching the message's `connectorType` header
-    // against the *destination* configured for its input binding - both must be the same literal
-    // value, so the AMQP exchange/routing name doubles as the connector type identifier here.
+    // connectorType must equal the input binding's destination for the router to match it
     private static final String CONNECTOR_TYPE = "test-connector-queue";
     private static final String EXCHANGE = "test-connector-queue";
     private static final String THROW_MARKER = "THROW:";
-    // FunctionRouterExecutorFactory keys its executors by the resolved function registration
-    // name, i.e. the bean name plus Spring Cloud Function's registration suffix.
+    // executors are keyed by registration name: bean name + Spring Cloud Function suffix
     private static final String REGISTRATION_NAME = "testConnector_registration";
 
     private static final String SLOW_CONNECTOR_TYPE = "slow-connector-queue";
@@ -279,25 +242,10 @@ class FunctionRouterRabbitDeliveryFailureIT {
 
     @Test
     void should_absorbExecutorQueueOverflow_withoutErrorHandlerInvocation() throws InterruptedException {
-        // Saturate the single-threaded, queue-size-1 executor backing this connector's
-        // registration directly (rather than racing real AMQP delivery timing to fill it): one
-        // task occupies the running slot, a second fills the queue. A message published while
-        // both are occupied hits the executor's RejectedExecutionHandler synchronously once
-        // dispatched by the real AMQP listener - the exact condition that produced
-        // RejectedExecutionException in production during a rolling upgrade.
-        //
-        // AmqpInboundChannelAdapter wraps this dispatch in its own RetryTemplate: without this
-        // module's fix, that outer retry engages (our code throws synchronously, exactly what
-        // triggers it) and gives the condition several seconds across ~4 attempts to clear - long
-        // enough for overflow-1 below to recover once we release the executor after 1s. With the
-        // fix applied, our own handler never throws synchronously, so the outer retry never
-        // engages at all; only this module's own much shorter internal retry
-        // (CompletableFutureRetry, max-retries=1, 10ms) gets a chance, which exhausts almost
-        // immediately - well before the 1s release - so overflow-1 is dropped instead (see the
-        // class-level Javadoc). What IS consistent regardless of the fix is whether a delivery
-        // failure is ever forwarded to the function router's error handler while retries are still
-        // in play: it must not be, since that would incorrectly fail the waiting service task
-        // instead of letting the retry (whichever layer's) play out.
+        // Saturate the single-threaded, queue-size-1 executor directly (1 task running, 1 queued);
+        // a message published now hits the RejectedExecutionHandler synchronously on the AMQP
+        // listener thread - the exact rolling-upgrade condition. The delivery failure must be
+        // requeued and eventually processed, and never forwarded to the error handler.
         var executor = functionRouterExecutorFactory.apply(REGISTRATION_NAME);
 
         var runningTaskStarted = new CountDownLatch(1);
@@ -328,21 +276,16 @@ class FunctionRouterRabbitDeliveryFailureIT {
         );
         overflowPayloads.forEach(this::publish);
 
-        // Give the real AMQP listener time to dispatch each overflow message to the saturated
-        // executor and hit the RejectedExecutionHandler at least once; none of them should be
-        // processed yet, since the running task is still holding the executor.
+        // nothing should be processed yet: the running task still holds the executor
         await()
             .during(Duration.ofSeconds(1))
             .atMost(Duration.ofSeconds(2))
             .until(() -> overflowPayloads.stream().noneMatch(TestConnectorState.processedPayloads::contains));
 
-        // Free the executor so any overflow message still pending can be processed.
+        // free the executor so requeued messages can be processed
         releaseRunningTask.countDown();
 
-        // overflow-1 (the message that actually hit the saturated queue) must also be genuinely
-        // redelivered and eventually processed, not silently dropped - a delivery failure must
-        // result in a real nack+requeue, not an optimistic ack of a message we haven't actually
-        // finished handling yet.
+        // every overflow message must be genuinely redelivered and processed, not dropped
         await()
             .atMost(Duration.ofSeconds(15))
             .untilAsserted(() -> assertThat(TestConnectorState.processedPayloads).containsAll(overflowPayloads));
@@ -352,31 +295,22 @@ class FunctionRouterRabbitDeliveryFailureIT {
 
     @Test
     void should_genuinelyRedeliverDeliveryFailure_soMessageSucceedsAfterExecutorRecovers() {
-        // Reproduces the actual application-upgrade scenario end-to-end: the executor backing
-        // this connector's registration becomes permanently unavailable (simulating the old
-        // instance's executor shutting down) while a message is in flight, and later a *new*,
-        // healthy executor becomes available for the same registration (simulating the new
-        // instance/pod becoming ready). If the delivery failure was genuinely nacked and
-        // requeued by RabbitMQ (rather than optimistically acked and dropped), the message
-        // should be redelivered and processed successfully once the executor recovers.
+        // Rolling-upgrade scenario: the executor is permanently shut down while a message is in
+        // flight, then a fresh executor becomes available (new pod). The requeued message should be
+        // redelivered and succeed once the executor recovers.
         var executor = functionRouterExecutorFactory.apply(REGISTRATION_NAME);
         executor.shutdown();
 
         var payload = uniquePayload("recovers-after-shutdown");
         publish(payload);
 
-        // Give every dispatch attempt (this module's own retry, and - in the broken state -
-        // AmqpInboundChannelAdapter's outer retry) a chance to run against the permanently
-        // shut-down executor and exhaust; the message must not sneak through and get processed
-        // while the executor is still down.
+        // while the executor is down the message must keep being requeued, never processed
         await()
             .during(Duration.ofSeconds(12))
             .atMost(Duration.ofSeconds(13))
             .until(() -> !TestConnectorState.processedPayloads.contains(payload));
 
-        // Simulate recovery: destroy() clears FunctionRouterExecutorFactory's executor map, so
-        // the next submission attempt for this registration creates a fresh, healthy executor -
-        // standing in for a new/recovered instance taking over.
+        // recovery: destroy() clears the executor map so the next submission creates a fresh one
         functionRouterExecutorFactory.destroy();
 
         await()
@@ -388,33 +322,16 @@ class FunctionRouterRabbitDeliveryFailureIT {
 
     @Test
     void should_notLeakDeliveryFailureToGlobalErrorChannel_whenExecutorIsPermanentlyShutDown() {
-        // Unlike a transiently full queue, a shut-down executor never recovers on its own - so
-        // this reproduces the actual application-upgrade scenario: the old instance's executor is
-        // shutting down while a message for that connector is still in flight. Every dispatch
-        // attempt (including all of AmqpInboundChannelAdapter's own outer retries) fails the same
-        // way, forever, since there is no second instance in this test to take over.
-        //
-        // This is the scenario that actually discriminates the fix: with the synchronous-throw
-        // bug present, the ImmediateRequeueAmqpException escapes functionRouterMessageHandler()
-        // uncaught, which - once the outer retry budget is exhausted - surfaces on Spring
-        // Integration's global error channel as an unhandled exception. With the fix applied, it
-        // is detected and filtered internally every time, so nothing ever reaches either the
-        // function router's own error handler or the global error channel.
+        // A shut-down executor never recovers, so the delivery keeps failing. The failure must be
+        // filtered internally on every attempt and never leak to the function router's error
+        // handler or Spring Integration's global error channel.
         var executor = functionRouterExecutorFactory.apply(REGISTRATION_NAME);
         executor.shutdown();
 
         var payload = uniquePayload("shutdown");
         publish(payload);
 
-        // With manual ack, the message is now genuinely nacked and redelivered by RabbitMQ
-        // throughout this window (rather than acked-and-dropped after one delivery), so it keeps
-        // hitting the still-shut-down executor over and over. In the broken (synchronous-throw)
-        // state, each of those redeliveries also exhausts AmqpInboundChannelAdapter's own outer
-        // RetryTemplate (~4 in-process attempts with exponential backoff, ~7-8s total) before its
-        // ErrorMessageSendingRecoverer traps the failure and publishes it to the global error
-        // channel. Either way, one window past a full retry-exhaustion cycle is enough to observe
-        // whether the failure ever leaks there; poll throughout so a leak fails fast instead of
-        // only being caught by the assertions below.
+        // poll throughout a full retry-exhaustion window so any leak fails fast
         await()
             .during(Duration.ofSeconds(12))
             .atMost(Duration.ofSeconds(13))
@@ -434,12 +351,9 @@ class FunctionRouterRabbitDeliveryFailureIT {
 
     @Test
     void should_notBlockOtherConnectors_whileOneConnectorIsStillProcessing() throws InterruptedException {
-        // Manual ack defers acknowledgment until this module's own async chain resolves (see
-        // acknowledge()/negativelyAcknowledgeAndRequeue() in FunctionRouterConfiguration), rather
-        // than the previous fire-and-forget auto-ack that happened as soon as the listener
-        // returned. RabbitMQ's default consumer prefetch is 1, so if the slow connector's message
-        // being unacked blocked the shared function-router queue's consumer from fetching
-        // anything else, an unrelated, fast connector's message would be stuck behind it too.
+        // Manual ack defers acknowledgment until processing completes (prefetch=1). Verify a slow
+        // connector holding its message unacked does not block an unrelated fast connector, since
+        // each connector binding gets its own listener container/consumer.
         TestConnectorState.slowConnectorGate.set(new CountDownLatch(1));
 
         publishSlow(uniquePayload("slow"));

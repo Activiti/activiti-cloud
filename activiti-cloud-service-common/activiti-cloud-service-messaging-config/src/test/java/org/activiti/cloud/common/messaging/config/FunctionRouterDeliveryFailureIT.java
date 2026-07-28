@@ -40,11 +40,8 @@ class FunctionRouterDeliveryFailureIT {
 
     @Test
     void should_not_send_error_message_when_executor_queue_overflows() throws InterruptedException {
-        // Unit test: executor-level behavior
-        // Given: executor with very short timeout (queue size = 1)
         var executor = factory.apply("testConnector");
 
-        // Start a long-running task to block the executor
         var taskStarted = new CountDownLatch(1);
         var releaseTask = new CountDownLatch(1);
 
@@ -57,30 +54,23 @@ class FunctionRouterDeliveryFailureIT {
             }
         });
 
-        // Wait for task to start
         assertThat(taskStarted.await(1, TimeUnit.SECONDS)).isTrue();
 
-        // Queue a second task (fills the queue)
-        executor.submit(() -> {});
+        executor.submit(() -> {}); // fill the queue (size 1)
 
-        // When: we try to submit a third task while queue is full
-        // Then: it throws RejectedExecutionException (delivery failure)
+        // submitting past capacity is a delivery failure, not an application error
         assertThatThrownBy(() -> executor.submit(() -> {}))
             .isInstanceOf(RejectedExecutionException.class)
             .hasMessageContaining("Timeout after")
             .hasMessageContaining("because the queue is full");
 
-        // Clean up
         releaseTask.countDown();
     }
 
     @Test
     void should_not_send_error_message_when_executor_shuts_down() throws InterruptedException {
-        // Unit test: executor-level behavior
-        // Given: executor that is being shut down
         var executor = factory.apply("testConnector");
 
-        // Start a long-running task to block the executor
         var taskStarted = new CountDownLatch(1);
         var releaseTask = new CountDownLatch(1);
 
@@ -95,36 +85,23 @@ class FunctionRouterDeliveryFailureIT {
 
         assertThat(taskStarted.await(1, TimeUnit.SECONDS)).isTrue();
 
-        // Queue a second task
         executor.submit(() -> {});
-
-        // When: executor is shut down and we try to submit a task
         executor.shutdown();
 
-        // Then: it should throw ImmediateRequeueAmqpException
+        // submitting to a shut-down executor is a requeue signal, not an application error
         assertThatThrownBy(() -> executor.submit(() -> {}))
             .isInstanceOf(ImmediateRequeueAmqpException.class)
             .hasMessage("Executor is shutting down; requeueing for redelivery");
 
-        // Clean up
         releaseTask.countDown();
     }
 
     @Test
-    void delivery_failures_are_rethrown_not_collected_as_errors() throws InterruptedException {
-        // Unit test: verify filter logic behavior
-        // This test documents that in FunctionRouterConfiguration.functionRouterMessageHandler():
-        // 1. Delivery failures (RejectedExecutionException, ImmediateRequeueAmqpException)
-        //    are detected in the exceptionally() handler (lines 237-244)
-        // 2. They are rethrown (not returned as Map.entry)
-        // 3. They are filtered out from error collection (lines 275-280)
-        // 4. They are NOT sent as ErrorMessage to the service task
-
-        // Simulate the filtering logic
+    void delivery_failures_are_rethrown_not_collected_as_errors() {
+        // both delivery-failure types are recognised by the filter in functionRouterMessageHandler
         Throwable rejectionError = new RejectedExecutionException("queue full");
         Throwable shutdownError = new ImmediateRequeueAmqpException("shutdown");
 
-        // These should be detected as delivery failures in the filter
         var isDeliveryFailure1 =
             rejectionError instanceof RejectedExecutionException ||
             rejectionError instanceof ImmediateRequeueAmqpException;
@@ -134,24 +111,14 @@ class FunctionRouterDeliveryFailureIT {
 
         assertThat(isDeliveryFailure1).isTrue();
         assertThat(isDeliveryFailure2).isTrue();
-
-        // Verify they would be filtered out (negation in filter)
-        var shouldBeFiltered1 = !(isDeliveryFailure1);
-        var shouldBeFiltered2 = !(isDeliveryFailure2);
-
-        assertThat(shouldBeFiltered1).isFalse();
-        assertThat(shouldBeFiltered2).isFalse();
     }
 
     @Test
     void supplyAsync_throws_synchronously_when_executor_rejects_instead_of_failing_the_future()
         throws InterruptedException {
-        // This test documents the root cause of why delivery failures previously bypassed
-        // the exceptionally() filtering in FunctionRouterConfiguration: CompletableFuture
-        // .supplyAsync(supplier, executor) calls executor.execute() on the CALLING thread.
-        // Since our executor's RejectedExecutionHandler throws instead of just recording
-        // rejection, that exception propagates out of supplyAsync() itself - it is NOT
-        // captured as a failed future - so any .exceptionally() chained afterwards never runs.
+        // root cause: supplyAsync() calls executor.execute() on the calling thread, so a throwing
+        // RejectedExecutionHandler escapes synchronously instead of failing the future - a chained
+        // exceptionally() would never see it.
         var executor = factory.apply("testConnector");
         fillExecutorQueue(executor);
 
@@ -163,11 +130,8 @@ class FunctionRouterDeliveryFailureIT {
     @Test
     void wrapping_supplyAsync_in_try_catch_converts_synchronous_rejection_to_failed_future()
         throws InterruptedException {
-        // This is the fix applied in FunctionRouterConfiguration.functionRouterMessageHandler():
-        // wrap the executor submission in try/catch and convert any synchronous rejection into
-        // CompletableFuture.failedFuture(e), so it flows through the normal async exceptionally()
-        // pipeline (and therefore through our delivery-failure filtering) instead of crashing the
-        // caller synchronously.
+        // the fix: wrap submission in try/catch and convert a synchronous rejection into
+        // failedFuture(e) so it flows through the normal exceptionally() pipeline.
         var executor = factory.apply("testConnector");
         fillExecutorQueue(executor);
 
@@ -205,7 +169,6 @@ class FunctionRouterDeliveryFailureIT {
 
         assertThat(taskStarted.await(1, TimeUnit.SECONDS)).isTrue();
 
-        // Queue a second task to fill the queue (size = 1)
-        executor.submit(() -> {});
+        executor.submit(() -> {}); // fill the queue (size 1)
     }
 }

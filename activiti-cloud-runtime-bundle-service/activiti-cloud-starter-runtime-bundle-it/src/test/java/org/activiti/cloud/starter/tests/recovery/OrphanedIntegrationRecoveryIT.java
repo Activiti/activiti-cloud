@@ -246,9 +246,8 @@ class OrphanedIntegrationRecoveryIT {
             )
             .isEqualTo(1L);
 
-        // Both function-router-enabled and function-router-disabled paths now defer ack until
-        // the connector's processing genuinely completes, so resetConnection() leaves the message
-        // unacked and the broker redelivers it to ctx2's connector either way.
+        // both paths defer ack until processing completes, so resetConnection() leaves the message
+        // unacked and the broker redelivers it to ctx2's connector either way
         await().atMost(Duration.ofSeconds(30)).until(integrationRequestReceived::get);
 
         var errorHandler = AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(

@@ -129,15 +129,10 @@ public class FunctionRouterConfiguration {
     }
 
     /**
-     * Forces manual ack mode on the function router's own consumer. The router hands off processing
-     * to a per-connector executor and returns without waiting for it to finish (see
-     * {@link #functionRouterMessageHandler}). Auto-ack would acknowledge the message as soon as that
-     * fire-and-forget handoff returns, regardless of whether the work it kicked off actually
-     * succeeds; manual ack lets {@code functionRouterMessageHandler} decide ack vs. nack-and-requeue
-     * once it genuinely knows the outcome. This customizer is only registered when the function
-     * router is enabled (the enclosing configuration is conditional on that), so no consumer is ever
-     * left on manual ack without this configuration present to acknowledge it. The binder composes
-     * all {@link ListenerContainerCustomizer} beans, so this coexists with any others.
+     * Switches the function router's consumer to manual ack so {@code functionRouterMessageHandler}
+     * can ack/nack once the fire-and-forget handoff to the per-connector executor actually
+     * completes. Only registered when the function router is enabled (the enclosing configuration is
+     * conditional on that), so no consumer is ever left on manual ack with nothing to acknowledge it.
      */
     @Bean
     ListenerContainerCustomizer<MessageListenerContainer> functionRouterListenerContainerCustomizer(
@@ -242,13 +237,10 @@ public class FunctionRouterConfiguration {
                         };
 
                         Function<Message<?>, CompletableFuture<Object>> submitFunctionRequest = functionRequest -> {
-                            // CompletableFuture.supplyAsync() calls executor.execute() synchronously
-                            // on the calling thread. Our executor's RejectedExecutionHandler throws
-                            // (rather than just recording rejection) when the queue is full or the
-                            // executor is shutting down, so that exception surfaces here rather than
-                            // asynchronously later. Without this try/catch, it would propagate straight
-                            // out of this handler - bypassing both the retry logic below and the
-                            // exceptionally() delivery-failure handling further down.
+                            // supplyAsync() submits synchronously, so a throwing
+                            // RejectedExecutionHandler (queue full / executor shutting down) would
+                            // escape here instead of failing the future - wrap it so the retry and
+                            // exceptionally() handling below still apply.
                             try {
                                 return CompletableFuture.supplyAsync(
                                     () -> routingFunction.apply(functionRequest),
@@ -280,17 +272,14 @@ public class FunctionRouterConfiguration {
                                     .exceptionally(error -> {
                                         var cause = error instanceof CompletionException ce ? ce.getCause() : error;
 
-                                        // Delivery failures (RejectedExecutionException,
-                                        // ImmediateRequeueAmqpException) should be requeued by
-                                        // AMQP, not sent as error messages to service task
+                                        // Delivery failures must be requeued by AMQP, not sent to
+                                        // the service task as errors. Rethrow so the outer handler
+                                        // nacks. debug, not warn: an unclearing failure loops with
+                                        // no backoff and would flood the logs.
                                         if (
                                             cause instanceof RejectedExecutionException ||
                                             cause instanceof ImmediateRequeueAmqpException
                                         ) {
-                                            // debug, not warn: a delivery failure that never
-                                            // clears is redelivered in a tight nack/requeue loop
-                                            // with no backoff, so this can log tens of thousands
-                                            // of times per second while the condition persists.
                                             log.debug("Delivery failure - will be requeued for redelivery", error);
                                             throw new CompletionException(cause);
                                         }
@@ -322,7 +311,7 @@ public class FunctionRouterConfiguration {
                                             .isPresent()
                                     )
                                     .map(entry -> Optional.class.cast(entry.getValue()).get())
-                                    // Filter out delivery failures - only handle execution errors
+                                    // delivery failures are requeued, not reported as errors
                                     .filter(exception -> {
                                         var cause =
                                             exception instanceof CompletionException ce ? ce.getCause() : exception;
@@ -365,18 +354,13 @@ public class FunctionRouterConfiguration {
                                     log.debug("Successfully completed function route message request {}", message);
                                 }
 
-                                // Whether it was a genuine success or a genuine execution error (already
-                                // delivered to the error handler above), the outcome is final - ack so
-                                // AMQP does not redeliver it.
+                                // success or genuine execution error (already reported): outcome
+                                // is final, ack so AMQP does not redeliver.
                                 acknowledge(message);
                             })
                             .exceptionally(completionError -> {
-                                // Every per-registration delivery failure was rethrown by the
-                                // exceptionally() handler above, so CompletableFuture.allOf() -
-                                // and therefore `completed` - completes exceptionally here. Nack
-                                // with requeue=true so AMQP genuinely redelivers the message,
-                                // instead of acknowledging a message we never actually finished
-                                // handling.
+                                // reached only when a delivery failure was rethrown above: nack
+                                // with requeue so AMQP redelivers rather than dropping the message.
                                 log.debug("Delivery failure occurred, message will be requeued", completionError);
                                 negativelyAcknowledgeAndRequeue(message);
                                 return null;
@@ -396,8 +380,7 @@ public class FunctionRouterConfiguration {
                             registration
                         );
 
-                        // No registration exists to handle this destination - redelivering will
-                        // never change that, so acknowledge rather than requeue indefinitely.
+                        // no registration for this destination: requeuing would loop forever, so ack
                         acknowledge(message);
                     }
                 );
@@ -405,10 +388,8 @@ public class FunctionRouterConfiguration {
     }
 
     /**
-     * Acknowledges the message if it was delivered with a manual-ack channel/delivery-tag (i.e.
-     * the consumer's {@code AcknowledgeMode} is {@code MANUAL} - see
-     * {@code ActivitiCloudMessagingAutoConfiguration}'s listener container customizer). A no-op
-     * otherwise, so this is safe to call regardless of binder/ack-mode configuration.
+     * Acks the message when delivered with a manual-ack channel/delivery-tag; a no-op otherwise, so
+     * it is safe to call regardless of ack-mode.
      */
     private static void acknowledge(Message<?> message) {
         withChannelAndDeliveryTag(message, (channel, deliveryTag) -> {
@@ -421,9 +402,8 @@ public class FunctionRouterConfiguration {
     }
 
     /**
-     * Negatively acknowledges the message with {@code requeue=true} if it was delivered with a
-     * manual-ack channel/delivery-tag, so AMQP genuinely redelivers it rather than the message
-     * being lost after an optimistic ack. A no-op otherwise.
+     * Nacks the message with {@code requeue=true} when delivered with a manual-ack
+     * channel/delivery-tag so AMQP redelivers it; a no-op otherwise.
      */
     private static void negativelyAcknowledgeAndRequeue(Message<?> message) {
         withChannelAndDeliveryTag(message, (channel, deliveryTag) -> {
