@@ -16,14 +16,10 @@
 package org.activiti.cloud.common.messaging.config.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,27 +58,6 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
         assertThat(messagingProperties.getRabbitmq().getMissingDurableQueuesFatal()).isTrue();
 
         assertThat(activitiRabbitMqMessageListenerContainerCustomizer).isNotNull();
-    }
-
-    @Test
-    public void shouldNotForceManualAckModeForFunctionRouterConsumerGroup_when_functionRouterDisabled() {
-        // The function router is disabled in this context (the default). Manual ack relies on
-        // FunctionRouterConfiguration to issue the ack/nack, and that only exists when the
-        // function router is enabled - so the customizer must leave the consumer on its default
-        // (auto) ack mode even for the function-router group. Forcing manual ack here would strand
-        // the matching consumer's messages unacked (with prefetch=1 the consumer then stalls after
-        // its first delivery). The manual-ack behaviour for the enabled case is covered end-to-end
-        // by FunctionRouterRabbitDeliveryFailureIT.
-        assertThat(messagingProperties.getFunctionRouter().isEnabled()).isFalse();
-        var functionRouterGroup = messagingProperties.getFunctionRouter().getGroup();
-
-        var functionRouterContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
-        activitiRabbitMqMessageListenerContainerCustomizer.configure(
-            functionRouterContainer,
-            "some-destination",
-            functionRouterGroup
-        );
-        assertThat(functionRouterContainer.getAcknowledgeMode()).isNotEqualTo(AcknowledgeMode.MANUAL);
     }
 
     @Test

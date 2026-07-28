@@ -39,8 +39,11 @@ import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.ImmediateRequeueAmqpException;
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -57,6 +60,7 @@ import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.MessageDispatchingException;
@@ -121,6 +125,33 @@ public class FunctionRouterConfiguration {
             }
 
             return declarable;
+        };
+    }
+
+    /**
+     * Forces manual ack mode on the function router's own consumer. The router hands off processing
+     * to a per-connector executor and returns without waiting for it to finish (see
+     * {@link #functionRouterMessageHandler}). Auto-ack would acknowledge the message as soon as that
+     * fire-and-forget handoff returns, regardless of whether the work it kicked off actually
+     * succeeds; manual ack lets {@code functionRouterMessageHandler} decide ack vs. nack-and-requeue
+     * once it genuinely knows the outcome. This customizer is only registered when the function
+     * router is enabled (the enclosing configuration is conditional on that), so no consumer is ever
+     * left on manual ack without this configuration present to acknowledge it. The binder composes
+     * all {@link ListenerContainerCustomizer} beans, so this coexists with any others.
+     */
+    @Bean
+    ListenerContainerCustomizer<MessageListenerContainer> functionRouterListenerContainerCustomizer(
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
+        final var functionRouterGroup = messagingProperties.getFunctionRouter().getGroup();
+
+        return (container, destinationName, group) -> {
+            if (
+                functionRouterGroup.equals(group) &&
+                container instanceof AbstractMessageListenerContainer rabbitContainer
+            ) {
+                rabbitContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+            }
         };
     }
 

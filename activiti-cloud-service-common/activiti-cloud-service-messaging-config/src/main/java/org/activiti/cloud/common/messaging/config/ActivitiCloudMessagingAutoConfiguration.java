@@ -18,7 +18,6 @@ package org.activiti.cloud.common.messaging.config;
 import com.rabbitmq.client.ConnectionFactory;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -43,9 +42,6 @@ public class ActivitiCloudMessagingAutoConfiguration {
         ListenerContainerCustomizer<MessageListenerContainer> activitiRabbitMqMessageListenerContainerCustomizer(
             ActivitiCloudMessagingProperties activitiCloudMessagingProperties
         ) {
-            var functionRouter = activitiCloudMessagingProperties.getFunctionRouter();
-            var functionRouterGroup = functionRouter.getGroup();
-
             return (container, destinationName, group) -> {
                 if (container instanceof AbstractMessageListenerContainer rabbitListenerContainer) {
                     if (group == null) {
@@ -56,21 +52,6 @@ public class ActivitiCloudMessagingAutoConfiguration {
                         Optional.ofNullable(activitiCloudMessagingProperties.getRabbitmq())
                             .map(ActivitiCloudMessagingProperties.RabbitMqProperties::getMissingDurableQueuesFatal)
                             .ifPresent(rabbitListenerContainer::setMissingQueuesFatal);
-                    }
-
-                    // Only force manual ack when the function router is actually enabled: manual
-                    // ack relies on FunctionRouterConfiguration to issue the ack/nack, and that
-                    // configuration only exists when the function router is enabled. Applying it
-                    // otherwise would leave the matching consumer's messages unacked forever (with
-                    // prefetch=1 the consumer then stalls after its first delivery).
-                    if (functionRouter.isEnabled() && functionRouterGroup.equals(group)) {
-                        // The function router hands off processing to a per-connector executor and
-                        // returns without waiting for it to finish (see FunctionRouterConfiguration).
-                        // Auto-ack would acknowledge the message as soon as that fire-and-forget
-                        // handoff returns, regardless of whether the work it kicked off actually
-                        // succeeds. Manual ack lets FunctionRouterConfiguration decide ack vs.
-                        // nack-and-requeue once it genuinely knows the outcome.
-                        rabbitListenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
                     }
                 }
             };

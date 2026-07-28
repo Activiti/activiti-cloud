@@ -33,6 +33,7 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.mock;
 import static org.springframework.cloud.function.context.FunctionProperties.FUNCTION_DEFINITION;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
@@ -63,10 +64,15 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.ImmediateRequeueAmqpException;
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.function.context.FunctionRegistry;
@@ -75,6 +81,7 @@ import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -195,6 +202,10 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Autowired
     private FunctionRouterExecutorFactory functionRouterExecutorFactory;
+
+    @Autowired
+    @Qualifier("functionRouterListenerContainerCustomizer")
+    private ListenerContainerCustomizer<MessageListenerContainer> functionRouterListenerContainerCustomizer;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -802,6 +813,23 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(queue.getArguments())
             .asInstanceOf(InstanceOfAssertFactories.MAP)
             .containsEntry("x-queue-master-locator", "client-local");
+    }
+
+    @Test
+    void functionRouterListenerContainerCustomizerForcesManualAckOnlyForFunctionRouterGroup() {
+        var functionRouterGroup = messagingProperties.getFunctionRouter().getGroup();
+
+        var functionRouterContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
+        functionRouterListenerContainerCustomizer.configure(
+            functionRouterContainer,
+            "some-destination",
+            functionRouterGroup
+        );
+        assertThat(functionRouterContainer.getAcknowledgeMode()).isEqualTo(AcknowledgeMode.MANUAL);
+
+        var otherContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
+        functionRouterListenerContainerCustomizer.configure(otherContainer, "some-destination", "some-other-group");
+        assertThat(otherContainer.getAcknowledgeMode()).isNotEqualTo(AcknowledgeMode.MANUAL);
     }
 
     @Test
