@@ -43,7 +43,8 @@ public class ActivitiCloudMessagingAutoConfiguration {
         ListenerContainerCustomizer<MessageListenerContainer> activitiRabbitMqMessageListenerContainerCustomizer(
             ActivitiCloudMessagingProperties activitiCloudMessagingProperties
         ) {
-            var functionRouterGroup = activitiCloudMessagingProperties.getFunctionRouter().getGroup();
+            var functionRouter = activitiCloudMessagingProperties.getFunctionRouter();
+            var functionRouterGroup = functionRouter.getGroup();
 
             return (container, destinationName, group) -> {
                 if (container instanceof AbstractMessageListenerContainer rabbitListenerContainer) {
@@ -57,7 +58,12 @@ public class ActivitiCloudMessagingAutoConfiguration {
                             .ifPresent(rabbitListenerContainer::setMissingQueuesFatal);
                     }
 
-                    if (functionRouterGroup.equals(group)) {
+                    // Only force manual ack when the function router is actually enabled: manual
+                    // ack relies on FunctionRouterConfiguration to issue the ack/nack, and that
+                    // configuration only exists when the function router is enabled. Applying it
+                    // otherwise would leave the matching consumer's messages unacked forever (with
+                    // prefetch=1 the consumer then stalls after its first delivery).
+                    if (functionRouter.isEnabled() && functionRouterGroup.equals(group)) {
                         // The function router hands off processing to a per-connector executor and
                         // returns without waiting for it to finish (see FunctionRouterConfiguration).
                         // Auto-ack would acknowledge the message as soon as that fire-and-forget

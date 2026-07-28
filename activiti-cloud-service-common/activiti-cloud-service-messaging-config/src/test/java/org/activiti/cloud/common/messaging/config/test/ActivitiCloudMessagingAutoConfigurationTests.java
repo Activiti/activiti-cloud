@@ -65,7 +65,15 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
     }
 
     @Test
-    public void shouldForceManualAckModeForFunctionRouterConsumerGroup() {
+    public void shouldNotForceManualAckModeForFunctionRouterConsumerGroup_when_functionRouterDisabled() {
+        // The function router is disabled in this context (the default). Manual ack relies on
+        // FunctionRouterConfiguration to issue the ack/nack, and that only exists when the
+        // function router is enabled - so the customizer must leave the consumer on its default
+        // (auto) ack mode even for the function-router group. Forcing manual ack here would strand
+        // the matching consumer's messages unacked (with prefetch=1 the consumer then stalls after
+        // its first delivery). The manual-ack behaviour for the enabled case is covered end-to-end
+        // by FunctionRouterRabbitDeliveryFailureIT.
+        assertThat(messagingProperties.getFunctionRouter().isEnabled()).isFalse();
         var functionRouterGroup = messagingProperties.getFunctionRouter().getGroup();
 
         var functionRouterContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
@@ -74,15 +82,7 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
             "some-destination",
             functionRouterGroup
         );
-        assertThat(functionRouterContainer.getAcknowledgeMode()).isEqualTo(AcknowledgeMode.MANUAL);
-
-        var otherContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
-        activitiRabbitMqMessageListenerContainerCustomizer.configure(
-            otherContainer,
-            "some-destination",
-            "some-other-group"
-        );
-        assertThat(otherContainer.getAcknowledgeMode()).isNotEqualTo(AcknowledgeMode.MANUAL);
+        assertThat(functionRouterContainer.getAcknowledgeMode()).isNotEqualTo(AcknowledgeMode.MANUAL);
     }
 
     @Test
