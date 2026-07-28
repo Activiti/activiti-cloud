@@ -128,10 +128,18 @@ public class AuthorizationConfigurerIT {
     void should_return200OnPublicEndpoints_whenJwtIsInvalid() throws Exception {
         when(jwtDecoderMock.decode(any())).thenThrow(new InvalidBearerTokenException(""));
         MockMvc mockMvc = mockMvcBuilder.alwaysExpect(status().isOk()).build();
-        mockMvc.perform(get(AuthorizationTestController.PUBLIC_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER));
-        mockMvc.perform(post(AuthorizationTestController.PUBLIC_POST).header(AUTH_HEADER_NAME, DUMMY_BEARER));
-        mockMvc.perform(put(AuthorizationTestController.PUBLIC_PUT).header(AUTH_HEADER_NAME, DUMMY_BEARER));
-        mockMvc.perform(delete(AuthorizationTestController.PUBLIC_DELETE).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc
+            .perform(get(AuthorizationTestController.PUBLIC_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
+        mockMvc
+            .perform(post(AuthorizationTestController.PUBLIC_POST).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
+        mockMvc
+            .perform(put(AuthorizationTestController.PUBLIC_PUT).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
+        mockMvc
+            .perform(delete(AuthorizationTestController.PUBLIC_DELETE).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
     }
 
     @Test

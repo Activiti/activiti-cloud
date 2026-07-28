@@ -212,7 +212,7 @@ public class CommonSecurityAutoConfiguration {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain publicFilterChain(HttpSecurity http) {
         List<String> publicPatterns = authorizationConfigurer.getPublicPatterns();
         if (publicPatterns.isEmpty()) {
             // No public paths declared: match nothing so the main chain handles every request.
