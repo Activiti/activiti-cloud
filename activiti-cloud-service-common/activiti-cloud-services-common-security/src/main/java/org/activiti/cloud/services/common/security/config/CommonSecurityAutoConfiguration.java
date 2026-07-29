@@ -89,18 +89,14 @@ public class CommonSecurityAutoConfiguration {
 
     private final List<HttpSecurityCustomizer> httpSecurityCustomizers;
 
-    private final JwtDecoder jwtDecoder;
-
     @Autowired
     public CommonSecurityAutoConfiguration(
         AuthorizationConfigurer authorizationConfigurer,
         Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter,
-        JwtDecoder jwtDecoder,
         @Autowired(required = false) List<HttpSecurityCustomizer> httpSecurityCustomizers
     ) {
         this.authorizationConfigurer = authorizationConfigurer;
         this.jwtAuthenticationConverter = jwtAuthenticationConverter;
-        this.jwtDecoder = jwtDecoder;
         this.httpSecurityCustomizers = httpSecurityCustomizers != null ? httpSecurityCustomizers : List.of();
     }
 
@@ -212,7 +208,7 @@ public class CommonSecurityAutoConfiguration {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain publicFilterChain(HttpSecurity http) {
+    public SecurityFilterChain publicFilterChain(HttpSecurity http, JwtDecoder jwtDecoder) {
         List<String> publicPatterns = authorizationConfigurer.getPublicPatterns();
         if (publicPatterns.isEmpty()) {
             // No public paths declared: match nothing so the main chain handles every request.
