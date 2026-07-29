@@ -233,6 +233,15 @@ public class FunctionRouterConfiguration {
                                 messageContentTypeNormalizer.normalizeToExpected(functionMessage, expectedContentType)
                             )
                                 .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
+                                // Manual ack (see the listener container customizer) puts the live,
+                                // non-serializable AMQP channel in the message headers so this router
+                                // can ack/nack the original message. Those transport headers must not
+                                // leak into the routed business message: a handler that persists it
+                                // (e.g. the messages-service's JdbcMessageStore aggregator serializes
+                                // the message) would fail to serialize the channel. The outer message
+                                // retains them for acknowledge()/negativelyAcknowledgeAndRequeue().
+                                .removeHeader(AmqpHeaders.CHANNEL)
+                                .removeHeader(AmqpHeaders.DELIVERY_TAG)
                                 .build();
                         };
 
