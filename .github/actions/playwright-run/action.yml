@@ -59,7 +59,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@1d671f8f10336861c89c67be57c6648d98876103 # v18.19.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
 
     - name: Compute Report Portal Launch key
       id: compute-rp-launch-key
@@ -103,7 +103,7 @@ runs:
 
     - name: Upload Playwright diagnostics on failure
       if: always() && steps.launch-tests.outcome == 'failure'
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: ${{ inputs.diagnostics-artifact-name }}
         path: |
