@@ -295,8 +295,7 @@ public class TaskControllerHelper {
         if (authenticatedUserGroups == null) {
             return List.of();
         }
-        return Optional.ofNullable(authenticatedUserGroups)
-            .stream()
+        return authenticatedUserGroups.stream()
             .filter(Objects::nonNull)
             .distinct()
             .sorted()
