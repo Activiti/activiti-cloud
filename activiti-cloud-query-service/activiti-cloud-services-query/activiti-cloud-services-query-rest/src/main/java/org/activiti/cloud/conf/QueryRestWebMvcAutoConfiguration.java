@@ -15,8 +15,11 @@
  */
 package org.activiti.cloud.conf;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import jakarta.persistence.EntityManagerFactory;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -34,6 +37,7 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.ProcessVariableService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
+import org.activiti.cloud.services.query.rest.RestrictedTaskCountCacheKey;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
 import org.activiti.cloud.services.query.rest.assembler.ApplicationRepresentationModelAssembler;
@@ -275,6 +279,15 @@ public class QueryRestWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache(
+        @Value("${query.task-count.cache.ttl:PT5S}") Duration taskCountCacheTtl,
+        @Value("${query.task-count.cache.max-size:10000}") long taskCountCacheMaxSize
+    ) {
+        return Caffeine.newBuilder().expireAfterWrite(taskCountCacheTtl).maximumSize(taskCountCacheMaxSize).build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public TaskControllerHelper taskControllerHelper(
         TaskRepository taskRepository,
         TaskCandidateUserRepository taskCandidateUserRepository,
@@ -283,7 +296,8 @@ public class QueryRestWebMvcAutoConfiguration {
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        SecurityManager securityManager
+        SecurityManager securityManager,
+        Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache
     ) {
         return new TaskControllerHelper(
             taskRepository,
@@ -294,7 +308,8 @@ public class QueryRestWebMvcAutoConfiguration {
             new QueryDslPredicateAggregator(),
             taskRepresentationModelAssembler,
             taskLookupRestrictionService,
-            securityManager
+            securityManager,
+            restrictedTaskCountCache
         );
     }
 
