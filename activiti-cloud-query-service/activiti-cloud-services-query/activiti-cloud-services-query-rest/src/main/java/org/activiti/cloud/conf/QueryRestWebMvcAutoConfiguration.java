@@ -37,6 +37,7 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.ProcessVariableService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
+import org.activiti.cloud.services.query.rest.RestrictedProcessInstanceCountCacheKey;
 import org.activiti.cloud.services.query.rest.RestrictedTaskCountCacheKey;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
@@ -288,6 +289,19 @@ public class QueryRestWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public Cache<RestrictedProcessInstanceCountCacheKey, Long> restrictedProcessInstanceCountCache(
+        @Value("${query.process-instance-count.cache.ttl:PT5S}") Duration processInstanceCountCacheTtl,
+        @Value("${query.process-instance-count.cache.max-size:10000}") long processInstanceCountCacheMaxSize
+    ) {
+        return Caffeine
+            .newBuilder()
+            .expireAfterWrite(processInstanceCountCacheTtl)
+            .maximumSize(processInstanceCountCacheMaxSize)
+            .build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public TaskControllerHelper taskControllerHelper(
         TaskRepository taskRepository,
         TaskCandidateUserRepository taskCandidateUserRepository,
@@ -340,13 +354,15 @@ public class QueryRestWebMvcAutoConfiguration {
         ProcessInstanceRepository processInstanceRepository,
         ProcessVariableService processVariableService,
         SecurityManager securityManager,
-        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository
+        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository,
+        Cache<RestrictedProcessInstanceCountCacheKey, Long> restrictedProcessInstanceCountCache
     ) {
         return new ProcessInstanceSearchService(
             processInstanceRepository,
             processVariableService,
             securityManager,
-            processInstanceHierarchyRepository
+            processInstanceHierarchyRepository,
+            restrictedProcessInstanceCountCache
         );
     }
 

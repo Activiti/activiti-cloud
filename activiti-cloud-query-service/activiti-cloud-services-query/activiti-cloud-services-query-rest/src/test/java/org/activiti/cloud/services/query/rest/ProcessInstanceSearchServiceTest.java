@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +58,8 @@ class ProcessInstanceSearchServiceTest {
             processInstanceRepository,
             processVariableService,
             securityManager,
-            processInstanceHierarchyRepository
+            processInstanceHierarchyRepository,
+            Caffeine.newBuilder().<RestrictedProcessInstanceCountCacheKey, Long>build()
         );
     }
 
