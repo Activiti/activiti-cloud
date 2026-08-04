@@ -41,6 +41,7 @@ import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelA
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
+import org.springframework.data.jpa.domain.Specification;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -176,7 +177,7 @@ public class TaskControllerHelperTest {
         FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE::equals);
         given(securityManager.getAuthenticatedUserId()).willReturn("test-user");
         given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("group-b", "group-a"));
-        given(taskRepository.count(any())).willReturn(5L);
+        given(taskRepository.count(any(Specification.class))).willReturn(5L);
 
         var request = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.ASSIGNED).build();
 
@@ -193,7 +194,7 @@ public class TaskControllerHelperTest {
     void countTasksRestricted_should_hitRepositoryEveryTime_whenCacheDisabled() {
         given(securityManager.getAuthenticatedUserId()).willReturn("test-user");
         given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("group-a", "group-b"));
-        given(taskRepository.count(any())).willReturn(5L, 6L);
+        given(taskRepository.count(any(Specification.class))).willReturn(5L, 6L);
 
         var request = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.ASSIGNED).build();
 
@@ -210,7 +211,7 @@ public class TaskControllerHelperTest {
         FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE::equals);
         given(securityManager.getAuthenticatedUserId()).willReturn("test-user", "other-user");
         given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("group-a"));
-        given(taskRepository.count(any())).willReturn(5L, 6L);
+        given(taskRepository.count(any(Specification.class))).willReturn(5L, 6L);
 
         var request = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.ASSIGNED).build();
 
@@ -227,7 +228,7 @@ public class TaskControllerHelperTest {
         FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE::equals);
         given(securityManager.getAuthenticatedUserId()).willReturn("test-user");
         given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("group-a"), List.of("group-b"));
-        given(taskRepository.count(any())).willReturn(5L, 6L);
+        given(taskRepository.count(any(Specification.class))).willReturn(5L, 6L);
 
         var request = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.ASSIGNED).build();
 
@@ -244,7 +245,7 @@ public class TaskControllerHelperTest {
         FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE::equals);
         given(securityManager.getAuthenticatedUserId()).willReturn("test-user");
         given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("group-a"));
-        given(taskRepository.count(any())).willReturn(5L, 6L);
+        given(taskRepository.count(any(Specification.class))).willReturn(5L, 6L);
 
         var assignedRequest = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.ASSIGNED).build();
         var completedRequest = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.COMPLETED).build();
