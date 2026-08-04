@@ -36,4 +36,9 @@ public final class QueryFeatureToggles {
      * Enables the short-lived in-memory cache for restricted task counts.
      */
     public static final String FEATURE_TASK_COUNT_CACHE = "query.task-count.cache";
+
+    /**
+     * Enables the short-lived in-memory cache for restricted process instance counts.
+     */
+    public static final String FEATURE_PROCESS_INSTANCE_COUNT_CACHE = "query.process-instance-count.cache";
 }
