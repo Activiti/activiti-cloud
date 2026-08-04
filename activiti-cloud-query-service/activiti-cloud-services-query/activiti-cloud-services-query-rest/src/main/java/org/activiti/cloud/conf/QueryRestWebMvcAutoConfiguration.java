@@ -293,8 +293,7 @@ public class QueryRestWebMvcAutoConfiguration {
         @Value("${query.process-instance-count.cache.ttl:PT5S}") Duration processInstanceCountCacheTtl,
         @Value("${query.process-instance-count.cache.max-size:10000}") long processInstanceCountCacheMaxSize
     ) {
-        return Caffeine
-            .newBuilder()
+        return Caffeine.newBuilder()
             .expireAfterWrite(processInstanceCountCacheTtl)
             .maximumSize(processInstanceCountCacheMaxSize)
             .build();
