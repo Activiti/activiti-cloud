@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -114,11 +115,27 @@ public class FunctionRouterConfiguration {
             if (declarable instanceof Queue queue) {
                 Optional.ofNullable(queue.getName())
                     .filter(it -> it.startsWith(queuePrefix))
-                    .ifPresent(name -> queue.setLeaderLocator("client-local"));
+                    .ifPresent(name -> setLeaderLocator(queue));
             }
 
             return declarable;
         };
+    }
+
+    /**
+     * Classic queues only accept {@code x-queue-master-locator}; quorum/stream queues require
+     * {@code x-queue-leader-locator} (which {@link Queue#setLeaderLocator} always uses since spring-amqp 4.0.4).
+     */
+    private static void setLeaderLocator(Queue queue) {
+        var locatorValue = QueueBuilder.LeaderLocator.clientLocal.getValue();
+        var queueType = Optional.ofNullable(queue.getArguments())
+            .map(args -> args.get("x-queue-type"))
+            .orElse(null);
+        if ("quorum".equals(queueType) || "stream".equals(queueType)) {
+            queue.setLeaderLocator(locatorValue);
+        } else {
+            queue.addArgument("x-queue-master-locator", locatorValue);
+        }
     }
 
     @Bean
