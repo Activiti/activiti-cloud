@@ -128,7 +128,9 @@ public class FunctionRouterConfiguration {
      */
     private static void setLeaderLocator(Queue queue) {
         var locatorValue = QueueBuilder.LeaderLocator.clientLocal.getValue();
-        var queueType = queue.getArguments().get("x-queue-type");
+        var queueType = Optional.ofNullable(queue.getArguments())
+            .map(args -> args.get("x-queue-type"))
+            .orElse(null);
         if ("quorum".equals(queueType) || "stream".equals(queueType)) {
             queue.setLeaderLocator(locatorValue);
         } else {
