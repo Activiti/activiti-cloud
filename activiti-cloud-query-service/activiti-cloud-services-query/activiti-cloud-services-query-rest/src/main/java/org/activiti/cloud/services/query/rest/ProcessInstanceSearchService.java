@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import com.github.benmanes.caffeine.cache.Cache;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
@@ -111,7 +111,10 @@ public class ProcessInstanceSearchService {
         );
     }
 
-    private Long countRestrictedProcessInstances(ProcessInstanceSearchRequest searchRequest, String authenticatedUserId) {
+    private Long countRestrictedProcessInstances(
+        ProcessInstanceSearchRequest searchRequest,
+        String authenticatedUserId
+    ) {
         ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restricted(
             searchRequest,
             authenticatedUserId

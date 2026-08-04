@@ -269,11 +269,7 @@ public class TaskControllerHelper {
 
         List<String> normalizedAuthenticatedUserGroups = normalizeAuthenticatedUserGroups(authenticatedUserGroups);
         return restrictedTaskCountCache.get(
-            new RestrictedTaskCountCacheKey(
-                authenticatedUserId,
-                normalizedAuthenticatedUserGroups,
-                taskSearchRequest
-            ),
+            new RestrictedTaskCountCacheKey(authenticatedUserId, normalizedAuthenticatedUserGroups, taskSearchRequest),
             unused -> countRestrictedTasks(taskSearchRequest, authenticatedUserId, authenticatedUserGroups)
         );
     }
@@ -295,10 +291,6 @@ public class TaskControllerHelper {
         if (authenticatedUserGroups == null) {
             return List.of();
         }
-        return authenticatedUserGroups.stream()
-            .filter(Objects::nonNull)
-            .distinct()
-            .sorted()
-            .toList();
+        return authenticatedUserGroups.stream().filter(Objects::nonNull).distinct().sorted().toList();
     }
 }
