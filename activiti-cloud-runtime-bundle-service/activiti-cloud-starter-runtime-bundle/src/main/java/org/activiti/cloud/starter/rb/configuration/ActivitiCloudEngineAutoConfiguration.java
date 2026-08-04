@@ -54,6 +54,11 @@ public class ActivitiCloudEngineAutoConfiguration {
     }
 
     @Bean
+    public ResourceQueryConfigurer resourceQueryConfigurer() {
+        return new ResourceQueryConfigurer();
+    }
+
+    @Bean
     public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(
         ActivitiMessagingDestinationTransformer destinationTransformer
     ) {
