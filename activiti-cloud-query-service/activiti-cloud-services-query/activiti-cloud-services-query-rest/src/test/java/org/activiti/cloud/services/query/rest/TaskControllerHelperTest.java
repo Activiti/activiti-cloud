@@ -187,7 +187,7 @@ public class TaskControllerHelperTest {
 
         assertThat(firstCount).isEqualTo(5L);
         assertThat(secondCount).isEqualTo(5L);
-        verify(taskRepository, times(1)).count(any());
+        verify(taskRepository, times(1)).count(any(Specification.class));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class TaskControllerHelperTest {
 
         assertThat(firstCount).isEqualTo(5L);
         assertThat(secondCount).isEqualTo(6L);
-        verify(taskRepository, times(2)).count(any());
+        verify(taskRepository, times(2)).count(any(Specification.class));
     }
 
     @Test
@@ -220,7 +220,7 @@ public class TaskControllerHelperTest {
 
         assertThat(firstCount).isEqualTo(5L);
         assertThat(secondCount).isEqualTo(6L);
-        verify(taskRepository, times(2)).count(any());
+        verify(taskRepository, times(2)).count(any(Specification.class));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class TaskControllerHelperTest {
 
         assertThat(firstCount).isEqualTo(5L);
         assertThat(secondCount).isEqualTo(6L);
-        verify(taskRepository, times(2)).count(any());
+        verify(taskRepository, times(2)).count(any(Specification.class));
     }
 
     @Test
@@ -255,6 +255,6 @@ public class TaskControllerHelperTest {
 
         assertThat(firstCount).isEqualTo(5L);
         assertThat(secondCount).isEqualTo(6L);
-        verify(taskRepository, times(2)).count(any());
+        verify(taskRepository, times(2)).count(any(Specification.class));
     }
 }
