@@ -296,7 +296,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${maven-surefire-plugin.version}</version>
           <configuration>
-            <argLine>@{argLine} -Xmx1024m</argLine>
+            <argLine>@{argLine} -Xmx1024m -javaagent:"${org.mockito:mockito-core:jar}"</argLine>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <failIfNoTests>false</failIfNoTests>
             <trimStackTrace>false</trimStackTrace>
@@ -518,6 +518,17 @@ limitations under the License.]]>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
@@ -534,7 +545,7 @@ limitations under the License.]]>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>@{argLine} -Xmx1024m</argLine>
+          <argLine>@{argLine} -Xmx1024m -javaagent:"${org.mockito:mockito-core:jar}"</argLine>
           <properties>
             <configurationParameters>
               junit.jupiter.execution.parallel.enabled=${unitTests.parallel}
@@ -717,7 +728,7 @@ limitations under the License.]]>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <argLine>@{argLine} -Xmx1024m</argLine>
+              <argLine>@{argLine} -Xmx1024m -javaagent:"${org.mockito:mockito-core:jar}"</argLine>
             </configuration>
             <executions>
               <execution>
