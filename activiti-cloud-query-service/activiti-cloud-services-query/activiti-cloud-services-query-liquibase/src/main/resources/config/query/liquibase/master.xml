@@ -1012,7 +1012,7 @@
                encoding="utf8"
                path="changelog/44-rollback.oracle.schema.9.1.0.sql"
                relativeToChangelogFile="true"
-               splitStatements="true"
+               splitStatements="false"
                stripComments="true"/>
     </rollback>
   </changeSet>
