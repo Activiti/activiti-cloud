@@ -403,6 +403,7 @@ class TaskEntityControllerIT {
             .perform(get("/v1/tasks/{taskId}/candidate-groups", taskEntity.getId()).accept(MediaType.APPLICATION_JSON))
             //then
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$[1]").doesNotExist())
             .andExpect(jsonPath("$[0]").value("testgroup"));
     }
 
