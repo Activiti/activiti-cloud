@@ -34,34 +34,38 @@ pre-commit run --all-files
 
 ## Hooks that run on every commit
 
-| Hook | What it checks | Applies to |
-|------|---------------|------------|
-| `check-merge-conflict` | No unresolved merge conflict markers | All files |
-| `fix-byte-order-marker` | Removes UTF-8 BOM | All files |
-| `mixed-line-ending` | Converts to LF line endings | All files |
-| `end-of-file-fixer` | Ensures files end with a newline | All (except `*.lock.yml`, `*.md` in `.github/workflows/`) |
-| `trailing-whitespace` | Removes trailing spaces/tabs | All (except `*.lock.yml`, `*.md` in `.github/workflows/`) |
-| `check-yaml` | Valid YAML | `*.yaml`, `*.yml` |
-| `check-json` | Valid JSON | `*.json` (except files matching `*invalid*.json`) |
-| `check-xml` | Valid XML | `*.xml` |
-| `prettier` | Consistent formatting | Java (`*.java`) and Markdown (`*.md`) |
-| `check-dependabot` | Valid Dependabot v2 config | `.github/dependabot.yml` |
-| `check-github-actions` | Valid GitHub Actions syntax | `.github/actions/**` |
-| `check-github-workflows` | Valid GitHub Workflows syntax | `.github/workflows/**` (except `*.lock.yml`) |
-| `semgrep` | Static analysis rules from `.semgrep.yaml` | Java and XML |
+| Hook                     | What it checks                             | Applies to                                                |
+| ------------------------ | ------------------------------------------ | --------------------------------------------------------- |
+| `check-merge-conflict`   | No unresolved merge conflict markers       | All files                                                 |
+| `fix-byte-order-marker`  | Removes UTF-8 BOM                          | All files                                                 |
+| `mixed-line-ending`      | Converts to LF line endings                | All files                                                 |
+| `end-of-file-fixer`      | Ensures files end with a newline           | All (except `*.lock.yml`, `*.md` in `.github/workflows/`) |
+| `trailing-whitespace`    | Removes trailing spaces/tabs               | All (except `*.lock.yml`, `*.md` in `.github/workflows/`) |
+| `check-yaml`             | Valid YAML                                 | `*.yaml`, `*.yml`                                         |
+| `check-json`             | Valid JSON                                 | `*.json` (except files matching `*invalid*.json`)         |
+| `check-xml`              | Valid XML                                  | `*.xml`                                                   |
+| `prettier`               | Consistent formatting                      | Java (`*.java`) and Markdown (`*.md`)                     |
+| `check-dependabot`       | Valid Dependabot v2 config                 | `.github/dependabot.yml`                                  |
+| `check-github-actions`   | Valid GitHub Actions syntax                | `.github/actions/**`                                      |
+| `check-github-workflows` | Valid GitHub Workflows syntax              | `.github/workflows/**` (except `*.lock.yml`)              |
+| `semgrep`                | Static analysis rules from `.semgrep.yaml` | Java and XML                                              |
 
 ## Common failures and fixes
 
 ### prettier (Java formatting)
+
 Prettier reformats Java files according to `prettier-plugin-java`. If it fails:
+
 - The hook will **auto-fix** the file (CI uses auto-commit)
 - Locally: run `pre-commit run prettier --files <file>` to apply the fix
 - **Never commit syntactically invalid Java** — prettier cannot parse it and will fail
 
 ### trailing-whitespace / end-of-file-fixer
+
 These hooks auto-fix. Locally run `pre-commit run trailing-whitespace --files <file>`.
 
 ### semgrep
+
 Check `.semgrep.yaml` for the specific rule that was violated.
 
 ## Checklist before every `report_progress` call
