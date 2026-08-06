@@ -26,8 +26,6 @@ import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
-import org.activiti.cloud.common.feature.FeatureToggleHolder;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -262,10 +260,6 @@ public class TaskControllerHelper {
     public Long countTasksRestricted(TaskSearchRequest taskSearchRequest) {
         String authenticatedUserId = securityManager.getAuthenticatedUserId();
         List<String> authenticatedUserGroups = securityManager.getAuthenticatedUserGroups();
-
-        if (!FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE)) {
-            return countRestrictedTasks(taskSearchRequest, authenticatedUserId, authenticatedUserGroups);
-        }
 
         List<String> normalizedAuthenticatedUserGroups = normalizeAuthenticatedUserGroups(authenticatedUserGroups);
         return restrictedTaskCountCache.get(

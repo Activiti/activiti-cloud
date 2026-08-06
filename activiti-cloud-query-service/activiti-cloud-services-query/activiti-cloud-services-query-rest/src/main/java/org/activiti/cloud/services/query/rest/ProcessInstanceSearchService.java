@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
-import org.activiti.cloud.common.feature.FeatureToggleHolder;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository.RelatedProcessCountProjection;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -100,10 +98,6 @@ public class ProcessInstanceSearchService {
     @Transactional(readOnly = true)
     public Long countRestricted(ProcessInstanceSearchRequest searchRequest) {
         String authenticatedUserId = securityManager.getAuthenticatedUserId();
-
-        if (!FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_PROCESS_INSTANCE_COUNT_CACHE)) {
-            return countRestrictedProcessInstances(searchRequest, authenticatedUserId);
-        }
 
         return restrictedProcessInstanceCountCache.get(
             new RestrictedProcessInstanceCountCacheKey(authenticatedUserId, searchRequest),

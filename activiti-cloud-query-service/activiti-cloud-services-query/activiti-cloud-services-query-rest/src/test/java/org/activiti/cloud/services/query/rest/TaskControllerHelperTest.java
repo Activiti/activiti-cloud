@@ -191,22 +191,6 @@ public class TaskControllerHelperTest {
     }
 
     @Test
-    void countTasksRestricted_should_hitRepositoryEveryTime_whenCacheDisabled() {
-        given(securityManager.getAuthenticatedUserId()).willReturn("test-user");
-        given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("group-a", "group-b"));
-        given(taskRepository.count(any(Specification.class))).willReturn(5L, 6L);
-
-        var request = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.ASSIGNED).build();
-
-        Long firstCount = taskControllerHelper.countTasksRestricted(request);
-        Long secondCount = taskControllerHelper.countTasksRestricted(request);
-
-        assertThat(firstCount).isEqualTo(5L);
-        assertThat(secondCount).isEqualTo(6L);
-        verify(taskRepository, times(2)).count(any(Specification.class));
-    }
-
-    @Test
     void countTasksRestricted_should_missCache_whenAuthenticatedUserChanges() {
         FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE::equals);
         given(securityManager.getAuthenticatedUserId()).willReturn("test-user", "other-user");
