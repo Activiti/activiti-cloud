@@ -364,6 +364,7 @@ class TaskEntityControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[1]").doesNotExist())
             .andExpect(jsonPath("$[0]").value("testuser"));
+    }
 
     @Test
     void should_returnForbidden_when_userIsNotPermittedForCandidateUsers() throws Exception {
