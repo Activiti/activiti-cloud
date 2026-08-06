@@ -15,7 +15,13 @@
  */
 package org.activiti.cloud.services.query.liquibase;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -23,8 +29,31 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootApplication
 class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
 
+    @Autowired
+    private DataSource dataSource;
+
     @Test
     void contextLoads() {
         // application context loads successfully
+    }
+
+    @Test
+    void shouldCreateParentIdIndexForProcessInstance() throws Exception {
+        boolean foundParentIdIndex = false;
+
+        try (Connection connection = dataSource.getConnection();
+            ResultSet indexes = connection.getMetaData().getIndexInfo(null, null, "PROCESS_INSTANCE", false, false)) {
+            while (indexes.next()) {
+                if (
+                    "PI_PARENTID_IDX".equalsIgnoreCase(indexes.getString("INDEX_NAME")) &&
+                    "PARENT_ID".equalsIgnoreCase(indexes.getString("COLUMN_NAME"))
+                ) {
+                    foundParentIdIndex = true;
+                    break;
+                }
+            }
+        }
+
+        assertThat(foundParentIdIndex).isTrue();
     }
 }

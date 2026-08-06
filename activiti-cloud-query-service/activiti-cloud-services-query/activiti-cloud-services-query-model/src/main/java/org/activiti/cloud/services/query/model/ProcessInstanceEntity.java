@@ -61,6 +61,7 @@ import org.springframework.format.annotation.DateTimeFormat;
         @Index(name = "pi_status_idx", columnList = "status", unique = false),
         @Index(name = "pi_businessKey_idx", columnList = "businessKey", unique = false),
         @Index(name = "pi_name_idx", columnList = "name", unique = false),
+        @Index(name = "pi_parentId_idx", columnList = "parentId", unique = false),
         @Index(name = "pi_processDefinitionId_idx", columnList = "processDefinitionId", unique = false),
         @Index(name = "pi_processDefinitionKey_idx", columnList = "processDefinitionKey", unique = false),
         @Index(name = "pi_processDefinitionName_idx", columnList = "processDefinitionName", unique = false),
