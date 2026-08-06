@@ -16,6 +16,7 @@
 package org.activiti.cloud.conf;
 
 import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.rest.ApplicationAdminController;
 import org.activiti.cloud.services.query.rest.ApplicationController;
 import org.activiti.cloud.services.query.rest.CommonExceptionHandlerQuery;
@@ -44,6 +45,8 @@ import org.activiti.cloud.services.query.rest.TaskDeleteController;
 import org.activiti.cloud.services.query.rest.TaskVariableAdminController;
 import org.activiti.cloud.services.query.rest.TaskVariableController;
 import org.activiti.cloud.services.query.rest.advice.SerializationViewResponseBodyAdvice;
+import org.activiti.cloud.services.query.rest.metrics.StorageConsumersController;
+import org.activiti.cloud.services.query.rest.metrics.StorageConsumersService;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -53,6 +56,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 @AutoConfiguration
@@ -86,6 +90,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         IntegrationContextAdminController.class,
         ProcessInstanceBpmnActivitiesAdminController.class,
         ProcessInstanceSequenceFlowsAdminController.class,
+        StorageConsumersController.class,
     }
 )
 @PropertySource("classpath:query-rest.properties")
@@ -103,6 +108,15 @@ public class QueryRestControllersAutoConfiguration {
         ProcessDiagramGenerator processDiagramGenerator
     ) {
         return new ProcessDiagramGeneratorWrapper(processDiagramGenerator);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public StorageConsumersService storageConsumersService(
+        JdbcTemplate jdbcTemplate,
+        VariableRepository variableRepository
+    ) {
+        return new StorageConsumersService(jdbcTemplate, variableRepository);
     }
 
     @Bean
