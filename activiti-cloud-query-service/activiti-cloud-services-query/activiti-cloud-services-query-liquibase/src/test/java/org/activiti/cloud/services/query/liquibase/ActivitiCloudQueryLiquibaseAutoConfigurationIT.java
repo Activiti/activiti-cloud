@@ -41,8 +41,10 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
     void shouldCreateParentIdIndexForProcessInstance() throws Exception {
         boolean foundParentIdIndex = false;
 
-        try (Connection connection = dataSource.getConnection();
-            ResultSet indexes = connection.getMetaData().getIndexInfo(null, null, "PROCESS_INSTANCE", false, false)) {
+        try (
+            Connection connection = dataSource.getConnection();
+            ResultSet indexes = connection.getMetaData().getIndexInfo(null, null, "PROCESS_INSTANCE", false, false)
+        ) {
             while (indexes.next()) {
                 if (
                     "PI_PARENTID_IDX".equalsIgnoreCase(indexes.getString("INDEX_NAME")) &&
