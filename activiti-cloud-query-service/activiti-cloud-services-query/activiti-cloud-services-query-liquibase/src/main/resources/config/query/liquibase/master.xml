@@ -987,7 +987,7 @@
              encoding="utf8"
              path="changelog/44-alter.pg.schema.9.1.0.sql"
              relativeToChangelogFile="true"
-             splitStatements="true"
+             splitStatements="false"
              stripComments="true"/>
     <rollback>
       <sqlFile dbms="postgresql"
