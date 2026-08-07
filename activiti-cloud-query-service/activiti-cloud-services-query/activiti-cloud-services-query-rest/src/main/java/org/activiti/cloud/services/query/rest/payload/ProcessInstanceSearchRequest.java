@@ -329,7 +329,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         this.subprocessParentIds = subprocessParentIds;
     }
 
-    // subprocessParentIds is derived server-side and mutated after the count cache key is built, so it is excluded
+    // subprocessParentIds is server-populated, not client input, so it is excluded from the cache-key identity
     @Override
     public boolean equals(Object o) {
         if (this == o) {
