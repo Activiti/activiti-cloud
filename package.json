@@ -68,5 +68,8 @@
     "jwt-decode": "^4.0.0",
     "winston": "^3.19.0",
     "ws": "^8.21.1"
+  },
+  "overrides": {
+    "fast-uri": "3.1.5"
   }
 }
