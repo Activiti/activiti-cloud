@@ -196,6 +196,7 @@ create index pd_key_idx on process_definition (process_definition_key);
 create index pi_status_idx on process_instance (status);
 create index pi_businessKey_idx on process_instance (business_key);
 create index pi_name_idx on process_instance (name);
+create index pi_parentId_idx on process_instance (parent_id);
 create index pi_processDefinitionId_idx on process_instance (process_definition_id);
 create index pi_processDefinitionKey_idx on process_instance (process_definition_key);
 create index proc_var_processInstanceId_idx on process_variable (process_instance_id);
