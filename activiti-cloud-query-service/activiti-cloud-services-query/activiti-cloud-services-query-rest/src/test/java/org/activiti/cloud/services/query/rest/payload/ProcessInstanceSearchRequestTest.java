@@ -52,7 +52,7 @@ class ProcessInstanceSearchRequestTest {
     }
 
     @Test
-    void should_ignoreSubprocessParentIds_inEqualityAndHashCode() {
+    void should_notBeEqual_whenSubprocessParentIdsDiffer() {
         ProcessInstanceSearchRequest first = new ProcessInstanceSearchRequestBuilder()
             .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
             .build();
@@ -61,7 +61,7 @@ class ProcessInstanceSearchRequestTest {
             .build();
         second.setSubprocessParentIds(Set.of("parent-1", "parent-2"));
 
-        assertThat(first).isEqualTo(second).hasSameHashCodeAs(second);
+        assertThat(first).isNotEqualTo(second);
     }
 
     @Test

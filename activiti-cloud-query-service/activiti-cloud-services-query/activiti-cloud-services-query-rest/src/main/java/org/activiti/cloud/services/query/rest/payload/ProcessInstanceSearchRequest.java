@@ -329,7 +329,6 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         this.subprocessParentIds = subprocessParentIds;
     }
 
-    // subprocessParentIds is server-populated, not client input, so it is excluded from the cache-key identity
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -363,7 +362,8 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
             Objects.equals(linkedProcessInstanceType, that.linkedProcessInstanceType) &&
             Objects.equals(processRelatedTo, that.processRelatedTo) &&
             Objects.equals(includeUnlinkedProcesses, that.includeUnlinkedProcesses) &&
-            Objects.equals(includeLinkedProcesses, that.includeLinkedProcesses)
+            Objects.equals(includeLinkedProcesses, that.includeLinkedProcesses) &&
+            Objects.equals(subprocessParentIds, that.subprocessParentIds)
         );
     }
 
@@ -393,7 +393,8 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
             linkedProcessInstanceType,
             processRelatedTo,
             includeUnlinkedProcesses,
-            includeLinkedProcesses
+            includeLinkedProcesses,
+            subprocessParentIds
         );
     }
 }
