@@ -61,7 +61,6 @@ public class IntegrationErrorBuilderTest {
         ).build();
         //then
         assertThat(integrationError)
-            .hasIntegrationRequest(integrationRequestEvent)
             .hasErrorClassName("java.lang.Error")
             .hasErrorMessage("Boom!")
             .hasStackTraceElements(error.getStackTrace());
@@ -125,7 +124,7 @@ public class IntegrationErrorBuilderTest {
             .build();
 
         //then
-        assertThat(integrationError).hasIntegrationRequest(integrationRequestEvent).hasErrorMessage(customMessage);
+        assertThat(integrationError).hasErrorMessage(customMessage);
 
         Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
         Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);

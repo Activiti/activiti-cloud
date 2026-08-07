@@ -41,7 +41,7 @@ public class IntegrationResultBuilder {
             sanitizedIntegrationContext.clearInBoundVariables();
         }
 
-        this.integrationResult = new IntegrationResultImpl(integrationRequest, sanitizedIntegrationContext);
+        this.integrationResult = new IntegrationResultImpl(sanitizedIntegrationContext);
 
         if (connectorProperties != null) {
             this.integrationResult.setAppName(connectorProperties.getAppName());
@@ -76,6 +76,8 @@ public class IntegrationResultBuilder {
     public MessageBuilder<IntegrationResult> getMessageBuilder() {
         return MessageBuilder.withPayload((IntegrationResult) integrationResult)
             .setHeader("targetAppName", requestEvent.getAppName())
-            .setHeader("targetService", requestEvent.getServiceFullName());
+            .setHeader("targetService", requestEvent.getServiceFullName())
+            .setHeader("resultDestination", requestEvent.getResultDestination())
+            .setHeader("errorDestination", requestEvent.getErrorDestination());
     }
 }

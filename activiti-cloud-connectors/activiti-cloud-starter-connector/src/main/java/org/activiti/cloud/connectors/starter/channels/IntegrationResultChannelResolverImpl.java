@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.activiti.cloud.api.process.model.IntegrationRequest;
-
 public class IntegrationResultChannelResolverImpl implements IntegrationResultChannelResolver {
 
     private final IntegrationResultDestinationBuilder integrationResultDestinationBuilder;
@@ -28,8 +26,8 @@ public class IntegrationResultChannelResolverImpl implements IntegrationResultCh
     }
 
     @Override
-    public String resolveDestination(IntegrationRequest event) {
-        String destination = integrationResultDestinationBuilder.buildDestination(event);
+    public String resolveDestination(String resultDestination, String serviceFullName) {
+        String destination = integrationResultDestinationBuilder.buildDestination(resultDestination, serviceFullName);
 
         return destination;
     }

@@ -92,9 +92,8 @@ public class OrphanedIntegrationRecoveryScheduler {
             integrationContext.setProcessDefinitionId(entity.getProcessDefinitionId());
             integrationContext.setClientId(entity.getFlowNodeId());
 
-            var integrationRequest = integrationRequestBuilder.build(integrationContext);
             var integrationError = new IntegrationErrorImpl(
-                integrationRequest,
+                integrationContext,
                 new CloudBpmnError(ORPHANED_INTEGRATION_ERROR_CODE, buildErrorMessage())
             );
 

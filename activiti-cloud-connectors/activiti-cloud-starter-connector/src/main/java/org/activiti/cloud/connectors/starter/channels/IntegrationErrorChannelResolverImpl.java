@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.activiti.cloud.api.process.model.IntegrationRequest;
-
 public class IntegrationErrorChannelResolverImpl implements IntegrationErrorChannelResolver {
 
     private final IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder;
@@ -26,8 +24,8 @@ public class IntegrationErrorChannelResolverImpl implements IntegrationErrorChan
     }
 
     @Override
-    public String resolveDestination(IntegrationRequest event) {
-        String destination = integrationErrorDestinationBuilder.buildDestination(event);
+    public String resolveDestination(String errorDestination, String serviceFullName) {
+        String destination = integrationErrorDestinationBuilder.buildDestination(errorDestination, serviceFullName);
 
         return destination;
     }
