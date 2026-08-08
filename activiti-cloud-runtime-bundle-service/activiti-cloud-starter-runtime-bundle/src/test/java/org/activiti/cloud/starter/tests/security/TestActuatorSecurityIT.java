@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
@@ -60,7 +61,13 @@ public class TestActuatorSecurityIT {
     }
 
     @Test
-    public void should_getActuatorInfoAndReturn200ok() throws Exception {
+    public void should_getActuatorInfoAndReturn401_when_unauthenticated() throws Exception {
+        mockMvc.perform(get("/actuator/info")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    public void should_getActuatorInfoAndReturn200_when_authenticated() throws Exception {
         mockMvc.perform(get("/actuator/info")).andExpect(status().isOk());
     }
 }
