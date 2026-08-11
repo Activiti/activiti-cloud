@@ -15,7 +15,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@5177eca5d3d71342d7f7e0a2a4d74cc16b1eeb1b # v18.21.3
       env:
         MAVEN_USERNAME: ${{ inputs.nexus-username }}
         MAVEN_PASSWORD: ${{ inputs.nexus-password }}
