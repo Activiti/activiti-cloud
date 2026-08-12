@@ -194,7 +194,7 @@
     <project.year>2026</project.year>
     <jacoco-report-dir-suffix></jacoco-report-dir-suffix>
 
-    <spring-boot.version>4.0.6</spring-boot.version>
+    <spring-boot.version>4.0.7</spring-boot.version>
     <!-- AAE-46198 temporary Tomcat version override. Remove when upgrading to Spring Boot 4.1.x -->
     <tomcat.version>11.0.24</tomcat.version>
 
@@ -211,6 +211,7 @@
     <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
     <third-party-license-maven-plugin.version>2.7.0</third-party-license-maven-plugin.version>
     <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+    <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
     <maven-failsafe-plugin.version>3.5.6</maven-failsafe-plugin.version>
@@ -218,8 +219,8 @@
     <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
-    <maven-release-plugin.version>3.3.0</maven-release-plugin.version>
-    <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
+    <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
+    <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
@@ -239,6 +240,7 @@
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
     <swagger-annotations.version>2.2.41</swagger-annotations.version>
+    <mockito.agent.arg>-javaagent:"${org.mockito:mockito-core:jar}"</mockito.agent.arg>
   </properties>
   <repositories>
     <repository>
@@ -296,7 +298,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${maven-surefire-plugin.version}</version>
           <configuration>
-            <argLine>@{argLine} -Xmx1024m</argLine>
+            <argLine>@{argLine} -Xmx1024m ${mockito.agent.arg}</argLine>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <failIfNoTests>false</failIfNoTests>
             <trimStackTrace>false</trimStackTrace>
@@ -518,6 +520,20 @@ limitations under the License.]]>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven-dependency-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>resolve-dependency-properties</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
@@ -534,7 +550,7 @@ limitations under the License.]]>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>@{argLine} -Xmx1024m</argLine>
+          <argLine>@{argLine} -Xmx1024m ${mockito.agent.arg}</argLine>
           <properties>
             <configurationParameters>
               junit.jupiter.execution.parallel.enabled=${unitTests.parallel}
@@ -717,7 +733,7 @@ limitations under the License.]]>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <argLine>@{argLine} -Xmx1024m</argLine>
+              <argLine>@{argLine} -Xmx1024m ${mockito.agent.arg}</argLine>
             </configuration>
             <executions>
               <execution>

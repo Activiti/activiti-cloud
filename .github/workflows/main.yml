@@ -33,32 +33,32 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check dependabot build
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "Fork PRs cannot be validated in this repository."
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: "dependabot[bot]"
           label: github_actions
       - name: Check skip tests
         id: check-skip-tests
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           label: skip-tests
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
       - name: Ensure all actions are covered by Dependabot
-        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
 
   create-tag:
     runs-on: ubuntu-latest
@@ -75,7 +75,7 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         if: github.event_name == 'push'
         id: tag
         env:
@@ -150,7 +150,7 @@ jobs:
           )
           echo "modules=$MODULES" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -178,7 +178,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - id: scan
-        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
 
       - id: transform
         name: Transform docker image matrix
@@ -216,7 +216,7 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -268,7 +268,7 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -444,7 +444,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         with:
           version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "true"
@@ -485,7 +485,7 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
@@ -537,6 +537,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@e87345fb177248fc5bdc7838107f098438818df1 # v18.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ac0009fd55b474dbf50864caa4f9da36a41e5ffe # v18.21.2
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}

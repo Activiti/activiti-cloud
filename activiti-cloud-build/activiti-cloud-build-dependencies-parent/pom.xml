@@ -12,7 +12,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2025.1.1</spring-cloud.version>
+    <spring-cloud.version>2025.1.2</spring-cloud.version>
     <testcontainers.version>2.0.3</testcontainers.version>
     <graphql-java.version>25.0</graphql-java.version>
     <postgresql.version>42.7.13</postgresql.version>
@@ -27,6 +27,8 @@
     <bcprov.version>1.84</bcprov.version>
     <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
     <spring-kafka.version>4.0.6</spring-kafka.version>
+    <!-- Security fix AAE-49996: hibernate-platform pins micrometer-core below the version Spring Boot manages. -->
+    <micrometer.version>1.16.6</micrometer.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -79,6 +81,15 @@
         <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- Security fix AAE-49996: hibernate-platform (imported above) pins micrometer-core to 1.16.0,
+           which wins over Spring Boot's managed 1.16.6 since both are import-scope BOMs and
+           hibernate-platform is declared first. Remove once hibernate-platform stops pinning it below
+           the version Spring Boot manages. -->
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-core</artifactId>
+        <version>${micrometer.version}</version>
       </dependency>
       <!-- AAE-46198 temporary Tomcat version overrides. Remove when upgrading to Spring Boot 4.1.x -->
       <dependency>

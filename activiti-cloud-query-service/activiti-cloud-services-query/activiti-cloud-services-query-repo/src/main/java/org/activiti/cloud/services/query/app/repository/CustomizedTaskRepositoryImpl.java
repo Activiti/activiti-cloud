@@ -119,8 +119,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
     public boolean existsInProcessInstanceScope(Predicate predicate) {
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
         JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
-        JPQLQuery<?> countQuery = from.select(taskEntity.count());
-        return countQuery.fetchCount() > 0;
+        return from.select(Expressions.ONE).fetchFirst() != null;
     }
 
     private JPQLQuery<TaskEntity> buildLeftJoin(QTaskEntity taskEntity, Predicate predicate) {
