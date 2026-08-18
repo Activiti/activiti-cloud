@@ -48,7 +48,6 @@ import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceived
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
