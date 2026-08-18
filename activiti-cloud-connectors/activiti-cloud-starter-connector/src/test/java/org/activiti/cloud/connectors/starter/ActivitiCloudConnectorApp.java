@@ -82,10 +82,9 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
         return event -> {
             verifyEventAndCreateResults(event);
             Map<String, Object> resultVariables = createResultVariables(event);
-            IntegrationResult integrationResultEvent = resultFor(event, connectorProperties)
+            Message<IntegrationResult> message = resultFor(event, connectorProperties)
                 .withOutboundVariables(resultVariables)
-                .build();
-            Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
+                .buildMessage();
 
             integrationResultSender.send(message);
         };

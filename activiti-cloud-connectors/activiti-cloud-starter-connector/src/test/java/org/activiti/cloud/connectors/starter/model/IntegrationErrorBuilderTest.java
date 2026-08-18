@@ -15,8 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
-import static org.activiti.test.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
@@ -35,6 +36,8 @@ public class IntegrationErrorBuilderTest {
     private static final String ACTIVITY_ELEMENT_ID = "activitiElementId";
     private static final String RB_NAME = "rbName";
     private static final String APP_NAME = "appName";
+    private static final String RESULT_DESTINATION = "resultDest";
+    private static final String ERROR_DESTINATION = "errorDest";
 
     private final ConnectorProperties connectorProperties = new ConnectorProperties();
 
@@ -60,10 +63,9 @@ public class IntegrationErrorBuilderTest {
             error
         ).build();
         //then
-        assertThat(integrationError)
-            .hasErrorClassName("java.lang.Error")
-            .hasErrorMessage("Boom!")
-            .hasStackTraceElements(error.getStackTrace());
+        assertThat(integrationError.getErrorClassName()).isEqualTo("java.lang.Error");
+        assertThat(integrationError.getErrorMessage()).isEqualTo("Boom!");
+        assertThat(integrationError.getStackTraceElements()).isEqualTo(Arrays.asList(error.getStackTrace()));
 
         Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
         Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
@@ -83,6 +85,8 @@ public class IntegrationErrorBuilderTest {
         IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
         integrationRequestEvent.setAppName(APP_NAME);
         integrationRequestEvent.setServiceFullName(RB_NAME);
+        integrationRequestEvent.setResultDestination(RESULT_DESTINATION);
+        integrationRequestEvent.setErrorDestination(ERROR_DESTINATION);
 
         //when
         Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(
@@ -95,7 +99,9 @@ public class IntegrationErrorBuilderTest {
         Assertions.assertThat(message.getHeaders())
             .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
             .containsEntry("targetService", RB_NAME)
-            .containsEntry("targetAppName", APP_NAME);
+            .containsEntry("targetAppName", APP_NAME)
+            .containsEntry("resultDestination", RESULT_DESTINATION)
+            .containsEntry("errorDestination", ERROR_DESTINATION);
     }
 
     @Test
@@ -124,7 +130,7 @@ public class IntegrationErrorBuilderTest {
             .build();
 
         //then
-        assertThat(integrationError).hasErrorMessage(customMessage);
+        assertThat(integrationError.getErrorMessage()).isEqualTo(customMessage);
 
         Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
         Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
@@ -155,7 +161,7 @@ public class IntegrationErrorBuilderTest {
             .build();
 
         //then
-        assertThat(integrationError).hasErrorMessage("Original error message");
+        assertThat(integrationError.getErrorMessage()).isEqualTo("Original error message");
     }
 
     @Test
@@ -183,7 +189,7 @@ public class IntegrationErrorBuilderTest {
             .build();
 
         //then
-        assertThat(integrationError).hasErrorMessage("Original error message");
+        assertThat(integrationError.getErrorMessage()).isEqualTo("Original error message");
     }
 
     @Test
