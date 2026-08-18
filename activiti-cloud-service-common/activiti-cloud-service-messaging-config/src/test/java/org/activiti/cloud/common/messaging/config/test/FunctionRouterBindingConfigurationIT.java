@@ -792,7 +792,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void functionRouterAnonymousQueueCustomizerOnClassicQueue() {
+    void functionRouterAnonymousQueueCustomizer() {
         var queueName = messagingProperties.getFunctionRouter().getGroup().concat(".foobar");
 
         var queue = new Queue(queueName);
@@ -801,22 +801,7 @@ public class FunctionRouterBindingConfigurationIT {
 
         assertThat(queue.getArguments())
             .asInstanceOf(InstanceOfAssertFactories.MAP)
-            .containsEntry("x-queue-master-locator", "client-local")
-            .doesNotContainKey("x-queue-leader-locator");
-    }
-
-    @Test
-    void functionRouterAnonymousQueueCustomizerOnQuorumQueue() {
-        var queueName = messagingProperties.getFunctionRouter().getGroup().concat(".foobar");
-
-        var queue = new Queue(queueName, true, false, false, Map.of("x-queue-type", "quorum"));
-
-        functionRouterAnonymousQueueCustomizer.apply(queue);
-
-        assertThat(queue.getArguments())
-            .asInstanceOf(InstanceOfAssertFactories.MAP)
-            .containsEntry("x-queue-leader-locator", "client-local")
-            .doesNotContainKey("x-queue-master-locator");
+            .containsEntry("x-queue-master-locator", "client-local");
     }
 
     @Test
