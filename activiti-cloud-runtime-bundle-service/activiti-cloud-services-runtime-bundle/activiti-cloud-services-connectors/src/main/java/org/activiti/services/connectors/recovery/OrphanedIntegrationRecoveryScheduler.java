@@ -25,7 +25,6 @@ import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
-import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,20 +37,17 @@ public class OrphanedIntegrationRecoveryScheduler {
     public static final String ORPHANED_INTEGRATION_ERROR_CODE = "ORPHANED_INTEGRATION";
 
     private final IntegrationContextService integrationContextService;
-    private final IntegrationRequestBuilder integrationRequestBuilder;
     private final ServiceTaskIntegrationErrorEventHandler errorEventHandler;
     private final int thresholdSeconds;
     private final FeatureToggle featureToggle;
 
     OrphanedIntegrationRecoveryScheduler(
         IntegrationContextService integrationContextService,
-        IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
         int thresholdSeconds,
         FeatureToggle featureToggle
     ) {
         this.integrationContextService = integrationContextService;
-        this.integrationRequestBuilder = integrationRequestBuilder;
         this.errorEventHandler = errorEventHandler;
         this.thresholdSeconds = thresholdSeconds;
         this.featureToggle = featureToggle;

@@ -35,7 +35,6 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextQuery;
 import org.activiti.engine.integration.IntegrationContextService;
-import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,9 +48,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
 
     @Mock
     IntegrationContextService integrationContextService;
-
-    @Mock
-    IntegrationRequestBuilder integrationRequestBuilder;
 
     @Mock
     ServiceTaskIntegrationErrorEventHandler errorEventHandler;
@@ -68,7 +64,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
     void setUp() {
         scheduler = new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
-            integrationRequestBuilder,
             errorEventHandler,
             0,
             featureToggle
@@ -148,7 +143,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
     void should_queryWithThresholdBasedOnConstructorValue_when_recoveringOrphanedIntegrations() {
         var customScheduler = new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
-            integrationRequestBuilder,
             errorEventHandler,
             300,
             featureToggle
