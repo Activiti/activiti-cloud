@@ -141,10 +141,10 @@ class MessageProducerCommandContextCloseListenerTest {
     @Captor
     private ArgumentCaptor<List<CloudRuntimeEventImpl<?, ?>>> chunkerArgumentCaptor;
 
-    private CloudRuntimeEventImpl<?, ?> event;
+    private CloudRuntimeEventImpl<?, ?> cloudRuntimeEvent;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() {
         incidentService = new IncidentService(
             producer,
             messageBuilderChainIncidentFactory,
@@ -163,7 +163,7 @@ class MessageProducerCommandContextCloseListenerTest {
         );
 
         ProcessInstance processInstance = new ProcessInstanceImpl();
-        event = new CloudProcessCreatedEventImpl(processInstance);
+        cloudRuntimeEvent = new CloudProcessCreatedEventImpl(processInstance);
 
         when(producer.auditProducer()).thenReturn(auditChannel);
         when(producer.auditProducerIncidents()).thenReturn(auditIncidentsChannel);
@@ -173,7 +173,7 @@ class MessageProducerCommandContextCloseListenerTest {
         when(processEngineEventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
 
         ExecutionContext executionContext = TestUtils.mockExecutionContext();
-        given(commandContext.getGenericAttribute(event.getEntityId())).willReturn(executionContext);
+        given(commandContext.getGenericAttribute(cloudRuntimeEvent.getEntityId())).willReturn(executionContext);
         given(
             commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT)
         ).willReturn(executionContext);
@@ -182,17 +182,17 @@ class MessageProducerCommandContextCloseListenerTest {
     @Test
     void closedShouldSendEventsRegisteredOnTheCommandContext() {
         // given
-        processEngineEventsAggregator.add(event);
+        processEngineEventsAggregator.add(cloudRuntimeEvent);
         given(
             commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
-        ).willReturn(Collections.singletonList(event));
+        ).willReturn(Collections.singletonList(cloudRuntimeEvent));
 
         // when
         closeListener.closed(commandContext);
 
         // then
         verify(auditChannel).send(messageArgumentCaptor.capture());
-        assertThat(messageArgumentCaptor.getValue().getPayload()).containsExactly(event);
+        assertThat(messageArgumentCaptor.getValue().getPayload()).containsExactly(cloudRuntimeEvent);
 
         CloudRuntimeEvent<?, ?>[] result = messageArgumentCaptor.getValue().getPayload();
 
@@ -245,7 +245,7 @@ class MessageProducerCommandContextCloseListenerTest {
         // given
         given(
             commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
-        ).willReturn(Collections.singletonList(event));
+        ).willReturn(Collections.singletonList(cloudRuntimeEvent));
 
         // when
         closeListener.closed(commandContext);
