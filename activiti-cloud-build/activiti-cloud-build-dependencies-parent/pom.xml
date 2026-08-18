@@ -165,6 +165,21 @@
         <version>${spring-kafka.version}</version>
       </dependency>
 
+      <!-- Pin spring-amqp to 4.0.3 to avoid x-queue-leader-locator regression (spring-projects/spring-amqp#3478).
+           A property alone does not override a version managed by an import-scope BOM, so an explicit
+           dependencyManagement entry is required here. Remove when upgrading to Spring AMQP 4.0.5+ or 4.1.1+. -->
+      <dependency>
+        <groupId>org.springframework.amqp</groupId>
+        <artifactId>spring-amqp</artifactId>
+        <version>${spring-amqp.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.amqp</groupId>
+        <artifactId>spring-rabbit</artifactId>
+        <version>${spring-amqp.version}</version>
+      </dependency>
+      <!-- End spring-amqp pin -->
+
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
