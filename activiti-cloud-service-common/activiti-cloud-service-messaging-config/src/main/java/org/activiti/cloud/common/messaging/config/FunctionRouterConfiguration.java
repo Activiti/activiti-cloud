@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -81,6 +82,7 @@ public class FunctionRouterConfiguration {
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
     public static final String FUNCTION_ROUTER_ANONYMOUS_INPUT = "functionRouterAnonymousInput";
     public static final String CONNECTOR_TYPE = "connectorType";
+    private static final String QUEUE_MASTER_LOCATOR = "x-queue-master-locator";
 
     @Bean
     ApplicationRunner functionRouterConfigurationApplicationRunner(
@@ -114,7 +116,9 @@ public class FunctionRouterConfiguration {
             if (declarable instanceof Queue queue) {
                 Optional.ofNullable(queue.getName())
                     .filter(it -> it.startsWith(queuePrefix))
-                    .ifPresent(name -> queue.setLeaderLocator("client-local"));
+                    .ifPresent(name ->
+                        queue.addArgument(QUEUE_MASTER_LOCATOR, QueueBuilder.LeaderLocator.clientLocal.getValue())
+                    );
             }
 
             return declarable;
