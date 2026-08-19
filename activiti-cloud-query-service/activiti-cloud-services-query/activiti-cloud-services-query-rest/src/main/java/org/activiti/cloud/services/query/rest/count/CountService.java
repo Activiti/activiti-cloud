@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.rest.count;
 
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +27,10 @@ import org.activiti.cloud.services.query.rest.payload.BatchCountRequest;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.payload.ResourceType;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Counts each requested filter per resource type, keyed by the filter's status.
+ * Counts each requested filter per resource type, keyed by the filter's requestId.
  * {@code restricted} selects the per-user vs admin tier.
  */
 public class CountService {
@@ -44,10 +46,12 @@ public class CountService {
         this.processInstanceSearchService = processInstanceSearchService;
     }
 
+    @Transactional(readOnly = true)
     public Map<ResourceType, Map<String, Long>> countRestricted(BatchCountRequest request) {
         return count(request, true);
     }
 
+    @Transactional(readOnly = true)
     public Map<ResourceType, Map<String, Long>> countUnrestricted(BatchCountRequest request) {
         return count(request, false);
     }
@@ -67,10 +71,8 @@ public class CountService {
     private Map<String, Long> countTasks(List<TaskSearchRequest> filters, boolean restricted) {
         Map<String, Long> counts = new LinkedHashMap<>();
         for (TaskSearchRequest filter : filters) {
-            String key = statusKey(filter.status(), ResourceType.TASK);
-            checkDuplicate(counts, key, ResourceType.TASK);
             counts.put(
-                key,
+                filter.requestId(),
                 restricted
                     ? taskControllerHelper.countTasksRestricted(filter)
                     : taskControllerHelper.countTasksUnrestricted(filter)
@@ -82,10 +84,8 @@ public class CountService {
     private Map<String, Long> countProcessInstances(List<ProcessInstanceSearchRequest> filters, boolean restricted) {
         Map<String, Long> counts = new LinkedHashMap<>();
         for (ProcessInstanceSearchRequest filter : filters) {
-            String key = statusKey(filter.getStatus(), ResourceType.PROCESS_INSTANCE);
-            checkDuplicate(counts, key, ResourceType.PROCESS_INSTANCE);
             counts.put(
-                key,
+                filter.getRequestId(),
                 restricted
                     ? processInstanceSearchService.countRestricted(filter)
                     : processInstanceSearchService.countUnrestricted(filter)
@@ -94,27 +94,41 @@ public class CountService {
         return counts;
     }
 
-    private void checkDuplicate(Map<String, Long> counts, String key, ResourceType resourceType) {
-        if (counts.containsKey(key)) {
-            throw new IllegalStateException("Duplicate status filter '" + key + "' for resource type " + resourceType);
-        }
-    }
-
-    private String statusKey(Set<? extends Enum<?>> statuses, ResourceType resourceType) {
-        if (statuses == null || statuses.size() != 1) {
-            throw new IllegalStateException(
-                "Each count filter for resource type " + resourceType + " must specify exactly one status"
-            );
-        }
-        return statuses.iterator().next().name();
-    }
-
     private void validate(BatchCountRequest request) {
         int taskFilters = request == null || request.task() == null ? 0 : request.task().size();
         int processInstanceFilters =
             request == null || request.processInstance() == null ? 0 : request.processInstance().size();
         if (taskFilters == 0 && processInstanceFilters == 0) {
             throw new IllegalStateException("At least one resource type must be provided");
+        }
+        validateRequestIds(request);
+    }
+
+    private void validateRequestIds(BatchCountRequest request) {
+        Set<String> taskRequestIds = new HashSet<>();
+        if (request.task() != null) {
+            for (TaskSearchRequest filter : request.task()) {
+                checkRequestId(filter.requestId(), taskRequestIds, ResourceType.TASK);
+            }
+        }
+        Set<String> processInstanceRequestIds = new HashSet<>();
+        if (request.processInstance() != null) {
+            for (ProcessInstanceSearchRequest filter : request.processInstance()) {
+                checkRequestId(filter.getRequestId(), processInstanceRequestIds, ResourceType.PROCESS_INSTANCE);
+            }
+        }
+    }
+
+    private void checkRequestId(String requestId, Set<String> seen, ResourceType resourceType) {
+        if (requestId == null || requestId.isBlank()) {
+            throw new IllegalStateException(
+                "Each count filter for resource type " + resourceType + " must specify a requestId"
+            );
+        }
+        if (!seen.add(requestId)) {
+            throw new IllegalStateException(
+                "Duplicate requestId '" + requestId + "' for resource type " + resourceType
+            );
         }
     }
 }

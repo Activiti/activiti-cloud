@@ -149,15 +149,7 @@ public class ProcessInstanceController {
         );
     }
 
-    /**
-     * @deprecated for removal. Use {@code POST /v1/count} instead.
-     */
-    @Deprecated(forRemoval = true)
-    @Operation(
-        summary = "Count process instances",
-        deprecated = true,
-        description = "Deprecated in favour of POST /v1/count."
-    )
+    @Operation(summary = "Count process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/count")
     public Long countProcessInstances(@RequestBody ProcessInstanceSearchRequest searchRequest) {

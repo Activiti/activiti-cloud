@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,50 +56,61 @@ class CountServiceTest {
         countService = new CountService(taskControllerHelper, processInstanceSearchService);
     }
 
-    private TaskSearchRequest task(String... statuses) {
-        return MAPPER.convertValue(Map.of("status", Set.of(statuses)), TaskSearchRequest.class);
+    private TaskSearchRequest task(String requestId, String... statuses) {
+        return MAPPER.convertValue(filterMap(requestId, statuses), TaskSearchRequest.class);
     }
 
-    private ProcessInstanceSearchRequest processInstance(String... statuses) {
-        return MAPPER.convertValue(Map.of("status", Set.of(statuses)), ProcessInstanceSearchRequest.class);
+    private ProcessInstanceSearchRequest processInstance(String requestId, String... statuses) {
+        return MAPPER.convertValue(filterMap(requestId, statuses), ProcessInstanceSearchRequest.class);
+    }
+
+    private Map<String, Object> filterMap(String requestId, String... statuses) {
+        Map<String, Object> map = new HashMap<>();
+        if (requestId != null) {
+            map.put("requestId", requestId);
+        }
+        map.put("status", Set.of(statuses));
+        return map;
     }
 
     @Test
-    void should_countRestricted_keyedByStatus_perResourceType() {
+    void should_countRestricted_keyedByRequestId_perResourceType() {
         when(taskControllerHelper.countTasksRestricted(any())).thenReturn(3L, 5L);
         when(processInstanceSearchService.countRestricted(any())).thenReturn(7L);
 
         BatchCountRequest request = new BatchCountRequest(
-            List.of(task("ASSIGNED"), task("CREATED")),
-            List.of(processInstance("RUNNING"))
+            List.of(task("requestId1", "ASSIGNED"), task("requestId2", "CREATED")),
+            List.of(processInstance("requestId3", "RUNNING"))
         );
 
         Map<ResourceType, Map<String, Long>> result = countService.countRestricted(request);
 
-        assertThat(result.get(ResourceType.TASK)).containsExactly(entry("ASSIGNED", 3L), entry("CREATED", 5L));
-        assertThat(result.get(ResourceType.PROCESS_INSTANCE)).containsExactly(entry("RUNNING", 7L));
+        assertThat(result.get(ResourceType.TASK)).containsExactly(entry("requestId1", 3L), entry("requestId2", 5L));
+        assertThat(result.get(ResourceType.PROCESS_INSTANCE)).containsExactly(entry("requestId3", 7L));
         verify(taskControllerHelper, never()).countTasksUnrestricted(any());
         verify(processInstanceSearchService, never()).countUnrestricted(any());
     }
 
     @Test
-    void should_throw_whenFilterHasMultipleStatuses() {
-        BatchCountRequest request = new BatchCountRequest(List.of(task("ASSIGNED", "SUSPENDED")), null);
+    void should_countFilterWithMultipleStatuses_keyedByRequestId() {
+        when(taskControllerHelper.countTasksRestricted(any())).thenReturn(8L);
 
-        assertThatThrownBy(() -> countService.countRestricted(request))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("must specify exactly one status");
+        BatchCountRequest request = new BatchCountRequest(List.of(task("requestId1", "ASSIGNED", "SUSPENDED")), null);
+
+        Map<ResourceType, Map<String, Long>> result = countService.countRestricted(request);
+
+        assertThat(result.get(ResourceType.TASK)).containsExactly(entry("requestId1", 8L));
     }
 
     @Test
     void should_countUnrestricted_whenNotRestricted() {
         when(taskControllerHelper.countTasksUnrestricted(any())).thenReturn(11L);
 
-        BatchCountRequest request = new BatchCountRequest(List.of(task("ASSIGNED")), null);
+        BatchCountRequest request = new BatchCountRequest(List.of(task("requestId1", "ASSIGNED")), null);
 
         Map<ResourceType, Map<String, Long>> result = countService.countUnrestricted(request);
 
-        assertThat(result.get(ResourceType.TASK)).containsExactly(entry("ASSIGNED", 11L));
+        assertThat(result.get(ResourceType.TASK)).containsExactly(entry("requestId1", 11L));
         verify(taskControllerHelper, never()).countTasksRestricted(any());
     }
 
@@ -106,12 +118,12 @@ class CountServiceTest {
     void should_countProcessInstancesUnrestricted_whenOnlyProcessInstancesRequested() {
         when(processInstanceSearchService.countUnrestricted(any())).thenReturn(9L);
 
-        BatchCountRequest request = new BatchCountRequest(null, List.of(processInstance("RUNNING")));
+        BatchCountRequest request = new BatchCountRequest(null, List.of(processInstance("requestId1", "RUNNING")));
 
         Map<ResourceType, Map<String, Long>> result = countService.countUnrestricted(request);
 
         assertThat(result).containsOnlyKeys(ResourceType.PROCESS_INSTANCE);
-        assertThat(result.get(ResourceType.PROCESS_INSTANCE)).containsExactly(entry("RUNNING", 9L));
+        assertThat(result.get(ResourceType.PROCESS_INSTANCE)).containsExactly(entry("requestId1", 9L));
         verify(processInstanceSearchService, never()).countRestricted(any());
         verify(taskControllerHelper, never()).countTasksUnrestricted(any());
     }
@@ -133,20 +145,23 @@ class CountServiceTest {
     }
 
     @Test
-    void should_throw_whenFilterHasNoStatus() {
-        BatchCountRequest request = new BatchCountRequest(List.of(task()), null);
+    void should_throw_whenFilterHasNoRequestId() {
+        BatchCountRequest request = new BatchCountRequest(List.of(task(null, "ASSIGNED")), null);
 
         assertThatThrownBy(() -> countService.countRestricted(request))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("must specify exactly one status");
+            .hasMessageContaining("must specify a requestId");
     }
 
     @Test
-    void should_throw_whenDuplicateStatusFilter() {
-        BatchCountRequest request = new BatchCountRequest(List.of(task("CREATED"), task("CREATED")), null);
+    void should_throw_whenDuplicateRequestId() {
+        BatchCountRequest request = new BatchCountRequest(
+            List.of(task("dup", "CREATED"), task("dup", "ASSIGNED")),
+            null
+        );
 
         assertThatThrownBy(() -> countService.countRestricted(request))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Duplicate status filter");
+            .hasMessageContaining("Duplicate requestId");
     }
 }

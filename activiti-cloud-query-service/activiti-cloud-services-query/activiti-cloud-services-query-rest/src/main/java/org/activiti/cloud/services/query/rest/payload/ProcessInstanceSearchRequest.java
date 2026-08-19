@@ -48,6 +48,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
     private Set<String> processRelatedTo;
     private Boolean includeUnlinkedProcesses;
     private Boolean includeLinkedProcesses;
+    private String requestId;
 
     @JsonIgnore
     private Set<String> subprocessParentIds;
@@ -79,6 +80,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         Set<String> processRelatedTo,
         Boolean includeUnlinkedProcesses,
         Boolean includeLinkedProcesses,
+        String requestId,
         Set<String> subprocessParentIds
     ) {
         this.id = id;
@@ -105,7 +107,16 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         this.processRelatedTo = processRelatedTo;
         this.includeUnlinkedProcesses = includeUnlinkedProcesses;
         this.includeLinkedProcesses = includeLinkedProcesses;
+        this.requestId = requestId;
         this.subprocessParentIds = subprocessParentIds;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     @Override

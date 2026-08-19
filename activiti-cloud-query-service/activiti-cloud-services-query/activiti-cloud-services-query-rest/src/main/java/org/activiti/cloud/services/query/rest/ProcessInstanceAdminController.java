@@ -196,15 +196,7 @@ public class ProcessInstanceAdminController {
         return processInstanceAdminService.findAllAppVersions(predicate);
     }
 
-    /**
-     * @deprecated for removal. Use {@code POST /admin/v1/count} instead.
-     */
-    @Deprecated(forRemoval = true)
-    @Operation(
-        summary = "Count process instances",
-        deprecated = true,
-        description = "Deprecated in favour of POST /admin/v1/count."
-    )
+    @Operation(summary = "Count process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/count")
     public Long searchProcessInstances(@RequestBody ProcessInstanceSearchRequest searchRequest) {

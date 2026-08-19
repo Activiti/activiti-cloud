@@ -39,8 +39,8 @@ public class CountAdminController {
     @Operation(
         summary = "Count resources for multiple filters and resource types in a single request (admin)",
         description = "Body is keyed by resource type (TASK, PROCESS_INSTANCE) with a list of search requests, each " +
-            "of which must specify exactly one status. Returns the count for each filter keyed by its status without " +
-            "user restriction. Replaces the deprecated /admin/v1/tasks/count and /admin/v1/process-instances/count endpoints."
+            "of which must specify a unique requestId. Returns the count for each filter keyed by its requestId without " +
+            "user restriction."
     )
     @PostMapping
     public Map<ResourceType, Map<String, Long>> count(@RequestBody BatchCountRequest request) {

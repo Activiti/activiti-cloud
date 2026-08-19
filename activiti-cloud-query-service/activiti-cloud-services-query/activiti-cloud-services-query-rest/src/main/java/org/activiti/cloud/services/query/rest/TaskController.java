@@ -245,11 +245,7 @@ public class TaskController extends TaskControllerAdvice {
             : null;
     }
 
-    /**
-     * @deprecated for removal. Use {@code POST /v1/count} instead.
-     */
-    @Deprecated(forRemoval = true)
-    @Operation(summary = "Count tasks", deprecated = true, description = "Deprecated in favour of POST /v1/count.")
+    @Operation(summary = "Count tasks")
     @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/count")
     public Long countTasks(@RequestBody TaskSearchRequest taskSearchRequest) {

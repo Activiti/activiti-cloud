@@ -66,8 +66,13 @@ class CountControllerIT {
 
     private static final String COUNT_REQUEST_BODY = """
         {
-          "TASK": [ { "status": ["ASSIGNED"] } ],
-          "PROCESS_INSTANCE": [ { "status": ["RUNNING"] } ]
+          "TASK": [
+            { "requestId": "requestId1", "status": ["ASSIGNED"], "sort": { "field": "createdDate", "direction": "desc", "isProcessVariable": false } },
+            { "requestId": "requestId2", "status": ["CREATED"] }
+          ],
+          "PROCESS_INSTANCE": [
+            { "requestId": "requestId3", "status": ["RUNNING"] }
+          ]
         }""";
 
     @Autowired
@@ -121,7 +126,7 @@ class CountControllerIT {
     }
 
     @Test
-    void should_returnCountsKeyedByStatus_restrictedToCurrentUser() {
+    void should_returnCountsKeyedByRequestId_restrictedToCurrentUser() {
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(COUNT_REQUEST_BODY)
@@ -129,8 +134,9 @@ class CountControllerIT {
             .post(COUNT_ENDPOINT)
             .then()
             .statusCode(200)
-            .body("TASK.ASSIGNED", equalTo(2))
-            .body("PROCESS_INSTANCE.RUNNING", equalTo(1));
+            .body("TASK.requestId1", equalTo(2))
+            .body("TASK.requestId2", equalTo(3))
+            .body("PROCESS_INSTANCE.requestId3", equalTo(1));
     }
 
     @Test
@@ -143,8 +149,9 @@ class CountControllerIT {
             .post(ADMIN_COUNT_ENDPOINT)
             .then()
             .statusCode(200)
-            .body("TASK.ASSIGNED", equalTo(3))
-            .body("PROCESS_INSTANCE.RUNNING", equalTo(2));
+            .body("TASK.requestId1", equalTo(3))
+            .body("TASK.requestId2", equalTo(3))
+            .body("PROCESS_INSTANCE.requestId3", equalTo(2));
     }
 
     @Test
@@ -169,14 +176,13 @@ class CountControllerIT {
     }
 
     @Test
-    void should_returnCountsForMultipleFiltersPerResourceType_withExtraCriteriaAndSort() {
+    void should_countSingleFilterWithMultipleStatuses() {
         String body = """
             {
               "TASK": [
-                { "status": ["ASSIGNED"], "assignee": ["%s"] },
-                { "status": ["CREATED"], "sort": { "field": "createdDate", "direction": "desc", "isProcessVariable": false } }
+                { "requestId": "requestId1", "status": ["ASSIGNED", "CREATED"] }
               ]
-            }""".formatted(CURRENT_USER);
+            }""";
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -185,8 +191,7 @@ class CountControllerIT {
             .post(COUNT_ENDPOINT)
             .then()
             .statusCode(200)
-            .body("TASK.ASSIGNED", equalTo(2))
-            .body("TASK.CREATED", equalTo(3));
+            .body("TASK.requestId1", equalTo(5));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -197,19 +202,22 @@ class CountControllerIT {
 
     private static Stream<Arguments> invalidCountRequests() {
         return Stream.of(
-            Arguments.of("resource type unknown", "{ \"UNKNOWN\": [ { \"status\": [\"ASSIGNED\"] } ] }"),
-            Arguments.of("filter has no status", "{ \"TASK\": [ {} ] }"),
-            Arguments.of("status is not a valid enum", "{ \"TASK\": [ { \"status\": [\"NOT_A_STATUS\"] } ] }"),
             Arguments.of(
-                "duplicate status filter",
-                """
-                {
-                  "TASK": [ { "status": ["CREATED"] }, { "status": ["CREATED"] } ]
-                }"""
+                "no recognized resource type",
+                "{ \"UNKNOWN\": [ { \"requestId\": \"x\", \"status\": [\"ASSIGNED\"] } ] }"
+            ),
+            Arguments.of("filter has no requestId", "{ \"TASK\": [ { \"status\": [\"ASSIGNED\"] } ] }"),
+            Arguments.of("requestId is blank", "{ \"TASK\": [ { \"requestId\": \"\", \"status\": [\"ASSIGNED\"] } ] }"),
+            Arguments.of(
+                "status is not a valid enum",
+                "{ \"TASK\": [ { \"requestId\": \"x\", \"status\": [\"NOT_A_STATUS\"] } ] }"
             ),
             Arguments.of(
-                "filter has multiple statuses",
-                "{ \"TASK\": [ { \"status\": [\"ASSIGNED\", \"SUSPENDED\"] } ] }"
+                "duplicate requestId",
+                """
+                {
+                  "TASK": [ { "requestId": "dup", "status": ["CREATED"] }, { "requestId": "dup", "status": ["ASSIGNED"] } ]
+                }"""
             )
         );
     }

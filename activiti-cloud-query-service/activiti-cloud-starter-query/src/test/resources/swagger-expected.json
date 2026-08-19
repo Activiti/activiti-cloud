@@ -109,7 +109,6 @@
       "post" : {
         "tags" : [ "task-controller" ],
         "summary" : "Count tasks",
-        "description" : "Deprecated in favour of POST /v1/count.",
         "operationId" : "countTasks",
         "requestBody" : {
           "content" : {
@@ -173,7 +172,6 @@
             "description" : "Unauthorized"
           }
         },
-        "deprecated" : true,
         "security" : [ {
           "oauth" : [ ]
         } ]
@@ -346,7 +344,6 @@
       "post" : {
         "tags" : [ "process-instance-controller" ],
         "summary" : "Count process instances",
-        "description" : "Deprecated in favour of POST /v1/count.",
         "operationId" : "countProcessInstances",
         "requestBody" : {
           "content" : {
@@ -410,7 +407,6 @@
             "description" : "Unauthorized"
           }
         },
-        "deprecated" : true,
         "security" : [ {
           "oauth" : [ ]
         } ]
@@ -420,7 +416,7 @@
       "post" : {
         "tags" : [ "count-controller" ],
         "summary" : "Count resources for multiple filters and resource types in a single request",
-        "description" : "Body is keyed by resource type (TASK, PROCESS_INSTANCE) with a list of search requests, each of which must specify exactly one status. Returns the count for each filter keyed by its status, restricted to the authenticated user. Replaces the deprecated /v1/tasks/count and /v1/process-instances/count endpoints.",
+        "description" : "Body is keyed by resource type (TASK, PROCESS_INSTANCE) with a list of search requests, each of which must specify a unique requestId. Returns the count for each filter keyed by its requestId, restricted to the authenticated user.",
         "operationId" : "count",
         "requestBody" : {
           "content" : {
@@ -1628,7 +1624,6 @@
       "post" : {
         "tags" : [ "task-admin-controller" ],
         "summary" : "Count tasks",
-        "description" : "Deprecated in favour of POST /admin/v1/count.",
         "operationId" : "countTasks",
         "requestBody" : {
           "content" : {
@@ -1692,7 +1687,6 @@
             "description" : "Unauthorized"
           }
         },
-        "deprecated" : true,
         "security" : [ {
           "oauth" : [ ]
         } ]
@@ -2670,7 +2664,6 @@
       "post" : {
         "tags" : [ "process-instance-admin-controller" ],
         "summary" : "Count process instances",
-        "description" : "Deprecated in favour of POST /admin/v1/count.",
         "operationId" : "searchProcessInstances",
         "requestBody" : {
           "content" : {
@@ -2734,7 +2727,6 @@
             "description" : "Unauthorized"
           }
         },
-        "deprecated" : true,
         "security" : [ {
           "oauth" : [ ]
         } ]
@@ -2744,7 +2736,7 @@
       "post" : {
         "tags" : [ "count-admin-controller" ],
         "summary" : "Count resources for multiple filters and resource types in a single request (admin)",
-        "description" : "Body is keyed by resource type (TASK, PROCESS_INSTANCE) with a list of search requests, each of which must specify exactly one status. Returns the count for each filter keyed by its status without user restriction. Replaces the deprecated /admin/v1/tasks/count and /admin/v1/process-instances/count endpoints.",
+        "description" : "Body is keyed by resource type (TASK, PROCESS_INSTANCE) with a list of search requests, each of which must specify a unique requestId. Returns the count for each filter keyed by its requestId without user restriction.",
         "operationId" : "count",
         "requestBody" : {
           "content" : {
@@ -7377,6 +7369,9 @@
       "TaskSearchRequest_ProcessVariables" : {
         "type" : "object",
         "properties" : {
+          "requestId" : {
+            "type" : "string"
+          },
           "onlyStandalone" : {
             "type" : "boolean"
           },
@@ -7937,6 +7932,9 @@
           },
           "includeLinkedProcesses" : {
             "type" : "boolean"
+          },
+          "requestId" : {
+            "type" : "string"
           }
         },
         "title" : "ProcessInstanceSearchRequest_ProcessVariables"
@@ -9690,6 +9688,9 @@
           },
           "includeLinkedProcesses" : {
             "type" : "boolean"
+          },
+          "requestId" : {
+            "type" : "string"
           }
         },
         "title" : "ProcessInstanceSearchRequest"
@@ -9697,6 +9698,9 @@
       "TaskSearchRequest" : {
         "type" : "object",
         "properties" : {
+          "requestId" : {
+            "type" : "string"
+          },
           "onlyStandalone" : {
             "type" : "boolean"
           },

@@ -18,7 +18,7 @@ package org.activiti.cloud.services.query.rest.payload;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-/** Request for the batch count endpoint: a list of filters per resource type, each of which must specify a status. */
+/** Request for the batch count endpoint: a list of filters per resource type, each identified by a unique requestId. */
 public record BatchCountRequest(
     @JsonProperty("TASK") List<TaskSearchRequest> task,
     @JsonProperty("PROCESS_INSTANCE") List<ProcessInstanceSearchRequest> processInstance

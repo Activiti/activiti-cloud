@@ -39,8 +39,8 @@ public class CountController {
     @Operation(
         summary = "Count resources for multiple filters and resource types in a single request",
         description = "Body is keyed by resource type (TASK, PROCESS_INSTANCE) with a list of search requests, each " +
-            "of which must specify exactly one status. Returns the count for each filter keyed by its status, restricted " +
-            "to the authenticated user. Replaces the deprecated /v1/tasks/count and /v1/process-instances/count endpoints."
+            "of which must specify a unique requestId. Returns the count for each filter keyed by its requestId, restricted " +
+            "to the authenticated user."
     )
     @PostMapping
     public Map<ResourceType, Map<String, Long>> count(@RequestBody BatchCountRequest request) {
