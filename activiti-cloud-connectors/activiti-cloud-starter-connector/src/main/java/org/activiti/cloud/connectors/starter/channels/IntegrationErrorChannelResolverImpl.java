@@ -25,8 +25,6 @@ public class IntegrationErrorChannelResolverImpl implements IntegrationErrorChan
 
     @Override
     public String resolveDestination(String errorDestination, String serviceFullName) {
-        String destination = integrationErrorDestinationBuilder.buildDestination(errorDestination, serviceFullName);
-
-        return destination;
+        return integrationErrorDestinationBuilder.buildDestination(errorDestination, serviceFullName);
     }
 }

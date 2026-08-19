@@ -27,8 +27,6 @@ public class IntegrationResultChannelResolverImpl implements IntegrationResultCh
 
     @Override
     public String resolveDestination(String resultDestination, String serviceFullName) {
-        String destination = integrationResultDestinationBuilder.buildDestination(resultDestination, serviceFullName);
-
-        return destination;
+        return integrationResultDestinationBuilder.buildDestination(resultDestination, serviceFullName);
     }
 }
