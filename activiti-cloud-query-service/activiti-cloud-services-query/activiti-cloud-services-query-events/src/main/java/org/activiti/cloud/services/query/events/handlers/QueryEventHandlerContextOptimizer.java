@@ -20,9 +20,7 @@ import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -31,44 +29,12 @@ import java.util.stream.Collectors;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.events.CloudRuntimeEventSorter;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
-import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.hibernate.jpa.AvailableHints;
@@ -85,47 +51,6 @@ public class QueryEventHandlerContextOptimizer {
     public static final String SEQUENCE_FLOWS = "sequenceFlows";
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContextOptimizer.class);
 
-    private Map<Class<? extends CloudRuntimeEvent>, Integer> order = Map.ofEntries(
-        Map.entry(CloudRuntimeEvent.class, 0),
-        Map.entry(CloudProcessCreatedEventImpl.class, 0),
-        Map.entry(CloudProcessStartedEventImpl.class, 1),
-        Map.entry(CloudProcessUpdatedEventImpl.class, 1),
-        Map.entry(CloudProcessSuspendedEventImpl.class, 1),
-        Map.entry(CloudSequenceFlowTakenEventImpl.class, 2),
-        Map.entry(CloudBPMNActivityStartedEventImpl.class, 3),
-        Map.entry(CloudIntegrationRequestedEventImpl.class, 4),
-        Map.entry(CloudBPMNSignalReceivedEventImpl.class, 5),
-        Map.entry(CloudBPMNActivityCompletedEventImpl.class, 6),
-        Map.entry(CloudBPMNActivityCancelledEventImpl.class, 6),
-        Map.entry(CloudIntegrationResultReceivedEventImpl.class, 7),
-        Map.entry(CloudIntegrationErrorReceivedEventImpl.class, 7),
-        Map.entry(CloudTaskCreatedEventImpl.class, 8),
-        Map.entry(CloudTaskCandidateUserAddedEventImpl.class, 9),
-        Map.entry(CloudTaskCandidateGroupAddedEventImpl.class, 9),
-        Map.entry(CloudVariableCreatedEventImpl.class, 10),
-        Map.entry(CloudVariableUpdatedEventImpl.class, 11),
-        Map.entry(CloudVariableDeletedEventImpl.class, 12),
-        Map.entry(CloudTaskActivatedEventImpl.class, 13),
-        Map.entry(CloudTaskSuspendedEventImpl.class, 13),
-        Map.entry(CloudTaskAssignedEventImpl.class, 13),
-        Map.entry(CloudTaskUpdatedEventImpl.class, 13),
-        Map.entry(CloudTaskCompletedEventImpl.class, 14),
-        Map.entry(CloudTaskCancelledEventImpl.class, 14),
-        Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 15),
-        Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 15),
-        Map.entry(CloudProcessCompletedEventImpl.class, 16),
-        Map.entry(CloudProcessCancelledEventImpl.class, 16),
-        Map.entry(CloudProcessCandidateStarterUserAddedEventImpl.class, 17),
-        Map.entry(CloudProcessCandidateStarterGroupAddedEventImpl.class, 17),
-        Map.entry(CloudProcessCandidateStarterUserRemovedEventImpl.class, 18),
-        Map.entry(CloudProcessCandidateStarterGroupRemovedEventImpl.class, 18),
-        Map.entry(CloudProcessDeletedEventImpl.class, 19)
-    );
-
-    private Comparator<CloudRuntimeEvent<?, ?>> byTimestamp = Comparator.comparingLong(CloudRuntimeEvent::getTimestamp);
-    private Comparator<CloudRuntimeEvent<?, ?>> byEventClass = Comparator.comparing(event ->
-        Optional.ofNullable(order.get(event.getClass())).orElseGet(() -> order.get(CloudRuntimeEvent.class))
-    );
     private final EntityManager entityManager;
 
     public QueryEventHandlerContextOptimizer(EntityManager entityManager) {
@@ -199,7 +124,7 @@ public class QueryEventHandlerContextOptimizer {
                 });
         });
 
-        return events.stream().sorted(byEventClass.thenComparing(byTimestamp)).collect(Collectors.toList());
+        return CloudRuntimeEventSorter.sort(events);
     }
 
     protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {
