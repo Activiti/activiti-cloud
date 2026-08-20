@@ -302,8 +302,10 @@ class OrphanedIntegrationRecoveryIT {
 
     @Test
     void should_runRecoveryOnlyOnce_when_twoInstancesRunConcurrently() {
-        ctx1 = buildLightweightContext();
-        ctx2 = buildLightweightContext();
+        // ctx1's own scheduler is disabled: its lock acquisition below is manual/simulated only,
+        // so it never competes with itself for the "orphanedIntegrationRecovery" lock.
+        ctx1 = buildLightweightContext(false);
+        ctx2 = buildLightweightContext(true);
 
         var lockConfig = new LockConfiguration(Instant.now(), LOCK_NAME, Duration.ofMinutes(5), Duration.ZERO);
 
@@ -384,14 +386,14 @@ class OrphanedIntegrationRecoveryIT {
             .run();
     }
 
-    private static ConfigurableApplicationContext buildLightweightContext() {
+    private static ConfigurableApplicationContext buildLightweightContext(boolean schedulerEnabled) {
         return new SpringApplicationBuilder(LockTestApplication.class, LockTestConfiguration.class)
             .web(WebApplicationType.NONE)
             .initializers(ctx ->
                 TestPropertyValues.of(
                     "spring.main.banner-mode=off",
                     "activiti.orphaned-integration-recovery.threshold-seconds=0",
-                    "activiti.orphaned-integration-recovery.cron=*/1 * * * * *",
+                    "activiti.orphaned-integration-recovery.cron=" + (schedulerEnabled ? "*/1 * * * * *" : "-"),
                     "activiti.features.rb.orphaned-integration-recovery.enabled=true"
                 ).applyTo(ctx.getEnvironment())
             )

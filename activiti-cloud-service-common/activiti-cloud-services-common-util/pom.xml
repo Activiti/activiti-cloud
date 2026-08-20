@@ -10,6 +10,9 @@
   </parent>
   <artifactId>activiti-cloud-services-common-util</artifactId>
   <name>Activiti Cloud Services :: Common Util</name>
+  <properties>
+    <mockito.agent.arg/>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>jakarta.servlet</groupId>

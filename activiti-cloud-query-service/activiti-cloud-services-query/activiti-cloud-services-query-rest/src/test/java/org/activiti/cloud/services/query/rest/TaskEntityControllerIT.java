@@ -343,4 +343,88 @@ class TaskEntityControllerIT {
             .perform(get("/v1/tasks?page=0&size=1000").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void should_returnCandidateUsers_when_userIsPermitted() throws Exception {
+        //given
+        TaskEntity taskEntity = buildDefaultTask();
+        taskEntity.setTaskCandidateUsers(buildCandidateUsers(taskEntity));
+
+        given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString())).willReturn(taskEntity);
+
+        Predicate restrictionPredicate = mock(Predicate.class);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks/{taskId}/candidate-users", taskEntity.getId()).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[1]").doesNotExist())
+            .andExpect(jsonPath("$[0]").value("testuser"));
+    }
+
+    @Test
+    void should_returnForbidden_when_userIsNotPermittedForCandidateUsers() throws Exception {
+        //given
+        TaskEntity taskEntity = buildDefaultTask();
+        taskEntity.setTaskCandidateUsers(buildCandidateUsers(taskEntity));
+
+        given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString())).willReturn(taskEntity);
+
+        Predicate restrictionPredicate = mock(Predicate.class);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(false);
+        given(securityManager.getAuthenticatedUserId()).willReturn("otheruser");
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks/{taskId}/candidate-users", taskEntity.getId()).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_returnCandidateGroups_when_userIsPermitted() throws Exception {
+        //given
+        TaskEntity taskEntity = buildDefaultTask();
+        taskEntity.setTaskCandidateGroups(buildCandidateGroups(taskEntity));
+
+        given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString())).willReturn(taskEntity);
+
+        Predicate restrictionPredicate = mock(Predicate.class);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(true);
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks/{taskId}/candidate-groups", taskEntity.getId()).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[1]").doesNotExist())
+            .andExpect(jsonPath("$[0]").value("testgroup"));
+    }
+
+    @Test
+    void should_returnForbidden_when_userIsNotPermittedForCandidateGroups() throws Exception {
+        //given
+        TaskEntity taskEntity = buildDefaultTask();
+        taskEntity.setTaskCandidateGroups(buildCandidateGroups(taskEntity));
+
+        given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString())).willReturn(taskEntity);
+
+        Predicate restrictionPredicate = mock(Predicate.class);
+        given(taskLookupRestrictionService.restrictToInvolvedUsersQuery(any())).willReturn(restrictionPredicate);
+        given(taskRepository.existsInProcessInstanceScope(restrictionPredicate)).willReturn(false);
+        given(securityManager.getAuthenticatedUserId()).willReturn("otheruser");
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks/{taskId}/candidate-groups", taskEntity.getId()).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isForbidden());
+    }
 }

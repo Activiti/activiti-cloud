@@ -9,6 +9,9 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>activiti-cloud-service-common-config</artifactId>
+  <properties>
+    <mockito.agent.arg/>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework</groupId>

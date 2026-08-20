@@ -664,7 +664,7 @@ public class ConnectorConfigurationIT {
             .extracting(Throwable::getMessage)
             .isEqualTo("Timeout after PT1S while waiting for result");
 
-        assertThat(connectorTimeoutCounter.get()).isEqualTo(1);
+        await().untilAtomic(connectorTimeoutCounter, Matchers.equalTo(1));
     }
 
     @Test
@@ -721,7 +721,7 @@ public class ConnectorConfigurationIT {
             .extracting(Throwable::getMessage)
             .isEqualTo("Timeout after PT1S while waiting for result");
 
-        assertThat(connectorTimeoutCounter.get()).isEqualTo(1);
+        await().untilAtomic(connectorTimeoutCounter, Matchers.equalTo(1));
     }
 
     @Test
