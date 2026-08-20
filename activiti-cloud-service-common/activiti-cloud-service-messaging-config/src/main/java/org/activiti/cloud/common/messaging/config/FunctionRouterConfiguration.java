@@ -82,6 +82,7 @@ public class FunctionRouterConfiguration {
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
     public static final String FUNCTION_ROUTER_ANONYMOUS_INPUT = "functionRouterAnonymousInput";
     public static final String CONNECTOR_TYPE = "connectorType";
+    private static final String QUEUE_MASTER_LOCATOR = "x-queue-master-locator";
 
     @Bean
     ApplicationRunner functionRouterConfigurationApplicationRunner(
@@ -115,27 +116,13 @@ public class FunctionRouterConfiguration {
             if (declarable instanceof Queue queue) {
                 Optional.ofNullable(queue.getName())
                     .filter(it -> it.startsWith(queuePrefix))
-                    .ifPresent(name -> setLeaderLocator(queue));
+                    .ifPresent(name ->
+                        queue.addArgument(QUEUE_MASTER_LOCATOR, QueueBuilder.LeaderLocator.clientLocal.getValue())
+                    );
             }
 
             return declarable;
         };
-    }
-
-    /**
-     * Classic queues only accept {@code x-queue-master-locator}; quorum/stream queues require
-     * {@code x-queue-leader-locator} (which {@link Queue#setLeaderLocator} always uses since spring-amqp 4.0.4).
-     */
-    private static void setLeaderLocator(Queue queue) {
-        var locatorValue = QueueBuilder.LeaderLocator.clientLocal.getValue();
-        var queueType = Optional.ofNullable(queue.getArguments())
-            .map(args -> args.get("x-queue-type"))
-            .orElse(null);
-        if ("quorum".equals(queueType) || "stream".equals(queueType)) {
-            queue.setLeaderLocator(locatorValue);
-        } else {
-            queue.addArgument("x-queue-master-locator", locatorValue);
-        }
     }
 
     @Bean

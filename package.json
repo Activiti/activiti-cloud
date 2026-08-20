@@ -55,7 +55,7 @@
     "@playwright/test": "^1.62.1",
     "@types/node": "^22.0.0",
     "@types/ws": "^8.18.1",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.11",
     "typescript": "^5.5.4"
   },
   "engines": {
@@ -67,7 +67,7 @@
     "dotenv": "^17.4.2",
     "jwt-decode": "^4.0.0",
     "winston": "^3.19.0",
-    "ws": "^8.21.1"
+    "ws": "^8.21.3"
   },
   "overrides": {
     "fast-uri": "3.1.5",
