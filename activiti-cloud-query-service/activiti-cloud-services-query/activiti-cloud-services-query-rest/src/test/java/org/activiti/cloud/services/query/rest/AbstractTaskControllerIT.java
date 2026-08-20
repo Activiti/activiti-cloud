@@ -26,11 +26,14 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import org.activiti.api.task.model.Task;
+import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -45,6 +48,8 @@ import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
@@ -67,6 +72,9 @@ public abstract class AbstractTaskControllerIT {
     @Autowired
     protected QueryTestUtils queryTestUtils;
 
+    @Autowired
+    private Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache;
+
     protected abstract String getSearchEndpointHttpGet();
 
     protected abstract String getSearchEndpointHttpPost();
@@ -81,11 +89,23 @@ public abstract class AbstractTaskControllerIT {
 
     @AfterEach
     public void cleanUp() {
+        FeatureToggleHolder.reset();
+        restrictedTaskCountCache.invalidateAll();
         queryTestUtils.cleanUp();
     }
 
-    @Test
-    void should_return400_whenInvalidSearchParameterIsProvided() {
+    protected void setTaskCountCacheEnabled(boolean taskCountCacheEnabled) {
+        if (taskCountCacheEnabled) {
+            FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE::equals);
+        } else {
+            FeatureToggleHolder.reset();
+        }
+    }
+
+    @ParameterizedTest(name = "taskCountCache={0}")
+    @ValueSource(booleans = { false, true })
+    void should_return400_whenInvalidSearchParameterIsProvided(boolean taskCountCacheEnabled) {
+        setTaskCountCacheEnabled(taskCountCacheEnabled);
         String missingSortField = """
             {
                 "sort": {
@@ -155,8 +175,10 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
     }
 
-    @Test
-    void should_returnPaginatedTasks_whenNoFilters() {
+    @ParameterizedTest(name = "taskCountCache={0}")
+    @ValueSource(booleans = { false, true })
+    void should_returnPaginatedTasks_whenNoFilters(boolean taskCountCacheEnabled) {
+        setTaskCountCacheEnabled(taskCountCacheEnabled);
         for (int i = 0; i < 5; i++) {
             queryTestUtils
                 .buildTask()

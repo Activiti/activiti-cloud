@@ -44,6 +44,8 @@ import org.activiti.cloud.services.query.rest.TaskDeleteController;
 import org.activiti.cloud.services.query.rest.TaskVariableAdminController;
 import org.activiti.cloud.services.query.rest.TaskVariableController;
 import org.activiti.cloud.services.query.rest.advice.SerializationViewResponseBodyAdvice;
+import org.activiti.cloud.services.query.rest.count.CountAdminController;
+import org.activiti.cloud.services.query.rest.count.CountController;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -86,6 +88,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         IntegrationContextAdminController.class,
         ProcessInstanceBpmnActivitiesAdminController.class,
         ProcessInstanceSequenceFlowsAdminController.class,
+        CountController.class,
+        CountAdminController.class,
     }
 )
 @PropertySource("classpath:query-rest.properties")

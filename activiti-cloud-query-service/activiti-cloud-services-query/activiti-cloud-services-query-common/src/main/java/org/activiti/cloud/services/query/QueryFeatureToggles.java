@@ -31,4 +31,14 @@ public final class QueryFeatureToggles {
      * subquery-based queries (flag {@code true}).
      */
     public static final String FEATURE_EXISTS_SUBQUERIES = "query.specifications.exists-subqueries";
+
+    /**
+     * Enables the short-lived in-memory cache for restricted task counts.
+     */
+    public static final String FEATURE_TASK_COUNT_CACHE = "query.task-count.cache";
+
+    /**
+     * Enables the short-lived in-memory cache for restricted process instance counts.
+     */
+    public static final String FEATURE_PROCESS_INSTANCE_COUNT_CACHE = "query.process-instance-count.cache";
 }

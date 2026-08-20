@@ -234,6 +234,7 @@ public class TaskSearchRequestBuilder {
             }
         }
         return new TaskSearchRequest(
+            null,
             onlyStandalone,
             onlyRoot,
             id,
