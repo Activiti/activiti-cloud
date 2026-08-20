@@ -412,6 +412,91 @@
         } ]
       }
     },
+    "/v1/count" : {
+      "post" : {
+        "tags" : [ "count-controller" ],
+        "summary" : "Count resources for multiple filters and resource types in a single request",
+        "description" : "Body is keyed by resource type (TASK, PROCESS_INSTANCE) with a list of search requests, each of which must specify a unique requestId. Returns the count for each filter keyed by its requestId, restricted to the authenticated user.",
+        "operationId" : "count",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BatchCountRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "type" : "integer",
+                      "format" : "int64"
+                    }
+                  }
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "type" : "integer",
+                      "format" : "int64"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
+      }
+    },
     "/admin/v1/tasks" : {
       "get" : {
         "tags" : [ "task-admin-controller" ],
@@ -2634,6 +2719,91 @@
                 "schema" : {
                   "type" : "integer",
                   "format" : "int64"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
+      }
+    },
+    "/admin/v1/count" : {
+      "post" : {
+        "tags" : [ "count-admin-controller" ],
+        "summary" : "Count resources for multiple filters and resource types in a single request (admin)",
+        "description" : "Body is keyed by resource type (TASK, PROCESS_INSTANCE) with a list of search requests, each of which must specify a unique requestId. Returns the count for each filter keyed by its requestId without user restriction.",
+        "operationId" : "count",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BatchCountRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "type" : "integer",
+                      "format" : "int64"
+                    }
+                  }
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "type" : "integer",
+                      "format" : "int64"
+                    }
+                  }
                 }
               }
             }
@@ -7199,6 +7369,9 @@
       "TaskSearchRequest_ProcessVariables" : {
         "type" : "object",
         "properties" : {
+          "requestId" : {
+            "type" : "string"
+          },
           "onlyStandalone" : {
             "type" : "boolean"
           },
@@ -7759,6 +7932,9 @@
           },
           "includeLinkedProcesses" : {
             "type" : "boolean"
+          },
+          "requestId" : {
+            "type" : "string"
           }
         },
         "title" : "ProcessInstanceSearchRequest_ProcessVariables"
@@ -9337,6 +9513,377 @@
           }
         },
         "title" : "BPMNDiagramSequenceFlowEntry"
+      },
+      "BatchCountRequest": {
+        "properties": {
+          "PROCESS_INSTANCE": {
+            "items": {
+              "$ref": "#/components/schemas/ProcessInstanceSearchRequest"
+            },
+            "type": "array"
+          },
+          "TASK": {
+            "items": {
+              "$ref": "#/components/schemas/TaskSearchRequest"
+            },
+            "type": "array"
+          }
+        },
+        "title": "BatchCountRequest",
+        "type": "object"
+      },
+      "CloudRuntimeEntitySort" : {
+        "type" : "object",
+        "properties" : {
+          "field" : {
+            "type" : "string"
+          },
+          "direction" : {
+            "type" : "string",
+            "enum" : [ "ASC", "DESC" ]
+          },
+          "isProcessVariable" : {
+            "type" : "boolean"
+          },
+          "processDefinitionKey" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "string", "integer", "bigdecimal", "boolean", "date", "datetime" ]
+          }
+        },
+        "title" : "CloudRuntimeEntitySort"
+      },
+      "ProcessInstanceSearchRequest" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "parentId" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "name" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "processDefinitionName" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "initiator" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "appVersion" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "status" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "CREATED", "RUNNING", "SUSPENDED", "CANCELLED", "COMPLETED" ]
+            },
+            "uniqueItems" : true
+          },
+          "lastModifiedFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "lastModifiedTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "startFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "startTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "completedFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "completedTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "suspendedFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "suspendedTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "processVariableFilters" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/VariableFilter"
+            },
+            "uniqueItems" : true
+          },
+          "processVariableKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "Identifies a process variable by its process definition key and variable name. It's represented in the form 'processDefinitionKey/variableName'.",
+              "example" : "processDefinitionKey/variableName"
+            },
+            "uniqueItems" : true
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/CloudRuntimeEntitySort"
+          },
+          "includeSubprocesses" : {
+            "type" : "boolean"
+          },
+          "linkedProcessInstanceId" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "linkedProcessInstanceType" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "processRelatedTo" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "includeUnlinkedProcesses" : {
+            "type" : "boolean"
+          },
+          "includeLinkedProcesses" : {
+            "type" : "boolean"
+          },
+          "requestId" : {
+            "type" : "string"
+          }
+        },
+        "title" : "ProcessInstanceSearchRequest"
+      },
+      "TaskSearchRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requestId" : {
+            "type" : "string"
+          },
+          "onlyStandalone" : {
+            "type" : "boolean"
+          },
+          "onlyRoot" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "parentId" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "processInstanceId" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "name" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "description" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "processDefinitionName" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "priority" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            },
+            "uniqueItems" : true
+          },
+          "status" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "CREATED", "ASSIGNED", "SUSPENDED", "COMPLETED", "CANCELLED", "DELETED" ]
+            },
+            "uniqueItems" : true
+          },
+          "completedBy" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "assignee" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "createdFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "lastModifiedFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "lastModifiedTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "lastClaimedFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "lastClaimedTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "dueDateFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "dueDateTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "completedFrom" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "completedTo" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "candidateUserId" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "candidateGroupId" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          },
+          "taskVariableFilters" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/VariableFilter"
+            },
+            "uniqueItems" : true
+          },
+          "processVariableFilters" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/VariableFilter"
+            },
+            "uniqueItems" : true
+          },
+          "processVariableKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "Identifies a process variable by its process definition key and variable name. It's represented in the form 'processDefinitionKey/variableName'.",
+              "example" : "processDefinitionKey/variableName"
+            },
+            "uniqueItems" : true
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/CloudRuntimeEntitySort"
+          }
+        },
+        "title" : "TaskSearchRequest"
+      },
+      "VariableFilter" : {
+        "type" : "object",
+        "properties" : {
+          "processDefinitionKey" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "string", "integer", "bigdecimal", "boolean", "date", "datetime" ]
+          },
+          "value" : {
+            "type" : "string"
+          },
+          "operator" : {
+            "type" : "string",
+            "enum" : [ "eq", "ne", "like", "gt", "gte", "lt", "lte" ]
+          }
+        },
+        "title" : "VariableFilter"
       },
       "EntriesResponseContentBPMNDiagramSequenceFlowEntry" : {
         "type" : "object",

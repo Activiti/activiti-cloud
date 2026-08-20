@@ -53,6 +53,7 @@ import org.activiti.cloud.services.query.rest.assembler.QueryCloudVariableInstan
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.count.CountService;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
@@ -430,5 +431,14 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceControllerHelper,
             processInstanceSearchService
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CountService countService(
+        TaskControllerHelper taskControllerHelper,
+        ProcessInstanceSearchService processInstanceSearchService
+    ) {
+        return new CountService(taskControllerHelper, processInstanceSearchService);
     }
 }
