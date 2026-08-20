@@ -15,15 +15,19 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.querydsl.core.types.Predicate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
+import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -62,6 +66,8 @@ public class TaskControllerHelper {
 
     private final SecurityManager securityManager;
 
+    private final Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache;
+
     public TaskControllerHelper(
         TaskRepository taskRepository,
         TaskCandidateUserRepository taskCandidateUserRepository,
@@ -71,7 +77,8 @@ public class TaskControllerHelper {
         QueryDslPredicateAggregator predicateAggregator,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        SecurityManager securityManager
+        SecurityManager securityManager,
+        Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache
     ) {
         this.taskRepository = taskRepository;
         this.taskCandidateUserRepository = taskCandidateUserRepository;
@@ -82,6 +89,7 @@ public class TaskControllerHelper {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.taskLookupRestrictionService = taskLookupRestrictionService;
         this.securityManager = securityManager;
+        this.restrictedTaskCountCache = restrictedTaskCountCache;
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAll(
@@ -252,12 +260,37 @@ public class TaskControllerHelper {
 
     @Transactional(readOnly = true)
     public Long countTasksRestricted(TaskSearchRequest taskSearchRequest) {
+        String authenticatedUserId = securityManager.getAuthenticatedUserId();
+        List<String> authenticatedUserGroups = securityManager.getAuthenticatedUserGroups();
+
+        if (!FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE)) {
+            return countRestrictedTasks(taskSearchRequest, authenticatedUserId, authenticatedUserGroups);
+        }
+
+        List<String> normalizedAuthenticatedUserGroups = normalizeAuthenticatedUserGroups(authenticatedUserGroups);
+        return restrictedTaskCountCache.get(
+            new RestrictedTaskCountCacheKey(authenticatedUserId, normalizedAuthenticatedUserGroups, taskSearchRequest),
+            unused -> countRestrictedTasks(taskSearchRequest, authenticatedUserId, authenticatedUserGroups)
+        );
+    }
+
+    private Long countRestrictedTasks(
+        TaskSearchRequest taskSearchRequest,
+        String authenticatedUserId,
+        List<String> authenticatedUserGroups
+    ) {
         TaskSpecification restrictedTaskSpecification = TaskSpecification.restricted(
             taskSearchRequest,
-            securityManager.getAuthenticatedUserId(),
-            securityManager.getAuthenticatedUserGroups()
+            authenticatedUserId,
+            authenticatedUserGroups
         );
-
         return taskRepository.count(restrictedTaskSpecification);
+    }
+
+    private List<String> normalizeAuthenticatedUserGroups(List<String> authenticatedUserGroups) {
+        if (authenticatedUserGroups == null) {
+            return List.of();
+        }
+        return authenticatedUserGroups.stream().filter(Objects::nonNull).distinct().sorted().toList();
     }
 }

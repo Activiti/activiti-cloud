@@ -26,7 +26,8 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -76,8 +77,10 @@ class TaskControllerIT extends AbstractTaskControllerIT {
         return "/v1/tasks/count";
     }
 
-    @Test
-    void should_returnTasksAndCount_restrictedToCurrentUser() {
+    @ParameterizedTest(name = "taskCountCache={0}")
+    @ValueSource(booleans = { false, true })
+    void should_returnTasksAndCount_restrictedToCurrentUser(boolean taskCountCacheEnabled) {
+        setTaskCountCacheEnabled(taskCountCacheEnabled);
         String otherUser = "other-user";
         String testgroup = "testgroup";
         Mockito.when(securityManager.getAuthenticatedUserGroups()).thenReturn(List.of(testgroup));
