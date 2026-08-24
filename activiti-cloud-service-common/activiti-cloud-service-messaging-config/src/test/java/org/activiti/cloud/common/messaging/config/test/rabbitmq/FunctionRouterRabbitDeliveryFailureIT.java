@@ -460,7 +460,7 @@ class FunctionRouterRabbitDeliveryFailureIT {
         await()
             .during(Duration.ofSeconds(2))
             .atMost(Duration.ofSeconds(3))
-            .until(() -> TestConnectorState.fanoutBProcessed.isEmpty());
+            .until(TestConnectorState.fanoutBProcessed::isEmpty);
         assertThat(TestConnectorState.fanoutAProcessed).containsExactly(payload);
 
         // free B's executor: the redelivered, B-pinned message now succeeds
