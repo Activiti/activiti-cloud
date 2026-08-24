@@ -33,7 +33,6 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.mock;
 import static org.springframework.cloud.function.context.FunctionProperties.FUNCTION_DEFINITION;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
@@ -56,6 +55,7 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.config.FunctionRouterExecutorFactory;
+import org.activiti.cloud.common.messaging.config.RequeueDeliveryException;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -63,16 +63,10 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.ImmediateRequeueAmqpException;
-import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.function.context.FunctionRegistry;
@@ -81,7 +75,6 @@ import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -202,10 +195,6 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Autowired
     private FunctionRouterExecutorFactory functionRouterExecutorFactory;
-
-    @Autowired
-    @Qualifier("functionRouterListenerContainerCustomizer")
-    private ListenerContainerCustomizer<MessageListenerContainer> functionRouterListenerContainerCustomizer;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -816,20 +805,16 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void functionRouterListenerContainerCustomizerForcesManualAckOnlyForFunctionRouterGroup() {
-        var functionRouterGroup = messagingProperties.getFunctionRouter().getGroup();
+    void functionRouterConsumersUseManualAcknowledgeMode() {
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.acknowledge-mode")
+        ).isEqualTo("MANUAL");
 
-        var functionRouterContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
-        functionRouterListenerContainerCustomizer.configure(
-            functionRouterContainer,
-            "some-destination",
-            functionRouterGroup
-        );
-        assertThat(functionRouterContainer.getAcknowledgeMode()).isEqualTo(AcknowledgeMode.MANUAL);
-
-        var otherContainer = new SimpleMessageListenerContainer(mock(ConnectionFactory.class));
-        functionRouterListenerContainerCustomizer.configure(otherContainer, "some-destination", "some-other-group");
-        assertThat(otherContainer.getAcknowledgeMode()).isNotEqualTo(AcknowledgeMode.MANUAL);
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.acknowledge-mode"
+            )
+        ).isEqualTo("MANUAL");
     }
 
     @Test
@@ -952,7 +937,7 @@ public class FunctionRouterBindingConfigurationIT {
 
         //then
         assertThat(futureResult.get()).isNull();
-        assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(ImmediateRequeueAmqpException.class);
+        assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(RequeueDeliveryException.class);
     }
 
     @Test

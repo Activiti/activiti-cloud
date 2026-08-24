@@ -38,13 +38,9 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.ImmediateRequeueAmqpException;
-import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -61,10 +57,12 @@ import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.integration.MessageDispatchingException;
+import org.springframework.integration.StaticMessageHeaderAccessor;
+import org.springframework.integration.acks.AcknowledgmentCallback;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
@@ -129,28 +127,6 @@ public class FunctionRouterConfiguration {
             }
 
             return declarable;
-        };
-    }
-
-    /**
-     * Switches the function router's consumer to manual ack so {@code functionRouterMessageHandler}
-     * can ack/nack once the fire-and-forget handoff to the per-connector executor actually
-     * completes. Only registered when the function router is enabled (the enclosing configuration is
-     * conditional on that), so no consumer is ever left on manual ack with nothing to acknowledge it.
-     */
-    @Bean
-    ListenerContainerCustomizer<MessageListenerContainer> functionRouterListenerContainerCustomizer(
-        ActivitiCloudMessagingProperties messagingProperties
-    ) {
-        final var functionRouterGroup = messagingProperties.getFunctionRouter().getGroup();
-
-        return (container, destinationName, group) -> {
-            if (
-                functionRouterGroup.equals(group) &&
-                container instanceof AbstractMessageListenerContainer rabbitContainer
-            ) {
-                rabbitContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-            }
         };
     }
 
@@ -237,15 +213,16 @@ public class FunctionRouterConfiguration {
                                 messageContentTypeNormalizer.normalizeToExpected(functionMessage, expectedContentType)
                             )
                                 .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
-                                // Manual ack (see the listener container customizer) puts the live,
-                                // non-serializable AMQP channel in the message headers so this router
-                                // can ack/nack the original message. Those transport headers must not
-                                // leak into the routed business message: a handler that persists it
-                                // (e.g. the messages-service's JdbcMessageStore aggregator serializes
-                                // the message) would fail to serialize the channel. The outer message
-                                // retains them for acknowledge()/negativelyAcknowledgeAndRequeue().
+                                // Manual ack carries a live, non-serializable acknowledgment handle on
+                                // the message: the AMQP channel/delivery-tag on the classic RabbitMQ
+                                // binder, or an AcknowledgmentCallback on binders that provide one.
+                                // Neither must leak into the routed business message: a handler that
+                                // persists it (e.g. the messages-service's JdbcMessageStore aggregator
+                                // serializes the message) would fail to serialize the handle. The outer
+                                // message retains them for acknowledge()/negativelyAcknowledgeAndRequeue().
                                 .removeHeader(AmqpHeaders.CHANNEL)
                                 .removeHeader(AmqpHeaders.DELIVERY_TAG)
+                                .removeHeader(IntegrationMessageHeaderAccessor.ACKNOWLEDGMENT_CALLBACK)
                                 .build();
                         };
 
@@ -291,7 +268,7 @@ public class FunctionRouterConfiguration {
                                         // no backoff and would flood the logs.
                                         if (
                                             cause instanceof RejectedExecutionException ||
-                                            cause instanceof ImmediateRequeueAmqpException
+                                            cause instanceof RequeueDeliveryException
                                         ) {
                                             log.debug("Delivery failure - will be requeued for redelivery", error);
                                             throw new CompletionException(cause);
@@ -330,7 +307,7 @@ public class FunctionRouterConfiguration {
                                             exception instanceof CompletionException ce ? ce.getCause() : exception;
                                         return !(
                                             cause instanceof RejectedExecutionException ||
-                                            cause instanceof ImmediateRequeueAmqpException
+                                            cause instanceof RequeueDeliveryException
                                         );
                                     })
                                     .toList();
@@ -401,10 +378,18 @@ public class FunctionRouterConfiguration {
     }
 
     /**
-     * Acks the message when delivered with a manual-ack channel/delivery-tag; a no-op otherwise, so
-     * it is safe to call regardless of ack-mode.
+     * Acks the message once processing has genuinely completed. Prefers the binder-neutral
+     * {@link AcknowledgmentCallback} when the active binder provides one (e.g. Kafka); falls back to
+     * the RabbitMQ channel/delivery-tag when it does not (the classic AMQP binder exposes only
+     * those). A no-op when neither is present, so it is safe to call regardless of ack mode.
      */
-    private static void acknowledge(Message<?> message) {
+    static void acknowledge(Message<?> message) {
+        final var callback = StaticMessageHeaderAccessor.getAcknowledgmentCallback(message);
+        if (callback != null) {
+            callback.acknowledge(AcknowledgmentCallback.Status.ACCEPT);
+            return;
+        }
+
         withChannelAndDeliveryTag(message, (channel, deliveryTag) -> {
             try {
                 channel.basicAck(deliveryTag, false);
@@ -415,10 +400,17 @@ public class FunctionRouterConfiguration {
     }
 
     /**
-     * Nacks the message with {@code requeue=true} when delivered with a manual-ack
-     * channel/delivery-tag so AMQP redelivers it; a no-op otherwise.
+     * Negatively acks the message with requeue so the broker redelivers it. Prefers the
+     * binder-neutral {@link AcknowledgmentCallback.Status#REQUEUE} when available; falls back to a
+     * RabbitMQ nack with {@code requeue=true} otherwise. A no-op when neither is present.
      */
-    private static void negativelyAcknowledgeAndRequeue(Message<?> message) {
+    static void negativelyAcknowledgeAndRequeue(Message<?> message) {
+        final var callback = StaticMessageHeaderAccessor.getAcknowledgmentCallback(message);
+        if (callback != null) {
+            callback.acknowledge(AcknowledgmentCallback.Status.REQUEUE);
+            return;
+        }
+
         withChannelAndDeliveryTag(message, (channel, deliveryTag) -> {
             try {
                 channel.basicNack(deliveryTag, false, true);

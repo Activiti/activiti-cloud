@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.ImmediateRequeueAmqpException;
 
 class FunctionRouterExecutorFactoryTest {
 
@@ -54,7 +53,7 @@ class FunctionRouterExecutorFactoryTest {
         executor.shutdown();
 
         assertThatThrownBy(() -> executor.submit(() -> {}))
-            .isInstanceOf(ImmediateRequeueAmqpException.class)
+            .isInstanceOf(RequeueDeliveryException.class)
             .hasMessage("Executor is shutting down; requeueing for redelivery");
     }
 
@@ -122,7 +121,7 @@ class FunctionRouterExecutorFactoryTest {
         releaseTask.countDown();
         submitter.join();
 
-        assertThat(thrown.get()).isInstanceOf(ImmediateRequeueAmqpException.class);
+        assertThat(thrown.get()).isInstanceOf(RequeueDeliveryException.class);
         assertThat(interrupted.get()).isTrue();
     }
 

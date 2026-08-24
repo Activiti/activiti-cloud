@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.ImmediateRequeueAmqpException;
 
 class FunctionRouterDeliveryFailureIT {
 
@@ -90,7 +89,7 @@ class FunctionRouterDeliveryFailureIT {
 
         // submitting to a shut-down executor is a requeue signal, not an application error
         assertThatThrownBy(() -> executor.submit(() -> {}))
-            .isInstanceOf(ImmediateRequeueAmqpException.class)
+            .isInstanceOf(RequeueDeliveryException.class)
             .hasMessage("Executor is shutting down; requeueing for redelivery");
 
         releaseTask.countDown();
@@ -100,14 +99,12 @@ class FunctionRouterDeliveryFailureIT {
     void delivery_failures_are_rethrown_not_collected_as_errors() {
         // both delivery-failure types are recognised by the filter in functionRouterMessageHandler
         Throwable rejectionError = new RejectedExecutionException("queue full");
-        Throwable shutdownError = new ImmediateRequeueAmqpException("shutdown");
+        Throwable shutdownError = new RequeueDeliveryException("shutdown");
 
         var isDeliveryFailure1 =
-            rejectionError instanceof RejectedExecutionException ||
-            rejectionError instanceof ImmediateRequeueAmqpException;
+            rejectionError instanceof RejectedExecutionException || rejectionError instanceof RequeueDeliveryException;
         var isDeliveryFailure2 =
-            shutdownError instanceof RejectedExecutionException ||
-            shutdownError instanceof ImmediateRequeueAmqpException;
+            shutdownError instanceof RejectedExecutionException || shutdownError instanceof RequeueDeliveryException;
 
         assertThat(isDeliveryFailure1).isTrue();
         assertThat(isDeliveryFailure2).isTrue();
