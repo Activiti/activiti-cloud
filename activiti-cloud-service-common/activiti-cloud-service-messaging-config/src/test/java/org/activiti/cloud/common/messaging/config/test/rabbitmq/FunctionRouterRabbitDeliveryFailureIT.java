@@ -86,6 +86,14 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
         "spring.cloud.stream.bindings.slowConnectorInput.group=slow-connector-group",
         "spring.cloud.stream.bindings.slowConnectorInput.content-type=text/plain",
         "activiti.cloud.messaging.function-router.routes.slowConnectorInput.enabled=true",
+        "spring.cloud.stream.bindings.fanoutAInput.destination=fanout-queue",
+        "spring.cloud.stream.bindings.fanoutAInput.group=fanout-a-group",
+        "spring.cloud.stream.bindings.fanoutAInput.content-type=text/plain",
+        "activiti.cloud.messaging.function-router.routes.fanoutAInput.enabled=true",
+        "spring.cloud.stream.bindings.fanoutBInput.destination=fanout-queue",
+        "spring.cloud.stream.bindings.fanoutBInput.group=fanout-b-group",
+        "spring.cloud.stream.bindings.fanoutBInput.content-type=text/plain",
+        "activiti.cloud.messaging.function-router.routes.fanoutBInput.enabled=true",
     }
 )
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class })
@@ -105,6 +113,11 @@ class FunctionRouterRabbitDeliveryFailureIT {
 
     private static final String SLOW_CONNECTOR_TYPE = "slow-connector-queue";
     private static final String SLOW_EXCHANGE = "slow-connector-queue";
+
+    // two connectors share one destination (fan-out), like co-located audit + query on engine-events
+    private static final String FANOUT_CONNECTOR_TYPE = "fanout-queue";
+    private static final String FANOUT_EXCHANGE = "fanout-queue";
+    private static final String FANOUT_B_REGISTRATION_NAME = "fanoutConnectorB_registration";
 
     @TestConfiguration
     static class TestConnectorConfig {
@@ -131,6 +144,28 @@ class FunctionRouterRabbitDeliveryFailureIT {
             return TestConnectorState::handleSlow;
         }
 
+        @InputBinding("fanoutAInput")
+        SubscribableChannel fanoutAInput() {
+            return MessageChannels.publishSubscribe("fanoutAInput").getObject();
+        }
+
+        @Bean("fanoutConnectorA")
+        @ConnectorBinding(input = "fanoutAInput", connectorType = FANOUT_CONNECTOR_TYPE, condition = "")
+        Consumer<org.springframework.messaging.Message<String>> fanoutConnectorA() {
+            return TestConnectorState::handleFanoutA;
+        }
+
+        @InputBinding("fanoutBInput")
+        SubscribableChannel fanoutBInput() {
+            return MessageChannels.publishSubscribe("fanoutBInput").getObject();
+        }
+
+        @Bean("fanoutConnectorB")
+        @ConnectorBinding(input = "fanoutBInput", connectorType = FANOUT_CONNECTOR_TYPE, condition = "")
+        Consumer<org.springframework.messaging.Message<String>> fanoutConnectorB() {
+            return TestConnectorState::handleFanoutB;
+        }
+
         @Bean("testErrorHandler")
         Consumer<ErrorMessage> testErrorHandler() {
             return TestConnectorState::recordError;
@@ -144,6 +179,8 @@ class FunctionRouterRabbitDeliveryFailureIT {
     static final class TestConnectorState {
 
         static final CopyOnWriteArrayList<String> processedPayloads = new CopyOnWriteArrayList<>();
+        static final CopyOnWriteArrayList<String> fanoutAProcessed = new CopyOnWriteArrayList<>();
+        static final CopyOnWriteArrayList<String> fanoutBProcessed = new CopyOnWriteArrayList<>();
         static final CopyOnWriteArrayList<ErrorMessage> capturedErrors = new CopyOnWriteArrayList<>();
         static final AtomicReference<CountDownLatch> slowConnectorGate = new AtomicReference<>();
         static final AtomicReference<CountDownLatch> slowConnectorStarted = new AtomicReference<>(
@@ -173,12 +210,22 @@ class FunctionRouterRabbitDeliveryFailureIT {
             processedPayloads.add(message.getPayload());
         }
 
+        static void handleFanoutA(org.springframework.messaging.Message<String> message) {
+            fanoutAProcessed.add(message.getPayload());
+        }
+
+        static void handleFanoutB(org.springframework.messaging.Message<String> message) {
+            fanoutBProcessed.add(message.getPayload());
+        }
+
         static void recordError(ErrorMessage errorMessage) {
             capturedErrors.add(errorMessage);
         }
 
         static void reset() {
             processedPayloads.clear();
+            fanoutAProcessed.clear();
+            fanoutBProcessed.clear();
             capturedErrors.clear();
             slowConnectorGate.set(null);
             slowConnectorStarted.set(new CountDownLatch(1));
@@ -377,6 +424,56 @@ class FunctionRouterRabbitDeliveryFailureIT {
         }
 
         assertThat(TestConnectorState.capturedErrors).isEmpty();
+    }
+
+    @Test
+    void should_redeliverOnlyFailedRegistration_onPartialFanOutFailure() throws InterruptedException {
+        // Two connectors (A, B) share one destination, as co-located audit + query do for
+        // engine-events. Saturate ONLY B's executor so, for a single delivery, A succeeds while B
+        // hits a delivery failure. Only B must be redelivered; A must not re-run.
+        var executorB = functionRouterExecutorFactory.apply(FANOUT_B_REGISTRATION_NAME);
+
+        var runningTaskStarted = new CountDownLatch(1);
+        var releaseRunningTask = new CountDownLatch(1);
+        executorB.submit(() -> {
+            runningTaskStarted.countDown();
+            try {
+                releaseRunningTask.await(20, TimeUnit.SECONDS);
+            } catch (InterruptedException _) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        assertThat(runningTaskStarted.await(5, TimeUnit.SECONDS))
+            .as("B's executor task should have started running")
+            .isTrue();
+        executorB.submit(() -> {}); // fill B's single queue slot -> B now rejects
+
+        var payload = uniquePayload("partial-fanout");
+        publish(FANOUT_EXCHANGE, FANOUT_CONNECTOR_TYPE, payload);
+
+        // A (unsaturated) processes the message exactly once
+        await()
+            .atMost(Duration.ofSeconds(10))
+            .untilAsserted(() -> assertThat(TestConnectorState.fanoutAProcessed).containsExactly(payload));
+
+        // while B stays saturated it must not process, and the B-pinned redeliveries must not re-run A
+        await()
+            .during(Duration.ofSeconds(2))
+            .atMost(Duration.ofSeconds(3))
+            .until(() -> TestConnectorState.fanoutBProcessed.isEmpty());
+        assertThat(TestConnectorState.fanoutAProcessed).containsExactly(payload);
+
+        // free B's executor: the redelivered, B-pinned message now succeeds
+        releaseRunningTask.countDown();
+
+        await()
+            .atMost(Duration.ofSeconds(15))
+            .untilAsserted(() -> assertThat(TestConnectorState.fanoutBProcessed).containsExactly(payload));
+
+        // A still processed exactly once - never duplicated by B's redelivery
+        assertThat(TestConnectorState.fanoutAProcessed).containsExactly(payload);
+        assertThat(TestConnectorState.capturedErrors).isEmpty();
+        assertThat(globalErrorChannelMessages).isEmpty();
     }
 
     private String uniquePayload(String label) {
