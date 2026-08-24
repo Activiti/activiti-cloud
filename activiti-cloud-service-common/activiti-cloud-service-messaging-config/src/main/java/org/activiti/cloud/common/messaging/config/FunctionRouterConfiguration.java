@@ -29,6 +29,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.ObjLongConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -357,7 +358,7 @@ public class FunctionRouterConfiguration {
                                                         );
                                                     }
                                                 })
-                                                .forEach(errorMessage -> errorHandlerDefinition.accept(errorMessage))
+                                                .forEach(errorHandlerDefinition)
                                         );
                                 }
 
@@ -469,7 +470,7 @@ public class FunctionRouterConfiguration {
         });
     }
 
-    private static void withChannelAndDeliveryTag(Message<?> message, BiConsumer<Channel, Long> action) {
+    private static void withChannelAndDeliveryTag(Message<?> message, ObjLongConsumer<Channel> action) {
         var channel = message.getHeaders().get(AmqpHeaders.CHANNEL, Channel.class);
         var deliveryTag = message.getHeaders().get(AmqpHeaders.DELIVERY_TAG, Long.class);
 
@@ -568,22 +569,20 @@ public class FunctionRouterConfiguration {
             public Object postProcessAfterInitialization(Object bean, String beanName) {
                 if (bean instanceof DirectChannel messageChannel) {
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class)).ifPresent(
-                        outputBinding -> {
-                            messageChannel.addInterceptor(
-                                new ChannelInterceptor() {
-                                    @Override
-                                    public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                                        return Optional.ofNullable(bindingServiceProperties.getBindings().get(beanName))
-                                            .<Message<?>>map(binding ->
-                                                MessageBuilder.fromMessage(message)
-                                                    .setHeader(FUNCTION_DESTINATION, binding.getDestination())
-                                                    .build()
-                                            )
-                                            .orElse(message);
-                                    }
+                        outputBinding -> messageChannel.addInterceptor(
+                            new ChannelInterceptor() {
+                                @Override
+                                public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                                    return Optional.ofNullable(bindingServiceProperties.getBindings().get(beanName))
+                                        .<Message<?>>map(binding ->
+                                            MessageBuilder.fromMessage(message)
+                                                .setHeader(FUNCTION_DESTINATION, binding.getDestination())
+                                                .build()
+                                        )
+                                        .orElse(message);
                                 }
-                            );
-                        }
+                            }
+                        )
                     );
                 }
                 return bean;
