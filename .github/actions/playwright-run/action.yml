@@ -59,7 +59,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@5177eca5d3d71342d7f7e0a2a4d74cc16b1eeb1b # v18.21.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
 
     - name: Compute Report Portal Launch key
       id: compute-rp-launch-key
