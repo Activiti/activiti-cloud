@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -569,20 +569,21 @@ public class FunctionRouterConfiguration {
             public Object postProcessAfterInitialization(Object bean, String beanName) {
                 if (bean instanceof DirectChannel messageChannel) {
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class)).ifPresent(
-                        outputBinding -> messageChannel.addInterceptor(
-                            new ChannelInterceptor() {
-                                @Override
-                                public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                                    return Optional.ofNullable(bindingServiceProperties.getBindings().get(beanName))
-                                        .<Message<?>>map(binding ->
-                                            MessageBuilder.fromMessage(message)
-                                                .setHeader(FUNCTION_DESTINATION, binding.getDestination())
-                                                .build()
-                                        )
-                                        .orElse(message);
+                        outputBinding ->
+                            messageChannel.addInterceptor(
+                                new ChannelInterceptor() {
+                                    @Override
+                                    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                                        return Optional.ofNullable(bindingServiceProperties.getBindings().get(beanName))
+                                            .<Message<?>>map(binding ->
+                                                MessageBuilder.fromMessage(message)
+                                                    .setHeader(FUNCTION_DESTINATION, binding.getDestination())
+                                                    .build()
+                                            )
+                                            .orElse(message);
+                                    }
                                 }
-                            }
-                        )
+                            )
                     );
                 }
                 return bean;
