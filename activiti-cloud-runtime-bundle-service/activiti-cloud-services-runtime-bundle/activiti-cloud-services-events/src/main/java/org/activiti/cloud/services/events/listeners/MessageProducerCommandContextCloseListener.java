@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.listeners;
 
 import java.util.Collection;
 import java.util.List;
+import org.activiti.cloud.api.events.CloudRuntimeEventSorter;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -112,7 +113,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
             return List.of(processedEvents);
         }
 
-        return this.eventChunker.chunk(processedEvents);
+        return this.eventChunker.chunk(CloudRuntimeEventSorter.sort(processedEvents));
     }
 
     private List<CloudRuntimeEventImpl<?, ?>> processEvents(List<CloudRuntimeEvent<?, ?>> events) {

@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 //prettier-ignore
 public record TaskSearchRequest (
+    String requestId,
     boolean onlyStandalone,
     boolean onlyRoot,
     Set<String> id,

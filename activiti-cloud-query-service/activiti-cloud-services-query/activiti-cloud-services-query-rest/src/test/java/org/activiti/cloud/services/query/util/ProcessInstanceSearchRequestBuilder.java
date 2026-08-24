@@ -229,6 +229,7 @@ public class ProcessInstanceSearchRequestBuilder {
             processRelatedTo,
             includeUnlinkedProcesses,
             includeLinkedProcesses,
+            null,
             rootProcessInstanceIds
         );
     }

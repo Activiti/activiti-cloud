@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
+import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository.RelatedProcessCountProjection;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -44,16 +47,20 @@ public class ProcessInstanceSearchService {
 
     private final ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
 
+    private final Cache<RestrictedProcessInstanceCountCacheKey, Long> restrictedProcessInstanceCountCache;
+
     public ProcessInstanceSearchService(
         ProcessInstanceRepository processInstanceRepository,
         ProcessVariableService processVariableService,
         SecurityManager securityManager,
-        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository
+        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository,
+        Cache<RestrictedProcessInstanceCountCacheKey, Long> restrictedProcessInstanceCountCache
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processVariableService = processVariableService;
         this.securityManager = securityManager;
         this.processInstanceHierarchyRepository = processInstanceHierarchyRepository;
+        this.restrictedProcessInstanceCountCache = restrictedProcessInstanceCountCache;
     }
 
     @Transactional(readOnly = true)
@@ -92,9 +99,25 @@ public class ProcessInstanceSearchService {
 
     @Transactional(readOnly = true)
     public Long countRestricted(ProcessInstanceSearchRequest searchRequest) {
+        String authenticatedUserId = securityManager.getAuthenticatedUserId();
+
+        if (!FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_PROCESS_INSTANCE_COUNT_CACHE)) {
+            return countRestrictedProcessInstances(searchRequest, authenticatedUserId);
+        }
+
+        return restrictedProcessInstanceCountCache.get(
+            new RestrictedProcessInstanceCountCacheKey(authenticatedUserId, searchRequest),
+            unused -> countRestrictedProcessInstances(searchRequest, authenticatedUserId)
+        );
+    }
+
+    private Long countRestrictedProcessInstances(
+        ProcessInstanceSearchRequest searchRequest,
+        String authenticatedUserId
+    ) {
         ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restricted(
             searchRequest,
-            securityManager.getAuthenticatedUserId()
+            authenticatedUserId
         );
         return processInstanceRepository.count(restrictedSpecification);
     }

@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest.payload;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
@@ -48,6 +49,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
     private Set<String> processRelatedTo;
     private Boolean includeUnlinkedProcesses;
     private Boolean includeLinkedProcesses;
+    private String requestId;
 
     @JsonIgnore
     private Set<String> subprocessParentIds;
@@ -79,6 +81,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         Set<String> processRelatedTo,
         Boolean includeUnlinkedProcesses,
         Boolean includeLinkedProcesses,
+        String requestId,
         Set<String> subprocessParentIds
     ) {
         this.id = id;
@@ -105,7 +108,16 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         this.processRelatedTo = processRelatedTo;
         this.includeUnlinkedProcesses = includeUnlinkedProcesses;
         this.includeLinkedProcesses = includeLinkedProcesses;
+        this.requestId = requestId;
         this.subprocessParentIds = subprocessParentIds;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     @Override
@@ -326,5 +338,74 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
 
     public void setSubprocessParentIds(Set<String> subprocessParentIds) {
         this.subprocessParentIds = subprocessParentIds;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ProcessInstanceSearchRequest that = (ProcessInstanceSearchRequest) o;
+        return (
+            Objects.equals(id, that.id) &&
+            Objects.equals(parentId, that.parentId) &&
+            Objects.equals(name, that.name) &&
+            Objects.equals(processDefinitionName, that.processDefinitionName) &&
+            Objects.equals(initiator, that.initiator) &&
+            Objects.equals(appVersion, that.appVersion) &&
+            Objects.equals(status, that.status) &&
+            Objects.equals(lastModifiedFrom, that.lastModifiedFrom) &&
+            Objects.equals(lastModifiedTo, that.lastModifiedTo) &&
+            Objects.equals(startFrom, that.startFrom) &&
+            Objects.equals(startTo, that.startTo) &&
+            Objects.equals(completedFrom, that.completedFrom) &&
+            Objects.equals(completedTo, that.completedTo) &&
+            Objects.equals(suspendedFrom, that.suspendedFrom) &&
+            Objects.equals(suspendedTo, that.suspendedTo) &&
+            Objects.equals(processVariableFilters, that.processVariableFilters) &&
+            Objects.equals(processVariableKeys, that.processVariableKeys) &&
+            Objects.equals(sort, that.sort) &&
+            Objects.equals(includeSubprocesses, that.includeSubprocesses) &&
+            Objects.equals(linkedProcessInstanceId, that.linkedProcessInstanceId) &&
+            Objects.equals(linkedProcessInstanceType, that.linkedProcessInstanceType) &&
+            Objects.equals(processRelatedTo, that.processRelatedTo) &&
+            Objects.equals(includeUnlinkedProcesses, that.includeUnlinkedProcesses) &&
+            Objects.equals(includeLinkedProcesses, that.includeLinkedProcesses) &&
+            Objects.equals(subprocessParentIds, that.subprocessParentIds)
+        );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            id,
+            parentId,
+            name,
+            processDefinitionName,
+            initiator,
+            appVersion,
+            status,
+            lastModifiedFrom,
+            lastModifiedTo,
+            startFrom,
+            startTo,
+            completedFrom,
+            completedTo,
+            suspendedFrom,
+            suspendedTo,
+            processVariableFilters,
+            processVariableKeys,
+            sort,
+            includeSubprocesses,
+            linkedProcessInstanceId,
+            linkedProcessInstanceType,
+            processRelatedTo,
+            includeUnlinkedProcesses,
+            includeLinkedProcesses,
+            subprocessParentIds
+        );
     }
 }

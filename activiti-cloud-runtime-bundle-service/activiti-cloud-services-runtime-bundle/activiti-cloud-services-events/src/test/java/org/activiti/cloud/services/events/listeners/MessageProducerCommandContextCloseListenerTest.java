@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -27,16 +28,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -131,10 +138,13 @@ class MessageProducerCommandContextCloseListenerTest {
     @Captor
     private ArgumentCaptor<Message<List<CloudRuntimeEvent<?, ?>>>> incidentMessageArgumentCaptor;
 
-    private CloudRuntimeEventImpl<?, ?> event;
+    @Captor
+    private ArgumentCaptor<List<CloudRuntimeEventImpl<?, ?>>> chunkerArgumentCaptor;
+
+    private CloudRuntimeEventImpl<?, ?> cloudRuntimeEvent;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() {
         incidentService = new IncidentService(
             producer,
             messageBuilderChainIncidentFactory,
@@ -153,7 +163,7 @@ class MessageProducerCommandContextCloseListenerTest {
         );
 
         ProcessInstance processInstance = new ProcessInstanceImpl();
-        event = new CloudProcessCreatedEventImpl(processInstance);
+        cloudRuntimeEvent = new CloudProcessCreatedEventImpl(processInstance);
 
         when(producer.auditProducer()).thenReturn(auditChannel);
         when(producer.auditProducerIncidents()).thenReturn(auditIncidentsChannel);
@@ -163,7 +173,7 @@ class MessageProducerCommandContextCloseListenerTest {
         when(processEngineEventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
 
         ExecutionContext executionContext = TestUtils.mockExecutionContext();
-        given(commandContext.getGenericAttribute(event.getEntityId())).willReturn(executionContext);
+        given(commandContext.getGenericAttribute(cloudRuntimeEvent.getEntityId())).willReturn(executionContext);
         given(
             commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT)
         ).willReturn(executionContext);
@@ -172,17 +182,17 @@ class MessageProducerCommandContextCloseListenerTest {
     @Test
     void closedShouldSendEventsRegisteredOnTheCommandContext() {
         // given
-        processEngineEventsAggregator.add(event);
+        processEngineEventsAggregator.add(cloudRuntimeEvent);
         given(
             commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
-        ).willReturn(Collections.singletonList(event));
+        ).willReturn(Collections.singletonList(cloudRuntimeEvent));
 
         // when
         closeListener.closed(commandContext);
 
         // then
         verify(auditChannel).send(messageArgumentCaptor.capture());
-        assertThat(messageArgumentCaptor.getValue().getPayload()).containsExactly(event);
+        assertThat(messageArgumentCaptor.getValue().getPayload()).containsExactly(cloudRuntimeEvent);
 
         CloudRuntimeEvent<?, ?>[] result = messageArgumentCaptor.getValue().getPayload();
 
@@ -235,7 +245,7 @@ class MessageProducerCommandContextCloseListenerTest {
         // given
         given(
             commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
-        ).willReturn(Collections.singletonList(event));
+        ).willReturn(Collections.singletonList(cloudRuntimeEvent));
 
         // when
         closeListener.closed(commandContext);
@@ -390,6 +400,72 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
     }
 
+    @Test
+    void closedShouldSortEventsBeforeChunkingSoThatTaskCreatedPrecedesItsVariables() {
+        List<CloudRuntimeEventImpl<?, ?>> events = getTaskVariablesEmittedBeforeTaskCreated();
+
+        given(
+            this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(events);
+
+        this.closeListener.closed(this.commandContext);
+
+        verify(this.eventChunker).chunk(this.chunkerArgumentCaptor.capture());
+        assertThat(this.chunkerArgumentCaptor.getValue())
+            .extracting(event -> event.getEventType().name())
+            .containsExactly("TASK_CREATED", "VARIABLE_CREATED", "VARIABLE_CREATED", "VARIABLE_CREATED");
+
+        verify(this.auditChannel, atLeastOnce()).send(this.messageArgumentCaptor.capture());
+        var sentEvents = this.messageArgumentCaptor.getAllValues()
+            .stream()
+            .flatMap(message -> Arrays.stream(message.getPayload()))
+            .toList();
+        assertThat(sentEvents)
+            .extracting(event -> event.getEventType().name())
+            .containsExactly("TASK_CREATED", "VARIABLE_CREATED", "VARIABLE_CREATED", "VARIABLE_CREATED");
+    }
+
+    @Test
+    void closedShouldKeepEngineEmissionOrderWhenChunkingIsDisabled() {
+        var testListener = getMessageProducerCloseListenerWithDisabledChunker();
+        List<CloudRuntimeEventImpl<?, ?>> events = getTaskVariablesEmittedBeforeTaskCreated();
+
+        given(
+            this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(events);
+
+        testListener.closed(this.commandContext);
+
+        verify(this.eventChunker, never()).chunk(any());
+        verify(this.auditChannel, times(1)).send(this.messageArgumentCaptor.capture());
+
+        assertThat(this.messageArgumentCaptor.getValue().getPayload())
+            .extracting(event -> event.getEventType().name())
+            .containsExactly("VARIABLE_CREATED", "VARIABLE_CREATED", "VARIABLE_CREATED", "TASK_CREATED");
+    }
+
+    private List<CloudRuntimeEventImpl<?, ?>> getTaskVariablesEmittedBeforeTaskCreated() {
+        var taskId = "task-id";
+        List<CloudRuntimeEventImpl<?, ?>> events = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            var variable = new VariableInstanceImpl<>(
+                "variable-" + i,
+                String.class.getName(),
+                "value-" + i,
+                TestUtils.MOCK_PROCESS_INSTANCE_ID,
+                taskId
+            );
+            events.add(new CloudVariableCreatedEventImpl("variable-event-" + i, 100L + i, variable));
+        }
+
+        var task = new TaskImpl(taskId, "task name", Task.TaskStatus.CREATED);
+        task.setProcessInstanceId(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        events.add(new CloudTaskCreatedEventImpl("task-created-event", 200L, task));
+
+        return events;
+    }
+
     private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {
         var runtimeBundleProperties = new RuntimeBundleProperties() {
             {
@@ -434,9 +510,7 @@ class MessageProducerCommandContextCloseListenerTest {
         for (int i = 0; i < eventsCount; i++) {
             ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
             StringBuilder largeData = new StringBuilder("LARGE_DATA_");
-            for (int j = 0; j < 500; j++) {
-                largeData.append("This_is_large_test_data_to_exceed_bytes_limit_");
-            }
+            largeData.repeat("This_is_large_test_data_to_exceed_bytes_limit_", 500);
             processInstance.setId(TestUtils.MOCK_PROCESS_INSTANCE_ID + "_" + largeData + "_" + i);
             processInstance.setBusinessKey(largeData.toString());
             CloudProcessCreatedEventImpl event = new CloudProcessCreatedEventImpl(processInstance);
