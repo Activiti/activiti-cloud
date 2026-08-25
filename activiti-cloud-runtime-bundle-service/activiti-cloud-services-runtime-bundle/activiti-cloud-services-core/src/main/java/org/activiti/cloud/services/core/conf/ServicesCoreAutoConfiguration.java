@@ -71,7 +71,6 @@ import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -292,7 +291,6 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConfigurationProperties(prefix = "activiti.cloud.variable")
     public VariableProperties variableProperties() {
         return new VariableProperties();
     }

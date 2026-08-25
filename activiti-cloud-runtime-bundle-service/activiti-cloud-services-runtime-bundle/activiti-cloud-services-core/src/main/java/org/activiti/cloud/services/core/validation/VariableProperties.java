@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.core.validation;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "activiti.cloud.variable")
 public class VariableProperties {
 
     public static final int DEFAULT_MAX_VALUE_SIZE = 5 * 1024 * 1024;
