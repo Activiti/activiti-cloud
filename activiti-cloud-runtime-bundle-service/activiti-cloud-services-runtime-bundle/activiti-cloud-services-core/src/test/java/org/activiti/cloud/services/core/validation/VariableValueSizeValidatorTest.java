@@ -47,6 +47,13 @@ class VariableValueSizeValidatorTest {
     }
 
     @Test
+    void shouldPassWhenValueIsNull() {
+        variableProperties.setMaxValueSize(1);
+
+        assertThatCode(() -> validator.validate("name", null)).doesNotThrowAnyException();
+    }
+
+    @Test
     void shouldPassWhenValueIsExactlyAtLimit() {
         variableProperties.setMaxValueSize(5);
 

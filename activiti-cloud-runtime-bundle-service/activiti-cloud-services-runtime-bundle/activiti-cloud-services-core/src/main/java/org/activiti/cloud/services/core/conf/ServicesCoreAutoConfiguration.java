@@ -71,6 +71,7 @@ import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -83,6 +84,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
+@EnableConfigurationProperties(VariableProperties.class)
 public class ServicesCoreAutoConfiguration {
 
     @Bean
@@ -287,12 +289,6 @@ public class ServicesCoreAutoConfiguration {
         ProcessVariableValueConverter variableValueConverter
     ) {
         return new ProcessVariablesPayloadConverter(variableValueConverter);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public VariableProperties variableProperties() {
-        return new VariableProperties();
     }
 
     @Bean

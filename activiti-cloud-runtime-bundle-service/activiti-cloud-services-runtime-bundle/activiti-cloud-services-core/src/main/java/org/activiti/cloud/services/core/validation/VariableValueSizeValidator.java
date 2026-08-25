@@ -57,7 +57,7 @@ public class VariableValueSizeValidator {
     }
 
     public void validate(String variableName, Object variableValue) {
-        if (isDisabled()) {
+        if (variableValue == null || isDisabled()) {
             return;
         }
 

@@ -57,6 +57,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -68,16 +69,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(ProcessInstanceVariableAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
+@EnableConfigurationProperties(VariableProperties.class)
 @Import(
     {
         RuntimeBundleProperties.class,
-        VariableProperties.class,
         VariableValueSizeValidator.class,
         CloudEventsAutoConfiguration.class,
         ProcessEngineChannelsConfiguration.class,
@@ -114,9 +114,6 @@ class ProcessInstanceVariableAdminControllerImplIT {
     @Autowired
     private VariableProperties variableProperties;
 
-    @Autowired
-    private VariableValueSizeValidator variableValueSizeValidator;
-
     @MockitoBean
     private CollectionModelAssembler resourcesAssembler;
 
@@ -151,17 +148,6 @@ class ProcessInstanceVariableAdminControllerImplIT {
         processInstance = new ProcessInstanceImpl();
         processInstance.setId("1");
         processInstance.setProcessDefinitionKey("1");
-
-        this.mockMvc = MockMvcBuilders.standaloneSetup(
-            new ProcessInstanceVariableAdminControllerImpl(
-                variableRepresentationModelAssembler,
-                processAdminRuntime,
-                resourcesAssembler,
-                variableValueSizeValidator
-            )
-        )
-            .setControllerAdvice(new RuntimeBundleExceptionHandler())
-            .build();
 
         given(processAdminRuntime.processInstance(any())).willReturn(processInstance);
     }
