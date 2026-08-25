@@ -29,6 +29,7 @@ import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.UnprocessableEntityException;
+import org.activiti.cloud.services.core.validation.VariableValueSerializationException;
 import org.activiti.cloud.services.core.validation.VariableValueSizeLimitExceededException;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.engine.ActivitiException;
@@ -97,6 +98,18 @@ public class RuntimeBundleExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     public EntityModel<ActivitiErrorMessage> handleAppException(
         VariableValueSizeLimitExceededException ex,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) {
+        logFailedRequest(request, ex);
+        response.setContentType(APPLICATION_JSON_VALUE);
+        return EntityModel.of(new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(VariableValueSerializationException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        VariableValueSerializationException ex,
         HttpServletRequest request,
         HttpServletResponse response
     ) {

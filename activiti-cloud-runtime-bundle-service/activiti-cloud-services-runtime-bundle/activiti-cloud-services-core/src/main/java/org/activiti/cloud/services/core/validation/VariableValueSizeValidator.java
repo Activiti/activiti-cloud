@@ -61,7 +61,7 @@ public class VariableValueSizeValidator {
             return;
         }
 
-        int valueSize = getSerializedSize(variableValue);
+        long valueSize = getSerializedSize(variableValue);
         int maxValueSize = variableProperties.getMaxValueSize();
         if (valueSize > maxValueSize) {
             throw new VariableValueSizeLimitExceededException(variableName, maxValueSize);
@@ -72,7 +72,7 @@ public class VariableValueSizeValidator {
         return variableProperties.getMaxValueSize() <= 0;
     }
 
-    private int getSerializedSize(Object variableValue) {
+    private long getSerializedSize(Object variableValue) {
         try {
             CountingOutputStream outputStream = new CountingOutputStream();
             objectMapper.writeValue(outputStream, variableValue);
@@ -84,7 +84,7 @@ public class VariableValueSizeValidator {
 
     private static class CountingOutputStream extends OutputStream {
 
-        private int size;
+        private long size;
 
         @Override
         public void write(int b) {
@@ -96,7 +96,7 @@ public class VariableValueSizeValidator {
             size += len;
         }
 
-        private int size() {
+        private long size() {
             return size;
         }
     }
