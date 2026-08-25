@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.core.validation;
 
+import java.io.OutputStream;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
@@ -63,9 +64,7 @@ public class VariableValueSizeValidator {
         int valueSize = getSerializedSize(variableValue);
         int maxValueSize = variableProperties.getMaxValueSize();
         if (valueSize > maxValueSize) {
-            throw new IllegalStateException(
-                "Variable '" + variableName + "' value exceeds maximum allowed size of " + maxValueSize + " bytes"
-            );
+            throw new VariableValueSizeLimitExceededException(variableName, maxValueSize);
         }
     }
 
@@ -75,9 +74,30 @@ public class VariableValueSizeValidator {
 
     private int getSerializedSize(Object variableValue) {
         try {
-            return objectMapper.writeValueAsBytes(variableValue).length;
+            CountingOutputStream outputStream = new CountingOutputStream();
+            objectMapper.writeValue(outputStream, variableValue);
+            return outputStream.size();
         } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize variable value to JSON", e);
+        }
+    }
+
+    private static class CountingOutputStream extends OutputStream {
+
+        private int size;
+
+        @Override
+        public void write(int b) {
+            size++;
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            size += len;
+        }
+
+        private int size() {
+            return size;
         }
     }
 }

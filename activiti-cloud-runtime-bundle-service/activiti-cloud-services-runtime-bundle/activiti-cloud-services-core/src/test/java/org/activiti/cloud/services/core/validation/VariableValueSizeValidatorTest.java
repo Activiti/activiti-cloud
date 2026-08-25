@@ -58,7 +58,7 @@ class VariableValueSizeValidatorTest {
         variableProperties.setMaxValueSize(5);
 
         assertThatThrownBy(() -> validator.validate("name", "abcd"))
-            .isInstanceOf(IllegalStateException.class)
+            .isInstanceOf(VariableValueSizeLimitExceededException.class)
             .hasMessage("Variable 'name' value exceeds maximum allowed size of 5 bytes");
     }
 
