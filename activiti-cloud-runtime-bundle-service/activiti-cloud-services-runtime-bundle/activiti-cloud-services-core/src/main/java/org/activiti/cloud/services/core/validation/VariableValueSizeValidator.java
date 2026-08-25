@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.core.validation;
 
 import java.io.OutputStream;
+import java.util.Objects;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
@@ -61,8 +62,8 @@ public class VariableValueSizeValidator {
             return;
         }
 
-        long valueSize = getSerializedSize(variableValue);
         int maxValueSize = variableProperties.getMaxValueSize();
+        long valueSize = getSerializedSize(variableValue, maxValueSize);
         if (valueSize > maxValueSize) {
             throw new VariableValueSizeLimitExceededException(variableName, maxValueSize);
         }
@@ -72,28 +73,59 @@ public class VariableValueSizeValidator {
         return variableProperties.getMaxValueSize() <= 0;
     }
 
-    private long getSerializedSize(Object variableValue) {
+    private long getSerializedSize(Object variableValue, int maxValueSize) {
         try {
-            CountingOutputStream outputStream = new CountingOutputStream();
+            CountingOutputStream outputStream = new CountingOutputStream(maxValueSize);
             objectMapper.writeValue(outputStream, variableValue);
             return outputStream.size();
+        } catch (SizeLimitExceededSignal signal) {
+            return signal.size;
         } catch (JacksonException e) {
             throw new VariableValueSerializationException(e);
         }
     }
 
+    /**
+     * Internal control-flow exception used to abort serialization as soon as the configured
+     * limit is exceeded, avoiding the cost of serializing the remainder of the value.
+     * Stack trace and suppression are disabled since this is not an error condition.
+     */
+    private static final class SizeLimitExceededSignal extends RuntimeException {
+
+        private final long size;
+
+        private SizeLimitExceededSignal(long size) {
+            super(null, null, false, false);
+            this.size = size;
+        }
+    }
+
     private static class CountingOutputStream extends OutputStream {
 
+        private final int limit;
         private long size;
+
+        private CountingOutputStream(int limit) {
+            this.limit = limit;
+        }
 
         @Override
         public void write(int b) {
             size++;
+            checkLimit();
         }
 
         @Override
         public void write(byte[] b, int off, int len) {
+            Objects.checkFromIndexSize(off, len, b.length);
             size += len;
+            checkLimit();
+        }
+
+        private void checkLimit() {
+            if (size > limit) {
+                throw new SizeLimitExceededSignal(size);
+            }
         }
 
         private long size() {
