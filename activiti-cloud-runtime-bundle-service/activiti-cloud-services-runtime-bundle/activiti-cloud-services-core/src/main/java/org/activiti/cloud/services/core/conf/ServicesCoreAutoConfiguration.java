@@ -59,6 +59,8 @@ import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
+import org.activiti.cloud.services.core.validation.VariableProperties;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.engine.RepositoryService;
@@ -69,6 +71,7 @@ import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -102,8 +105,11 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
-        return new CreateTaskVariableCmdExecutor(taskAdminRuntime);
+    public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(
+        TaskAdminRuntime taskAdminRuntime,
+        VariableValueSizeValidator variableValueSizeValidator
+    ) {
+        return new CreateTaskVariableCmdExecutor(taskAdminRuntime, variableValueSizeValidator);
     }
 
     @Bean
@@ -114,8 +120,11 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
-        return new UpdateTaskVariableCmdExecutor(taskAdminRuntime);
+    public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(
+        TaskAdminRuntime taskAdminRuntime,
+        VariableValueSizeValidator variableValueSizeValidator
+    ) {
+        return new UpdateTaskVariableCmdExecutor(taskAdminRuntime, variableValueSizeValidator);
     }
 
     @Bean
@@ -134,8 +143,11 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
-        return new SetProcessVariablesCmdExecutor(processAdminRuntime);
+    public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime,
+        VariableValueSizeValidator variableValueSizeValidator
+    ) {
+        return new SetProcessVariablesCmdExecutor(processAdminRuntime, variableValueSizeValidator);
     }
 
     @Bean
@@ -276,6 +288,22 @@ public class ServicesCoreAutoConfiguration {
         ProcessVariableValueConverter variableValueConverter
     ) {
         return new ProcessVariablesPayloadConverter(variableValueConverter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConfigurationProperties(prefix = "activiti.cloud.variable")
+    public VariableProperties variableProperties() {
+        return new VariableProperties();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public VariableValueSizeValidator variableValueSizeValidator(
+        JsonMapper jsonMapper,
+        VariableProperties variableProperties
+    ) {
+        return new VariableValueSizeValidator(jsonMapper, variableProperties);
     }
 
     @Bean

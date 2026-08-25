@@ -36,6 +36,8 @@ import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.core.validation.VariableProperties;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -75,6 +77,8 @@ import tools.jackson.databind.ObjectMapper;
 @Import(
     {
         RuntimeBundleProperties.class,
+        VariableProperties.class,
+        VariableValueSizeValidator.class,
         CloudEventsAutoConfiguration.class,
         ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
@@ -107,6 +111,12 @@ class ProcessInstanceVariableAdminControllerImplIT {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private VariableProperties variableProperties;
+
+    @Autowired
+    private VariableValueSizeValidator variableValueSizeValidator;
+
     @MockitoBean
     private CollectionModelAssembler resourcesAssembler;
 
@@ -136,6 +146,7 @@ class ProcessInstanceVariableAdminControllerImplIT {
 
     @BeforeEach
     void setUp() {
+        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
         ProcessInstanceImpl processInstance;
         processInstance = new ProcessInstanceImpl();
         processInstance.setId("1");
@@ -145,7 +156,8 @@ class ProcessInstanceVariableAdminControllerImplIT {
             new ProcessInstanceVariableAdminControllerImpl(
                 variableRepresentationModelAssembler,
                 processAdminRuntime,
-                resourcesAssembler
+                resourcesAssembler,
+                variableValueSizeValidator
             )
         )
             .setControllerAdvice(new RuntimeBundleExceptionHandler())
@@ -208,6 +220,32 @@ class ProcessInstanceVariableAdminControllerImplIT {
 
         assertThat(expectedResponseBody).isEqualTo(actualResponseBody);
         verify(processAdminRuntime).setVariables(any());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenVariableValueExceedsConfiguredSize() throws Exception {
+        variableProperties.setMaxValueSize(5);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("oversized", "abcd");
+
+        MvcResult result = mockMvc
+            .perform(
+                put("/admin/v1/process-instances/1/variables", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder.setVariables()
+                                .withProcessInstanceId("1")
+                                .withVariables(variables)
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString())
+            .contains("Variable 'oversized' value exceeds maximum allowed size of 5 bytes");
     }
 
     @Test

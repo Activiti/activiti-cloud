@@ -35,6 +35,7 @@ import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.rest.api.TaskVariableAdminController;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceRepresentationModelAssembler;
@@ -53,16 +54,19 @@ public class TaskVariableAdminControllerImpl implements TaskVariableAdminControl
     private final TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler;
     private final CollectionModelAssembler resourcesAssembler;
     private final TaskAdminRuntime taskRuntime;
+    private final VariableValueSizeValidator variableValueSizeValidator;
 
     @Autowired
     public TaskVariableAdminControllerImpl(
         TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
         CollectionModelAssembler resourcesAssembler,
-        TaskAdminRuntime taskRuntime
+        TaskAdminRuntime taskRuntime,
+        VariableValueSizeValidator variableValueSizeValidator
     ) {
         this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.resourcesAssembler = resourcesAssembler;
         this.taskRuntime = taskRuntime;
+        this.variableValueSizeValidator = variableValueSizeValidator;
     }
 
     @Override
@@ -79,6 +83,7 @@ public class TaskVariableAdminControllerImpl implements TaskVariableAdminControl
         @RequestBody CreateTaskVariablePayload createTaskVariablePayload
     ) {
         createTaskVariablePayload.setTaskId(taskId);
+        variableValueSizeValidator.validate(createTaskVariablePayload);
         taskRuntime.createVariable(createTaskVariablePayload);
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -92,6 +97,7 @@ public class TaskVariableAdminControllerImpl implements TaskVariableAdminControl
     ) {
         updateTaskVariablePayload.setTaskId(taskId);
         updateTaskVariablePayload.setName(variableName);
+        variableValueSizeValidator.validate(updateTaskVariablePayload);
         taskRuntime.updateVariable(updateTaskVariablePayload);
 
         return new ResponseEntity<>(HttpStatus.OK);

@@ -18,17 +18,24 @@ package org.activiti.cloud.services.core.commands;
 import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 
 public class CreateTaskVariableCmdExecutor extends AbstractCommandExecutor<CreateTaskVariablePayload> {
 
     private TaskAdminRuntime taskAdminRuntime;
+    private VariableValueSizeValidator variableValueSizeValidator;
 
-    public CreateTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+    public CreateTaskVariableCmdExecutor(
+        TaskAdminRuntime taskAdminRuntime,
+        VariableValueSizeValidator variableValueSizeValidator
+    ) {
         this.taskAdminRuntime = taskAdminRuntime;
+        this.variableValueSizeValidator = variableValueSizeValidator;
     }
 
     @Override
     public EmptyResult execute(CreateTaskVariablePayload createTaskVariablePayload) {
+        variableValueSizeValidator.validate(createTaskVariablePayload);
         taskAdminRuntime.createVariable(createTaskVariablePayload);
 
         return new EmptyResult(createTaskVariablePayload);

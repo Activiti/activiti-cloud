@@ -35,6 +35,8 @@ import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
+import org.activiti.cloud.services.core.validation.VariableProperties;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -62,6 +64,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(TaskVariableControllerImpl.class)
@@ -72,6 +75,8 @@ import tools.jackson.databind.ObjectMapper;
         CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
+        VariableProperties.class,
+        VariableValueSizeValidator.class,
         CloudEventsAutoConfiguration.class,
         ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
@@ -88,6 +93,9 @@ class TaskVariableControllerImplIT {
 
     @Autowired
     private ObjectMapper mapper;
+
+    @Autowired
+    private VariableProperties variableProperties;
 
     @MockitoBean
     private RepositoryService repositoryService;
@@ -127,6 +135,7 @@ class TaskVariableControllerImplIT {
 
     @BeforeEach
     void setUp() {
+        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
         //this assertion is not really necessary. It's only here to remove warning
         //telling that resourcesAssembler is never used. Even if we are not directly
         //using it in the test we need to to declare it as @SpyBean so it get inject
@@ -175,6 +184,26 @@ class TaskVariableControllerImplIT {
     }
 
     @Test
+    void createVariableShouldReturnBadRequestWhenVariableValueExceedsConfiguredSize() throws Exception {
+        variableProperties.setMaxValueSize(5);
+
+        MvcResult result = this.mockMvc.perform(
+            post("/v1/tasks/{taskId}/variables", TASK_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    mapper.writeValueAsString(
+                        TaskPayloadBuilder.createVariable().withTaskId(TASK_ID).withVariable("name", "abcd").build()
+                    )
+                )
+        )
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString())
+            .contains("Variable 'name' value exceeds maximum allowed size of 5 bytes");
+    }
+
+    @Test
     void updateVariable() throws Exception {
         //WHEN
         this.mockMvc.perform(
@@ -188,5 +217,25 @@ class TaskVariableControllerImplIT {
         ).andExpect(status().isOk());
 
         verify(taskRuntime).updateVariable(any());
+    }
+
+    @Test
+    void updateVariableShouldReturnBadRequestWhenVariableValueExceedsConfiguredSize() throws Exception {
+        variableProperties.setMaxValueSize(5);
+
+        MvcResult result = this.mockMvc.perform(
+            put("/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    mapper.writeValueAsString(
+                        TaskPayloadBuilder.updateVariable().withTaskId(TASK_ID).withVariable("name", "abcd").build()
+                    )
+                )
+        )
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString())
+            .contains("Variable 'name' value exceeds maximum allowed size of 5 bytes");
     }
 }
