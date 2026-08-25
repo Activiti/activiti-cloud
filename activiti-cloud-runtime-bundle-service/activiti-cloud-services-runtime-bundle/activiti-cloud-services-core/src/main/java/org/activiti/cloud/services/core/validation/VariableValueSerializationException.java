@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.core.validation;
 
-public class VariableValueSizeLimitExceededException extends RuntimeException {
+public class VariableValueSerializationException extends RuntimeException {
 
-    public VariableValueSizeLimitExceededException(String variableName, int maxValueSize) {
-        super("Variable '" + variableName + "' value exceeds maximum allowed size of " + maxValueSize + " bytes");
+    public VariableValueSerializationException(Throwable cause) {
+        super("Failed to serialize variable value to JSON", cause);
     }
 }

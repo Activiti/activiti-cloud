@@ -78,7 +78,7 @@ public class VariableValueSizeValidator {
             objectMapper.writeValue(outputStream, variableValue);
             return outputStream.size();
         } catch (JacksonException e) {
-            throw new IllegalStateException("Failed to serialize variable value to JSON", e);
+            throw new VariableValueSerializationException(e);
         }
     }
 
