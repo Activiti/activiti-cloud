@@ -36,6 +36,7 @@ public class TaskSearchRequestBuilder {
         )
         .build();
 
+    private String requestId;
     private boolean onlyStandalone;
     private boolean onlyRoot;
     private Set<String> id;
@@ -64,6 +65,11 @@ public class TaskSearchRequestBuilder {
     private Set<VariableFilter> processVariableFilters;
     private Set<ProcessVariableKey> processVariableKeys;
     private CloudRuntimeEntitySort sort;
+
+    public TaskSearchRequestBuilder withRequestId(String requestId) {
+        this.requestId = requestId;
+        return this;
+    }
 
     public TaskSearchRequestBuilder onlyStandalone() {
         this.onlyStandalone = true;
@@ -234,7 +240,7 @@ public class TaskSearchRequestBuilder {
             }
         }
         return new TaskSearchRequest(
-            null,
+            requestId,
             onlyStandalone,
             onlyRoot,
             id,
