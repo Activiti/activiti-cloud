@@ -52,6 +52,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.common.messaging.config.DeliveryAcknowledgment;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.config.FunctionRouterExecutorFactory;
@@ -133,7 +134,7 @@ import tools.jackson.databind.ObjectMapper;
 )
 @EnableTestBinder
 @Import({ TestBindingsChannelsConfiguration.class })
-public class FunctionRouterBindingConfigurationIT {
+class FunctionRouterBindingConfigurationIT {
 
     private static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
     private static final String FUNCTION_PROCESSOR_NAME = "commandProcessorHandler";
@@ -196,6 +197,9 @@ public class FunctionRouterBindingConfigurationIT {
     @Autowired
     private FunctionRouterExecutorFactory functionRouterExecutorFactory;
 
+    @Autowired
+    private DeliveryAcknowledgment deliveryAcknowledgment;
+
     @TestConfiguration
     static class ApplicationConfig {
 
@@ -235,9 +239,7 @@ public class FunctionRouterBindingConfigurationIT {
         @Bean
         @ConnectorBinding(input = SCRIPT_RUNTIME_CONSUMER, condition = "true")
         public ConsumerConnector<String> scriptRuntimeExecutor() {
-            return message -> {
-                connectorPayload.set(message);
-            };
+            return connectorPayload::set;
         }
 
         @Bean
@@ -255,17 +257,13 @@ public class FunctionRouterBindingConfigurationIT {
         @Bean
         @ConnectorBinding(input = REST_CONSUMER, connectorType = "${FOOBAR:rest.GET}", condition = "true")
         public ConsumerConnector<String> restConsumerGetHandler() {
-            return message -> {
-                getPayload.set(message);
-            };
+            return getPayload::set;
         }
 
         @Bean
         @ConnectorBinding(input = REST_CONSUMER, connectorType = "rest.POST", condition = "true")
         public ConsumerConnector<String> restConsumerPostHandler() {
-            return message -> {
-                postPayload.set(message);
-            };
+            return postPayload::set;
         }
 
         @Bean
@@ -305,7 +303,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         queryMessage.set(null);
         auditMessage.set(null);
         connectorPayload.set(null);
@@ -805,6 +803,16 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
+    void functionRouterUsesRabbitDeliveryAcknowledgmentWhenAmqpOnClasspath() {
+        // the rabbit strategy is selected on the AMQP classpath: it strips the AMQP ack handle
+        final var acknowledgmentHeaders = deliveryAcknowledgment.acknowledgmentHeaders();
+        assertThat(
+            acknowledgmentHeaders.contains(AmqpHeaders.CHANNEL) &&
+                acknowledgmentHeaders.contains(AmqpHeaders.DELIVERY_TAG)
+        ).isTrue();
+    }
+
+    @Test
     void functionRouterConsumersUseManualAcknowledgeMode() {
         assertThat(
             environment.getProperty("spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.acknowledge-mode")
@@ -923,7 +931,7 @@ public class FunctionRouterBindingConfigurationIT {
             () -> {
                 try {
                     countDownLatch.await();
-                } catch (InterruptedException e) {
+                } catch (InterruptedException _) {
                     Thread.currentThread().interrupt();
                 }
 

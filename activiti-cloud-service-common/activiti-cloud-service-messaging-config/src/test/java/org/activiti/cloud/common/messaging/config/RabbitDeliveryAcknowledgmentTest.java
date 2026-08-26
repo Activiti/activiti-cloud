@@ -30,9 +30,11 @@ import org.springframework.integration.acks.AcknowledgmentCallback;
 import org.springframework.messaging.support.MessageBuilder;
 
 @ExtendWith(MockitoExtension.class)
-class FunctionRouterAcknowledgmentTest {
+class RabbitDeliveryAcknowledgmentTest {
 
     private static final long DELIVERY_TAG = 42L;
+
+    private final RabbitDeliveryAcknowledgment acknowledgment = new RabbitDeliveryAcknowledgment();
 
     @Mock
     private AcknowledgmentCallback acknowledgmentCallback;
@@ -48,7 +50,7 @@ class FunctionRouterAcknowledgmentTest {
             .setHeader(AmqpHeaders.DELIVERY_TAG, DELIVERY_TAG)
             .build();
 
-        FunctionRouterConfiguration.acknowledge(message);
+        acknowledgment.acknowledge(message);
 
         verify(acknowledgmentCallback).acknowledge(AcknowledgmentCallback.Status.ACCEPT);
         verifyNoInteractions(channel);
@@ -62,7 +64,7 @@ class FunctionRouterAcknowledgmentTest {
             .setHeader(AmqpHeaders.DELIVERY_TAG, DELIVERY_TAG)
             .build();
 
-        FunctionRouterConfiguration.negativelyAcknowledgeAndRequeue(message);
+        acknowledgment.requeue(message);
 
         verify(acknowledgmentCallback).acknowledge(AcknowledgmentCallback.Status.REQUEUE);
         verifyNoInteractions(channel);
@@ -75,7 +77,7 @@ class FunctionRouterAcknowledgmentTest {
             .setHeader(AmqpHeaders.DELIVERY_TAG, DELIVERY_TAG)
             .build();
 
-        FunctionRouterConfiguration.acknowledge(message);
+        acknowledgment.acknowledge(message);
 
         verify(channel).basicAck(DELIVERY_TAG, false);
     }
@@ -87,7 +89,7 @@ class FunctionRouterAcknowledgmentTest {
             .setHeader(AmqpHeaders.DELIVERY_TAG, DELIVERY_TAG)
             .build();
 
-        FunctionRouterConfiguration.negativelyAcknowledgeAndRequeue(message);
+        acknowledgment.requeue(message);
 
         verify(channel).basicNack(DELIVERY_TAG, false, true);
     }
@@ -97,8 +99,8 @@ class FunctionRouterAcknowledgmentTest {
         var message = MessageBuilder.withPayload("payload").build();
 
         assertThatCode(() -> {
-            FunctionRouterConfiguration.acknowledge(message);
-            FunctionRouterConfiguration.negativelyAcknowledgeAndRequeue(message);
+            acknowledgment.acknowledge(message);
+            acknowledgment.requeue(message);
         }).doesNotThrowAnyException();
 
         verifyNoInteractions(channel, acknowledgmentCallback);

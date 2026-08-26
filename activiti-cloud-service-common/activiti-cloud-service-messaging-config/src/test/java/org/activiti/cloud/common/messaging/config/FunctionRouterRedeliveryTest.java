@@ -19,6 +19,7 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.TARGET_REGISTRATIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,13 +89,14 @@ class FunctionRouterRedeliveryTest {
         when(streamBridge.send(eq(DESTINATION), org.mockito.ArgumentMatchers.<Message<?>>any())).thenReturn(true);
 
         var original = MessageBuilder.withPayload("payload")
-            .setHeader(AmqpHeaders.CHANNEL, org.mockito.Mockito.mock(Channel.class))
+            .setHeader(AmqpHeaders.CHANNEL, mock(Channel.class))
             .setHeader(AmqpHeaders.DELIVERY_TAG, 7L)
             .setHeader(IntegrationMessageHeaderAccessor.ACKNOWLEDGMENT_CALLBACK, new Object())
             .build();
 
         var sent = FunctionRouterConfiguration.redeliverFailedRegistrations(
             streamBridgeProvider,
+            new RabbitDeliveryAcknowledgment(),
             DESTINATION,
             original,
             List.of("audit")
@@ -123,6 +125,7 @@ class FunctionRouterRedeliveryTest {
 
         var sent = FunctionRouterConfiguration.redeliverFailedRegistrations(
             streamBridgeProvider,
+            new RabbitDeliveryAcknowledgment(),
             DESTINATION,
             MessageBuilder.withPayload("payload").build(),
             List.of("audit")

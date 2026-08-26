@@ -17,7 +17,6 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
 
-import com.rabbitmq.client.Channel;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +28,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.ObjLongConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -48,7 +46,9 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
@@ -61,10 +61,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.integration.MessageDispatchingException;
-import org.springframework.integration.StaticMessageHeaderAccessor;
-import org.springframework.integration.acks.AcknowledgmentCallback;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
@@ -185,6 +182,31 @@ public class FunctionRouterConfiguration {
         return message -> functionRegistrationSelector.andThen(functionRouterExecutorFactory).apply(message);
     }
 
+    /**
+     * Binder-neutral acknowledgment used when no binder-specific implementation is on the classpath.
+     * A {@code DeliveryAcknowledgment} bean declared by the application overrides it.
+     */
+    @Bean
+    @ConditionalOnMissingBean(DeliveryAcknowledgment.class)
+    @ConditionalOnMissingClass("com.rabbitmq.client.Channel")
+    DeliveryAcknowledgment deliveryAcknowledgment() {
+        return new NeutralDeliveryAcknowledgment();
+    }
+
+    /**
+     * RabbitMQ-specific acknowledgment, contributed only when the AMQP client is on the classpath.
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(name = "com.rabbitmq.client.Channel")
+    static class RabbitDeliveryAcknowledgmentConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(DeliveryAcknowledgment.class)
+        DeliveryAcknowledgment rabbitDeliveryAcknowledgment() {
+            return new RabbitDeliveryAcknowledgment();
+        }
+    }
+
     @Bean
     BiConsumer<Message<?>, String> functionRouterMessageHandler(
         RoutingFunction routingFunction,
@@ -193,7 +215,8 @@ public class FunctionRouterConfiguration {
         Function<Message<?>, ExecutorService> functionExecutorSelector,
         MessageContentTypeNormalizer messageContentTypeNormalizer,
         BindingServiceProperties bindingServiceProperties,
-        ObjectProvider<StreamBridge> streamBridgeProvider
+        ObjectProvider<StreamBridge> streamBridgeProvider,
+        DeliveryAcknowledgment deliveryAcknowledgment
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
@@ -237,22 +260,17 @@ public class FunctionRouterConfiguration {
                                 .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
                                 .map(BindingProperties::getContentType)
                                 .orElse(null);
-                            return MessageBuilder.fromMessage(
+                            var builder = MessageBuilder.fromMessage(
                                 messageContentTypeNormalizer.normalizeToExpected(functionMessage, expectedContentType)
                             )
                                 .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
-                                // Manual ack carries a live, non-serializable acknowledgment handle on
-                                // the message: the AMQP channel/delivery-tag on the classic RabbitMQ
-                                // binder, or an AcknowledgmentCallback on binders that provide one.
-                                // Neither must leak into the routed business message: a handler that
-                                // persists it (e.g. the messages-service's JdbcMessageStore aggregator
-                                // serializes the message) would fail to serialize the handle. The outer
-                                // message retains them for acknowledge()/negativelyAcknowledgeAndRequeue().
-                                .removeHeader(AmqpHeaders.CHANNEL)
-                                .removeHeader(AmqpHeaders.DELIVERY_TAG)
-                                .removeHeader(IntegrationMessageHeaderAccessor.ACKNOWLEDGMENT_CALLBACK)
-                                .removeHeader(TARGET_REGISTRATIONS)
-                                .build();
+                                .removeHeader(TARGET_REGISTRATIONS);
+                            // The acknowledgment handle is live and non-serializable, so it must not
+                            // leak into the routed business message: a handler that persists it (e.g.
+                            // the messages-service's JdbcMessageStore aggregator serializes the message)
+                            // would fail. The outer message keeps it for acknowledge()/requeue().
+                            deliveryAcknowledgment.acknowledgmentHeaders().forEach(builder::removeHeader);
+                            return builder.build();
                         };
 
                         Function<Message<?>, CompletableFuture<Object>> submitFunctionRequest = functionRequest -> {
@@ -372,15 +390,16 @@ public class FunctionRouterConfiguration {
                                     // every registration reached a final outcome (success or an error
                                     // already reported): ack so the broker does not redeliver.
                                     log.debug("Successfully completed function route message request {}", message);
-                                    acknowledge(message);
+                                    deliveryAcknowledgment.acknowledge(message);
                                 } else if (failedRegistrations.size() == outcomes.size()) {
                                     // no registration succeeded, so requeueing the whole message cannot
                                     // re-run already-done work: nack+requeue and let the broker redeliver.
                                     log.debug("Delivery failure for all registrations, message will be requeued");
-                                    negativelyAcknowledgeAndRequeue(message);
+                                    deliveryAcknowledgment.requeue(message);
                                 } else if (
                                     redeliverFailedRegistrations(
                                         streamBridgeProvider,
+                                        deliveryAcknowledgment,
                                         destination,
                                         message,
                                         failedRegistrations
@@ -388,12 +407,12 @@ public class FunctionRouterConfiguration {
                                 ) {
                                     // partial failure: re-publish only the failed registrations (pinned)
                                     // so the ones that already succeeded do not re-run, then ack the original.
-                                    acknowledge(message);
+                                    deliveryAcknowledgment.acknowledge(message);
                                 } else {
                                     // could not re-publish (broker/producer unavailable): requeue the
                                     // whole message so nothing is lost, at the cost of re-running the
                                     // registrations that already succeeded.
-                                    negativelyAcknowledgeAndRequeue(message);
+                                    deliveryAcknowledgment.requeue(message);
                                 }
                             })
                             .exceptionally(unexpectedError -> {
@@ -402,7 +421,7 @@ public class FunctionRouterConfiguration {
                                     message,
                                     unexpectedError
                                 );
-                                negativelyAcknowledgeAndRequeue(message);
+                                deliveryAcknowledgment.requeue(message);
                                 return null;
                             });
                     },
@@ -421,62 +440,10 @@ public class FunctionRouterConfiguration {
                         );
 
                         // no registration for this destination: requeuing would loop forever, so ack
-                        acknowledge(message);
+                        deliveryAcknowledgment.acknowledge(message);
                     }
                 );
         };
-    }
-
-    /**
-     * Acks the message once processing has genuinely completed. Prefers the binder-neutral
-     * {@link AcknowledgmentCallback} when the active binder provides one (e.g. Kafka); falls back to
-     * the RabbitMQ channel/delivery-tag when it does not (the classic AMQP binder exposes only
-     * those). A no-op when neither is present, so it is safe to call regardless of ack mode.
-     */
-    static void acknowledge(Message<?> message) {
-        final var callback = StaticMessageHeaderAccessor.getAcknowledgmentCallback(message);
-        if (callback != null) {
-            callback.acknowledge(AcknowledgmentCallback.Status.ACCEPT);
-            return;
-        }
-
-        withChannelAndDeliveryTag(message, (channel, deliveryTag) -> {
-            try {
-                channel.basicAck(deliveryTag, false);
-            } catch (Exception e) {
-                log.warn("Failed to acknowledge message {}", message, e);
-            }
-        });
-    }
-
-    /**
-     * Negatively acks the message with requeue so the broker redelivers it. Prefers the
-     * binder-neutral {@link AcknowledgmentCallback.Status#REQUEUE} when available; falls back to a
-     * RabbitMQ nack with {@code requeue=true} otherwise. A no-op when neither is present.
-     */
-    static void negativelyAcknowledgeAndRequeue(Message<?> message) {
-        final var callback = StaticMessageHeaderAccessor.getAcknowledgmentCallback(message);
-        if (callback != null) {
-            callback.acknowledge(AcknowledgmentCallback.Status.REQUEUE);
-            return;
-        }
-
-        withChannelAndDeliveryTag(message, (channel, deliveryTag) -> {
-            try {
-                channel.basicNack(deliveryTag, false, true);
-            } catch (Exception e) {
-                log.warn("Failed to negatively acknowledge message {}", message, e);
-            }
-        });
-    }
-
-    private static void withChannelAndDeliveryTag(Message<?> message, ObjLongConsumer<Channel> action) {
-        var channel = message.getHeaders().get(AmqpHeaders.CHANNEL, Channel.class);
-        var deliveryTag = message.getHeaders().get(AmqpHeaders.DELIVERY_TAG, Long.class);
-
-        if (channel != null && deliveryTag != null) {
-            action.accept(channel, deliveryTag);
-        }
     }
 
     /**
@@ -509,19 +476,18 @@ public class FunctionRouterConfiguration {
      */
     static boolean redeliverFailedRegistrations(
         ObjectProvider<StreamBridge> streamBridgeProvider,
+        DeliveryAcknowledgment deliveryAcknowledgment,
         String destination,
         Message<?> message,
         List<String> failedRegistrations
     ) {
         try {
-            final var redelivery = MessageBuilder.fromMessage(message)
+            final var builder = MessageBuilder.fromMessage(message)
                 .setHeader(FUNCTION_DESTINATION, destination)
-                .setHeader(TARGET_REGISTRATIONS, String.join(",", failedRegistrations))
-                // never carry the original delivery's live, non-serializable ack handle into the copy
-                .removeHeader(AmqpHeaders.CHANNEL)
-                .removeHeader(AmqpHeaders.DELIVERY_TAG)
-                .removeHeader(IntegrationMessageHeaderAccessor.ACKNOWLEDGMENT_CALLBACK)
-                .build();
+                .setHeader(TARGET_REGISTRATIONS, String.join(",", failedRegistrations));
+            // never carry the original delivery's live, non-serializable ack handle into the copy
+            deliveryAcknowledgment.acknowledgmentHeaders().forEach(builder::removeHeader);
+            final var redelivery = builder.build();
 
             final var sent = streamBridgeProvider.getObject().send(destination, redelivery);
             if (!sent) {
