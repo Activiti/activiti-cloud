@@ -233,9 +233,8 @@ public class CommonSecurityAutoConfiguration {
     private RequestMatcher actuatorEndpointsMatcher() {
         RequestMatcher actuatorMatcher = PathPatternRequestMatcher.pathPattern("/actuator/**");
         RequestMatcher healthMatcher = PathPatternRequestMatcher.pathPattern("/actuator/health/**");
-        RequestMatcher infoMatcher = PathPatternRequestMatcher.pathPattern("/actuator/info/**");
 
-        RequestMatcher excludeMatcher = RequestMatchers.anyOf(healthMatcher, infoMatcher);
+        RequestMatcher excludeMatcher = RequestMatchers.anyOf(healthMatcher);
 
         return request -> actuatorMatcher.matches(request) && !excludeMatcher.matches(request);
     }
