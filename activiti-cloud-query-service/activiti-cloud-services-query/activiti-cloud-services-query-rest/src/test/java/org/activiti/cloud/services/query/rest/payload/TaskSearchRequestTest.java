@@ -40,7 +40,7 @@ class TaskSearchRequestTest {
     }
 
     @Test
-    void should_ignoreRequestId_inEqualsAndHashCode() {
+    void should_notBeEqual_whenRequestIdDiffers() {
         TaskSearchRequest firstPoll = new TaskSearchRequestBuilder()
             .withRequestId("poll-1")
             .withStatus(Task.TaskStatus.ASSIGNED)
@@ -50,18 +50,18 @@ class TaskSearchRequestTest {
             .withStatus(Task.TaskStatus.ASSIGNED)
             .build();
 
-        assertThat(firstPoll).isEqualTo(secondPoll).hasSameHashCodeAs(secondPoll);
+        assertThat(firstPoll).isNotEqualTo(secondPoll);
     }
 
     @Test
-    void should_ignoreNullRequestId_inEqualsAndHashCode() {
+    void should_notBeEqual_whenRequestIdGoesFromNullToNonNull() {
         TaskSearchRequest unidentified = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.ASSIGNED).build();
         TaskSearchRequest correlated = new TaskSearchRequestBuilder()
             .withRequestId("poll-1")
             .withStatus(Task.TaskStatus.ASSIGNED)
             .build();
 
-        assertThat(unidentified).isEqualTo(correlated).hasSameHashCodeAs(correlated);
+        assertThat(unidentified).isNotEqualTo(correlated);
     }
 
     @Test
