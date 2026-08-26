@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -28,10 +29,12 @@ import java.util.List;
 import java.util.Set;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
+import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
@@ -62,9 +65,14 @@ import org.springframework.boot.test.context.SpringBootTest;
  *   <li><b>How do we get what we need out of a task event?</b>
  *       {@link #step1TheEventIsTheOnlySourceForARemovedGroup()}, {@link #step2NonTaskEventsCostNothing()}</li>
  *   <li><b>How do we get the count right?</b> {@link #step3OneCorrectCountPerAudience()},
- *       {@link #step4BothSqlShapesAgree(boolean)}, {@link #step6TheTwoWaysToGetTheCountWrong()}</li>
- *   <li><b>How do we change or add a query?</b> {@link #step7AddingYourOwnCountQuery()}</li>
+ *       {@link #step4BothSqlShapesAgree(boolean)}, {@link #step6TheTwoWaysToGetTheCountWrong()},
+ *       {@link #step7ATaskWithBothCandidateGroupsAndUsers()}</li>
+ *   <li><b>How do we change or add a query?</b> {@link #step8AddingYourOwnCountQuery()}</li>
  * </ol>
+ *
+ * <p>If you only read one method, read {@link #step7ATaskWithBothCandidateGroupsAndUsers()}: it lays the
+ * group-scoped query and the per-user query side by side on a task that has <em>both</em> a candidate group and
+ * a candidate user, and shows why neither answer can be derived from the other.
  *
  * <h3>The path being exercised</h3>
  * <pre>
@@ -108,7 +116,11 @@ class PushedTaskCountPocTest {
     private static final String HR = "hr";
     private static final String FINANCE = "finance";
 
-    /** Named as an individual candidate user on {@link #TASK_FOR_ALICE_ALONE}, and a member of {@link #ENG}. */
+    /**
+     * Named as an individual candidate user on {@link #TASK_FOR_ALICE_ALONE} and {@link #TASK_FOR_ENG_AND_ALICE}.
+     * Her group membership varies by scenario - she is asked about as a member of {@link #ENG} in step 2d and of
+     * {@link #HR} in step 2e.
+     */
     private static final String ALICE = "alice";
 
     /** The only standalone task in the fixture - used by step 3 to show a second filter counting differently. */
@@ -118,6 +130,10 @@ class PushedTaskCountPocTest {
     private static final String TASK_FOR_HR = "task-for-hr";
     private static final String TASK_FOR_EVERYONE = "task-for-everyone";
     private static final String TASK_FOR_ALICE_ALONE = "task-for-alice-alone";
+
+    /** Both kinds of candidate at once: a candidate group <em>and</em> a candidate user - see step 2e. */
+    private static final String TASK_FOR_ENG_AND_ALICE = "task-for-eng-and-alice";
+
     private static final String TASK_ALREADY_ASSIGNED = "task-already-assigned";
     private static final String TASK_ALREADY_COMPLETED = "task-already-completed";
 
@@ -133,23 +149,46 @@ class PushedTaskCountPocTest {
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
     /**
-     * The production recomputer bean, from {@code QueryRepositoryAutoConfiguration}. In a real deployment it
-     * shares its {@link SubscriberScopeRegistry} with the REST tier, which is what makes the registry useful.
+     * The beans {@code QueryRepositoryAutoConfiguration} declares, injected so that a failure to wire them fails
+     * this test class - see {@link #step0TheProductionBeanGraphResolves()}. In a real deployment the registry is
+     * shared with the REST tier, which is what makes it useful at all.
      */
     @Autowired
-    private TaskCountRecomputer recomputer;
+    private TaskCountRecomputer productionRecomputer;
 
     @Autowired
-    private SubscriberScopeRegistry registry;
+    private SubscriberScopeRegistry productionRegistry;
 
     /** Stands in for {@code TaskCountsChannelPublisher}: same interface, keeps the messages instead of sending them. */
     private final List<TaskCountChangedEvent> published = new ArrayList<>();
+
+    /**
+     * Rebuilt for every test, with the same constructor arguments and defaults the auto-configuration uses.
+     * <p>
+     * The registry is a singleton in production - which is the point of it - so sharing the bean across these
+     * tests would leak recorded group sets from one scenario into the next, and the assertions here are about
+     * <em>exactly</em> which audiences get recomputed. A fresh instance per test is the only way to keep them
+     * honest and order-independent. The one thing lost is the {@code REQUIRES_NEW} transaction proxy, which
+     * changes nothing here because no test holds an ambient transaction: each {@code count(...)} already runs in
+     * its own read-only one.
+     */
+    private SubscriberScopeRegistry registry;
+
+    private TaskCountRecomputer recomputer;
 
     private TaskCountEmitter emitter;
 
     @BeforeEach
     void setUp() {
         published.clear();
+        registry = new SubscriberScopeRegistry(Duration.ofMinutes(15), 10_000);
+        recomputer = new TaskCountRecomputer(
+            taskRepository,
+            taskCandidateGroupRepository,
+            taskCandidateUserRepository,
+            registry,
+            200
+        );
         emitter = new TaskCountEmitter(
             recomputer,
             published::addAll,
@@ -173,6 +212,11 @@ class PushedTaskCountPocTest {
         queuedTask(TASK_FOR_ALICE_ALONE, A_PROCESS_INSTANCE);
         taskCandidateUserRepository.save(new TaskCandidateUserEntity(TASK_FOR_ALICE_ALONE, ALICE));
 
+        // Both kinds of candidate at once: eng holds it as a group queue item, and alice is also named on it
+        // personally. The one task the group query and the user query genuinely disagree about - see step 2e.
+        queuedTask(TASK_FOR_ENG_AND_ALICE, A_PROCESS_INSTANCE, ENG);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(TASK_FOR_ENG_AND_ALICE, ALICE));
+
         // Excluded from the queued count: it has an assignee, so it is somebody's work, not the queue's.
         TaskEntity assigned = queuedTask(TASK_ALREADY_ASSIGNED, A_PROCESS_INSTANCE, ENG);
         assigned.setAssignee("bob");
@@ -188,6 +232,22 @@ class PushedTaskCountPocTest {
     @AfterEach
     void tearDown() {
         FeatureToggleHolder.reset();
+    }
+
+    // ---------------------------------------------------------------------------------------------------
+    // 0. The wiring
+    // ---------------------------------------------------------------------------------------------------
+
+    /**
+     * Cheap but worth having: until this ran, nothing had ever started a context containing
+     * {@code taskCountRecomputer}, so a wiring mistake in {@code QueryRepositoryAutoConfiguration} would only
+     * have surfaced on a real deployment. Injection failing is what fails this - the assertions are a formality.
+     */
+    @Test
+    @DisplayName("0. The production bean graph resolves")
+    void step0TheProductionBeanGraphResolves() {
+        assertThat(productionRecomputer).isNotNull();
+        assertThat(productionRegistry).isNotNull();
     }
 
     // ---------------------------------------------------------------------------------------------------
@@ -252,14 +312,17 @@ class PushedTaskCountPocTest {
      *
      * <p>Given the queued tasks in {@link #setUp()}:
      * <pre>
-     *   audience     sees                                                          count
-     *   {eng}        task-for-eng, task-for-eng-and-hr, task-for-everyone             3
-     *   {hr}         task-for-eng-and-hr, task-for-hr, task-for-everyone              3
-     *   {eng,hr}     all four of the above                                            4
-     *   {finance}    task-for-everyone                                                1
+     *   audience     sees                                                                    count
+     *   {eng}        task-for-eng, task-for-eng-and-hr, task-for-eng-and-alice,
+     *                task-for-everyone                                                          4
+     *   {hr}         task-for-eng-and-hr, task-for-hr, task-for-everyone                        3
+     *   {eng,hr}     all five of the above                                                      5
+     *   {finance}    task-for-everyone                                                          1
      * </pre>
      * {@code {eng}} and {@code {eng,hr}} disagree, and {@code {finance}} is not zero. Neither number can be
      * worked out from the other, which is why the registry has to remember real group sets.
+     * <p>
+     * Note what is <em>absent</em> from every row: {@code task-for-alice-alone}. No group scope can see it.
      */
     @Test
     @DisplayName("2a. One correct count per audience, from one event")
@@ -275,8 +338,8 @@ class PushedTaskCountPocTest {
 
         //then only the audiences that hold a candidacy on it are recomputed, each with its own number
         assertThat(published).containsExactlyInAnyOrder(
-            new TaskCountChangedEvent("groups:eng", List.of(ENG), 3, NOW),
-            new TaskCountChangedEvent("groups:eng,hr", List.of(ENG, HR), 4, NOW)
+            new TaskCountChangedEvent("groups:eng", List.of(ENG), 4, NOW),
+            new TaskCountChangedEvent("groups:eng,hr", List.of(ENG, HR), 5, NOW)
         );
 
         //and hr and finance are not queried at all: their queues cannot have changed, so there is nothing to
@@ -304,7 +367,7 @@ class PushedTaskCountPocTest {
 
         assertThat(published)
             .extracting(TaskCountChangedEvent::scopeKey, TaskCountChangedEvent::count)
-            .containsExactlyInAnyOrder(tuple("groups:eng", 3L), tuple("groups:eng,hr", 4L));
+            .containsExactlyInAnyOrder(tuple("groups:eng", 4L), tuple("groups:eng,hr", 5L));
     }
 
     /**
@@ -347,13 +410,15 @@ class PushedTaskCountPocTest {
             TaskSpecification.restricted(PushedTaskCountFilter.QUEUED, ALICE, List.of(ENG))
         );
 
-        assertThat(groupCountForEng).isEqualTo(3);
-        assertThat(whatAliceActuallySees).isEqualTo(4);
+        assertThat(groupCountForEng).isEqualTo(4);
+        assertThat(whatAliceActuallySees).isEqualTo(5);
 
-        //trap 1: a badge that added the pushed group count to alice's own count would show 7 rather than 4
-        assertThat(groupCountForEng + whatAliceActuallySees).isEqualTo(7);
+        //trap 1: a badge that added the pushed group count to alice's own count would show 9 rather than 5
+        assertThat(groupCountForEng + whatAliceActuallySees).isEqualTo(9);
 
-        //trap 2: the gap between the two is exactly the task that names alice individually
+        //trap 2: the gap between the two is exactly task-for-alice-alone, the one task alice can reach that no
+        //eng-scoped count can. Step 2e shows the harder version, where the missing task does have candidate
+        //groups - just not the audience's.
         assertThat(whatAliceActuallySees - groupCountForEng).isEqualTo(1);
 
         //and a group-scoped specification refuses to be built without groups, rather than silently counting
@@ -361,6 +426,71 @@ class PushedTaskCountPocTest {
         assertThatThrownBy(() -> TaskSpecification.forGroups(PushedTaskCountFilter.QUEUED, List.of())).isInstanceOf(
             IllegalArgumentException.class
         );
+    }
+
+    /**
+     * <h3>A task carrying both a candidate group and a candidate user - and the two queries it needs.</h3>
+     *
+     * {@code task-for-eng-and-alice} has candidate group {@code eng} and candidate user {@code alice}. Ask about
+     * it as an HR member and the two queries disagree, because they match through different branches of
+     * {@code TaskSpecification}:
+     *
+     * <pre>
+     *   forGroups(QUEUED, {hr})              → assignee IS NULL AND ( candidateGroup IN {hr}
+     *                                                               OR no candidates at all )
+     *                                          → 3   does NOT include task-for-eng-and-alice
+     *
+     *   restricted(QUEUED, alice, {hr})      → assignee = alice OR owner = alice
+     *                                          OR ( assignee IS NULL AND ( candidateUser = alice
+     *                                                                    OR candidateGroup IN {hr}
+     *                                                                    OR no candidates at all ) )
+     *                                          → 5   DOES include it, via the candidateUser branch
+     * </pre>
+     *
+     * So the same task sits <em>inside</em> the pushed count for {@code {eng}} and <em>outside</em> the pushed
+     * count for {@code {hr}}, while alice sees it either way. The group query is not a subset-by-audience of the
+     * user query; the two are different questions.
+     *
+     * <p>Note the "no candidates at all" branch needs <em>both</em> collections empty
+     * ({@code isEmpty(taskCandidateUsers) AND isEmpty(taskCandidateGroups)}), so a task with both kinds of
+     * candidate never reaches it - and never triggers the recomputer's {@code allGroupSets()} fallback either.
+     *
+     * <p><b>The consequence for this feature:</b> only the group query is pushed. A candidate-user event on this
+     * task publishes group scopes and nothing else - alice's own number changed and no message says so. That is
+     * not an oversight to patch here: {@code TaskCountEmitter.collect} keeps {@code TaskCandidateUser}'s
+     * {@code getTaskId()} but discards {@code getUserId()}, so there is no per-user analogue of
+     * {@code groupsNamedInBatch} - and a <em>removed</em> candidate user would be unrecoverable after commit for
+     * exactly the reason step 1a exists. Pushing per-user counts means solving that first.
+     */
+    @Test
+    @DisplayName("2e. A task with both candidate groups and users: two queries, two different answers")
+    void step7ATaskWithBothCandidateGroupsAndUsers() {
+        //the query that gets pushed, for an audience that does not hold this task's candidacy
+        long pushedForHr = taskRepository.count(TaskSpecification.forGroups(PushedTaskCountFilter.QUEUED, List.of(HR)));
+        //the query alice's own badge is served from, with the same group membership
+        long aliceInHr = taskRepository.count(
+            TaskSpecification.restricted(PushedTaskCountFilter.QUEUED, ALICE, List.of(HR))
+        );
+
+        assertThat(pushedForHr).isEqualTo(3);
+        assertThat(aliceInHr).isEqualTo(5);
+
+        //the gap is the two tasks alice is named on personally - one of which has candidate groups of its own
+        assertThat(aliceInHr - pushedForHr).isEqualTo(2);
+
+        //and the very same task is counted by the audience that does hold its candidacy
+        assertThat(
+            taskRepository.count(TaskSpecification.forGroups(PushedTaskCountFilter.QUEUED, List.of(ENG)))
+        ).isEqualTo(4);
+
+        //when a candidate-user change on that task is processed
+        registry.record(List.of(ENG));
+        registry.record(List.of(HR));
+        emitter.emitFor(List.of(candidateUserAdded(TASK_FOR_ENG_AND_ALICE, ALICE)));
+
+        //then what goes out is group-scoped only: eng, because the task's candidate group rows say so. There is
+        //no user: scope in the output even though a user's visible count is what actually changed.
+        assertThat(published).extracting(TaskCountChangedEvent::scopeKey).containsExactly("groups:eng");
     }
 
     // ---------------------------------------------------------------------------------------------------
@@ -372,7 +502,7 @@ class PushedTaskCountPocTest {
      * <p>
      * The filter is a {@link TaskSearchRequest} - the same payload the REST endpoint deserialises - so
      * "adding a query" means declaring one more constant and counting with it. Below, the pinned
-     * {@link PushedTaskCountFilter#QUEUED} filter is narrowed to standalone tasks, and the number drops from 3
+     * {@link PushedTaskCountFilter#QUEUED} filter is narrowed to standalone tasks, and the number drops from 4
      * to 1 through exactly the same code path.
      * <p>
      * Two rules to respect when you add one:
@@ -388,12 +518,12 @@ class PushedTaskCountPocTest {
      */
     @Test
     @DisplayName("3. Adding your own pushed count is one more filter constant")
-    void step7AddingYourOwnCountQuery() {
+    void step8AddingYourOwnCountQuery() {
         TaskSearchRequest queuedStandaloneOnly = queuedFilterNarrowedToStandaloneTasks();
 
         assertThat(
             taskRepository.count(TaskSpecification.forGroups(PushedTaskCountFilter.QUEUED, List.of(ENG)))
-        ).isEqualTo(3);
+        ).isEqualTo(4);
         assertThat(taskRepository.count(TaskSpecification.forGroups(queuedStandaloneOnly, List.of(ENG)))).isEqualTo(1); // only TASK_FOR_ENG has no process instance
     }
 
@@ -450,5 +580,9 @@ class PushedTaskCountPocTest {
 
     private static CloudRuntimeEvent<?, ?> candidateGroupRemoved(String taskId, String groupId) {
         return new CloudTaskCandidateGroupRemovedEventImpl(new TaskCandidateGroupImpl(groupId, taskId));
+    }
+
+    private static CloudRuntimeEvent<?, ?> candidateUserAdded(String taskId, String userId) {
+        return new CloudTaskCandidateUserAddedEventImpl(new TaskCandidateUserImpl(userId, taskId));
     }
 }
