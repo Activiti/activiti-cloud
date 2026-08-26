@@ -53,9 +53,10 @@ public class TaskCountEmitter {
     public void emitFor(List<CloudRuntimeEvent<?, ?>> events) {
         Set<String> taskIds = new HashSet<>();
         Set<String> groupsNamedInBatch = new HashSet<>();
-        collect(events, taskIds, groupsNamedInBatch);
+        Set<String> usersNamedInBatch = new HashSet<>();
+        collect(events, taskIds, groupsNamedInBatch, usersNamedInBatch);
 
-        if (taskIds.isEmpty() && groupsNamedInBatch.isEmpty()) {
+        if (taskIds.isEmpty() && groupsNamedInBatch.isEmpty() && usersNamedInBatch.isEmpty()) {
             // Nothing task-shaped in the batch - process and variable events cannot move a task count.
             return;
         }
@@ -64,7 +65,7 @@ public class TaskCountEmitter {
         // turns out to have no audience costs no transaction at all.
         List<TaskCountChange> changes;
         try {
-            changes = recomputer.recompute(taskIds, groupsNamedInBatch);
+            changes = recomputer.recompute(taskIds, groupsNamedInBatch, usersNamedInBatch);
         } catch (RuntimeException cause) {
             // The batch has already committed. Failing to push a count means clients fall back to the
             // count they poll for, which is a degradation, not a corruption - so log and carry on.
@@ -85,16 +86,19 @@ public class TaskCountEmitter {
     }
 
     /**
-     * Task ids and directly named groups from the batch.
+     * Task ids, and the groups and users the batch named directly.
      * <p>
-     * Candidate-group events are the reason groups are collected here at all: a
-     * {@code TASK_CANDIDATE_GROUP_REMOVED} event names the group whose count changed, and once the batch
-     * has committed that row is gone, so reading it back is impossible.
+     * Candidate events are the reason identities are collected here at all, and it is a
+     * <em>removal</em> that makes it necessary: a {@code TASK_CANDIDATE_GROUP_REMOVED} or
+     * {@code TASK_CANDIDATE_USER_REMOVED} event names the group or user whose count just changed, and once
+     * the batch has committed that row is gone, so reading it back is impossible. Everything else can be
+     * recovered from the task ids.
      */
     private static void collect(
         List<CloudRuntimeEvent<?, ?>> events,
         Set<String> taskIds,
-        Set<String> groupsNamedInBatch
+        Set<String> groupsNamedInBatch,
+        Set<String> usersNamedInBatch
     ) {
         for (CloudRuntimeEvent<?, ?> event : events) {
             switch (event.getEntity()) {
@@ -103,7 +107,10 @@ public class TaskCountEmitter {
                     addIfPresent(taskIds, candidateGroup.getTaskId());
                     addIfPresent(groupsNamedInBatch, candidateGroup.getGroupId());
                 }
-                case TaskCandidateUser candidateUser -> addIfPresent(taskIds, candidateUser.getTaskId());
+                case TaskCandidateUser candidateUser -> {
+                    addIfPresent(taskIds, candidateUser.getTaskId());
+                    addIfPresent(usersNamedInBatch, candidateUser.getUserId());
+                }
                 case null, default -> {
                     // Not a task event: cannot change a task count.
                 }

@@ -68,32 +68,40 @@ import org.springframework.boot.test.context.SpringBootTest;
  *   <li><b>How do we get the count right?</b> {@link #step3OneCorrectCountPerAudience()},
  *       {@link #step4BothSqlShapesAgree(boolean)}, {@link #step6TheTwoWaysToGetTheCountWrong()},
  *       {@link #step7ATaskWithBothCandidateGroupsAndUsers()},
- *       {@link #step7bOverlappingCandidateUsersAndGroupsAreCountedOnce(boolean)}</li>
+ *       {@link #step7bOverlappingCandidateUsersAndGroupsAreCountedOnce(boolean)},
+ *       {@link #step7cThreeSubscribersThreeDifferentNumbers()},
+ *       {@link #step7dASubscriberWithNoGroupsAtAll()}</li>
  *   <li><b>How do we change or add a query?</b> {@link #step8AddingYourOwnCountQuery()}</li>
  * </ol>
  *
- * <p>If you only read one method, read {@link #step7ATaskWithBothCandidateGroupsAndUsers()}: it lays the
- * group-scoped query and the per-user query side by side on a task that has <em>both</em> a candidate group and
- * a candidate user, and shows why neither answer can be derived from the other.
+ * <p>If you only read one method, read {@link #step7cThreeSubscribersThreeDifferentNumbers()}: one event, three
+ * people who each need a <em>different</em> number, and one of them reachable by no group set at all.
  *
  * <h3>The path being exercised</h3>
  * <pre>
  * events (committed batch)
- *   -&gt; TaskCountEmitter          reads task ids and named groups off the events
- *   -&gt; TaskCountRecomputer       asks the registry which audiences care, then runs one COUNT each
- *   -&gt; TaskCountChangePublisher  one message per audience   (here: collected into a list)
+ *   -&gt; TaskCountEmitter          reads task ids, named groups and named users off the events
+ *   -&gt; TaskCountRecomputer       asks the registry who cares, buckets them by group set,
+ *                                then per bucket: one shared COUNT + one GROUP BY remainder
+ *   -&gt; TaskCountChangePublisher  one message per person       (here: collected into a list)
  * </pre>
  *
  * In production the emitter is triggered from {@code QueryConsumerMessageHandler.accept} through an
  * after-commit transaction synchronization, and the publisher writes to the {@code taskCountsProducer}
  * binding. Everything else below is the production code, including the beans.
  *
- * <h3>The one idea to take away</h3>
- * An event tells you a <em>task's</em> candidate groups. A count needs a <em>subscriber's</em> group set. Those
- * are not the same thing and neither can be derived from the other: {@code {eng}} and {@code {eng,hr}} are two
- * different numbers. That is why {@link SubscriberScopeRegistry} exists - the REST tier records each
- * subscriber's group set as it serves them a count, and this path recomputes only the group sets that were
- * actually recorded.
+ * <h3>The two ideas to take away</h3>
+ * <b>The unit of output is a person.</b> A group-scoped count is shareable and cheap, but it deletes every
+ * branch that depends on who is asking, so it is not a badge - and it cannot be repaired by adding a per-user
+ * count on the client, because the two overlap (step 2d). Every assertion below that names a subscriber also
+ * checks the published number against {@code TaskSpecification.restricted(...)}, the very query
+ * {@code POST /v1/tasks/count} runs: pushed and polled agree by construction, not by coincidence.
+ * <p>
+ * <b>The unit of work is still a group set.</b> Per-user output must not mean per-user queries. Subscribers are
+ * bucketed by the group set they hold, and each bucket costs two queries however many members it has - see
+ * {@link #step3OneCorrectCountPerAudience()}. Group membership itself exists only in
+ * {@link SubscriberScopeRegistry}: there is no user table in the query model, so a subscriber's groups arrive
+ * as an input off their token and can never be recovered by a query.
  */
 @SpringBootTest(
     classes = PushedTaskCountPocConfiguration.class,
@@ -127,6 +135,32 @@ class PushedTaskCountPocTest {
 
     /** A second individual, so step 2f can build a task with more than one candidate user. */
     private static final String BOB = "bob";
+
+    /**
+     * Subscribers, distinguished from candidates on purpose. A candidate is a row in the read model; a subscriber
+     * is a name in {@link SubscriberScopeRegistry} with the group set that arrived on their token. The four below
+     * hold the four group sets step 2a measures, and none of them is a candidate on anything - which is the point:
+     * a group-only subscriber has no rows anywhere and can only be found through the registry.
+     */
+    private static final String ENG_MEMBER = "eng-member";
+
+    private static final String HR_MEMBER = "hr-member";
+    private static final String ENG_AND_HR_MEMBER = "eng-and-hr-member";
+    private static final String FINANCE_MEMBER = "finance-member";
+
+    /** A subscriber in no groups at all - see step 2g. */
+    private static final String SOLO = "solo";
+
+    /**
+     * The three subscribers of step 2h, kept apart from the fixture above so their numbers are the doc's numbers:
+     * {@link #PLUTO} and {@link #DAVE} share a group, {@link #PIPPO} shares nothing with either.
+     */
+    private static final String PLUTO = "pluto";
+
+    private static final String DAVE = "dave";
+    private static final String PIPPO = "pippo";
+    private static final String BANANA = "banana";
+    private static final String CHERRY = "cherry";
 
     /** The only standalone task in the fixture - used by step 3 to show a second filter counting differently. */
     private static final String TASK_FOR_ENG = "task-for-eng";
@@ -282,8 +316,8 @@ class PushedTaskCountPocTest {
     @Test
     @DisplayName("1a. A removed candidate group is only knowable from the event")
     void step1TheEventIsTheOnlySourceForARemovedGroup() {
-        //given HR is listening
-        registry.record(List.of(HR));
+        //given someone in HR is listening
+        registry.record(HR_MEMBER, List.of(HR));
 
         //and the committed batch has already deleted the row that put this task in HR's queue
         taskCandidateGroupRepository.delete(new TaskCandidateGroupEntity(TASK_FOR_ENG_AND_HR, HR));
@@ -291,14 +325,17 @@ class PushedTaskCountPocTest {
         //when the removal event is processed
         emitter.emitFor(List.of(candidateGroupRemoved(TASK_FOR_ENG_AND_HR, HR)));
 
-        //then HR is told its queue shrank to 2, even though nothing in the database still associates the
+        //then they are told their queue shrank to 2, even though nothing in the database still associates the
         //departed task with HR
         assertThat(published)
             .singleElement()
             .satisfies(change -> {
-                assertThat(change.scopeKey()).isEqualTo("groups:hr");
+                assertThat(change.scopeKey()).isEqualTo("queued:" + HR_MEMBER);
                 assertThat(change.count()).isEqualTo(2); // TASK_FOR_HR + TASK_FOR_EVERYONE
             });
+
+        //and that is the number their own REST call would return, which is the only test that matters
+        assertThat(published.get(0).count()).isEqualTo(whatTheRestEndpointWouldReturnFor(HR_MEMBER, List.of(HR)));
     }
 
     /**
@@ -309,7 +346,7 @@ class PushedTaskCountPocTest {
     @Test
     @DisplayName("1b. Non-task events are dropped before touching the database")
     void step2NonTaskEventsCostNothing() {
-        registry.record(List.of(ENG));
+        registry.record(ENG_MEMBER, List.of(ENG));
 
         emitter.emitFor(List.of(new CloudProcessStartedEventImpl()));
 
@@ -321,13 +358,12 @@ class PushedTaskCountPocTest {
     // ---------------------------------------------------------------------------------------------------
 
     /**
-     * One task changes; several audiences are listening; each gets its own correct number from its own COUNT
-     * query. This is the point of the feature - the number is computed once <em>per group set</em>, not once
-     * per user.
+     * One task changes; several people are listening; each gets their own correct number, and the queries are
+     * shared by group set rather than run per person.
      *
      * <p>Given the queued tasks in {@link #setUp()}:
      * <pre>
-     *   audience     sees                                                                    count
+     *   group set    sees                                                                    count
      *   {eng}        task-for-eng, task-for-eng-and-hr, task-for-eng-and-alice,
      *                task-for-everyone                                                          4
      *   {hr}         task-for-eng-and-hr, task-for-hr, task-for-everyone                        3
@@ -337,30 +373,47 @@ class PushedTaskCountPocTest {
      * {@code {eng}} and {@code {eng,hr}} disagree, and {@code {finance}} is not zero. Neither number can be
      * worked out from the other, which is why the registry has to remember real group sets.
      * <p>
-     * Note what is <em>absent</em> from every row: {@code task-for-alice-alone}. No group scope can see it.
+     * The two subscribers who hold {@code {eng}} get one shared COUNT between them and one message each. Add 500
+     * more members of eng and the query cost does not move - that is the whole reason output-per-person does not
+     * mean work-per-person.
+     * <p>
+     * Note what is <em>absent</em> from the table: {@code task-for-alice-alone}. No group set reaches it, which is
+     * what the second query per bucket is for - see step 2f.
      */
     @Test
-    @DisplayName("2a. One correct count per audience, from one event")
+    @DisplayName("2a. One correct count per person, shared queries per group set")
     void step3OneCorrectCountPerAudience() {
-        //given four audiences have fetched a count recently
-        registry.record(List.of(ENG));
-        registry.record(List.of(HR));
-        registry.record(List.of(ENG, HR));
-        registry.record(List.of(FINANCE));
+        //given five subscribers across four group sets - two of them holding exactly the same one
+        registry.record(ENG_MEMBER, List.of(ENG));
+        registry.record("another-eng-member", List.of(ENG));
+        registry.record(HR_MEMBER, List.of(HR));
+        registry.record(ENG_AND_HR_MEMBER, List.of(ENG, HR));
+        registry.record(FINANCE_MEMBER, List.of(FINANCE));
 
         //when a task whose only candidate group is eng changes
         emitter.emitFor(List.of(taskCreated(TASK_FOR_ENG)));
 
-        //then only the audiences that hold a candidacy on it are recomputed, each with its own number
+        //then everyone who can see that task gets their own message, and the two eng members get the same number
+        //off one shared query
         assertThat(published).containsExactlyInAnyOrder(
-            new TaskCountChangedEvent("groups:eng", List.of(ENG), 4, NOW),
-            new TaskCountChangedEvent("groups:eng,hr", List.of(ENG, HR), 5, NOW)
+            new TaskCountChangedEvent("queued:" + ENG_MEMBER, List.of(ENG), 4, NOW),
+            new TaskCountChangedEvent("queued:another-eng-member", List.of(ENG), 4, NOW),
+            new TaskCountChangedEvent("queued:" + ENG_AND_HR_MEMBER, List.of(ENG, HR), 5, NOW)
         );
 
         //and hr and finance are not queried at all: their queues cannot have changed, so there is nothing to
         //tell them. This is the saving - it is not "one query instead of 2000", it is also "no query for the
-        //audiences that do not care".
-        assertThat(published).extracting(TaskCountChangedEvent::scopeKey).doesNotContain("groups:hr", "groups:finance");
+        //people who do not care".
+        assertThat(published)
+            .extracting(TaskCountChangedEvent::scopeKey)
+            .doesNotContain("queued:" + HR_MEMBER, "queued:" + FINANCE_MEMBER);
+
+        //and every number published is the number that person's own REST call returns
+        assertThat(published).allSatisfy(change ->
+            assertThat(change.count()).isEqualTo(
+                whatTheRestEndpointWouldReturnFor(change.scopeKey().substring("queued:".length()), change.groups())
+            )
+        );
     }
 
     /**
@@ -375,21 +428,23 @@ class PushedTaskCountPocTest {
         FeatureToggleHolder.initialize(
             feature -> existsSubqueriesEnabled && QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES.equals(feature)
         );
-        registry.record(List.of(ENG));
-        registry.record(List.of(ENG, HR));
+        registry.record(ENG_MEMBER, List.of(ENG));
+        registry.record(ENG_AND_HR_MEMBER, List.of(ENG, HR));
 
         emitter.emitFor(List.of(taskCreated(TASK_FOR_ENG)));
 
         assertThat(published)
             .extracting(TaskCountChangedEvent::scopeKey, TaskCountChangedEvent::count)
-            .containsExactlyInAnyOrder(tuple("groups:eng", 4L), tuple("groups:eng,hr", 5L));
+            .containsExactlyInAnyOrder(tuple("queued:" + ENG_MEMBER, 4L), tuple("queued:" + ENG_AND_HR_MEMBER, 5L));
     }
 
     /**
      * Nothing recorded means nothing computed - not one query. Worth knowing when a badge appears to stop
-     * updating: if the subscriber's group set has aged out of the registry (TTL
-     * {@code query.count-scopes.registry.ttl}, 15 minutes by default) it receives nothing until it fetches a
-     * count again. That TTL is a correctness setting, not a tuning knob.
+     * updating: if the subscriber has aged out of the registry (TTL {@code query.count-scopes.registry.ttl}, 2
+     * hours by default) they receive nothing until they fetch a count again. That TTL is a correctness setting,
+     * not a tuning knob, and it stays one until registration follows the websocket's lifetime instead of the last
+     * REST call - a client that is being pushed to has no reason to keep re-fetching, which is exactly what would
+     * expire it.
      */
     @Test
     @DisplayName("2c. Nobody listening means no queries are run")
@@ -401,18 +456,25 @@ class PushedTaskCountPocTest {
 
     /**
      * The two traps. Both are properties of a group-scoped count rather than bugs, and both produce a
-     * plausible-looking wrong badge if ignored.
+     * plausible-looking wrong badge if ignored. Together they are the reason the group count is a computation step
+     * and not the thing we publish.
      *
      * <ol>
      *   <li><b>It is not additive with the per-user count.</b> Visibility is a union, not a partition: alice
-     *       sees the group's tasks <em>and</em> her own. Adding the two numbers double-counts.</li>
+     *       sees the group's tasks <em>and</em> her own, and {@code task-for-eng-and-alice} is in both. Adding
+     *       the two numbers double-counts it. So "push the group count and let the client add its own" is not a
+     *       shortcut to a badge, it is a wrong badge.</li>
      *   <li><b>It omits individually named candidates.</b> A task whose only link to alice is a
      *       {@code candidateUser} row is invisible to every group scope, so a pushed group count can be lower
      *       than what alice sees on screen.</li>
      * </ol>
      *
-     * The mirror image of trap 2 is a task with no candidates at all, which every audience sees. That is why
-     * {@code TaskCountRecomputer} falls back to {@code allGroupSets()} when it finds one, and why
+     * What makes the decomposition {@code TaskCountRecomputer} actually uses legal is that its second half is a
+     * <em>set difference</em>, not another count: tasks naming the user whose candidate groups exclude the
+     * bucket's groups entirely. Disjoint halves can be added; these two cannot.
+     * <p>
+     * The mirror image of trap 2 is a task with no candidates at all, which everybody sees. That is why
+     * {@code TaskCountRecomputer} falls back to {@code allSubscribers()} when it finds one, and why
      * {@code {finance}} counted 1 rather than 0 in step 2a.
      */
     @Test
@@ -470,12 +532,12 @@ class PushedTaskCountPocTest {
      * ({@code isEmpty(taskCandidateUsers) AND isEmpty(taskCandidateGroups)}), so a task with both kinds of
      * candidate never reaches it - and never triggers the recomputer's {@code allGroupSets()} fallback either.
      *
-     * <p><b>The consequence for this feature:</b> only the group query is pushed. A candidate-user event on this
-     * task publishes group scopes and nothing else - alice's own number changed and no message says so. That is
-     * not an oversight to patch here: {@code TaskCountEmitter.collect} keeps {@code TaskCandidateUser}'s
-     * {@code getTaskId()} but discards {@code getUserId()}, so there is no per-user analogue of
-     * {@code groupsNamedInBatch} - and a <em>removed</em> candidate user would be unrecoverable after commit for
-     * exactly the reason step 1a exists. Pushing per-user counts means solving that first.
+     * <p><b>The consequence for this feature</b>, and what it took to get right: the number we publish for alice
+     * has to be the {@code restricted(...)} one, because that is the query her own badge is served from. Getting
+     * there needed {@code TaskCountEmitter.collect} to keep {@code TaskCandidateUser}'s {@code getUserId()} as
+     * well as its {@code getTaskId()} - a <em>removed</em> candidate user is unrecoverable after commit for
+     * exactly the reason step 1a exists - and needed the recomputer to reach alice at all, which no group set
+     * would have done here: she is in {@code {hr}} and the task's candidate group is {@code eng}.
      */
     @Test
     @DisplayName("2e. A task with both candidate groups and users: two queries, two different answers")
@@ -498,14 +560,20 @@ class PushedTaskCountPocTest {
             taskRepository.count(TaskSpecification.forGroups(PushedTaskCountFilter.QUEUED, List.of(ENG)))
         ).isEqualTo(4);
 
-        //when a candidate-user change on that task is processed
-        registry.record(List.of(ENG));
-        registry.record(List.of(HR));
+        //when a candidate-user change on that task is processed, with alice listening as an hr member
+        registry.record(ENG_MEMBER, List.of(ENG));
+        registry.record(ALICE, List.of(HR));
         emitter.emitFor(List.of(candidateUserAdded(TASK_FOR_ENG_AND_ALICE, ALICE)));
 
-        //then what goes out is group-scoped only: eng, because the task's candidate group rows say so. There is
-        //no user: scope in the output even though a user's visible count is what actually changed.
-        assertThat(published).extracting(TaskCountChangedEvent::scopeKey).containsExactly("groups:eng");
+        //then alice is told 5 - the restricted number above, not the group number - and the eng member is told
+        //their own 4. Two people, one event, two different correct answers.
+        assertThat(published)
+            .extracting(TaskCountChangedEvent::scopeKey, TaskCountChangedEvent::count)
+            .containsExactlyInAnyOrder(tuple("queued:" + ALICE, aliceInHr), tuple("queued:" + ENG_MEMBER, 4L));
+
+        //and alice was unreachable through the group door: {hr} intersects none of this task's candidate groups.
+        //She is found only because the event named her.
+        assertThat(registry.subscribersHoldingAnyOf(List.of(ENG))).containsExactly(ENG_MEMBER);
     }
 
     /**
@@ -543,11 +611,12 @@ class PushedTaskCountPocTest {
      * {@code COUNT(*) OVER ()} window function - so it is handled, but by a second code path this POC does not
      * exercise. {@link PushedTaskCountFilter#QUEUED} has no variable filters.
      *
-     * <p><b>And the consequence for pushing counts</b>, which narrows what step 2e said: when a candidate user
-     * <em>is</em> covered by one of the task's candidate groups, a change to that task <em>does</em> reach them,
-     * because the task has candidate group rows and {@code groupSetsIntersecting} fires on them. The uncovered
-     * case is therefore narrower than "any candidate user" - it is a user whose recorded group sets do not
-     * intersect the task's candidate groups at all.
+     * <p><b>And the consequence for pushing counts:</b> a subscriber can be found by two doors at once - their
+     * group set intersects the task's candidate groups, <em>and</em> the event names them personally. Both doors
+     * lead to the same bucket and the same single message, because the recomputer unions the two sets of names
+     * before it buckets them. The number cannot double either: the remainder query excludes any task carrying a
+     * candidate group the bucket already covers, so a task reached both ways is counted in the shared half only.
+     * Step 2h pins that on real rows.
      */
     @ParameterizedTest(name = "2f. Overlapping candidate users and groups count once, EXISTS subqueries = {0}")
     @ValueSource(booleans = { false, true })
@@ -591,6 +660,131 @@ class PushedTaskCountPocTest {
         assertThat(queuedCountForGroups(FINANCE)).isEqualTo(financeBefore);
     }
 
+    /**
+     * <h3>A subscriber in no groups at all.</h3>
+     *
+     * Ignorable while counts were group-scoped - an empty group set names no audience, and
+     * {@code forGroups(filter, {})} refuses to be built at all (step 2d). It is not ignorable now: such a person
+     * still sees every task they are individually named on, plus every task with no candidates whatsoever, and
+     * both numbers below are non-zero.
+     * <p>
+     * They also cannot be bucketed. There is no shared half to compute - the "shared" query would be an
+     * unrestricted count of the tenant - and the remainder query's {@code NOT IN :excludedGroups} would need an
+     * empty list, which is not portable JPQL. So the recomputer counts them the direct way, one
+     * {@code restricted(...)} per person, which is the one place where cost is per-head. Acceptable because a
+     * group-less subscriber is a rarity, and correct because it is literally the REST query.
+     * <p>
+     * The reason this needs a database rather than a mock: it is the only test that shows
+     * {@code restricted(filter, user, {})} - a candidate-group {@code IN} clause over an empty list - actually
+     * executes and returns the right number instead of throwing or matching everything.
+     */
+    @Test
+    @DisplayName("2g. A subscriber with no groups still has a count, and it is not zero")
+    void step7dASubscriberWithNoGroupsAtAll() {
+        //given two subscribers who belong to nothing: one named on tasks, one named on nothing at all
+        registry.record(SOLO, List.of());
+        registry.record(ALICE, List.of());
+
+        //when a task that nobody holds a candidacy on changes - the one case that reaches every subscriber
+        emitter.emitFor(List.of(taskCreated(TASK_FOR_EVERYONE)));
+
+        //then both are told a number, and the numbers differ: alice is personally named on two more tasks
+        assertThat(published)
+            .extracting(TaskCountChangedEvent::scopeKey, TaskCountChangedEvent::count)
+            .containsExactlyInAnyOrder(
+                tuple("queued:" + SOLO, 1L), // task-for-everyone
+                tuple("queued:" + ALICE, 3L) // + task-for-alice-alone, task-for-eng-and-alice
+            );
+
+        //and both agree with the endpoint, which is what makes the empty candidate-group IN clause safe rather
+        //than merely non-throwing
+        assertThat(whatTheRestEndpointWouldReturnFor(SOLO, List.of())).isEqualTo(1);
+        assertThat(whatTheRestEndpointWouldReturnFor(ALICE, List.of())).isEqualTo(3);
+    }
+
+    /**
+     * <h3>Three people, one event, three different numbers - and one of them reachable by no group at all.</h3>
+     *
+     * The case that made per-user counts necessary, on its own fixture so the numbers are small enough to check by
+     * eye. T1 and T2 name pluto personally; T3 - the task that just arrived - offers itself to group
+     * {@code banana} and also names pippo personally. pluto and dave are both in {@code banana}; pippo is in
+     * {@code cherry}, which touches nothing.
+     *
+     * <pre>
+     *   person   groups     sees                        needs to be told
+     *   pluto    {banana}   T1, T2, T3                        3
+     *   dave     {banana}   T3                                1
+     *   pippo    {cherry}   T3  (via candidateUser)           1
+     * </pre>
+     *
+     * Three facts fall out of this, and each of them is a thing the group-scoped design got wrong:
+     * <ol>
+     *   <li><b>One number for banana is nobody's number.</b> {@code forGroups({banana})} is 1. It is right for
+     *       dave by coincidence and wrong for pluto, who sees 3. A count that deletes the branches depending on
+     *       who is asking cannot be a badge for the people asking.</li>
+     *   <li><b>The fix is not addition.</b> {@code forGroups({banana})} + {@code restricted(pluto, {banana})} is
+     *       4, and pluto sees 3 - T3 is in both. See step 2d.</li>
+     *   <li><b>pippo is unreachable through groups.</b> Not "gets a slightly wrong number" - gets no message.
+     *       He is found only because the event named him, and counted only because the remainder query looks at
+     *       who is named on the tasks that changed.</li>
+     * </ol>
+     *
+     * And the cost is two queries for {@code {banana}} regardless of how many people are in it, plus two for
+     * {@code {cherry}}: four, not six, and not 2n.
+     */
+    @Test
+    @DisplayName("2h. Three subscribers, one event, three different numbers")
+    void step7cThreeSubscribersThreeDifferentNumbers() {
+        //given exactly the three tasks of the worked example and nothing else
+        taskCandidateGroupRepository.deleteAll();
+        taskCandidateUserRepository.deleteAll();
+        taskRepository.deleteAll();
+        String t1 = "t1-for-pluto";
+        String t2 = "t2-for-pluto";
+        String t3 = "t3-for-banana-and-pippo";
+        queuedTask(t1, A_PROCESS_INSTANCE);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(t1, PLUTO));
+        queuedTask(t2, A_PROCESS_INSTANCE);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(t2, PLUTO));
+        queuedTask(t3, A_PROCESS_INSTANCE, BANANA);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(t3, PIPPO));
+
+        //and the three subscribers
+        registry.record(PLUTO, List.of(BANANA));
+        registry.record(DAVE, List.of(BANANA));
+        registry.record(PIPPO, List.of(CHERRY));
+
+        //when T3 arrives
+        emitter.emitFor(List.of(taskCreated(t3)));
+
+        //then each of the three is told their own number
+        assertThat(published)
+            .extracting(TaskCountChangedEvent::scopeKey, TaskCountChangedEvent::count)
+            .containsExactlyInAnyOrder(
+                tuple("queued:" + PLUTO, 3L),
+                tuple("queued:" + DAVE, 1L),
+                tuple("queued:" + PIPPO, 1L)
+            );
+
+        //and each number is what that person's own REST call returns - the pushed badge and the polled badge are
+        //the same query, so they cannot drift
+        assertThat(whatTheRestEndpointWouldReturnFor(PLUTO, List.of(BANANA))).isEqualTo(3);
+        assertThat(whatTheRestEndpointWouldReturnFor(DAVE, List.of(BANANA))).isEqualTo(1);
+        assertThat(whatTheRestEndpointWouldReturnFor(PIPPO, List.of(CHERRY))).isEqualTo(1);
+
+        //fact 1: the single group-scoped number is nobody's number - it happens to match dave and understates
+        //pluto by two
+        assertThat(queuedCountForGroups(BANANA)).isEqualTo(1);
+
+        //fact 2: adding the two halves the naive way double-counts T3
+        assertThat(queuedCountForGroups(BANANA) + whatTheRestEndpointWouldReturnFor(PLUTO, List.of(BANANA)))
+            .isEqualTo(4)
+            .isNotEqualTo(3);
+
+        //fact 3: pippo is invisible to the group door. Under the group-scoped design he received nothing.
+        assertThat(registry.subscribersHoldingAnyOf(List.of(BANANA))).containsExactlyInAnyOrder(PLUTO, DAVE);
+    }
+
     // ---------------------------------------------------------------------------------------------------
     // 3. Changing or adding a query
     // ---------------------------------------------------------------------------------------------------
@@ -605,14 +799,20 @@ class PushedTaskCountPocTest {
      * <p>
      * Two rules to respect when you add one:
      * <ul>
-     *   <li><b>No user identity in the filter.</b> Assignee, candidate user, "my tasks" - anything
-     *       per-person makes the count unshareable, and a count that serves one person is just the REST call
-     *       again. Identity enters only through {@code forGroups(filter, groups)}.</li>
+     *   <li><b>No user identity in the filter.</b> Assignee, candidate user, "my tasks" - anything per-person
+     *       hard-coded into the filter breaks the sharing the buckets depend on. Identity belongs in the
+     *       specification, where {@code forGroups} and {@code restricted} put it, not in the request.</li>
      *   <li><b>Producer and consumer must agree statically.</b> The consumer has no HTTP request to read a
      *       filter from, so both ends have to name the same constant. Push a second count and clients need to
-     *       know which one a message carries - the {@code scopeKey} currently encodes only the audience, so a
-     *       second filter means extending the key.</li>
+     *       know which one a message carries - the {@code scopeKey} currently encodes the person and which of
+     *       the two badges it is ({@code queued:} / {@code assigned:}), so a third filter means extending it
+     *       again.</li>
      * </ul>
+     *
+     * {@code assigned:} is the obvious next one and is deliberately not built yet: it needs its own pinned filter,
+     * and it is blocked by {@code TaskAssignedEventHandler} hard-coding {@code status = ASSIGNED} when a task is
+     * <em>released</em>, which leaves the read model with {@code assignee = null, status = ASSIGNED} - a state that
+     * matches neither badge.
      */
     @Test
     @DisplayName("3. Adding your own pushed count is one more filter constant")
@@ -670,9 +870,19 @@ class PushedTaskCountPocTest {
         return saved;
     }
 
-    /** The pushed count, for an audience holding exactly the given groups. */
+    /** The shared half of the computation: the count for a group set, with every per-person branch removed. */
     private long queuedCountForGroups(String... groups) {
         return taskRepository.count(TaskSpecification.forGroups(PushedTaskCountFilter.QUEUED, List.of(groups)));
+    }
+
+    /**
+     * The number the client would get from {@code POST /v1/tasks/count} itself. {@code restricted(...)} is the very
+     * specification {@code TaskControllerHelper} builds from the caller's token, so asserting a pushed count
+     * against this is asserting that push and poll cannot disagree - not that two hand-written queries happen to
+     * agree today.
+     */
+    private long whatTheRestEndpointWouldReturnFor(String userId, List<String> groups) {
+        return taskRepository.count(TaskSpecification.restricted(PushedTaskCountFilter.QUEUED, userId, groups));
     }
 
     /**

@@ -20,85 +20,119 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Remembers which group sets are currently worth counting for.
+ * Who is currently watching a task count, and which groups they hold.
  * <p>
- * This closes the one gap an event cannot close on its own. A task event tells you the <em>task's</em>
- * candidate groups; a group-scoped count needs a <em>subscriber's</em> group set, and the two are not
- * interchangeable - the count for {@code {eng}} is not the count for {@code {eng, hr}}, and neither can
- * be derived from the other. So the emitter has to be told which group sets real users actually hold.
+ * This is the only place a user's group membership exists in the query service. <b>There is no user table
+ * and no user-to-group table</b> in the query model, and no join that could reach one: membership arrives
+ * purely as an input, read off the caller's token by the REST tier. So a user who happens to have no
+ * {@code candidate_user} row anywhere cannot be produced by any query - they exist here or nowhere. That is
+ * why this registry cannot be replaced by "just query the group's members", and why it is a prerequisite for
+ * publishing per-user counts at all.
  * <p>
- * Rather than introduce a subscription protocol to collect them, group sets are recorded as a
- * by-product of ordinary read traffic: anyone whose count is worth pushing has necessarily just
- * fetched one. Entries expire, so the registry stays proportional to who is actually active.
+ * It is also what closes the gap an event cannot close. An event tells you the <em>task's</em> candidate
+ * groups; deciding whose count moved needs the reverse mapping, and only the registry has it.
  * <p>
- * <b>The TTL is a correctness parameter, not just a memory bound.</b> A subscriber that holds a
- * websocket open without re-fetching falls out of the registry when its entry expires and silently
- * stops receiving pushes. The TTL must therefore exceed the interval at which clients re-fetch their
- * counts.
+ * <b>The expiry is still a correctness parameter, not yet a leak guard.</b> Entries are written as a
+ * by-product of ordinary read traffic - anyone whose count is worth pushing has necessarily just fetched one
+ * - so a subscriber that holds a websocket open without ever re-fetching falls out and silently stops
+ * receiving pushes. The intended fix is to write on websocket connect and {@link #deregister(String)} on
+ * disconnect, at which point expiry degrades to what it should be: a guard against entries whose disconnect
+ * was lost. Until the notifications service does that, the expiry must exceed the interval at which clients
+ * re-fetch.
  * <p>
  * Instances are thread-safe.
  */
 public class SubscriberScopeRegistry {
 
-    /** Normalized group set -> presence. Caffeine gives expiry and bounded size; the value is unused. */
-    private final Cache<List<String>, Boolean> groupSets;
+    /** User id -> their normalized group set. Caffeine gives expiry and a bounded size. */
+    private final Cache<String, List<String>> subscribers;
 
     public SubscriberScopeRegistry(Duration ttl, long maxSize) {
-        this.groupSets = Caffeine.newBuilder().expireAfterWrite(ttl).maximumSize(maxSize).build();
+        this.subscribers = Caffeine.newBuilder().expireAfterWrite(ttl).maximumSize(maxSize).build();
     }
 
     /**
-     * Records that a subscriber holding this group set is active. Empty and null group collections are
-     * ignored: they describe a user who can see nothing through groups, so there is no group-scoped
-     * count to push them.
+     * Records that {@code userId} is watching, holding {@code groups}.
+     * <p>
+     * An empty group collection is recorded, not ignored: a user in no groups still has a queued count - the
+     * tasks they are individually named on, plus the tasks that have no candidates at all. It was ignorable
+     * only while counts were group-scoped.
      */
-    public void record(Collection<String> groups) {
-        List<String> normalized = CountScopeKeys.normalizeGroups(groups);
-        if (!normalized.isEmpty()) {
-            groupSets.put(normalized, Boolean.TRUE);
+    public void record(String userId, Collection<String> groups) {
+        if (userId == null || userId.isBlank()) {
+            return;
+        }
+        subscribers.put(userId, CountScopeKeys.normalizeGroups(groups));
+    }
+
+    /** Drops a subscriber, for when their websocket closes. */
+    public void deregister(String userId) {
+        if (userId != null) {
+            subscribers.invalidate(userId);
         }
     }
 
     /**
-     * The recorded group sets that contain at least one of {@code affectedGroups} - that is, exactly
-     * the audiences whose count may have changed when those groups were touched.
+     * The subscribers holding at least one of {@code affectedGroups} - that is, the people whose queued count
+     * may have moved when those groups were touched.
      * <p>
-     * A group set is returned when it intersects, not when it is contained: a user in
-     * {@code {eng, hr}} sees tasks offered to {@code eng} alone, so an event touching {@code eng}
-     * changes their count too.
-     *
-     * @return normalized group sets, each suitable for {@code TaskSpecification.forGroups(...)}
+     * Intersection, not containment: a user in {@code {eng, hr}} sees tasks offered to {@code eng} alone, so
+     * an event touching {@code eng} changes their count too.
+     * <p>
+     * An in-memory scan, bounded by the registry's maximum size. No query is involved, because none could be:
+     * see the class javadoc.
      */
-    public Set<List<String>> groupSetsIntersecting(Collection<String> affectedGroups) {
+    public Set<String> subscribersHoldingAnyOf(Collection<String> affectedGroups) {
         if (affectedGroups == null || affectedGroups.isEmpty()) {
             return Set.of();
         }
         Set<String> affected = Set.copyOf(CountScopeKeys.normalizeGroups(affectedGroups));
-        return groupSets
+        return subscribers
             .asMap()
-            .keySet()
+            .entrySet()
             .stream()
-            .filter(groupSet -> groupSet.stream().anyMatch(affected::contains))
+            .filter(entry -> entry.getValue().stream().anyMatch(affected::contains))
+            .map(Map.Entry::getKey)
             .collect(Collectors.toUnmodifiableSet());
     }
 
     /**
-     * Every recorded group set. Needed for the case where a task carries no candidates at all: such a
-     * task is visible through the "no candidate users or groups" branch to <em>every</em> audience, so
-     * there is no set of affected groups to intersect against.
-     *
-     * @return normalized group sets, each suitable for {@code TaskSpecification.forGroups(...)}
+     * Every subscriber. Needed for the case where a task carries no candidates at all: such a task is visible
+     * through the specification's "no candidate users or groups" branch to <em>everyone</em>, so there is no
+     * set of affected groups to narrow by.
      */
-    public Set<List<String>> allGroupSets() {
-        return Set.copyOf(groupSets.asMap().keySet());
+    public Set<String> allSubscribers() {
+        return Set.copyOf(subscribers.asMap().keySet());
     }
 
-    /** Number of distinct group sets currently recorded. Intended for metrics and diagnostics. */
+    /**
+     * Whether this user is watching. Used to filter the candidate users named on the changed tasks down to
+     * the ones worth counting for - the door through which a user reaches their count when none of their
+     * groups was touched at all.
+     */
+    public boolean isRegistered(String userId) {
+        return userId != null && subscribers.getIfPresent(userId) != null;
+    }
+
+    /**
+     * The group set recorded for this user, or empty if they are unknown or hold no groups. Two subscribers
+     * with equal group sets share a count query, which is what keeps the cost independent of headcount.
+     */
+    public List<String> groupsOf(String userId) {
+        if (userId == null) {
+            return List.of();
+        }
+        List<String> groups = subscribers.getIfPresent(userId);
+        return groups == null ? List.of() : groups;
+    }
+
+    /** Number of subscribers currently recorded. Intended for metrics and diagnostics. */
     public long size() {
-        return groupSets.estimatedSize();
+        return subscribers.estimatedSize();
     }
 }

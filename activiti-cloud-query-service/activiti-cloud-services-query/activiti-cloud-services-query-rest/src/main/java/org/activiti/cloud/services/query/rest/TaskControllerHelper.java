@@ -268,11 +268,13 @@ public class TaskControllerHelper {
         String authenticatedUserId = securityManager.getAuthenticatedUserId();
         List<String> authenticatedUserGroups = securityManager.getAuthenticatedUserGroups();
 
-        // Anyone worth pushing a group-scoped count to has just fetched one, so recording the caller's
-        // group set here is what lets the event consumer know which counts to recompute after commit.
-        // Deliberately outside the cache toggle below: the registry describes who is listening, which
-        // is independent of whether this particular count came from the cache.
-        subscriberScopeRegistry.record(authenticatedUserGroups);
+        // Anyone worth pushing a count to has just fetched one, so recording the caller here is what lets
+        // the event consumer know whose counts to recompute after commit. Both halves matter: the user id is
+        // what the pushed count is keyed by, and the group set is the only place their membership exists in
+        // this service - no query can recover it.
+        // Deliberately outside the cache toggle below: the registry describes who is listening, which is
+        // independent of whether this particular count came from the cache.
+        subscriberScopeRegistry.record(authenticatedUserId, authenticatedUserGroups);
 
         if (!FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE)) {
             return countRestrictedTasks(taskSearchRequest, authenticatedUserId, authenticatedUserGroups);

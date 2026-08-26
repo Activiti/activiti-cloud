@@ -34,7 +34,7 @@ import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupRemovedEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,6 +62,9 @@ class TaskCountEmitterTest {
     private ArgumentCaptor<Set<String>> groupsCaptor;
 
     @Captor
+    private ArgumentCaptor<Set<String>> usersCaptor;
+
+    @Captor
     private ArgumentCaptor<List<TaskCountChangedEvent>> publishedCaptor;
 
     private TaskCountEmitter emitter;
@@ -80,45 +83,51 @@ class TaskCountEmitterTest {
 
     @Test
     void shouldTakeTaskIdsStraightOffTaskEvents() {
-        given(recomputer.recompute(anySet(), anySet())).willReturn(List.of());
+        given(recomputer.recompute(anySet(), anySet(), anySet())).willReturn(List.of());
 
         emitter.emitFor(List.of(taskCreated("task-1"), taskCreated("task-2"), taskCreated("task-1")));
 
-        verify(recomputer).recompute(taskIdsCaptor.capture(), groupsCaptor.capture());
+        verify(recomputer).recompute(taskIdsCaptor.capture(), groupsCaptor.capture(), usersCaptor.capture());
         assertThat(taskIdsCaptor.getValue()).containsExactlyInAnyOrder("task-1", "task-2");
         assertThat(groupsCaptor.getValue()).isEmpty();
+        assertThat(usersCaptor.getValue()).isEmpty();
     }
 
     @Test
-    void shouldTakeTaskIdsFromCandidateEventsToo() {
-        given(recomputer.recompute(anySet(), anySet())).willReturn(List.of());
+    void shouldKeepBothIdentitiesOffCandidateEventsNotJustTheTaskId() {
+        given(recomputer.recompute(anySet(), anySet(), anySet())).willReturn(List.of());
 
-        emitter.emitFor(List.of(candidateGroupRemoved("task-1", "eng"), candidateUserAdded("task-2", "alice")));
+        emitter.emitFor(List.of(candidateGroupRemoved("task-1", "eng"), candidateUserRemoved("task-2", "alice")));
 
-        verify(recomputer).recompute(taskIdsCaptor.capture(), groupsCaptor.capture());
+        verify(recomputer).recompute(taskIdsCaptor.capture(), groupsCaptor.capture(), usersCaptor.capture());
         assertThat(taskIdsCaptor.getValue()).containsExactlyInAnyOrder("task-1", "task-2");
-        // The removed group can no longer be read back from the database, so the event is the only source.
+        // Neither removed row can be read back from the database, so the events are the only source. Keeping
+        // the group but discarding the user is what stopped per-user counts from being pushable at all.
         assertThat(groupsCaptor.getValue()).containsExactly("eng");
+        assertThat(usersCaptor.getValue()).containsExactly("alice");
     }
 
     @Test
-    void shouldPublishOneStampedChangePerAffectedAudience() {
-        given(recomputer.recompute(anySet(), anySet())).willReturn(
-            List.of(TaskCountChange.forGroups(List.of("eng"), 3), TaskCountChange.forGroups(List.of("eng", "hr"), 7))
+    void shouldPublishOneStampedChangePerAffectedSubscriber() {
+        given(recomputer.recompute(anySet(), anySet(), anySet())).willReturn(
+            List.of(
+                TaskCountChange.forQueued("pluto", List.of("banana"), 3),
+                TaskCountChange.forQueued("dave", List.of("banana"), 1)
+            )
         );
 
         emitter.emitFor(List.of(taskCreated("task-1")));
 
         verify(publisher).publish(publishedCaptor.capture());
         assertThat(publishedCaptor.getValue()).containsExactlyInAnyOrder(
-            new TaskCountChangedEvent("groups:eng", List.of("eng"), 3, NOW),
-            new TaskCountChangedEvent("groups:eng,hr", List.of("eng", "hr"), 7, NOW)
+            new TaskCountChangedEvent("queued:pluto", List.of("banana"), 3, NOW),
+            new TaskCountChangedEvent("queued:dave", List.of("banana"), 1, NOW)
         );
     }
 
     @Test
     void shouldNotPublishWhenNoAudienceIsAffected() {
-        given(recomputer.recompute(anySet(), anySet())).willReturn(List.of());
+        given(recomputer.recompute(anySet(), anySet(), anySet())).willReturn(List.of());
 
         emitter.emitFor(List.of(taskCreated("task-1")));
 
@@ -127,7 +136,7 @@ class TaskCountEmitterTest {
 
     @Test
     void shouldSwallowRecomputeFailuresBecauseTheBatchHasAlreadyCommitted() {
-        given(recomputer.recompute(anySet(), anySet())).willThrow(new IllegalStateException("database gone"));
+        given(recomputer.recompute(anySet(), anySet(), anySet())).willThrow(new IllegalStateException("database gone"));
 
         emitter.emitFor(List.of(taskCreated("task-1")));
 
@@ -144,7 +153,7 @@ class TaskCountEmitterTest {
         return new CloudTaskCandidateGroupRemovedEventImpl(new TaskCandidateGroupImpl(groupId, taskId));
     }
 
-    private static CloudRuntimeEvent<?, ?> candidateUserAdded(String taskId, String userId) {
-        return new CloudTaskCandidateUserAddedEventImpl(new TaskCandidateUserImpl(userId, taskId));
+    private static CloudRuntimeEvent<?, ?> candidateUserRemoved(String taskId, String userId) {
+        return new CloudTaskCandidateUserRemovedEventImpl(new TaskCandidateUserImpl(userId, taskId));
     }
 }

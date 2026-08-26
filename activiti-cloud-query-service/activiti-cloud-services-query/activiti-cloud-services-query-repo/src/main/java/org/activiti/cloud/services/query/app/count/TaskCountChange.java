@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.app.count;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -26,10 +27,24 @@ import java.util.List;
  * message at publish time rather than here, so that this record stays free of clock access.
  *
  * @param scopeKey the audience the count is valid for, as built by {@link CountScopeKeys}
- * @param groups   the normalized group set behind {@code scopeKey}, so consumers can filter without re-parsing
+ * @param groups   the normalized group set behind the count. For a {@code queued:} scope this is the
+ *                 subscriber's own membership - not part of their identity, but the bucket the count was
+ *                 computed in, which is what makes a wrong number diagnosable from the message alone
  * @param count    number of tasks matching {@link PushedTaskCountFilter#QUEUED} for that audience
  */
 public record TaskCountChange(String scopeKey, List<String> groups, long count) {
+    /**
+     * One user's queued-task badge. This is the shape that gets published: a group-scoped count is not a
+     * badge, because it omits every branch that depends on who is asking.
+     */
+    public static TaskCountChange forQueued(String userId, Collection<String> groups, long count) {
+        return new TaskCountChange(CountScopeKeys.forQueued(userId), CountScopeKeys.normalizeGroups(groups), count);
+    }
+
+    /**
+     * A count valid for everyone holding exactly {@code groups}. Retained because it is the shared half of a
+     * per-user count, not because it is published on its own.
+     */
     public static TaskCountChange forGroups(List<String> groups, long count) {
         return new TaskCountChange(CountScopeKeys.forGroups(groups), List.copyOf(groups), count);
     }

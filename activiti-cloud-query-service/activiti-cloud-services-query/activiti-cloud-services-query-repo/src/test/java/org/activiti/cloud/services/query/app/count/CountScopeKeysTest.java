@@ -64,6 +64,30 @@ class CountScopeKeysTest {
     }
 
     @Test
+    void shouldBuildTheTwoBadgeKeys() {
+        // These are the shapes that get published. They are disjoint by definition - assignee = me cannot
+        // also be assignee IS NULL - so a client never adds or reconciles them.
+        assertThat(CountScopeKeys.forQueued("pluto")).isEqualTo("queued:pluto");
+        assertThat(CountScopeKeys.forAssigned("pluto")).isEqualTo("assigned:pluto");
+        assertThat(CountScopeKeys.forQueued("pluto")).isNotEqualTo(CountScopeKeys.forAssigned("pluto"));
+    }
+
+    @Test
+    void shouldRejectABadgeKeyWithoutAUser() {
+        // A key that is only the prefix would match nobody's subject claim, so it must not be publishable.
+        assertThatThrownBy(() -> CountScopeKeys.forQueued(null))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("needs a user id");
+        assertThatThrownBy(() -> CountScopeKeys.forAssigned("  ")).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void shouldNotMistakeABadgeKeyForAGroupScope() {
+        assertThat(CountScopeKeys.isGroupScope(CountScopeKeys.forQueued("pluto"))).isFalse();
+        assertThat(CountScopeKeys.isGroupScope(CountScopeKeys.forAssigned("pluto"))).isFalse();
+    }
+
+    @Test
     void shouldRecogniseOnlyGroupKeysAsGroupScopes() {
         assertThat(CountScopeKeys.isGroupScope(CountScopeKeys.forGroups(List.of("eng")))).isTrue();
         assertThat(CountScopeKeys.isGroupScope(CountScopeKeys.forUser("alice"))).isFalse();

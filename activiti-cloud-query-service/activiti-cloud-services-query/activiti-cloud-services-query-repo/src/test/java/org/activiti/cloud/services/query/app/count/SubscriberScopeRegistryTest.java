@@ -34,60 +34,103 @@ class SubscriberScopeRegistryTest {
     }
 
     @Test
-    void shouldTreatTheSameMembershipInAnyOrderAsOneScope() {
-        registry.record(List.of("eng", "hr"));
-        registry.record(List.of("hr", "eng"));
+    void shouldNormalizeAGroupSetSoTheSameMembershipBucketsTogether() {
+        registry.record("pluto", List.of("hr", "eng", "hr"));
+        registry.record("dave", Arrays.asList("eng", null, "hr"));
 
-        assertThat(registry.size()).isEqualTo(1);
-        assertThat(registry.groupSetsIntersecting(List.of("eng"))).containsExactly(List.of("eng", "hr"));
+        // Equal group sets share a bucket, which is what keeps the query cost off the headcount.
+        assertThat(registry.groupsOf("pluto")).containsExactly("eng", "hr").isEqualTo(registry.groupsOf("dave"));
     }
 
     @Test
-    void shouldIgnoreGroupSetsThatCouldNotHaveAGroupScopedCount() {
-        registry.record(List.of());
-        registry.record(null);
-        registry.record(Arrays.asList((String) null));
+    void shouldKeepOneEntryPerUserRatherThanPerGroupSet() {
+        registry.record("pluto", List.of("banana"));
+        registry.record("dave", List.of("banana"));
 
+        // The old registry kept group sets, so these two collapsed into one entry and neither name survived.
+        assertThat(registry.size()).isEqualTo(2);
+        assertThat(registry.subscribersHoldingAnyOf(List.of("banana"))).containsExactlyInAnyOrder("pluto", "dave");
+    }
+
+    @Test
+    void shouldRecordASubscriberWhoHoldsNoGroupsAtAll() {
+        registry.record("solo", List.of());
+        registry.record("also-solo", null);
+        registry.record("nearly-solo", Arrays.asList((String) null));
+
+        // Ignorable while counts were group-scoped; not now - such a user still sees the tasks they are
+        // individually named on, plus any task with no candidates at all.
+        assertThat(registry.size()).isEqualTo(3);
+        assertThat(registry.isRegistered("solo")).isTrue();
+        assertThat(registry.groupsOf("solo")).isEmpty();
+        assertThat(registry.allSubscribers()).contains("solo", "also-solo", "nearly-solo");
+    }
+
+    @Test
+    void shouldIgnoreASubscriberWithoutAUserId() {
+        registry.record(null, List.of("eng"));
+        registry.record("  ", List.of("eng"));
+
+        // A per-user count with no user to send it to is not a count.
         assertThat(registry.size()).isZero();
-        assertThat(registry.groupSetsIntersecting(List.of("eng"))).isEmpty();
     }
 
     @Test
-    void shouldReturnGroupSetsThatIntersectRatherThanOnlyThoseContained() {
-        registry.record(List.of("eng"));
-        registry.record(List.of("eng", "hr"));
-        registry.record(List.of("finance"));
+    void shouldReturnSubscribersWhoseGroupSetIntersectsRatherThanOnlyThoseContained() {
+        registry.record("pluto", List.of("eng"));
+        registry.record("dave", List.of("eng", "hr"));
+        registry.record("pippo", List.of("finance"));
 
-        // A user in {eng, hr} can see tasks offered to eng alone, so touching eng changes their count too.
-        assertThat(registry.groupSetsIntersecting(List.of("eng"))).containsExactlyInAnyOrder(
-            List.of("eng"),
-            List.of("eng", "hr")
-        );
+        // A user in {eng, hr} can see tasks offered to eng alone, so touching eng moves their count too.
+        assertThat(registry.subscribersHoldingAnyOf(List.of("eng"))).containsExactlyInAnyOrder("pluto", "dave");
     }
 
     @Test
-    void shouldReturnNothingWhenNoRecordedGroupSetIsAffected() {
-        registry.record(List.of("eng"));
+    void shouldReturnNobodyWhenNoSubscriberHoldsAnAffectedGroup() {
+        registry.record("pluto", List.of("eng"));
 
-        assertThat(registry.groupSetsIntersecting(List.of("legal"))).isEmpty();
-        assertThat(registry.groupSetsIntersecting(List.of())).isEmpty();
-        assertThat(registry.groupSetsIntersecting(null)).isEmpty();
+        assertThat(registry.subscribersHoldingAnyOf(List.of("legal"))).isEmpty();
+        assertThat(registry.subscribersHoldingAnyOf(List.of())).isEmpty();
+        assertThat(registry.subscribersHoldingAnyOf(null)).isEmpty();
     }
 
     @Test
     void shouldMatchOnAnyOfTheAffectedGroups() {
-        registry.record(List.of("eng", "hr"));
-        registry.record(List.of("finance"));
+        registry.record("dave", List.of("eng", "hr"));
+        registry.record("pippo", List.of("finance"));
 
-        assertThat(registry.groupSetsIntersecting(Set.of("legal", "finance"))).containsExactly(List.of("finance"));
+        assertThat(registry.subscribersHoldingAnyOf(Set.of("legal", "finance"))).containsExactly("pippo");
     }
 
     @Test
-    void shouldDropRecordedGroupSetsOnceTheTtlHasElapsed() {
-        SubscriberScopeRegistry shortLived = new SubscriberScopeRegistry(Duration.ZERO, 100);
-        shortLived.record(List.of("eng"));
+    void shouldForgetASubscriberOnDeregistration() {
+        registry.record("pluto", List.of("eng"));
 
-        // A subscriber that stops re-fetching falls out of the registry and stops receiving pushes.
-        assertThat(shortLived.groupSetsIntersecting(List.of("eng"))).isEmpty();
+        registry.deregister("pluto");
+        registry.deregister(null);
+
+        // The websocket closing is the only signal that actually means "stopped watching".
+        assertThat(registry.isRegistered("pluto")).isFalse();
+        assertThat(registry.groupsOf("pluto")).isEmpty();
+        assertThat(registry.subscribersHoldingAnyOf(List.of("eng"))).isEmpty();
+    }
+
+    @Test
+    void shouldDropSubscribersOnceTheExpiryHasElapsed() {
+        SubscriberScopeRegistry shortLived = new SubscriberScopeRegistry(Duration.ZERO, 100);
+        shortLived.record("pluto", List.of("eng"));
+
+        // Until registration follows the socket's lifetime, this expiry is still a correctness parameter: a
+        // subscriber that stops re-fetching falls out and silently stops receiving pushes.
+        assertThat(shortLived.subscribersHoldingAnyOf(List.of("eng"))).isEmpty();
+        assertThat(shortLived.isRegistered("pluto")).isFalse();
+    }
+
+    @Test
+    void shouldReportAnUnknownUserAsNeitherRegisteredNorGrouped() {
+        assertThat(registry.isRegistered("nobody")).isFalse();
+        assertThat(registry.isRegistered(null)).isFalse();
+        assertThat(registry.groupsOf("nobody")).isEmpty();
+        assertThat(registry.groupsOf(null)).isEmpty();
     }
 }

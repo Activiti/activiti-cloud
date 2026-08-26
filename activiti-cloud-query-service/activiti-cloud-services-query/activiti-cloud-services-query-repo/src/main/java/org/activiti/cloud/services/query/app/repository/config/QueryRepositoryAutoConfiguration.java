@@ -52,12 +52,16 @@ public class QueryRepositoryAutoConfiguration {
      * is the only module both of them depend on.
      * <p>
      * The TTL must exceed the interval at which clients re-fetch their counts, or a subscriber can
-     * expire out of the registry and stop receiving pushes - see {@link SubscriberScopeRegistry}.
+     * expire out of the registry and stop receiving pushes - see {@link SubscriberScopeRegistry}. Two hours
+     * is deliberately generous, because the whole point of pushing counts is that a client with an open
+     * socket <em>stops</em> re-fetching: expiry measured from the last fetch would otherwise freeze a badge
+     * mid-session with the socket still connected. It shrinks to a pure leak guard once registration follows
+     * the socket's lifetime rather than read traffic.
      */
     @Bean
     @ConditionalOnMissingBean
     public SubscriberScopeRegistry subscriberScopeRegistry(
-        @Value("${query.count-scopes.registry.ttl:PT15M}") Duration registryTtl,
+        @Value("${query.count-scopes.registry.ttl:PT2H}") Duration registryTtl,
         @Value("${query.count-scopes.registry.max-size:10000}") long registryMaxSize
     ) {
         return new SubscriberScopeRegistry(registryTtl, registryMaxSize);
