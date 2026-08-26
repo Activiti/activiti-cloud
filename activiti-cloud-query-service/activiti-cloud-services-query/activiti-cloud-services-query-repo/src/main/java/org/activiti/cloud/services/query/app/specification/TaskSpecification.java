@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.specification;
+package org.activiti.cloud.services.query.app.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -37,7 +37,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.springframework.util.CollectionUtils;
 
 @CountOverFullWindow
@@ -82,6 +82,37 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         Collection<String> userGroups
     ) {
         return new TaskSpecification(taskSearchRequest, userId, userGroups);
+    }
+
+    /**
+     * Creates a specification that applies the filters and restricts the retrieved tasks to those visible to
+     * <em>any</em> user whose group membership is exactly {@code userGroups}, without knowing the user's identity.
+     * In addition to the filters, tasks are retrieved if they are unassigned and either:
+     * - any of the given groups is a candidate group
+     * - there are no candidate users and groups set
+     * <p>
+     * This is the group-shareable subset of {@link #restricted(TaskSearchRequest, String, Collection)}: the
+     * per-user branches (assignee / owner / candidate user) are deliberately absent, so the resulting count can
+     * be computed once and served to every user holding that group set.
+     * <p>
+     * <b>Not a substitute for the per-user count.</b> Because visibility is a union, a task can satisfy both a
+     * candidate-group branch and the candidate-user branch, so the result of this specification cannot be added
+     * to a per-user count without double counting. It also omits any task whose only link to the user is an
+     * individual {@code candidateUser} entry.
+     *
+     * @param taskSearchRequest the request containing all the filters
+     * @param userGroups        groups to be applied for restriction; must not be empty
+     * @return a specification that applies the filters and restricts the retrieved tasks to the given groups
+     * @throws IllegalArgumentException if {@code userGroups} is null or empty, which would otherwise silently
+     *                                  produce an unrestricted count
+     */
+    public static TaskSpecification forGroups(TaskSearchRequest taskSearchRequest, Collection<String> userGroups) {
+        if (CollectionUtils.isEmpty(userGroups)) {
+            throw new IllegalArgumentException(
+                "userGroups must not be empty: a group-scoped specification without groups would be unrestricted"
+            );
+        }
+        return new TaskSpecification(taskSearchRequest, null, userGroups);
     }
 
     @Override
@@ -324,7 +355,17 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
+        if (userId == null && CollectionUtils.isEmpty(userGroups)) {
+            // No identity at all: this is the unrestricted() tier, used by the admin endpoints.
+            return;
+        }
         if (userId == null) {
+            // Group-scoped: forGroups(). Restrict on the groups only, omitting the per-user branches.
+            if (useExistsSubqueries()) {
+                applyGroupRestrictionFilterWithExistsSubqueries(root, query, criteriaBuilder);
+            } else {
+                applyGroupRestrictionFilterLegacy(root, criteriaBuilder);
+            }
             return;
         }
         if (useExistsSubqueries()) {
@@ -363,6 +404,32 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
                             criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateUsers)),
                             criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateGroups))
                         )
+                    )
+                )
+            )
+        );
+    }
+
+    /**
+     * Group-scoped counterpart of {@link #applyUserRestrictionFilterLegacy}, used by
+     * {@link #forGroups(TaskSearchRequest, Collection)}. Same {@code LEFT JOIN} + {@code isEmpty} shape,
+     * with the assignee / owner / candidate-user branches removed. Active when
+     * {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is disabled, and likewise relies on
+     * {@link SpecificationSupport#useExistsSubqueries()} returning {@code false} so that the outer query keeps
+     * {@code SELECT DISTINCT} to collapse the duplicates the join produces.
+     */
+    private void applyGroupRestrictionFilterLegacy(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+        predicates.add(
+            criteriaBuilder.and(
+                criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
+                criteriaBuilder.or(
+                    root
+                        .join(TaskEntity_.taskCandidateGroups, JoinType.LEFT)
+                        .get(TaskCandidateGroupEntity_.groupId)
+                        .in(userGroups),
+                    criteriaBuilder.and(
+                        criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateUsers)),
+                        criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateGroups))
                     )
                 )
             )
@@ -428,6 +495,55 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
                             criteriaBuilder.not(criteriaBuilder.exists(noCandidateUserSubquery)),
                             criteriaBuilder.not(criteriaBuilder.exists(noCandidateGroupSubquery))
                         )
+                    )
+                )
+            )
+        );
+    }
+
+    /**
+     * Group-scoped counterpart of {@link #applyUserRestrictionFilterWithExistsSubqueries}, used by
+     * {@link #forGroups(TaskSearchRequest, Collection)}. Builds the same correlated {@code EXISTS} /
+     * {@code NOT EXISTS} shape minus the per-user branches, so three subqueries instead of four. Activated when
+     * {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is enabled.
+     */
+    private void applyGroupRestrictionFilterWithExistsSubqueries(
+        Root<TaskEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        // EXISTS (SELECT 1 FROM task_candidate_group WHERE task_id = root.id AND group_id IN (userGroups))
+        Subquery<String> candidateGroupSubquery = query.subquery(String.class);
+        Root<TaskCandidateGroupEntity> tcgRoot = candidateGroupSubquery.from(TaskCandidateGroupEntity.class);
+        candidateGroupSubquery
+            .select(tcgRoot.get(TaskCandidateGroupEntity_.taskId))
+            .where(
+                criteriaBuilder.equal(tcgRoot.get(TaskCandidateGroupEntity_.taskId), root.get(TaskEntity_.id)),
+                tcgRoot.get(TaskCandidateGroupEntity_.groupId).in(userGroups)
+            );
+
+        // NOT EXISTS (SELECT 1 FROM task_candidate_user WHERE task_id = root.id)
+        Subquery<String> noCandidateUserSubquery = query.subquery(String.class);
+        Root<TaskCandidateUserEntity> noCuRoot = noCandidateUserSubquery.from(TaskCandidateUserEntity.class);
+        noCandidateUserSubquery
+            .select(noCuRoot.get(TaskCandidateUserEntity_.taskId))
+            .where(criteriaBuilder.equal(noCuRoot.get(TaskCandidateUserEntity_.taskId), root.get(TaskEntity_.id)));
+
+        // NOT EXISTS (SELECT 1 FROM task_candidate_group WHERE task_id = root.id)
+        Subquery<String> noCandidateGroupSubquery = query.subquery(String.class);
+        Root<TaskCandidateGroupEntity> noCgRoot = noCandidateGroupSubquery.from(TaskCandidateGroupEntity.class);
+        noCandidateGroupSubquery
+            .select(noCgRoot.get(TaskCandidateGroupEntity_.taskId))
+            .where(criteriaBuilder.equal(noCgRoot.get(TaskCandidateGroupEntity_.taskId), root.get(TaskEntity_.id)));
+
+        predicates.add(
+            criteriaBuilder.and(
+                criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
+                criteriaBuilder.or(
+                    criteriaBuilder.exists(candidateGroupSubquery),
+                    criteriaBuilder.and(
+                        criteriaBuilder.not(criteriaBuilder.exists(noCandidateUserSubquery)),
+                        criteriaBuilder.not(criteriaBuilder.exists(noCandidateGroupSubquery))
                     )
                 )
             )

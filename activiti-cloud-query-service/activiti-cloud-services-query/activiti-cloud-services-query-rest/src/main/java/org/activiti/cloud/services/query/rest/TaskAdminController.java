@@ -41,7 +41,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.advice.SerializationViewResponseBodyAdvice;
 import org.activiti.cloud.services.query.rest.advice.TaskControllerAdvice;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.payload.TasksQueryBody;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;

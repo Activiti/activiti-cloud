@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.querydsl.core.types.Predicate;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -32,6 +33,7 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.activiti.cloud.services.query.app.count.SubscriberScopeRegistry;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -98,7 +100,8 @@ public class TaskControllerHelperTest {
             taskRepresentationModelAssembler,
             mock(TaskLookupRestrictionService.class),
             securityManager,
-            Caffeine.newBuilder().<RestrictedTaskCountCacheKey, Long>build()
+            Caffeine.newBuilder().<RestrictedTaskCountCacheKey, Long>build(),
+            new SubscriberScopeRegistry(Duration.ofMinutes(1), 100)
         );
     }
 

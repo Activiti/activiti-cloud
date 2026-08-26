@@ -19,6 +19,7 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.services.query.app.count.TaskCountEmitter;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.springframework.messaging.Message;
@@ -35,20 +36,27 @@ public class QueryConsumerMessageHandler
 
     private final MessageChannel queryEventsChannel;
 
+    private final TaskCountEmitter taskCountEmitter;
+
     public QueryConsumerMessageHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        MessageChannel queryEventsChannel
+        MessageChannel queryEventsChannel,
+        TaskCountEmitter taskCountEmitter
     ) {
         super(eventHandlerContext, optimizer, entityManager);
         this.queryEventsChannel = queryEventsChannel;
+        this.taskCountEmitter = taskCountEmitter;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
         beforeCommit(() -> queryEventsChannel.send(message));
+        // After commit, not before: the counts have to be read from the state a client could also read,
+        // and a batch that rolls back must publish nothing. The emitter opens its own transaction.
+        afterCommit(() -> taskCountEmitter.emitFor(message.getPayload()));
         receive(message.getPayload(), message.getHeaders());
     }
 
@@ -57,6 +65,17 @@ public class QueryConsumerMessageHandler
             new TransactionSynchronization() {
                 @Override
                 public void beforeCommit(boolean readOnly) {
+                    action.run();
+                }
+            }
+        );
+    }
+
+    private static void afterCommit(Runnable action) {
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
                     action.run();
                 }
             }

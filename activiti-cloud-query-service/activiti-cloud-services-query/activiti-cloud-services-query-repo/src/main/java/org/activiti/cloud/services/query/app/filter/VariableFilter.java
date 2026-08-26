@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.payload;
+package org.activiti.cloud.services.query.app.filter;
 
-import java.util.Set;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import jakarta.annotation.Nullable;
 
-public interface CloudRuntimeEntityFilterRequest {
-    Set<String> id();
-    Set<String> parentId();
-    Set<VariableFilter> processVariableFilters();
-    CloudRuntimeEntitySort sort();
-}
+public record VariableFilter(
+    @Nullable String processDefinitionKey,
+    String name,
+    VariableType type,
+    String value,
+    FilterOperator operator
+) {}
