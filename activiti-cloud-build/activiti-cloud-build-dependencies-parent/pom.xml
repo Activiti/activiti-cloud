@@ -29,6 +29,10 @@
     <spring-kafka.version>4.0.6</spring-kafka.version>
     <!-- Security fix AAE-49996: hibernate-platform pins micrometer-core below the version Spring Boot manages. -->
     <micrometer.version>1.16.6</micrometer.version>
+    <!-- Security fix AAE-50658: override httpcore5 (incl. httpcore5-h2) transitive version. -->
+    <httpcore5.version>5.4.3</httpcore5.version>
+    <!-- Security fix AAE-50658: override httpclient5 (incl. httpclient5-cache/-fluent) transitive version. -->
+    <httpclient5.version>5.6.4</httpclient5.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -179,6 +183,27 @@
         <version>${spring-amqp.version}</version>
       </dependency>
       <!-- End spring-amqp pin -->
+
+      <!-- Security fix AAE-50658: override httpcore5/httpcore5-h2. Remove once the managed Spring Boot BOM ships httpcore5 5.4.3+.-->
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>${httpcore5.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5-h2</artifactId>
+        <version>${httpcore5.version}</version>
+      </dependency>
+
+      <!-- Security fix AAE-50658: httpclient5 classic-I/O connection leak DoS. Separate release train from
+           httpcore5, managed by its own Spring Boot property. Remove once the managed Spring Boot BOM ships
+           httpclient5 5.6.3+. -->
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>${httpclient5.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
