@@ -29,6 +29,8 @@
     <spring-kafka.version>4.0.6</spring-kafka.version>
     <!-- Security fix AAE-49996: hibernate-platform pins micrometer-core below the version Spring Boot manages. -->
     <micrometer.version>1.16.6</micrometer.version>
+    <!-- Security fix AAE-50657: override RabbitMQ amqp-client. Remove once the managed Spring Boot BOM ships amqp-client 5.33.0+. -->
+    <amqp-client.version>5.33.0</amqp-client.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -179,6 +181,15 @@
         <version>${spring-amqp.version}</version>
       </dependency>
       <!-- End spring-amqp pin -->
+
+      <!-- Security fix AAE-50658: com.rabbitmq:amqp-client transitive version. Managed by the import-scope
+           Spring Boot BOM, so a property alone does not override it; an explicit dependencyManagement entry is
+           required. Remove once the managed Spring Boot BOM ships amqp-client 5.33.0+. -->
+      <dependency>
+        <groupId>com.rabbitmq</groupId>
+        <artifactId>amqp-client</artifactId>
+        <version>${amqp-client.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
