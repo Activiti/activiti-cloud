@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
+import jakarta.persistence.EntityManager;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -66,7 +67,8 @@ import org.springframework.boot.test.context.SpringBootTest;
  *       {@link #step1TheEventIsTheOnlySourceForARemovedGroup()}, {@link #step2NonTaskEventsCostNothing()}</li>
  *   <li><b>How do we get the count right?</b> {@link #step3OneCorrectCountPerAudience()},
  *       {@link #step4BothSqlShapesAgree(boolean)}, {@link #step6TheTwoWaysToGetTheCountWrong()},
- *       {@link #step7ATaskWithBothCandidateGroupsAndUsers()}</li>
+ *       {@link #step7ATaskWithBothCandidateGroupsAndUsers()},
+ *       {@link #step7bOverlappingCandidateUsersAndGroupsAreCountedOnce(boolean)}</li>
  *   <li><b>How do we change or add a query?</b> {@link #step8AddingYourOwnCountQuery()}</li>
  * </ol>
  *
@@ -123,6 +125,9 @@ class PushedTaskCountPocTest {
      */
     private static final String ALICE = "alice";
 
+    /** A second individual, so step 2f can build a task with more than one candidate user. */
+    private static final String BOB = "bob";
+
     /** The only standalone task in the fixture - used by step 3 to show a second filter counting differently. */
     private static final String TASK_FOR_ENG = "task-for-eng";
 
@@ -133,6 +138,12 @@ class PushedTaskCountPocTest {
 
     /** Both kinds of candidate at once: a candidate group <em>and</em> a candidate user - see step 2e. */
     private static final String TASK_FOR_ENG_AND_ALICE = "task-for-eng-and-alice";
+
+    /**
+     * Created inside step 2f rather than in the shared fixture, so that step can measure the counts before and
+     * after inserting it. Two candidate groups and two candidate users, deliberately overlapping.
+     */
+    private static final String TASK_WITH_OVERLAPPING_CANDIDATES = "task-with-overlapping-candidates";
 
     private static final String TASK_ALREADY_ASSIGNED = "task-already-assigned";
     private static final String TASK_ALREADY_COMPLETED = "task-already-completed";
@@ -147,6 +158,10 @@ class PushedTaskCountPocTest {
 
     @Autowired
     private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    /** Only used by {@link #joinedRowsFor(String)}, to count joined rows the repositories cannot express. */
+    @Autowired
+    private EntityManager entityManager;
 
     /**
      * The beans {@code QueryRepositoryAutoConfiguration} declares, injected so that a failure to wire them fails
@@ -219,7 +234,7 @@ class PushedTaskCountPocTest {
 
         // Excluded from the queued count: it has an assignee, so it is somebody's work, not the queue's.
         TaskEntity assigned = queuedTask(TASK_ALREADY_ASSIGNED, A_PROCESS_INSTANCE, ENG);
-        assigned.setAssignee("bob");
+        assigned.setAssignee(BOB);
         assigned.setStatus(Task.TaskStatus.ASSIGNED);
         taskRepository.save(assigned);
 
@@ -493,6 +508,89 @@ class PushedTaskCountPocTest {
         assertThat(published).extracting(TaskCountChangedEvent::scopeKey).containsExactly("groups:eng");
     }
 
+    /**
+     * <h3>What happens when the candidate users overlap the candidate groups.</h3>
+     *
+     * The obvious worry - "alice is a candidate user <em>and</em> a member of a candidate group, does she get
+     * counted twice?" - has three separate answers, and only the third one is a real hazard.
+     *
+     * <p><b>1. Group membership is never resolved by the query.</b> There is no user-to-groups table in the query
+     * model and no join that could reach one. The subscriber's group list is an <em>input</em>: the REST tier
+     * reads it off the caller's token, passes it to {@code forGroups(filter, groups)}, and records it in the
+     * registry. "alice is in eng" is never computed here - it arrives as {@code List.of("eng")}. So an overlap
+     * between a task's candidate users and its candidate groups is not even visible to the count; the two sets
+     * are compared against different things.
+     *
+     * <p><b>2. The restriction is a predicate, not a sum.</b> The candidate-user branch, the candidate-group
+     * branch and the no-candidates branch are {@code OR}-ed alternative <em>reasons</em> a task row qualifies. A
+     * task that qualifies for three reasons still qualifies once. Overlap cannot inflate a count through the
+     * predicate.
+     *
+     * <p><b>3. The real hazard is row multiplication, and it is already handled.</b> With
+     * {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} off, both collections are reached by {@code LEFT
+     * JOIN}, so the task below - 2 candidate groups x 2 candidate users - produces <b>4 rows for one task</b>, and
+     * for an {@code {eng,hr}} audience 2 of those group rows match the {@code IN} clause. A plain
+     * {@code COUNT(*)} would return 5 or 6 where the answer is 4. What prevents it:
+     * {@code SpecificationSupport.toPredicate} calls {@code query.distinct(true)}, which Spring Data's
+     * {@code getCountQuery} turns into {@code COUNT(DISTINCT task.id)}. With {@code EXISTS} subqueries there are
+     * no duplicate rows to collapse, so {@code DISTINCT} is deliberately dropped - which is why this test runs
+     * both shapes.
+     *
+     * <p><b>The one gap in that safety net</b>, worth knowing before you add a pushed filter: {@code distinct} is
+     * only applied when {@code query.getGroupList()} is empty, and a process- or task-variable filter forces a
+     * {@code GROUP BY}. That case is covered by a different mechanism - {@code @CountOverFullWindow} on
+     * {@code TaskSpecification}, which makes {@code CustomizedJpaSpecificationExecutorImpl} swap the count for a
+     * {@code COUNT(*) OVER ()} window function - so it is handled, but by a second code path this POC does not
+     * exercise. {@link PushedTaskCountFilter#QUEUED} has no variable filters.
+     *
+     * <p><b>And the consequence for pushing counts</b>, which narrows what step 2e said: when a candidate user
+     * <em>is</em> covered by one of the task's candidate groups, a change to that task <em>does</em> reach them,
+     * because the task has candidate group rows and {@code groupSetsIntersecting} fires on them. The uncovered
+     * case is therefore narrower than "any candidate user" - it is a user whose recorded group sets do not
+     * intersect the task's candidate groups at all.
+     */
+    @ParameterizedTest(name = "2f. Overlapping candidate users and groups count once, EXISTS subqueries = {0}")
+    @ValueSource(booleans = { false, true })
+    void step7bOverlappingCandidateUsersAndGroupsAreCountedOnce(boolean existsSubqueriesEnabled) {
+        FeatureToggleHolder.initialize(
+            feature -> existsSubqueriesEnabled && QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES.equals(feature)
+        );
+
+        long engBefore = queuedCountForGroups(ENG);
+        long engAndHrBefore = queuedCountForGroups(ENG, HR);
+        long financeBefore = queuedCountForGroups(FINANCE);
+        long aliceInEngBefore = taskRepository.count(
+            TaskSpecification.restricted(PushedTaskCountFilter.QUEUED, ALICE, List.of(ENG))
+        );
+
+        //given one task carrying two candidate groups and two candidate users, with alice in both sets as far as
+        //an eng-scoped subscriber is concerned: 2 x 2 = 4 joined rows for a single task
+        queuedTask(TASK_WITH_OVERLAPPING_CANDIDATES, A_PROCESS_INSTANCE, ENG, HR);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(TASK_WITH_OVERLAPPING_CANDIDATES, ALICE));
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(TASK_WITH_OVERLAPPING_CANDIDATES, BOB));
+
+        //the duplication is real, not hypothetical: joining both collections the way the legacy shape does
+        //yields four rows for this one task. This is the counterfactual the DISTINCT protects against.
+        assertThat(joinedRowsFor(TASK_WITH_OVERLAPPING_CANDIDATES)).isEqualTo(4);
+
+        //then every count goes up by exactly one task, whichever SQL shape is in use
+        assertThat(queuedCountForGroups(ENG)).isEqualTo(engBefore + 1);
+
+        //the interesting one: {eng,hr} matches this task through two candidate group rows, and still counts it
+        //once. Without DISTINCT this would be +2.
+        assertThat(queuedCountForGroups(ENG, HR)).isEqualTo(engAndHrBefore + 1);
+
+        //and alice matches it through the candidate-user branch and the candidate-group branch at the same time,
+        //which is also worth exactly one
+        assertThat(
+            taskRepository.count(TaskSpecification.restricted(PushedTaskCountFilter.QUEUED, ALICE, List.of(ENG)))
+        ).isEqualTo(aliceInEngBefore + 1);
+
+        //an unrelated audience is unaffected: having candidate groups at all keeps this task out of the
+        //no-candidates branch that finance sees
+        assertThat(queuedCountForGroups(FINANCE)).isEqualTo(financeBefore);
+    }
+
     // ---------------------------------------------------------------------------------------------------
     // 3. Changing or adding a query
     // ---------------------------------------------------------------------------------------------------
@@ -570,6 +668,30 @@ class PushedTaskCountPocTest {
             taskCandidateGroupRepository.save(new TaskCandidateGroupEntity(taskId, group));
         }
         return saved;
+    }
+
+    /** The pushed count, for an audience holding exactly the given groups. */
+    private long queuedCountForGroups(String... groups) {
+        return taskRepository.count(TaskSpecification.forGroups(PushedTaskCountFilter.QUEUED, List.of(groups)));
+    }
+
+    /**
+     * How many rows one task becomes once both candidate collections are joined - the same two associations
+     * {@code TaskSpecification} reaches through {@code LEFT JOIN} in its legacy shape, counted here <em>without</em>
+     * {@code DISTINCT} on purpose. Used by step 2f to show that the duplication is real and that the count is only
+     * correct because something collapses it.
+     */
+    private long joinedRowsFor(String taskId) {
+        return entityManager
+            .createQuery(
+                "select count(t) from Task t " +
+                    "left join t.taskCandidateGroups g " +
+                    "left join t.taskCandidateUsers u " +
+                    "where t.id = :taskId",
+                Long.class
+            )
+            .setParameter("taskId", taskId)
+            .getSingleResult();
     }
 
     private static CloudRuntimeEvent<?, ?> taskCreated(String taskId) {
