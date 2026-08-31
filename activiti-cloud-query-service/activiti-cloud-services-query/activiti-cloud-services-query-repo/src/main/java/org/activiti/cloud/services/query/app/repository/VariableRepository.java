@@ -18,6 +18,8 @@ package org.activiti.cloud.services.query.app.repository;
 import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
 
 import com.querydsl.core.types.dsl.StringPath;
+import java.util.Collection;
+import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -35,6 +37,8 @@ public interface VariableRepository
         QuerydslBinderCustomizer<QProcessVariableEntity>,
         CrudRepository<ProcessVariableEntity, Long>
 {
+    List<ProcessVariableEntity> findByProcessInstanceIdIn(Collection<String> processInstanceIds);
+
     @Override
     default void customize(QuerydslBindings bindings, QProcessVariableEntity root) {
         whitelist(root).apply(bindings);
