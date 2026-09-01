@@ -100,12 +100,17 @@ jobs:
       - name: Export build version
         id: export-version
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TAG_VERSION: ${{ steps.tag.outputs.version }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "version=${{ steps.tag.outputs.version }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "pull_request" ] \
-            && [[ ",${{ join(github.event.pull_request.labels.*.name, ',') }}," == *",preview,"* ]]; then
-            echo "version=0.0.1-PR-${{ github.event.pull_request.number }}-SNAPSHOT" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT_NAME" = "pull_request" ] \
+            && [[ ",${PR_LABELS}," == *",preview,"* ]]; then
+            echo "version=0.0.1-PR-${PR_NUMBER}-SNAPSHOT" >> "$GITHUB_OUTPUT"
           else
             echo "version=$(yq e '.project.version' pom.xml)" >> "$GITHUB_OUTPUT"
           fi
@@ -148,7 +153,7 @@ jobs:
               printf '%s\n' "${STANDALONE_MODULES[@]}"
             } | sort -u | tr '\n' ',' | sed 's/,$//'
           )
-          echo "modules=$MODULES" >> $GITHUB_OUTPUT
+          echo "modules=$MODULES" >> "$GITHUB_OUTPUT"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
         env:
@@ -366,11 +371,11 @@ jobs:
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
           VERSION: ${{ needs.create-tag.outputs.version }}
         run: |
-          if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
+          if [ "$IS_PREVIEW" = true ] || [ "$GITHUB_EVENT_NAME" = "push" ]
           then
               echo "Skipping delete Docker images"
           else
-              echo $VERSION > VERSION
+              echo "$VERSION" > VERSION
               echo "Delete Docker images"
               make docker-delete-all
           fi
@@ -478,7 +483,7 @@ jobs:
       - name: Update image tags in Helm chart
         working-directory: ${{ env.FULL_CHART_DIR }}/charts/activiti-cloud-full-example
         run: |
-          git checkout -b $FULL_CHART_PR_BRANCH
+          git checkout -b "$FULL_CHART_PR_BRANCH"
           yq -i e '.runtime-bundle.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-consumer.image.tag = env(VERSION)' values.yaml
@@ -526,8 +531,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
-          git push origin $FULL_CHART_PR_BRANCH
-          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot --head $(git branch --show-current)
+          git push origin "$FULL_CHART_PR_BRANCH"
+          gh pr create --fill --base "$FULL_CHART_BASE_BRANCH" --label updatebot --head "$(git branch --show-current)"
 
   notify:
     runs-on: ubuntu-latest
