@@ -41,8 +41,13 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
         TaskEntity queryTaskEntity = findResult.orElseThrow(() ->
             new QueryException("Unable to find task with id: " + eventTask.getId())
         );
-        queryTaskEntity.setAssignee(eventTask.getAssignee());
-        queryTaskEntity.setStatus(Task.TaskStatus.ASSIGNED);
+        String assignee = eventTask.getAssignee();
+        queryTaskEntity.setAssignee(assignee);
+        if (assignee != null && !assignee.isEmpty()) {
+            queryTaskEntity.setStatus(Task.TaskStatus.ASSIGNED);
+        } else {
+            queryTaskEntity.setStatus(Task.TaskStatus.CREATED);
+        }
         queryTaskEntity.setLastModified(new Date(taskAssignedEvent.getTimestamp()));
         queryTaskEntity.setServiceName(taskAssignedEvent.getServiceName());
         queryTaskEntity.setServiceFullName(taskAssignedEvent.getServiceFullName());
