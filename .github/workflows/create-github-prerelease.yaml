@@ -15,8 +15,8 @@ jobs:
         run: |
           ACTIVITI_VERSION=$(yq -p=xml e '.project.properties."activiti.version"' activiti-cloud-api/pom.xml)
           ACTIVITI_CLOUD_VERSION=$(yq -p=xml e '.project.version' pom.xml)
-          echo "activiti-tag=$ACTIVITI_VERSION" >> $GITHUB_OUTPUT
-          echo "activiti-cloud-tag=$ACTIVITI_CLOUD_VERSION" >> $GITHUB_OUTPUT
+          echo "activiti-tag=$ACTIVITI_VERSION" >> "$GITHUB_OUTPUT"
+          echo "activiti-cloud-tag=$ACTIVITI_CLOUD_VERSION" >> "$GITHUB_OUTPUT"
 
       - run: touch release.yaml
 
@@ -37,4 +37,4 @@ jobs:
           TAG: ${{ github.ref_name }}
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
-          gh release create $TAG 'release.yaml#Release Descriptor' --prerelease -t $TAG
+          gh release create "$TAG" 'release.yaml#Release Descriptor' --prerelease -t "$TAG"
