@@ -22,4 +22,46 @@ public record RestrictedTaskCountCacheKey(
     String authenticatedUserId,
     List<String> authenticatedUserGroups,
     TaskSearchRequest taskSearchRequest
-) {}
+) {
+    // requestId is a client-supplied correlation id, normalized away so polls differing only by it reuse the cached count.
+    public RestrictedTaskCountCacheKey {
+        taskSearchRequest = withoutRequestId(taskSearchRequest);
+    }
+
+    private static TaskSearchRequest withoutRequestId(TaskSearchRequest r) {
+        if (r.requestId() == null) {
+            return r;
+        }
+        return new TaskSearchRequest(
+            null,
+            r.onlyStandalone(),
+            r.onlyRoot(),
+            r.id(),
+            r.parentId(),
+            r.processInstanceId(),
+            r.name(),
+            r.description(),
+            r.processDefinitionName(),
+            r.priority(),
+            r.status(),
+            r.completedBy(),
+            r.assignee(),
+            r.createdFrom(),
+            r.createdTo(),
+            r.lastModifiedFrom(),
+            r.lastModifiedTo(),
+            r.lastClaimedFrom(),
+            r.lastClaimedTo(),
+            r.dueDateFrom(),
+            r.dueDateTo(),
+            r.completedFrom(),
+            r.completedTo(),
+            r.candidateUserId(),
+            r.candidateGroupId(),
+            r.taskVariableFilters(),
+            r.processVariableFilters(),
+            r.processVariableKeys(),
+            r.sort()
+        );
+    }
+}

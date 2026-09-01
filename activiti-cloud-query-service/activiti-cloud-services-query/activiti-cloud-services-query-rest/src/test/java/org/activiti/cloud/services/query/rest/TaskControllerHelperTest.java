@@ -257,4 +257,49 @@ public class TaskControllerHelperTest {
         assertThat(secondCount).isEqualTo(6L);
         verify(taskRepository, times(2)).count(any(Specification.class));
     }
+
+    @Test
+    void countTasksRestricted_should_hitCache_whenOnlyRequestIdChanges() {
+        FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE::equals);
+        given(securityManager.getAuthenticatedUserId()).willReturn("test-user");
+        given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("group-a"));
+        given(taskRepository.count(any(Specification.class))).willReturn(5L);
+
+        var firstPoll = new TaskSearchRequestBuilder()
+            .withRequestId("poll-1")
+            .withStatus(Task.TaskStatus.ASSIGNED)
+            .build();
+        var secondPoll = new TaskSearchRequestBuilder()
+            .withRequestId("poll-2")
+            .withStatus(Task.TaskStatus.ASSIGNED)
+            .build();
+
+        Long firstCount = taskControllerHelper.countTasksRestricted(firstPoll);
+        Long secondCount = taskControllerHelper.countTasksRestricted(secondPoll);
+
+        assertThat(firstCount).isEqualTo(5L);
+        assertThat(secondCount).isEqualTo(5L);
+        verify(taskRepository, times(1)).count(any(Specification.class));
+    }
+
+    @Test
+    void countTasksRestricted_should_hitCache_whenRequestIdGoesFromNullToNonNull() {
+        FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE::equals);
+        given(securityManager.getAuthenticatedUserId()).willReturn("test-user");
+        given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("group-a"));
+        given(taskRepository.count(any(Specification.class))).willReturn(5L);
+
+        var unidentifiedPoll = new TaskSearchRequestBuilder().withStatus(Task.TaskStatus.ASSIGNED).build();
+        var correlatedPoll = new TaskSearchRequestBuilder()
+            .withRequestId("poll-1")
+            .withStatus(Task.TaskStatus.ASSIGNED)
+            .build();
+
+        Long firstCount = taskControllerHelper.countTasksRestricted(unidentifiedPoll);
+        Long secondCount = taskControllerHelper.countTasksRestricted(correlatedPoll);
+
+        assertThat(firstCount).isEqualTo(5L);
+        assertThat(secondCount).isEqualTo(5L);
+        verify(taskRepository, times(1)).count(any(Specification.class));
+    }
 }
