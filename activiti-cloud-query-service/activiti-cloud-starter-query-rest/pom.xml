@@ -51,12 +51,32 @@
       <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
     </dependency>
     <dependency>
+      <!-- Websocket transport (graphql-transport-ws) for the pushed-counts subscriber registry.
+           Transport-generic - no coupling to that module's EngineEvent/GraphQL subscription
+           business logic, which is deliberately not depended on here. -->
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-ws</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <!-- SecurityWebSocketInterceptor and the JWT auth chain behind it, reused (via subclassing)
+           by PushedCountsWebSocketInterceptor so both websocket features share one
+           authentication/authorization implementation. -->
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-security</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-error-handlers</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

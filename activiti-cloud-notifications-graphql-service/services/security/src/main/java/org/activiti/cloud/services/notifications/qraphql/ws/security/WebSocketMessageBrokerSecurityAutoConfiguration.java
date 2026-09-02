@@ -33,6 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
 import org.springframework.graphql.server.support.BearerTokenAuthenticationExtractor;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
@@ -104,14 +105,28 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         }
 
         @Bean
+        @ConditionalOnMissingBean
+        public AuthorizationManager<RequestAuthorizationContext> graphQlWebSocketAuthorizationManager() {
+            return new CustomAuthorizationManager<>(authorities, permissions);
+        }
+
+        // @ConditionalOnMissingBean(WebSocketGraphQlInterceptor.class): a consumer that needs the
+        // same authentication/authorization but is deployed alongside this one (e.g. sharing the
+        // websocket endpoint with a pushed-counts subscriber registry) can supply its own
+        // WebSocketGraphQlInterceptor - e.g. a SecurityWebSocketInterceptor subclass - and this
+        // default backs off, since spring-graphql allows at most one WebSocketGraphQlInterceptor
+        // per application.
+        @Bean
+        @ConditionalOnMissingBean(WebSocketGraphQlInterceptor.class)
         public WebSocketGraphQlInterceptor authenticationInterceptor(
             JWSAuthenticationManager jwsAuthenticationManager,
-            JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor
+            JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor,
+            AuthorizationManager<RequestAuthorizationContext> graphQlWebSocketAuthorizationManager
         ) {
             return new SecurityWebSocketInterceptor(
                 jwsBearerTokenAuthenticationExtractor,
                 jwsAuthenticationManager,
-                new CustomAuthorizationManager<RequestAuthorizationContext>(authorities, permissions)
+                graphQlWebSocketAuthorizationManager
             );
         }
     }
