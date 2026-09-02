@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
+import org.activiti.cloud.services.core.validation.VariableProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
@@ -139,5 +140,10 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
     @ConditionalOnMissingBean
     public RuntimeBundleLinkRelationProvider runtimeBundleRelProvider() {
         return new RuntimeBundleLinkRelationProvider();
+    }
+
+    @Bean
+    public VariableRequestBodyAdvice variableRequestBodyAdvice(VariableProperties variableProperties) {
+        return new VariableRequestBodyAdvice(variableProperties);
     }
 }

@@ -21,8 +21,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class VariableProperties {
 
     public static final int DEFAULT_MAX_VALUE_SIZE = 5 * 1024 * 1024;
+    public static final int DEFAULT_MAX_REQUEST_SIZE = DEFAULT_MAX_VALUE_SIZE + 1024;
 
     private int maxValueSize = DEFAULT_MAX_VALUE_SIZE;
+    private int maxRequestSize = DEFAULT_MAX_REQUEST_SIZE;
 
     public int getMaxValueSize() {
         return maxValueSize;
@@ -30,5 +32,13 @@ public class VariableProperties {
 
     public void setMaxValueSize(int maxValueSize) {
         this.maxValueSize = maxValueSize;
+    }
+
+    public int getMaxRequestSize() {
+        return maxRequestSize;
+    }
+
+    public void setMaxRequestSize(int maxRequestSize) {
+        this.maxRequestSize = maxRequestSize;
     }
 }
