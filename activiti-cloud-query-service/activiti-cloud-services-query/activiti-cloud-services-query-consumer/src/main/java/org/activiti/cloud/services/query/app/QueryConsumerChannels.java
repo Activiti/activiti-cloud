@@ -26,6 +26,12 @@ public interface QueryConsumerChannels {
 
     String QUERY_EVENTS_PRODUCER = "queryEventsProducer";
 
+    String SUBSCRIBER_REGISTRY_CONSUMER = "subscriberRegistryConsumer";
+
+    String SUBSCRIBER_REGISTRY_PRODUCER = "subscriberRegistryProducer";
+
+    String COUNT_PRODUCER = "countProducer";
+
     @InputBinding(QUERY_CONSUMER)
     default SubscribableChannel queryConsumer() {
         return MessageChannels.publishSubscribe(QUERY_CONSUMER).getObject();
@@ -34,5 +40,20 @@ public interface QueryConsumerChannels {
     @OutputBinding(QUERY_EVENTS_PRODUCER)
     default MessageChannel queryEventsProducer() {
         return MessageChannels.direct(QUERY_EVENTS_PRODUCER).getObject();
+    }
+
+    @InputBinding(SUBSCRIBER_REGISTRY_CONSUMER)
+    default SubscribableChannel subscriberRegistryConsumer() {
+        return MessageChannels.publishSubscribe(SUBSCRIBER_REGISTRY_CONSUMER).getObject();
+    }
+
+    @OutputBinding(SUBSCRIBER_REGISTRY_PRODUCER)
+    default MessageChannel subscriberRegistryProducer() {
+        return MessageChannels.direct(SUBSCRIBER_REGISTRY_PRODUCER).getObject();
+    }
+
+    @OutputBinding(COUNT_PRODUCER)
+    default MessageChannel countProducer() {
+        return MessageChannels.direct(COUNT_PRODUCER).getObject();
     }
 }
