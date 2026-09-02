@@ -25,22 +25,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**
- * The local, per-instance {@code userId -> SubscriberRegistration} registry: which users have
- * at least one live websocket session on this query-rest instance.
+ * The local, per-instance {@code userId -> SubscriberRegistration} registry. Publishes a
+ * {@link SubscriberWentLiveEvent} / {@link SubscriberWentQuietEvent} only on the empty/non-empty
+ * transition, never on every session add/remove; a clean disconnect and the expiry sweep both go
+ * through {@link #unregister(String, String, Instant)}.
  *
- * <p>Only the transition from empty to non-empty (a user's first session on this instance) and
- * back to empty (their last session closing) is externally significant - a
- * {@link SubscriberWentLiveEvent} / {@link SubscriberWentQuietEvent} is published exactly then,
- * never on every session add/remove. Both a clean disconnect and the expiry sweep funnel
- * through the same {@link #unregister(String, String, Instant)} method, so there is only ever
- * one code path for "this session is gone".
- *
- * <p>Concurrency: two sessions for the <em>same</em> user can register concurrently (two
- * browser tabs opening within the same instant). {@link ConcurrentHashMap#compute} /
- * {@link ConcurrentHashMap#computeIfPresent} serialize remapping per key, so the
- * "was this the first/last session" decision and the mutation that answers it happen as one
- * atomic step - two concurrent registrations for the same user can never both observe
- * "was empty".
+ * <p>Concurrency: {@link ConcurrentHashMap#compute}/{@code computeIfPresent} serialize remapping
+ * per key, so two sessions for the same user registering concurrently can never both observe
+ * "was empty" and double-fire a transition.
  */
 public class SubscriberRegistry {
 
@@ -56,10 +48,8 @@ public class SubscriberRegistry {
     }
 
     public void register(String userId, Set<String> groups, String sessionId, Instant now) {
-        // Best-effort: a size check ahead of the atomic compute below can race with another
-        // new registration, so this is a soft cap that can be exceeded by a handful of entries
-        // under concurrent load, not a hard invariant - it only exists to keep an unbounded
-        // registry from becoming a memory-exhaustion vector.
+        // Soft cap - this check races with concurrent registrations and can be exceeded
+        // slightly; it only guards against unbounded growth, not exactness.
         if (!registrations.containsKey(userId) && registrations.size() >= maxSize) {
             LOGGER.warn(
                 "Subscriber registry is at its configured maximum size ({}); not registering a new session for user {}",
@@ -99,11 +89,7 @@ public class SubscriberRegistry {
         });
     }
 
-    /**
-     * Removes every session past {@code expiry}, taking the exact same path as a clean
-     * disconnect ({@link #unregister(String, String, Instant)}) - there is no separate code
-     * path for the expiry case.
-     */
+    /** Removes sessions past {@code expiry} via the same path as a clean disconnect. */
     public void expireSessionsOlderThan(Duration expiry, Instant now) {
         registrations.forEach((userId, registration) -> {
             for (String sessionId : registration.expiredSessionIds(now, expiry)) {

@@ -68,9 +68,6 @@ class SubscriberSessionExpirySweepTest {
 
         sweep.sweep();
 
-        // Only the stale session is gone; the user is still registered because of the fresh one,
-        // so no went-quiet transition fires - this is the same "did the map become empty" check
-        // a clean disconnect goes through, not a separate code path.
         assertThat(registry.size()).isEqualTo(1);
         verifyNoInteractions(eventPublisher);
     }

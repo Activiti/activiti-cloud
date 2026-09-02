@@ -19,8 +19,7 @@ import java.time.Instant;
 import java.util.Set;
 
 /**
- * Published when a user goes from no live websocket sessions on this instance to at least
- * one. This is the seam a later step (the consumer-side registry) listens on to broadcast a
- * {@code REGISTERED} message; this module does not publish to any broker itself.
+ * Published when a user goes from no live sessions on this instance to at least one. The seam
+ * a later step uses to broadcast a {@code REGISTERED} message.
  */
 public record SubscriberWentLiveEvent(String userId, Set<String> groups, Instant at) {}

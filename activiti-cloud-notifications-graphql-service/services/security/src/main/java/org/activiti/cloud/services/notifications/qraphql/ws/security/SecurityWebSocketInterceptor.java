@@ -68,11 +68,7 @@ public class SecurityWebSocketInterceptor extends AbstractAuthenticationWebSocke
             );
     }
 
-    /**
-     * The {@link Authentication} stored for this connection by
-     * {@link AbstractAuthenticationWebSocketInterceptor}, or {@code null} if the connection
-     * never authenticated (e.g. the workaround above left it anonymous).
-     */
+    /** The connection's authenticated {@link Authentication}, or {@code null} if none. */
     protected final Authentication currentAuthentication(WebSocketSessionInfo sessionInfo) {
         SecurityContext securityContext = (SecurityContext) sessionInfo.getAttributes().get(authenticationAttribute);
         return securityContext != null ? securityContext.getAuthentication() : null;

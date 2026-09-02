@@ -22,13 +22,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * One user's live websocket subscriptions on this query-rest instance.
- *
- * <p>A "session" here is one websocket connection (one browser tab), not one badge
- * subscription - a user with two tabs open has two sessions. {@code groups} is a snapshot
- * taken once, when the user's first session on this instance is added; it is not refreshed
- * for the life of the registration, matching the accepted staleness tradeoff described in
- * the pushed-counts ADR (group membership can drift stale until the connection is reopened).
+ * One user's live websocket sessions on this query-rest instance. A "session" is one websocket
+ * connection (one browser tab), not one badge subscription. {@code groups} is a snapshot taken
+ * when the first session is added and never refreshed for the life of the registration.
  */
 public class SubscriberRegistration {
 
@@ -49,30 +45,20 @@ public class SubscriberRegistration {
         return groups;
     }
 
-    /**
-     * @return {@code true} if this session was not already present, i.e. adding it was a
-     *         0 -&gt; 1 transition for an empty registration.
-     */
+    /** @return {@code true} if this was the first session added (a 0 -&gt; 1 transition). */
     public boolean addSession(String sessionId, Instant now) {
         boolean wasEmpty = sessions.isEmpty();
         sessions.put(sessionId, now);
         return wasEmpty;
     }
 
-    /**
-     * @return {@code true} if removing this session left the registration with no sessions
-     *         at all, i.e. a 1 -&gt; 0 transition.
-     */
+    /** @return {@code true} if this was the last session removed (a 1 -&gt; 0 transition). */
     public boolean removeSession(String sessionId) {
         sessions.remove(sessionId);
         return sessions.isEmpty();
     }
 
-    /**
-     * Refreshes the liveness timestamp of an already-registered session. A no-op if the
-     * session id is unknown (e.g. it already expired) - callers must not resurrect a removed
-     * session through a stray keep-alive frame.
-     */
+    /** No-op if {@code sessionId} is unknown (e.g. already expired). */
     public void touch(String sessionId, Instant now) {
         sessions.computeIfPresent(sessionId, (id, previous) -> now);
     }

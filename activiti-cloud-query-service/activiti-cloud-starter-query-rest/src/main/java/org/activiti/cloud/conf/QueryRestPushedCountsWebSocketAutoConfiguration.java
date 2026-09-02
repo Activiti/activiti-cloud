@@ -37,14 +37,10 @@ import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
 /**
- * Wires the pushed-counts websocket connection interceptor ({@link PushedCountsWebSocketInterceptor}),
- * the in-memory {@link SubscriberRegistry}, and the session expiry backstop
- * ({@link SubscriberSessionExpirySweep}). The interceptor and the registry are not yet wired to
- * each other - see {@link PushedCountsWebSocketInterceptor}'s javadoc for why.
- *
- * <p>Ordered before {@link WebSocketMessageBrokerSecurityAutoConfiguration} so its own
- * {@code authenticationInterceptor} bean sees this one already registered and backs off,
- * since spring-graphql allows at most one {@code WebSocketGraphQlInterceptor}.
+ * Wires the pushed-counts websocket interceptor, in-memory {@link SubscriberRegistry}, and
+ * session expiry sweep. Ordered before {@link WebSocketMessageBrokerSecurityAutoConfiguration}
+ * so its default interceptor bean backs off, since spring-graphql allows only one
+ * {@code WebSocketGraphQlInterceptor}.
  */
 @AutoConfiguration(before = WebSocketMessageBrokerSecurityAutoConfiguration.class)
 @ConditionalOnWebApplication

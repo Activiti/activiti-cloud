@@ -42,14 +42,10 @@ import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 /**
- * The Step 3 "spike": boots a minimal servlet web application context with the real
- * autoconfiguration chain, including {@link WebSocketMessageBrokerSecurityAutoConfiguration} -
- * the same autoconfiguration the engine-events websocket uses - to empirically confirm that the
- * placeholder {@code graphql/pushed-counts.graphqls} schema is sufficient to activate the
- * websocket transport, and that {@link PushedCountsWebSocketInterceptor} wins as the single
- * {@link WebSocketGraphQlInterceptor} while that autoconfiguration's own {@code
- * authenticationInterceptor} correctly backs off (spring-graphql throws at handler-construction
- * time if there is more than one).
+ * Boots the real autoconfiguration chain (including
+ * {@link WebSocketMessageBrokerSecurityAutoConfiguration}) to confirm the placeholder schema
+ * activates the websocket transport and {@link PushedCountsWebSocketInterceptor} wins as the
+ * single {@link WebSocketGraphQlInterceptor}.
  */
 class QueryRestPushedCountsWebSocketAutoConfigurationTest {
 
@@ -68,9 +64,8 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
         )
         .withPropertyValues("activiti.cloud.services.oauth2.iam-name=test")
         .withUserConfiguration(StubSecurityBeans.class)
-        // WebApplicationContextRunner does not install Boot's Duration-aware conversion
-        // service by default (unlike a real SpringApplication run), which the
-        // @Value(...) Duration parameters on the pushed-counts beans need.
+        // WebApplicationContextRunner doesn't install Boot's Duration-aware conversion service
+        // by default, which the @Value Duration params on the pushed-counts beans need.
         .withBean("conversionService", ConversionService.class, ApplicationConversionService::new);
 
     @Test
@@ -82,8 +77,7 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
             assertThat(context.getBeansOfType(WebSocketGraphQlInterceptor.class)).hasSize(1);
             assertThat(context).hasSingleBean(SubscriberRegistry.class);
 
-            // Confirms the handler actually resolved this bean as ITS single websocket
-            // interceptor, not merely that both happen to coexist unused in the context.
+            // Confirms the handler resolved this bean as its interceptor, not merely that it exists.
             WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
             assertThat(handler.getWebSocketInterceptor()).isInstanceOf(PushedCountsWebSocketInterceptor.class);
         });

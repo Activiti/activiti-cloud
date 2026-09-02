@@ -21,20 +21,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationManager;
 
 /**
- * The websocket connection interceptor for the pushed-counts feature - currently a distinctly
- * named, otherwise-unmodified {@link SecurityWebSocketInterceptor}.
+ * Websocket interceptor for the pushed-counts feature - currently just a distinctly-named
+ * {@link SecurityWebSocketInterceptor}, proving the "one WebSocketGraphQlInterceptor per
+ * application" composition works in combined deployments before behavior is added.
  *
- * <p>It adds no behavior of its own yet: registering a connection with {@link SubscriberRegistry}
- * cannot happen here, because the connection opening does not mean the client wants counts - on a
- * connection shared with an unrelated GraphQL subscription (e.g. notifications-graphql-service's
- * {@code engineEvents}), that would register every client of that other feature too. Registration
- * has to be triggered by a client actually subscribing to a pushed-counts badge, which does not
- * exist until a later step adds a real {@code Subscription} field and a data fetcher to hook into.
- *
- * <p>This class exists now, as its own bean, so that spring-graphql's "at most one
- * {@code WebSocketGraphQlInterceptor}" composition - this bean winning over
- * {@code WebSocketMessageBrokerSecurityAutoConfiguration}'s default - is already proven to work in
- * a combined deployment before that later step adds real behavior to it.
+ * <p>Registration with {@link SubscriberRegistry} can't happen at connection time: on a
+ * connection shared with an unrelated subscription (e.g. {@code engineEvents}), that would
+ * register every client of that other feature too. A later step wires registration to an actual
+ * pushed-counts subscription instead.
  */
 public class PushedCountsWebSocketInterceptor extends SecurityWebSocketInterceptor {
 

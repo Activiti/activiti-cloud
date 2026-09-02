@@ -18,8 +18,7 @@ package org.activiti.cloud.services.query.rest.subscriber;
 import java.time.Instant;
 
 /**
- * Published when a user's last live websocket session on this instance closes (either by a
- * clean disconnect or by expiry - both paths converge on the same transition). The seam a
- * later step listens on to broadcast an {@code UNREGISTERED} message.
+ * Published when a user's last live session on this instance closes. The seam a later step
+ * uses to broadcast an {@code UNREGISTERED} message.
  */
 public record SubscriberWentQuietEvent(String userId, Instant at) {}

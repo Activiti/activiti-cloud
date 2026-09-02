@@ -110,12 +110,8 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
             return new CustomAuthorizationManager<>(authorities, permissions);
         }
 
-        // @ConditionalOnMissingBean(WebSocketGraphQlInterceptor.class): a consumer that needs the
-        // same authentication/authorization but is deployed alongside this one (e.g. sharing the
-        // websocket endpoint with a pushed-counts subscriber registry) can supply its own
-        // WebSocketGraphQlInterceptor - e.g. a SecurityWebSocketInterceptor subclass - and this
-        // default backs off, since spring-graphql allows at most one WebSocketGraphQlInterceptor
-        // per application.
+        // Backs off if another WebSocketGraphQlInterceptor bean exists - spring-graphql allows
+        // only one per application.
         @Bean
         @ConditionalOnMissingBean(WebSocketGraphQlInterceptor.class)
         public WebSocketGraphQlInterceptor authenticationInterceptor(

@@ -20,10 +20,8 @@ import java.time.Duration;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * Backstop for sessions whose close was never observed - a half-open socket, a client that
- * vanished without a close frame. A later step wires the interceptor's connection-closed hook
- * to {@link SubscriberRegistry#unregister} for the normal disconnect case; this sweep exists
- * only for when that never fires, and must never be what a working client relies on for timely
+ * Backstop for sessions whose close was never observed (half-open socket, vanished client) -
+ * not the normal disconnect path. Must never be what a working client relies on for timely
  * cleanup.
  */
 public class SubscriberSessionExpirySweep {
