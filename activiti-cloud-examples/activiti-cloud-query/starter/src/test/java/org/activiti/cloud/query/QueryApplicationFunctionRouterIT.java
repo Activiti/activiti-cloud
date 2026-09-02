@@ -28,7 +28,15 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
             .doesNotContainKeys("auditConsumer", "queryConsumer")
-            .containsOnlyKeys("functionRouterInput", "functionRouterAnonymousInput", "producer", "queryEventsProducer");
+            .containsOnlyKeys(
+                "functionRouterInput",
+                "functionRouterAnonymousInput",
+                "producer",
+                "queryEventsProducer",
+                "subscriberRegistryConsumer",
+                "subscriberRegistryProducer",
+                "countProducer"
+            );
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput")).satisfies(binding -> {
             assertThat(binding.getGroup()).isEqualTo("consumer");
@@ -109,7 +117,12 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
     @Test
     @Override
     void anonymousRabbitQueues() {
-        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
+            .isNotEmpty()
+            .hasSize(1)
+            .satisfies(map ->
+                assertThat(map.keySet()).anyMatch(key -> key.startsWith("subscriberRegistry.anonymous."))
+            );
     }
 
     @Test
@@ -117,6 +130,6 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("engineEvents", "queryEvents");
+            .containsOnlyKeys("engineEvents", "queryEvents", "subscriberRegistry", "pushedCounts");
     }
 }
