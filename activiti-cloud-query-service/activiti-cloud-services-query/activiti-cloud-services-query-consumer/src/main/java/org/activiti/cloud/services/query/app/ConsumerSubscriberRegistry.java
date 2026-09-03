@@ -24,6 +24,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Consumer-side subscriber registry for pushed counts. Merges the presence
@@ -41,6 +43,8 @@ import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
  * compound "remove the source, then drop the user if now unheld" transition atomic.
  */
 public class ConsumerSubscriberRegistry {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerSubscriberRegistry.class);
 
     private static final class Subscriber {
 
@@ -73,6 +77,13 @@ public class ConsumerSubscriberRegistry {
             subscriber.groups = copyOf(groups);
         }
         subscriber.sources.add(sourceId);
+        LOGGER.debug(
+            "register user={} source={} firstAppearance={} sources={}",
+            userId,
+            sourceId,
+            firstAppearance,
+            subscriber.sources
+        );
         return firstAppearance;
     }
 
@@ -84,19 +95,22 @@ public class ConsumerSubscriberRegistry {
     public synchronized boolean unregister(String userId, String sourceId) {
         Subscriber subscriber = registry.get(userId);
         if (subscriber == null) {
+            LOGGER.debug("unregister user={} source={} (unknown user, ignored)", userId, sourceId);
             return false;
         }
         subscriber.sources.remove(sourceId);
-        if (subscriber.sources.isEmpty()) {
+        boolean dropped = subscriber.sources.isEmpty();
+        if (dropped) {
             registry.remove(userId);
-            return true;
         }
-        return false;
+        LOGGER.debug("unregister user={} source={} dropped={} sources={}", userId, sourceId, dropped, subscriber.sources);
+        return dropped;
     }
 
     /** Records liveness for an instance without changing any user's membership. */
     public synchronized void heartbeat(String sourceId, Instant at) {
         touchSource(sourceId, at);
+        LOGGER.debug("heartbeat source={} at={}", sourceId, at);
     }
 
     /**
@@ -127,6 +141,7 @@ public class ConsumerSubscriberRegistry {
             }
             return false;
         });
+        LOGGER.debug("expireInstances deadSources={} droppedUsers={}", deadSources, removedUsers);
         return removedUsers;
     }
 
@@ -141,6 +156,7 @@ public class ConsumerSubscriberRegistry {
         Instant at
     ) {
         touchSource(sourceId, at);
+        LOGGER.debug("applySnapshot source={} entries={}", sourceId, entries.size());
         for (SubscriberRegistryMessage.Entry entry : entries) {
             register(entry.userId(), entry.groups(), sourceId, at);
         }

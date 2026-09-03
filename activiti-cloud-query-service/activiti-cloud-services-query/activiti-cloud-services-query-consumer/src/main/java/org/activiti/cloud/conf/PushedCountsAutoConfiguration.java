@@ -28,6 +28,7 @@ import org.activiti.cloud.services.query.app.SubscriberInstanceRemover;
 import org.activiti.cloud.services.query.app.SubscriberRegistryConsumer;
 import org.activiti.cloud.services.query.app.SubscriberRegistryMessageHandler;
 import org.activiti.cloud.services.query.app.SubscriberRegistryResyncRequester;
+import org.activiti.cloud.services.query.app.SubscriberRegistryStateLogger;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -97,5 +98,14 @@ public class PushedCountsAutoConfiguration {
             UUID.randomUUID().toString(),
             Clock.systemUTC()
         );
+    }
+
+    // TEMPORARY manual-testing aid — logs registry state to the environment logs. Safe to remove.
+    @Bean
+    SubscriberRegistryStateLogger subscriberRegistryStateLogger(
+        ConsumerSubscriberRegistry registry,
+        FeatureToggle featureToggle
+    ) {
+        return new SubscriberRegistryStateLogger(registry, featureToggle);
     }
 }
