@@ -19,23 +19,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
-import org.activiti.cloud.services.query.subscription.ScopeKeys.Badge;
+import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 import org.junit.jupiter.api.Test;
 
 class ScopeKeysTest {
 
     @Test
-    void buildsOneKeyShapePerBadge() {
+    void buildsOneKeyShapePerType() {
         assertThat(ScopeKeys.assigned("alice")).isEqualTo("assigned:alice");
         assertThat(ScopeKeys.queued("alice")).isEqualTo("queued:alice");
         assertThat(ScopeKeys.processes("alice")).isEqualTo("processes:alice");
     }
 
     @Test
-    void parseRoundTripsBadgeAndUserId() {
+    void parseRoundTripsTypeAndUserId() {
         ScopeKeys.ScopeKey parsed = ScopeKeys.parse("queued:alice");
 
-        assertThat(parsed.badge()).isEqualTo(Badge.QUEUED);
+        assertThat(parsed.type()).isEqualTo(PushedCountType.QUEUED);
         assertThat(parsed.userId()).isEqualTo("alice");
     }
 
@@ -43,7 +43,7 @@ class ScopeKeysTest {
     void parsePreservesUserIdContainingSeparator() {
         ScopeKeys.ScopeKey parsed = ScopeKeys.parse("assigned:tenant:alice");
 
-        assertThat(parsed.badge()).isEqualTo(Badge.ASSIGNED);
+        assertThat(parsed.type()).isEqualTo(PushedCountType.ASSIGNED);
         assertThat(parsed.userId()).isEqualTo("tenant:alice");
     }
 

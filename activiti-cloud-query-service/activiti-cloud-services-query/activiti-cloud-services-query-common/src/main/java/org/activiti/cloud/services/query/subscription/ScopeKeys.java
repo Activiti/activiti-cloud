@@ -18,22 +18,22 @@ package org.activiti.cloud.services.query.subscription;
 import java.util.Objects;
 
 /**
- * Internal addressing for pushed counts: one {@code <badge>:<userId>} key per badge per user.
+ * Internal addressing for pushed counts: one {@code <type>:<userId>} key per count type per user.
  * Clients never send these — the consumer produces them and the query-rest relay matches them, so
  * both sides must use this class as the single source of construction, parsing and ownership
- * checks. The badge prefixes defined here are reserved and must not collide with other key shapes.
+ * checks. The prefixes defined here are reserved and must not collide with other key shapes.
  */
 public final class ScopeKeys {
 
-    /** The three pushed badges, each with the reserved prefix used in its scope key. */
-    public enum Badge {
+    /** The three pushed count types, each with the reserved prefix used in its scope key. */
+    public enum PushedCountType {
         ASSIGNED("assigned"),
         QUEUED("queued"),
         PROCESSES("processes");
 
         private final String prefix;
 
-        Badge(String prefix) {
+        PushedCountType(String prefix) {
             this.prefix = prefix;
         }
 
@@ -41,39 +41,39 @@ public final class ScopeKeys {
             return prefix;
         }
 
-        static Badge fromPrefix(String prefix) {
-            for (Badge badge : values()) {
-                if (badge.prefix.equals(prefix)) {
-                    return badge;
+        static PushedCountType fromPrefix(String prefix) {
+            for (PushedCountType type : values()) {
+                if (type.prefix.equals(prefix)) {
+                    return type;
                 }
             }
-            throw new IllegalArgumentException("Unknown badge prefix: " + prefix);
+            throw new IllegalArgumentException("Unknown pushed count type prefix: " + prefix);
         }
     }
 
     /** Parsed form of a scope key. */
-    public record ScopeKey(Badge badge, String userId) {}
+    public record ScopeKey(PushedCountType type, String userId) {}
 
     private static final String SEPARATOR = ":";
 
     private ScopeKeys() {}
 
-    public static String of(Badge badge, String userId) {
-        Objects.requireNonNull(badge, "badge");
+    public static String of(PushedCountType type, String userId) {
+        Objects.requireNonNull(type, "type");
         Objects.requireNonNull(userId, "userId");
-        return badge.prefix() + SEPARATOR + userId;
+        return type.prefix() + SEPARATOR + userId;
     }
 
     public static String assigned(String userId) {
-        return of(Badge.ASSIGNED, userId);
+        return of(PushedCountType.ASSIGNED, userId);
     }
 
     public static String queued(String userId) {
-        return of(Badge.QUEUED, userId);
+        return of(PushedCountType.QUEUED, userId);
     }
 
     public static String processes(String userId) {
-        return of(Badge.PROCESSES, userId);
+        return of(PushedCountType.PROCESSES, userId);
     }
 
     /**
@@ -86,12 +86,12 @@ public final class ScopeKeys {
         if (separatorAt < 0) {
             throw new IllegalArgumentException("Not a scope key: " + scopeKey);
         }
-        Badge badge = Badge.fromPrefix(scopeKey.substring(0, separatorAt));
+        PushedCountType type = PushedCountType.fromPrefix(scopeKey.substring(0, separatorAt));
         String userId = scopeKey.substring(separatorAt + SEPARATOR.length());
         if (userId.isEmpty()) {
             throw new IllegalArgumentException("Scope key has no userId: " + scopeKey);
         }
-        return new ScopeKey(badge, userId);
+        return new ScopeKey(type, userId);
     }
 
     /** Answers "does this key belong to this user id?" — the check the relay uses to route a count. */
