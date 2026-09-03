@@ -18,8 +18,5 @@ package org.activiti.cloud.services.query.rest.subscriber;
 import java.time.Instant;
 import java.util.Set;
 
-/**
- * Published when a user goes from no live sessions on this instance to at least one. The seam
- * a later step uses to broadcast a {@code REGISTERED} message.
- */
+/** Published when a user goes from no live sessions on this instance to at least one. */
 public record SubscriberWentLiveEvent(String userId, Set<String> groups, Instant at) {}

@@ -13,9 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.subscriber;
+package org.activiti.cloud.services.query.subscription;
 
 import java.time.Instant;
+import java.util.Objects;
 
-/** Published when a user's last live session on this instance closes. */
-public record SubscriberWentQuietEvent(String userId, Instant at) {}
+/**
+ * Count-channel message published by the query-consumer and relayed to the owning socket by
+ * query-rest. The {@code scopeKey} (see {@link ScopeKeys}) says who the number is for and which
+ * badge it belongs to; {@code count} is absolute (never a delta); {@code asOf} is when the count
+ * was computed, not when the triggering event happened.
+ */
+public record CountChangedMessage(String scopeKey, long count, Instant asOf) {
+    public CountChangedMessage {
+        Objects.requireNonNull(scopeKey, "scopeKey");
+        Objects.requireNonNull(asOf, "asOf");
+    }
+}

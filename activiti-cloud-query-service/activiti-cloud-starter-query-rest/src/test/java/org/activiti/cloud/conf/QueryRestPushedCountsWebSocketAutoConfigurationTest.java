@@ -18,13 +18,18 @@ package org.activiti.cloud.conf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
 import java.util.List;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
+import org.activiti.cloud.services.common.security.jwt.JwtPrincipalGroupsProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWebSocketMessageBrokerAutoConfiguration;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.WebSocketMessageBrokerSecurityAutoConfiguration;
 import org.activiti.cloud.services.query.rest.subscriber.PushedCountsWebSocketInterceptor;
 import org.activiti.cloud.services.query.rest.subscriber.SubscriberRegistry;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.convert.ApplicationConversionService;
@@ -37,15 +42,16 @@ import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.graphql.execution.GraphQlSource;
 import org.springframework.graphql.server.WebGraphQlHandler;
 import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 /**
  * Boots the real autoconfiguration chain (including
- * {@link WebSocketMessageBrokerSecurityAutoConfiguration}) to confirm the placeholder schema
- * activates the websocket transport and {@link PushedCountsWebSocketInterceptor} wins as the
- * single {@link WebSocketGraphQlInterceptor}.
+ * {@link WebSocketMessageBrokerSecurityAutoConfiguration}) to confirm the real pushed-counts
+ * schema activates the websocket transport, exposes the three badge subscriptions, and that
+ * {@link PushedCountsWebSocketInterceptor} wins as the single {@link WebSocketGraphQlInterceptor}.
  */
 class QueryRestPushedCountsWebSocketAutoConfigurationTest {
 
@@ -80,6 +86,14 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
             // Confirms the handler resolved this bean as its interceptor, not merely that it exists.
             WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
             assertThat(handler.getWebSocketInterceptor()).isInstanceOf(PushedCountsWebSocketInterceptor.class);
+
+            GraphQLSchema schema = context.getBean(GraphQlSource.class).schema();
+            assertThat(schema.getSubscriptionType())
+                .isNotNull()
+                .extracting(GraphQLObjectType::getFieldDefinitions)
+                .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
+                .extracting(GraphQLFieldDefinition::getName)
+                .containsExactlyInAnyOrder("myTasks", "queuedTasks", "runningProcesses");
         });
     }
 
@@ -99,6 +113,11 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
         @Bean
         JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter() {
             return mock(JwtUserInfoUriAuthenticationConverter.class);
+        }
+
+        @Bean
+        JwtPrincipalGroupsProviderChain principalGroupsProvider() {
+            return mock(JwtPrincipalGroupsProviderChain.class);
         }
     }
 }

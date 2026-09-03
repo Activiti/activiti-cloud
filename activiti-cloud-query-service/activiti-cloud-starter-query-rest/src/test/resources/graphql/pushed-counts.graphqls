@@ -1,6 +1,0 @@
-"""
-Placeholder schema.
-"""
-type Query {
-    _pushedCountsSchemaPlaceholder: Boolean
-}

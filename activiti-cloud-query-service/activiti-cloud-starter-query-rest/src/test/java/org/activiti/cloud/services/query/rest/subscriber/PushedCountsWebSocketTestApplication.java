@@ -15,7 +15,16 @@
  */
 package org.activiti.cloud.services.query.rest.subscriber;
 
-import java.time.Instant;
+import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/** Published when a user's last live session on this instance closes. */
-public record SubscriberWentQuietEvent(String userId, Instant at) {}
+/** Real app, booted with a random port, for {@link PushedCountsWebSocketIT}. */
+@SpringBootApplication
+@EnableActivitiQuery
+public class PushedCountsWebSocketTestApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(PushedCountsWebSocketTestApplication.class, args);
+    }
+}

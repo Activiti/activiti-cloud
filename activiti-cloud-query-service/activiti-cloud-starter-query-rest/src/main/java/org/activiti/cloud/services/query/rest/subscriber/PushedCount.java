@@ -15,7 +15,5 @@
  */
 package org.activiti.cloud.services.query.rest.subscriber;
 
-import java.time.Instant;
-
-/** Published when a user's last live session on this instance closes. */
-public record SubscriberWentQuietEvent(String userId, Instant at) {}
+/** The GraphQL response shape for a pushed-counts badge subscription. */
+public record PushedCount(int count, String asOf) {}
