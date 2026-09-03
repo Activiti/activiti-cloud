@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
     hooks:
       - id: check-merge-conflict
       - id: fix-byte-order-marker
@@ -15,7 +15,7 @@ repos:
         exclude: ^.*invalid.*\.json$
       - id: check-xml
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+    rev: f12edd9c7be1c20cfa42420fd0e6df71e42b51ea # frozen: v4.0.0-alpha.8
     hooks:
       - id: prettier
         types_or:
@@ -26,14 +26,14 @@ repos:
           - prettier-plugin-java@2.8.1
         exclude: ^\.github/workflows/.*\.(lock\.yml|md)$
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.37.4
+    rev: 12e63946db2c5cfcc9030fac21c3883ba88c6ed8 # frozen: 0.38.0
     hooks:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
         exclude: ^\.github/workflows/.*\.lock\.yml$
   - repo: https://github.com/returntocorp/semgrep
-    rev: v1.59.1
+    rev: 16f6e92bb512558496b05c1b695e482245876fc0 # frozen: v1.59.1
     hooks:
       - id: semgrep
         types_or:
@@ -44,4 +44,4 @@ repos:
     rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
     hooks:
       - id: actionlint
-        exclude: '\.lock\.yml$'
+        exclude: '^\.github/workflows/.*\.lock\.yml$'
