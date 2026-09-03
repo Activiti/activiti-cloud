@@ -149,7 +149,7 @@ class SubscriberRegistryTest {
                 });
             }
 
-            readyLatch.await();
+            assertThat(readyLatch.await(10, TimeUnit.SECONDS)).isTrue();
             startLatch.countDown();
             assertThat(doneLatch.await(10, TimeUnit.SECONDS)).isTrue();
             executor.shutdown();

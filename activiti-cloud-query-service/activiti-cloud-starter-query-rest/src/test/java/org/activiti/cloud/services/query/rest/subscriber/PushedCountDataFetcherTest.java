@@ -187,6 +187,45 @@ class PushedCountDataFetcherTest {
     }
 
     @Test
+    void should_registerWithEmptyGroups_when_groupsAreMissingFromTheContext() {
+        DataFetchingEnvironment environment = mock(DataFetchingEnvironment.class);
+        Map<Object, Object> context = new HashMap<>();
+        context.put(PushedCountsWebSocketInterceptor.USER_ID_CONTEXT_KEY, "alice");
+        context.put(PushedCountsWebSocketInterceptor.SESSION_ID_CONTEXT_KEY, "session-1");
+        when(environment.getGraphQlContext()).thenReturn(GraphQLContext.of(context));
+
+        PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
+            Badge.ASSIGNED,
+            pushedCountsFlux,
+            subscriberRegistry,
+            tracker,
+            CLOCK
+        );
+
+        Flux.from(fetcher.get(environment)).subscribe();
+
+        verify(subscriberRegistry).register("alice", Set.of(), "session-1", NOW);
+    }
+
+    @Test
+    void should_clampTheCount_when_itExceedsIntegerMaxValue() {
+        PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
+            Badge.ASSIGNED,
+            pushedCountsFlux,
+            subscriberRegistry,
+            tracker,
+            CLOCK
+        );
+        Publisher<PushedCount> publisher = fetcher.get(environmentFor("alice", "session-1", Set.of("eng")));
+
+        StepVerifier.create(Flux.from(publisher))
+            .then(() -> sink.tryEmitNext(new CountChangedMessage("assigned:alice", Long.MAX_VALUE, NOW)))
+            .expectNext(new PushedCount(Integer.MAX_VALUE, NOW.toString()))
+            .thenCancel()
+            .verify();
+    }
+
+    @Test
     void should_registerOnce_when_twoBadgesAreSubscribedOnTheSameSession() {
         PushedCountDataFetcher assignedTasks = new PushedCountDataFetcher(
             Badge.ASSIGNED,

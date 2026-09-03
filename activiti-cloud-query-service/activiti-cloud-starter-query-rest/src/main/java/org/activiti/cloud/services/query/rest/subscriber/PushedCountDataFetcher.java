@@ -19,6 +19,7 @@ import graphql.GraphQLContext;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import java.time.Clock;
+import java.util.Objects;
 import java.util.Set;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
@@ -63,13 +64,16 @@ public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount
         GraphQLContext context = environment.getGraphQlContext();
         String userId = context.get(PushedCountsWebSocketInterceptor.USER_ID_CONTEXT_KEY);
         String sessionId = context.get(PushedCountsWebSocketInterceptor.SESSION_ID_CONTEXT_KEY);
-        Set<String> groups = context.get(PushedCountsWebSocketInterceptor.GROUPS_CONTEXT_KEY);
+        Set<String> groups = Objects.requireNonNullElse(
+            context.get(PushedCountsWebSocketInterceptor.GROUPS_CONTEXT_KEY),
+            Set.of()
+        );
         if (userId == null || sessionId == null || !isFeatureEnabled()) {
             return Flux.empty();
         }
         return pushedCountsFlux
             .filter(message -> isFeatureEnabled() && matches(message, userId))
-            .map(message -> new PushedCount(Math.toIntExact(message.count()), message.asOf().toString()))
+            .map(message -> new PushedCount(clampToInt(message.count()), message.asOf().toString()))
             .doOnSubscribe(subscription -> {
                 if (subscriptionTracker.incrementAndCheckIfWasZero(sessionId)) {
                     subscriberRegistry.register(userId, groups, sessionId, clock.instant());
@@ -94,5 +98,10 @@ public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount
 
     private boolean isFeatureEnabled() {
         return FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS);
+    }
+
+    /** Clamps rather than throws on a practically-impossible overflow - the schema's {@code count} is an {@code Int}. */
+    private static int clampToInt(long count) {
+        return (int) Math.min(count, Integer.MAX_VALUE);
     }
 }
