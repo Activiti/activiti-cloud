@@ -33,5 +33,5 @@ public enum RegistryMessageType {
     SNAPSHOT,
 
     /** Periodic liveness signal from an instance, carrying only its {@code sourceId}. */
-    HEARTBEAT
+    HEARTBEAT,
 }

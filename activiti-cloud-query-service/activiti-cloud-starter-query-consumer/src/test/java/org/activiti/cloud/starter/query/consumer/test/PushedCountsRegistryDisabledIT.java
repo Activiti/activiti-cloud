@@ -34,8 +34,7 @@ import org.springframework.messaging.support.MessageBuilder;
     classes = QueryConsumerTestApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = {
-        "activiti.cloud.services.oauth2.iam-name=test",
-        "activiti.features.query.pushed-counts.enabled=false",
+        "activiti.cloud.services.oauth2.iam-name=test", "activiti.features.query.pushed-counts.enabled=false",
     }
 )
 @EnableTestBinder
@@ -50,12 +49,12 @@ class PushedCountsRegistryDisabledIT {
     @Test
     void registeredMessage_isIgnored_whenFeatureDisabled() {
         input.send(
-            MessageBuilder
-                .withPayload(
-                    """
-                    {"type":"REGISTERED","userId":"frank","groups":["eng"],"sourceId":"rest-1","sentAt":"2026-01-01T00:00:00Z"}
-                    """.strip().getBytes(StandardCharsets.UTF_8)
-                )
+            MessageBuilder.withPayload(
+                """
+                {"type":"REGISTERED","userId":"frank","groups":["eng"],"sourceId":"rest-1","sentAt":"2026-01-01T00:00:00Z"}
+                """.strip()
+                    .getBytes(StandardCharsets.UTF_8)
+            )
                 .setHeader("contentType", "application/json")
                 .build(),
             "subscriberRegistry"

@@ -40,8 +40,7 @@ class SubscriberRegistryConsumerTest {
     void setUp() {
         registry = new ConsumerSubscriberRegistry();
         SubscriberRegistryMessageHandler handler = new SubscriberRegistryMessageHandler(registry);
-        FeatureToggle featureToggle = name ->
-            featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
+        FeatureToggle featureToggle = name -> featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
         consumer = new SubscriberRegistryConsumer(handler, featureToggle);
     }
 

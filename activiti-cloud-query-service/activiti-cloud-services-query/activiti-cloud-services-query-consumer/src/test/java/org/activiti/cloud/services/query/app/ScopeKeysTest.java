@@ -57,19 +57,16 @@ class ScopeKeysTest {
 
     @Test
     void parseRejectsUnknownPrefix() {
-        assertThatThrownBy(() -> ScopeKeys.parse("mentions:alice"))
-            .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> ScopeKeys.parse("mentions:alice")).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void parseRejectsKeyWithoutSeparator() {
-        assertThatThrownBy(() -> ScopeKeys.parse("assigned"))
-            .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> ScopeKeys.parse("assigned")).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void parseRejectsKeyWithEmptyUserId() {
-        assertThatThrownBy(() -> ScopeKeys.parse("assigned:"))
-            .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> ScopeKeys.parse("assigned:")).isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -31,8 +31,12 @@ class SubscriberRegistryMessageTest {
 
     @Test
     void registeredCarriesUserAndGroups_butNoEntries() {
-        SubscriberRegistryMessage message =
-            SubscriberRegistryMessage.registered("alice", List.of("eng"), "rest-1", NOW);
+        SubscriberRegistryMessage message = SubscriberRegistryMessage.registered(
+            "alice",
+            List.of("eng"),
+            "rest-1",
+            NOW
+        );
 
         assertThat(message.type()).isEqualTo(RegistryMessageType.REGISTERED);
         assertThat(message.userId()).isEqualTo("alice");
@@ -78,18 +82,19 @@ class SubscriberRegistryMessageTest {
 
     @Test
     void requiredFieldsAreValidated() {
-        assertThatThrownBy(() -> SubscriberRegistryMessage.heartbeat(null, NOW))
-            .isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> SubscriberRegistryMessage.registered("alice", List.of(), "rest-1", null))
-            .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> SubscriberRegistryMessage.heartbeat(null, NOW)).isInstanceOf(
+            NullPointerException.class
+        );
+        assertThatThrownBy(() -> SubscriberRegistryMessage.registered("alice", List.of(), "rest-1", null)).isInstanceOf(
+            NullPointerException.class
+        );
     }
 
     @Test
     void groupsListIsDefensivelyCopied() {
         List<String> mutableGroups = new ArrayList<>(List.of("eng"));
 
-        SubscriberRegistryMessage message =
-            SubscriberRegistryMessage.registered("alice", mutableGroups, "rest-1", NOW);
+        SubscriberRegistryMessage message = SubscriberRegistryMessage.registered("alice", mutableGroups, "rest-1", NOW);
         mutableGroups.add("finance");
 
         assertThat(message.groups()).containsExactly("eng");

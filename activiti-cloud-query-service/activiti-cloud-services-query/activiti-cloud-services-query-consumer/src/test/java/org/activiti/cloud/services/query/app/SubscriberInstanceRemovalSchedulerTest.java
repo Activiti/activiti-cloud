@@ -46,8 +46,7 @@ class SubscriberInstanceRemovalSchedulerTest {
             TIMEOUT,
             Clock.fixed(T0.plus(Duration.ofMinutes(4)), ZoneOffset.UTC)
         );
-        FeatureToggle featureToggle = name ->
-            featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
+        FeatureToggle featureToggle = name -> featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
         scheduler = new SubscriberInstanceRemovalScheduler(remover, featureToggle);
     }
 

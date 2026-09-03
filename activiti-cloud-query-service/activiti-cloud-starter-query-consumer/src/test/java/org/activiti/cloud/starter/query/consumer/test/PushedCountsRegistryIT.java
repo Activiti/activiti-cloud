@@ -39,8 +39,7 @@ import org.springframework.messaging.support.MessageBuilder;
     classes = QueryConsumerTestApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = {
-        "activiti.cloud.services.oauth2.iam-name=test",
-        "activiti.features.query.pushed-counts.enabled=true",
+        "activiti.cloud.services.oauth2.iam-name=test", "activiti.features.query.pushed-counts.enabled=true",
     }
 )
 @EnableTestBinder
@@ -60,9 +59,14 @@ class PushedCountsRegistryIT {
 
     @Test
     void registeredMessage_isDeserializedAndAppliedToTheRegistry() {
-        input.send(registryJson("""
-            {"type":"REGISTERED","userId":"alice","groups":["eng"],"sourceId":"rest-1","sentAt":"%s"}
-            """.formatted(SENT_AT)), REGISTRY_DESTINATION);
+        input.send(
+            registryJson(
+                """
+                {"type":"REGISTERED","userId":"alice","groups":["eng"],"sourceId":"rest-1","sentAt":"%s"}
+                """.formatted(SENT_AT)
+            ),
+            REGISTRY_DESTINATION
+        );
 
         assertThat(registry.isWatching("alice")).isTrue();
         assertThat(registry.groupsOf("alice")).containsExactly("eng");
@@ -70,14 +74,24 @@ class PushedCountsRegistryIT {
 
     @Test
     void unregisteredMessage_removesTheUserHeldByThatInstance() {
-        input.send(registryJson("""
-            {"type":"REGISTERED","userId":"bob","groups":["fin"],"sourceId":"rest-1","sentAt":"%s"}
-            """.formatted(SENT_AT)), REGISTRY_DESTINATION);
+        input.send(
+            registryJson(
+                """
+                {"type":"REGISTERED","userId":"bob","groups":["fin"],"sourceId":"rest-1","sentAt":"%s"}
+                """.formatted(SENT_AT)
+            ),
+            REGISTRY_DESTINATION
+        );
         assertThat(registry.isWatching("bob")).isTrue();
 
-        input.send(registryJson("""
-            {"type":"UNREGISTERED","userId":"bob","sourceId":"rest-1","sentAt":"%s"}
-            """.formatted(SENT_AT)), REGISTRY_DESTINATION);
+        input.send(
+            registryJson(
+                """
+                {"type":"UNREGISTERED","userId":"bob","sourceId":"rest-1","sentAt":"%s"}
+                """.formatted(SENT_AT)
+            ),
+            REGISTRY_DESTINATION
+        );
 
         assertThat(registry.isWatching("bob")).isFalse();
     }
@@ -92,10 +106,15 @@ class PushedCountsRegistryIT {
 
     @Test
     void snapshotMessage_withNestedEntries_isDeserializedAndMerged() {
-        input.send(registryJson("""
-            {"type":"SNAPSHOT","entries":[{"userId":"carol","groups":["eng"]},\
-            {"userId":"dave","groups":["fin","ops"]}],"sourceId":"rest-9","sentAt":"%s"}
-            """.formatted(SENT_AT)), REGISTRY_DESTINATION);
+        input.send(
+            registryJson(
+                """
+                {"type":"SNAPSHOT","entries":[{"userId":"carol","groups":["eng"]},\
+                {"userId":"dave","groups":["fin","ops"]}],"sourceId":"rest-9","sentAt":"%s"}
+                """.formatted(SENT_AT)
+            ),
+            REGISTRY_DESTINATION
+        );
 
         assertThat(registry.isWatching("carol")).isTrue();
         assertThat(registry.sourcesOf("carol")).containsExactly("rest-9");
@@ -104,19 +123,28 @@ class PushedCountsRegistryIT {
 
     @Test
     void registrationsFromTwoInstances_areAggregatedForTheSameUser() {
-        input.send(registryJson("""
-            {"type":"REGISTERED","userId":"erin","groups":["eng"],"sourceId":"rest-1","sentAt":"%s"}
-            """.formatted(SENT_AT)), REGISTRY_DESTINATION);
-        input.send(registryJson("""
-            {"type":"REGISTERED","userId":"erin","groups":["eng"],"sourceId":"rest-2","sentAt":"%s"}
-            """.formatted(SENT_AT)), REGISTRY_DESTINATION);
+        input.send(
+            registryJson(
+                """
+                {"type":"REGISTERED","userId":"erin","groups":["eng"],"sourceId":"rest-1","sentAt":"%s"}
+                """.formatted(SENT_AT)
+            ),
+            REGISTRY_DESTINATION
+        );
+        input.send(
+            registryJson(
+                """
+                {"type":"REGISTERED","userId":"erin","groups":["eng"],"sourceId":"rest-2","sentAt":"%s"}
+                """.formatted(SENT_AT)
+            ),
+            REGISTRY_DESTINATION
+        );
 
         assertThat(registry.sourcesOf("erin")).containsExactlyInAnyOrder("rest-1", "rest-2");
     }
 
     private static Message<byte[]> registryJson(String json) {
-        return MessageBuilder
-            .withPayload(json.strip().getBytes(StandardCharsets.UTF_8))
+        return MessageBuilder.withPayload(json.strip().getBytes(StandardCharsets.UTF_8))
             .setHeader("contentType", "application/json")
             .build();
     }

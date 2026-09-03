@@ -103,7 +103,13 @@ public class ConsumerSubscriberRegistry {
         if (dropped) {
             registry.remove(userId);
         }
-        LOGGER.debug("unregister user={} source={} dropped={} sources={}", userId, sourceId, dropped, subscriber.sources);
+        LOGGER.debug(
+            "unregister user={} source={} dropped={} sources={}",
+            userId,
+            sourceId,
+            dropped,
+            subscriber.sources
+        );
         return dropped;
     }
 
@@ -133,14 +139,16 @@ public class ConsumerSubscriberRegistry {
             return removedUsers;
         }
         lastSeenBySource.keySet().removeAll(deadSources);
-        registry.entrySet().removeIf(user -> {
-            user.getValue().sources.removeAll(deadSources);
-            if (user.getValue().sources.isEmpty()) {
-                removedUsers.add(user.getKey());
-                return true;
-            }
-            return false;
-        });
+        registry
+            .entrySet()
+            .removeIf(user -> {
+                user.getValue().sources.removeAll(deadSources);
+                if (user.getValue().sources.isEmpty()) {
+                    removedUsers.add(user.getKey());
+                    return true;
+                }
+                return false;
+            });
         LOGGER.debug("expireInstances deadSources={} droppedUsers={}", deadSources, removedUsers);
         return removedUsers;
     }

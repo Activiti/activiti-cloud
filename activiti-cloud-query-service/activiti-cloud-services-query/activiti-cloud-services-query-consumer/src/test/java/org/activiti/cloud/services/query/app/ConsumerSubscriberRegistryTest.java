@@ -145,8 +145,7 @@ class ConsumerSubscriberRegistryTest {
 
     @Test
     void snapshotAndNormalRegistration_mergeToTheSameUnion_regardlessOfOrder() {
-        SubscriberRegistryMessage.Entry snapshotEntry =
-            new SubscriberRegistryMessage.Entry("alice", List.of("eng"));
+        SubscriberRegistryMessage.Entry snapshotEntry = new SubscriberRegistryMessage.Entry("alice", List.of("eng"));
 
         // registration first, then a snapshot from another instance
         registry.register("alice", List.of("eng"), "rest-1", T0);

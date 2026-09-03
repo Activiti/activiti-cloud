@@ -35,7 +35,8 @@ class PushedCountsAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
         .withInitializer(context ->
-            context.getBeanFactory().setConversionService(ApplicationConversionService.getSharedInstance()))
+            context.getBeanFactory().setConversionService(ApplicationConversionService.getSharedInstance())
+        )
         .withBean(FeatureToggle.class, () -> name -> false)
         .withBean("subscriberRegistryProducer", MessageChannel.class, () -> new NullChannel())
         .withConfiguration(AutoConfigurations.of(PushedCountsAutoConfiguration.class));
@@ -49,8 +50,9 @@ class PushedCountsAutoConfigurationTest {
             assertThat(context).hasSingleBean(SubscriberInstanceRemovalScheduler.class);
             assertThat(context).hasSingleBean(SubscriberRegistryResyncRequester.class);
             assertThat(context).hasBean("subscriberRegistryConsumerFunction");
-            assertThat(context.getBean("subscriberRegistryConsumerFunction"))
-                .isInstanceOf(SubscriberRegistryConsumer.class);
+            assertThat(context.getBean("subscriberRegistryConsumerFunction")).isInstanceOf(
+                SubscriberRegistryConsumer.class
+            );
         });
     }
 

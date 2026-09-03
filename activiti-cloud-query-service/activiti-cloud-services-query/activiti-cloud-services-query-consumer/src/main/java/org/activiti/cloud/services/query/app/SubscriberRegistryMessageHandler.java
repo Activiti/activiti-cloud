@@ -41,7 +41,8 @@ public class SubscriberRegistryMessageHandler {
             case HEARTBEAT -> registry.heartbeat(message.sourceId(), message.sentAt());
             case SNAPSHOT -> registry.applySnapshot(message.sourceId(), message.entries(), message.sentAt());
             // RESYNC_REQUEST is emitted by the consumer itself and carries no registry update.
-            case RESYNC_REQUEST -> {}
+            case RESYNC_REQUEST -> {
+            }
         }
     }
 }

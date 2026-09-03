@@ -67,7 +67,9 @@ class ConsumerSubscriberRegistryConcurrencyTest {
         int instances = 16;
         ExecutorService pool = Executors.newFixedThreadPool(instances);
 
-        CountDownLatch registered = submitEach(pool, instances, source -> registry.register("alice", List.of("eng"), source, T0));
+        CountDownLatch registered = submitEach(pool, instances, source ->
+            registry.register("alice", List.of("eng"), source, T0)
+        );
         assertThat(registered.await(30, TimeUnit.SECONDS)).isTrue();
         assertThat(registry.sourcesOf("alice")).hasSize(instances);
 
@@ -78,7 +80,11 @@ class ConsumerSubscriberRegistryConcurrencyTest {
         assertThat(registry.isWatching("alice")).isFalse();
     }
 
-    private static CountDownLatch submitEach(ExecutorService pool, int instances, java.util.function.Consumer<String> action) {
+    private static CountDownLatch submitEach(
+        ExecutorService pool,
+        int instances,
+        java.util.function.Consumer<String> action
+    ) {
         CountDownLatch latch = new CountDownLatch(instances);
         for (int i = 0; i < instances; i++) {
             String source = "rest-" + i;

@@ -43,8 +43,7 @@ class SubscriberRegistryResyncRequesterTest {
     void setUp() {
         sent = new ArrayList<>();
         MessageChannel registryProducer = (message, timeout) -> sent.add(message);
-        FeatureToggle featureToggle = name ->
-            featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
+        FeatureToggle featureToggle = name -> featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
         requester = new SubscriberRegistryResyncRequester(
             registryProducer,
             featureToggle,
