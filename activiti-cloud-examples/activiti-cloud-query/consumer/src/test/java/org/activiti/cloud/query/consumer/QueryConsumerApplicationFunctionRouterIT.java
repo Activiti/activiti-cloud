@@ -27,7 +27,14 @@ public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerAppli
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
             .doesNotContainKeys("auditConsumer", "queryConsumer")
-            .containsOnlyKeys("functionRouterInput", "producer", "queryEventsProducer");
+            .containsOnlyKeys(
+                "functionRouterInput",
+                "producer",
+                "queryEventsProducer",
+                "subscriberRegistryConsumer",
+                "subscriberRegistryProducer",
+                "countProducer"
+            );
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput")).satisfies(binding -> {
             assertThat(binding.getGroup()).isEqualTo("consumer");
