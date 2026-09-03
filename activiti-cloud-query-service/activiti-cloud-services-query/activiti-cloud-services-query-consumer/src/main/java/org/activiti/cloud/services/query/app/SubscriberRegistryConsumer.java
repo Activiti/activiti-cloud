@@ -19,6 +19,8 @@ import java.util.function.Consumer;
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 
 /**
@@ -27,6 +29,8 @@ import org.springframework.messaging.Message;
  * the feature can be switched on at runtime without a redeploy.
  */
 public class SubscriberRegistryConsumer implements Consumer<Message<SubscriberRegistryMessage>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriberRegistryConsumer.class);
 
     private final SubscriberRegistryMessageHandler handler;
     private final FeatureToggle featureToggle;
@@ -38,8 +42,15 @@ public class SubscriberRegistryConsumer implements Consumer<Message<SubscriberRe
 
     @Override
     public void accept(Message<SubscriberRegistryMessage> message) {
-        if (featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS)) {
-            handler.handle(message.getPayload());
+        if (!featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS)) {
+            return;
+        }
+        SubscriberRegistryMessage payload = message.getPayload();
+        try {
+            handler.handle(payload);
+        } catch (RuntimeException e) {
+            // One malformed message must not wedge the shared registry channel.
+            LOGGER.warn("Skipping subscriber registry message that failed to apply: {}", payload, e);
         }
     }
 }

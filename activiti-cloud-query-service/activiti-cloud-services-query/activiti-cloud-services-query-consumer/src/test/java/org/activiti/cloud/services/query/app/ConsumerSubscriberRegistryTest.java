@@ -166,4 +166,37 @@ class ConsumerSubscriberRegistryTest {
         assertThat(registry.sourcesOf("ghost")).isEmpty();
         assertThat(registry.isWatching("ghost")).isFalse();
     }
+
+    @Test
+    void duplicateRegister_fromSameInstance_isIdempotent() {
+        registry.register("alice", List.of("eng"), "rest-1", T0);
+
+        boolean firstAppearanceAgain = registry.register("alice", List.of("eng"), "rest-1", T0);
+
+        assertThat(firstAppearanceAgain).isFalse();
+        assertThat(registry.sourcesOf("alice")).containsExactly("rest-1");
+    }
+
+    @Test
+    void unregisterBeforeRegister_isNoOp_thenRegisterStillWorks() {
+        // at-least-once delivery can reorder: an UNREGISTERED for an unknown user must be harmless
+        assertThat(registry.unregister("alice", "rest-1")).isFalse();
+
+        boolean firstAppearance = registry.register("alice", List.of("eng"), "rest-1", T0);
+
+        assertThat(firstAppearance).isTrue();
+        assertThat(registry.isWatching("alice")).isTrue();
+    }
+
+    @Test
+    void staleUnregister_afterReregisterOnAnotherInstance_onlyRemovesItsOwnSource() {
+        registry.register("alice", List.of("eng"), "rest-1", T0);
+        registry.unregister("alice", "rest-1");
+        registry.register("alice", List.of("eng"), "rest-2", T0);
+
+        boolean removed = registry.unregister("alice", "rest-1");
+
+        assertThat(removed).isFalse();
+        assertThat(registry.sourcesOf("alice")).containsExactly("rest-2");
+    }
 }

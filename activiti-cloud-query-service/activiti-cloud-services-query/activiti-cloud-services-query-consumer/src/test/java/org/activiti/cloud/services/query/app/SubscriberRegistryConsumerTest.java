@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.time.Instant;
 import java.util.List;
@@ -61,6 +62,22 @@ class SubscriberRegistryConsumerTest {
 
         assertThat(registry.isWatching("alice")).isFalse();
         assertThat(registry.size()).isZero();
+    }
+
+    @Test
+    void skipsMessage_whenHandlerThrows_soOneBadMessageDoesNotWedgeTheChannel() {
+        SubscriberRegistryMessageHandler throwingHandler = new SubscriberRegistryMessageHandler(registry) {
+            @Override
+            public void handle(SubscriberRegistryMessage message) {
+                throw new IllegalStateException("boom");
+            }
+        };
+        SubscriberRegistryConsumer resilientConsumer = new SubscriberRegistryConsumer(
+            throwingHandler,
+            QueryFeatureToggles.FEATURE_PUSHED_COUNTS::equals
+        );
+
+        assertThatCode(() -> resilientConsumer.accept(registeredMessage())).doesNotThrowAnyException();
     }
 
     private static Message<SubscriberRegistryMessage> registeredMessage() {
