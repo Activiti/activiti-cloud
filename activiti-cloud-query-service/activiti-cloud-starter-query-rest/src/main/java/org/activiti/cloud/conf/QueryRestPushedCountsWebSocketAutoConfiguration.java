@@ -147,7 +147,7 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
             builder.type(
                 TypeRuntimeWiring.newTypeWiring("Subscription")
                     .dataFetcher(
-                        "myTasks",
+                        "assignedTasks",
                         new PushedCountDataFetcher(
                             Badge.ASSIGNED,
                             pushedCountsFlux,

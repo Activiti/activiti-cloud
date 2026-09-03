@@ -137,7 +137,7 @@ class PushedCountDataFetcherTest {
 
     @Test
     void should_registerOnce_when_twoBadgesAreSubscribedOnTheSameSession() {
-        PushedCountDataFetcher myTasks = new PushedCountDataFetcher(
+        PushedCountDataFetcher assignedTasks = new PushedCountDataFetcher(
             Badge.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
@@ -152,14 +152,16 @@ class PushedCountDataFetcherTest {
             CLOCK
         );
 
-        var myTasksDisposable = Flux.from(myTasks.get(environmentFor("alice", "session-1", Set.of("eng")))).subscribe();
+        var assignedTasksDisposable = Flux.from(
+            assignedTasks.get(environmentFor("alice", "session-1", Set.of("eng")))
+        ).subscribe();
         var queuedTasksDisposable = Flux.from(
             queuedTasks.get(environmentFor("alice", "session-1", Set.of("eng")))
         ).subscribe();
 
         verify(subscriberRegistry).register("alice", Set.of("eng"), "session-1", NOW);
 
-        myTasksDisposable.dispose();
+        assignedTasksDisposable.dispose();
         verify(subscriberRegistry, never()).unregister(any(), any(), any());
 
         queuedTasksDisposable.dispose();

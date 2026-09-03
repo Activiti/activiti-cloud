@@ -7,7 +7,7 @@ type Query {
 }
 
 type Subscription {
-    myTasks: PushedCount
+    assignedTasks: PushedCount
     queuedTasks: PushedCount
     runningProcesses: PushedCount
 }

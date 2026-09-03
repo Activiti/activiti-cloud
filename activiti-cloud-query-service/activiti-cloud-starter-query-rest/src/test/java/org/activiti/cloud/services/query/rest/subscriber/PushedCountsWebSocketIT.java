@@ -103,9 +103,9 @@ class PushedCountsWebSocketIT {
     @Order(1)
     void should_openTheSubscription_when_theConnectionIsAuthenticated() {
         Flux<Map> flux = graphQlTester
-            .document("subscription { myTasks { count asOf } }")
+            .document("subscription { assignedTasks { count asOf } }")
             .executeSubscription()
-            .toFlux("myTasks", Map.class);
+            .toFlux("assignedTasks", Map.class);
 
         StepVerifier.create(flux).expectSubscription().thenAwait(Duration.ofMillis(300)).thenCancel().verify(TIMEOUT);
     }
@@ -114,9 +114,9 @@ class PushedCountsWebSocketIT {
     @Order(2)
     void should_deliverTheCount_when_aMatchingMessageArrivesOnTheCountsChannel() {
         Flux<Map> flux = graphQlTester
-            .document("subscription { myTasks { count asOf } }")
+            .document("subscription { assignedTasks { count asOf } }")
             .executeSubscription()
-            .toFlux("myTasks", Map.class);
+            .toFlux("assignedTasks", Map.class);
 
         Instant asOf = Instant.parse("2026-01-01T00:00:00Z");
 
@@ -133,9 +133,9 @@ class PushedCountsWebSocketIT {
     @Order(3)
     void should_notDeliverTheCount_when_theMessageIsForADifferentBadge() {
         Flux<Map> flux = graphQlTester
-            .document("subscription { myTasks { count asOf } }")
+            .document("subscription { assignedTasks { count asOf } }")
             .executeSubscription()
-            .toFlux("myTasks", Map.class);
+            .toFlux("assignedTasks", Map.class);
 
         StepVerifier.create(flux)
             .expectSubscription()
@@ -150,9 +150,9 @@ class PushedCountsWebSocketIT {
     @Order(4)
     void should_notDeliverTheCount_when_theMessageIsForADifferentUser() {
         Flux<Map> flux = graphQlTester
-            .document("subscription { myTasks { count asOf } }")
+            .document("subscription { assignedTasks { count asOf } }")
             .executeSubscription()
-            .toFlux("myTasks", Map.class);
+            .toFlux("assignedTasks", Map.class);
 
         StepVerifier.create(flux)
             .expectSubscription()

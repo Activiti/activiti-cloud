@@ -27,7 +27,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 /**
- * Backs one pushed-counts badge subscription field (e.g. {@code myTasks} for
+ * Backs one pushed-counts badge subscription field (e.g. {@code assignedTasks} for
  * {@link Badge#ASSIGNED}). Registers/unregisters with {@link SubscriberRegistry} via
  * {@link PushedCountsSubscriptionTracker} on this {@code Flux}'s first subscribe / last cancel -
  * spring-graphql cancels it for us on unsubscribe or disconnect, so no separate handling is needed.

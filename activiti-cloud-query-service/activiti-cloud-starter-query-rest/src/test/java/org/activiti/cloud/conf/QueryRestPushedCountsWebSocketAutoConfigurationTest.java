@@ -93,7 +93,7 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
                 .extracting(GraphQLObjectType::getFieldDefinitions)
                 .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
                 .extracting(GraphQLFieldDefinition::getName)
-                .containsExactlyInAnyOrder("myTasks", "queuedTasks", "runningProcesses");
+                .containsExactlyInAnyOrder("assignedTasks", "queuedTasks", "runningProcesses");
         });
     }
 
