@@ -15,5 +15,5 @@
  */
 package org.activiti.cloud.services.query.rest.subscriber;
 
-/** The GraphQL response shape for a pushed-counts badge subscription. */
+/** The GraphQL response shape for a pushed-counts subscription. */
 public record PushedCount(int count, String asOf) {}

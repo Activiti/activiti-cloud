@@ -25,13 +25,13 @@ import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
-import org.activiti.cloud.services.query.subscription.ScopeKeys.Badge;
+import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 /**
- * Backs one pushed-counts badge subscription field (e.g. {@code assignedTasks} for
- * {@link Badge#ASSIGNED}). Registers/unregisters with {@link SubscriberRegistry} via
+ * Backs one pushed-counts subscription field (e.g. {@code assignedTasks} for
+ * {@link PushedCountType#ASSIGNED}). Registers/unregisters with {@link SubscriberRegistry} via
  * {@link PushedCountsSubscriptionTracker} on this {@code Flux}'s first subscribe / last cancel -
  * spring-graphql cancels it for us on unsubscribe or disconnect, so no separate handling is needed.
  * Delivery is gated by {@link QueryFeatureToggles#FEATURE_PUSHED_COUNTS}, re-checked on every
@@ -39,20 +39,20 @@ import reactor.core.publisher.Flux;
  */
 public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount>> {
 
-    private final Badge badge;
+    private final PushedCountType type;
     private final Flux<CountChangedMessage> pushedCountsFlux;
     private final SubscriberRegistry subscriberRegistry;
     private final PushedCountsSubscriptionTracker subscriptionTracker;
     private final Clock clock;
 
     public PushedCountDataFetcher(
-        Badge badge,
+        PushedCountType type,
         Flux<CountChangedMessage> pushedCountsFlux,
         SubscriberRegistry subscriberRegistry,
         PushedCountsSubscriptionTracker subscriptionTracker,
         Clock clock
     ) {
-        this.badge = badge;
+        this.type = type;
         this.pushedCountsFlux = pushedCountsFlux;
         this.subscriberRegistry = subscriberRegistry;
         this.subscriptionTracker = subscriptionTracker;
@@ -90,7 +90,7 @@ public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount
     private boolean matches(CountChangedMessage message, String userId) {
         try {
             ScopeKeys.ScopeKey scopeKey = ScopeKeys.parse(message.scopeKey());
-            return scopeKey.badge() == badge && scopeKey.userId().equals(userId);
+            return scopeKey.type() == type && scopeKey.userId().equals(userId);
         } catch (IllegalArgumentException _) {
             return false;
         }

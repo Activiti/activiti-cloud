@@ -29,7 +29,7 @@ import org.activiti.cloud.services.query.rest.subscriber.PushedCountsWebSocketIn
 import org.activiti.cloud.services.query.rest.subscriber.SubscriberRegistry;
 import org.activiti.cloud.services.query.rest.subscriber.SubscriberSessionExpirySweep;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
-import org.activiti.cloud.services.query.subscription.ScopeKeys.Badge;
+import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -51,8 +51,8 @@ import reactor.core.publisher.Sinks;
 
 /**
  * Wires the pushed-counts websocket interceptor, in-memory {@link SubscriberRegistry}, session
- * expiry sweep, and the relay that fans a {@link CountChangedMessage} out to the three badge
- * subscriptions via {@link PushedCountDataFetcher}. Ordered before
+ * expiry sweep, and the relay that fans a {@link CountChangedMessage} out to the three
+ * count-type subscriptions via {@link PushedCountDataFetcher}. Ordered before
  * {@link WebSocketMessageBrokerSecurityAutoConfiguration} so its default interceptor bean backs
  * off, since spring-graphql allows only one {@code WebSocketGraphQlInterceptor}.
  *
@@ -156,7 +156,7 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
                     .dataFetcher(
                         "assignedTasks",
                         new PushedCountDataFetcher(
-                            Badge.ASSIGNED,
+                            PushedCountType.ASSIGNED,
                             pushedCountsFlux,
                             subscriberRegistry,
                             pushedCountsSubscriptionTracker,
@@ -166,7 +166,7 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
                     .dataFetcher(
                         "queuedTasks",
                         new PushedCountDataFetcher(
-                            Badge.QUEUED,
+                            PushedCountType.QUEUED,
                             pushedCountsFlux,
                             subscriberRegistry,
                             pushedCountsSubscriptionTracker,
@@ -176,7 +176,7 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
                     .dataFetcher(
                         "runningProcesses",
                         new PushedCountDataFetcher(
-                            Badge.PROCESSES,
+                            PushedCountType.PROCESSES,
                             pushedCountsFlux,
                             subscriberRegistry,
                             pushedCountsSubscriptionTracker,

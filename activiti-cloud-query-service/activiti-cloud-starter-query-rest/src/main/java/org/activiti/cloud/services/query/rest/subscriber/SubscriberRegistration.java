@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * One user's live websocket sessions on this query-rest instance. A "session" is one websocket
- * connection (one browser tab), not one badge subscription. {@code groups} is a snapshot taken
+ * connection (one browser tab), not one count-type subscription. {@code groups} is a snapshot taken
  * when the first session is added and never refreshed for the life of the registration.
  */
 public class SubscriberRegistration {

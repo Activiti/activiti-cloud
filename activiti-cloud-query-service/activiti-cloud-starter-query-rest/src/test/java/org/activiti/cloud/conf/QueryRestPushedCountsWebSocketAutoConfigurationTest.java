@@ -51,7 +51,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 /**
  * Boots the real autoconfiguration chain (including
  * {@link WebSocketMessageBrokerSecurityAutoConfiguration}) to confirm the real pushed-counts
- * schema activates the websocket transport by default, exposes the three badge subscriptions,
+ * schema activates the websocket transport by default, exposes the three count-type subscriptions,
  * and that {@link PushedCountsWebSocketInterceptor} wins as the single
  * {@link WebSocketGraphQlInterceptor} - and that none of this holds when
  * {@code query.pushed-counts.enabled=false} is set explicitly.

@@ -33,7 +33,7 @@ import java.util.Set;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
-import org.activiti.cloud.services.query.subscription.ScopeKeys.Badge;
+import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,9 +85,9 @@ class PushedCountDataFetcherTest {
     }
 
     @Test
-    void should_deliverTheCount_when_theScopeKeyMatchesTheBadgeAndUserId() {
+    void should_deliverTheCount_when_theScopeKeyMatchesTheTypeAndUserId() {
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
@@ -106,7 +106,7 @@ class PushedCountDataFetcherTest {
     @ValueSource(strings = { "queued:alice", "assigned:bob", "not-a-scope-key" })
     void should_notDeliverTheCount_when_theScopeKeyDoesNotMatch(String scopeKey) {
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
@@ -124,7 +124,7 @@ class PushedCountDataFetcherTest {
     @Test
     void should_returnAnEmptyFlux_when_userIdIsMissingFromTheContext() {
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
@@ -138,7 +138,7 @@ class PushedCountDataFetcherTest {
     @Test
     void should_returnAnEmptyFlux_when_sessionIdIsMissingFromTheContext() {
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
@@ -153,7 +153,7 @@ class PushedCountDataFetcherTest {
     void should_returnAnEmptyFlux_when_theRuntimeToggleIsDisabled() {
         FeatureToggleHolder.reset();
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
@@ -168,7 +168,7 @@ class PushedCountDataFetcherTest {
     @Test
     void should_stopDeliveringCounts_when_theRuntimeToggleIsDisabledMidStream() {
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
@@ -195,7 +195,7 @@ class PushedCountDataFetcherTest {
         when(environment.getGraphQlContext()).thenReturn(GraphQLContext.of(context));
 
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
@@ -210,7 +210,7 @@ class PushedCountDataFetcherTest {
     @Test
     void should_clampTheCount_when_itExceedsIntegerMaxValue() {
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
@@ -226,16 +226,16 @@ class PushedCountDataFetcherTest {
     }
 
     @Test
-    void should_registerOnce_when_twoBadgesAreSubscribedOnTheSameSession() {
+    void should_registerOnce_when_twoCountTypesAreSubscribedOnTheSameSession() {
         PushedCountDataFetcher assignedTasks = new PushedCountDataFetcher(
-            Badge.ASSIGNED,
+            PushedCountType.ASSIGNED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,
             CLOCK
         );
         PushedCountDataFetcher queuedTasks = new PushedCountDataFetcher(
-            Badge.QUEUED,
+            PushedCountType.QUEUED,
             pushedCountsFlux,
             subscriberRegistry,
             tracker,

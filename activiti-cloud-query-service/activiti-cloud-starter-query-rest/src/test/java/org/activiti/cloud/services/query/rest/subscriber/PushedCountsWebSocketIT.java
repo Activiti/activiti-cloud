@@ -44,7 +44,7 @@ import reactor.test.StepVerifier;
 
 /**
  * The real end-to-end test for the pushed-counts feature: a real websocket connection,
- * authenticated with a real JWT, subscribing to a badge and receiving a count pushed through the
+ * authenticated with a real JWT, subscribing to a count type and receiving a count pushed through the
  * relay - modeled on {@code ActivitiGraphQLWsNativeStarterIT}'s
  * {@code EngineEventsSubscriptionTests} in activiti-cloud-notifications-graphql-service.
  *
@@ -132,7 +132,7 @@ class PushedCountsWebSocketIT {
 
     @Test
     @Order(3)
-    void should_notDeliverTheCount_when_theMessageIsForADifferentBadge() {
+    void should_notDeliverTheCount_when_theMessageIsForADifferentType() {
         Flux<Map> flux = graphQlTester
             .document("subscription { assignedTasks { count asOf } }")
             .executeSubscription()
