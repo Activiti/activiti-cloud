@@ -30,8 +30,12 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.Badge;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -55,6 +59,16 @@ class PushedCountDataFetcherTest {
     private final Sinks.Many<CountChangedMessage> sink = Sinks.many().multicast().onBackpressureBuffer();
     private final Flux<CountChangedMessage> pushedCountsFlux = sink.asFlux();
     private final PushedCountsSubscriptionTracker tracker = new PushedCountsSubscriptionTracker();
+
+    @BeforeEach
+    void enablePushedCountsToggle() {
+        FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_PUSHED_COUNTS::equals);
+    }
+
+    @AfterEach
+    void resetPushedCountsToggle() {
+        FeatureToggleHolder.reset();
+    }
 
     private DataFetchingEnvironment environmentFor(String userId, String sessionId, Set<String> groups) {
         DataFetchingEnvironment environment = mock(DataFetchingEnvironment.class);
@@ -133,6 +147,43 @@ class PushedCountDataFetcherTest {
         Publisher<PushedCount> publisher = fetcher.get(environmentFor("alice", null, Set.of("eng")));
 
         StepVerifier.create(Flux.from(publisher)).expectComplete().verify();
+    }
+
+    @Test
+    void should_returnAnEmptyFlux_when_theRuntimeToggleIsDisabled() {
+        FeatureToggleHolder.reset();
+        PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
+            Badge.ASSIGNED,
+            pushedCountsFlux,
+            subscriberRegistry,
+            tracker,
+            CLOCK
+        );
+        Publisher<PushedCount> publisher = fetcher.get(environmentFor("alice", "session-1", Set.of("eng")));
+
+        StepVerifier.create(Flux.from(publisher)).expectComplete().verify();
+        verify(subscriberRegistry, never()).register(any(), any(), any(), any());
+    }
+
+    @Test
+    void should_stopDeliveringCounts_when_theRuntimeToggleIsDisabledMidStream() {
+        PushedCountDataFetcher fetcher = new PushedCountDataFetcher(
+            Badge.ASSIGNED,
+            pushedCountsFlux,
+            subscriberRegistry,
+            tracker,
+            CLOCK
+        );
+        Publisher<PushedCount> publisher = fetcher.get(environmentFor("alice", "session-1", Set.of("eng")));
+
+        StepVerifier.create(Flux.from(publisher))
+            .then(() -> sink.tryEmitNext(new CountChangedMessage("assigned:alice", 3, NOW)))
+            .expectNext(new PushedCount(3, NOW.toString()))
+            .then(FeatureToggleHolder::reset)
+            .then(() -> sink.tryEmitNext(new CountChangedMessage("assigned:alice", 4, NOW)))
+            .expectNoEvent(Duration.ofMillis(200))
+            .thenCancel()
+            .verify();
     }
 
     @Test

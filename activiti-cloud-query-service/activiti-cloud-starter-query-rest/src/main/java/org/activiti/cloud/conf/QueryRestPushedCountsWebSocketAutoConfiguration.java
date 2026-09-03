@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -58,10 +59,15 @@ import reactor.core.publisher.Sinks;
  * <p>The {@code Sinks.Many<CountChangedMessage>} bean is not wired to any messaging channel here:
  * that needs a real Spring Cloud Stream binder at boot, which this bare REST starter does not
  * carry - added instead by whichever starter combines it with a messaging-capable module.
+ *
+ * <p>Disabled at startup unless {@code query.pushed-counts.enabled=true}, in which case none of
+ * this class's beans are created and {@code WebSocketMessageBrokerSecurityAutoConfiguration}'s
+ * plain interceptor is used instead.
  */
 @AutoConfiguration(before = WebSocketMessageBrokerSecurityAutoConfiguration.class)
 @ConditionalOnWebApplication
 @ConditionalOnClass({ GraphQL.class, WebSocketGraphQlInterceptor.class })
+@ConditionalOnProperty(name = "query.pushed-counts.enabled", havingValue = "true", matchIfMissing = false)
 @EnableScheduling
 public class QueryRestPushedCountsWebSocketAutoConfiguration {
 

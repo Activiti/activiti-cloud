@@ -20,6 +20,8 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import java.time.Clock;
 import java.util.Set;
+import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.Badge;
@@ -31,6 +33,8 @@ import reactor.core.publisher.Flux;
  * {@link Badge#ASSIGNED}). Registers/unregisters with {@link SubscriberRegistry} via
  * {@link PushedCountsSubscriptionTracker} on this {@code Flux}'s first subscribe / last cancel -
  * spring-graphql cancels it for us on unsubscribe or disconnect, so no separate handling is needed.
+ * Delivery is gated by {@link QueryFeatureToggles#FEATURE_PUSHED_COUNTS}, re-checked on every
+ * message so it can be toggled at runtime without a restart.
  */
 public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount>> {
 
@@ -60,11 +64,11 @@ public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount
         String userId = context.get(PushedCountsWebSocketInterceptor.USER_ID_CONTEXT_KEY);
         String sessionId = context.get(PushedCountsWebSocketInterceptor.SESSION_ID_CONTEXT_KEY);
         Set<String> groups = context.get(PushedCountsWebSocketInterceptor.GROUPS_CONTEXT_KEY);
-        if (userId == null || sessionId == null) {
+        if (userId == null || sessionId == null || !isFeatureEnabled()) {
             return Flux.empty();
         }
         return pushedCountsFlux
-            .filter(message -> matches(message, userId))
+            .filter(message -> isFeatureEnabled() && matches(message, userId))
             .map(message -> new PushedCount(Math.toIntExact(message.count()), message.asOf().toString()))
             .doOnSubscribe(subscription -> {
                 if (subscriptionTracker.incrementAndCheckIfWasZero(sessionId)) {
@@ -86,5 +90,9 @@ public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount
         } catch (IllegalArgumentException _) {
             return false;
         }
+    }
+
+    private boolean isFeatureEnabled() {
+        return FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS);
     }
 }
