@@ -51,9 +51,10 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 /**
  * Boots the real autoconfiguration chain (including
  * {@link WebSocketMessageBrokerSecurityAutoConfiguration}) to confirm the real pushed-counts
- * schema activates the websocket transport, exposes the three badge subscriptions, and that
- * {@link PushedCountsWebSocketInterceptor} wins as the single {@link WebSocketGraphQlInterceptor}
- * - and that none of this holds when {@code query.pushed-counts.enabled} is left unset.
+ * schema activates the websocket transport by default, exposes the three badge subscriptions,
+ * and that {@link PushedCountsWebSocketInterceptor} wins as the single
+ * {@link WebSocketGraphQlInterceptor} - and that none of this holds when
+ * {@code query.pushed-counts.enabled=false} is set explicitly.
  */
 class QueryRestPushedCountsWebSocketAutoConfigurationTest {
 
@@ -77,40 +78,40 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
         .withBean("conversionService", ConversionService.class, ApplicationConversionService::new);
 
     @Test
-    void should_activateTheWebsocketTransport_and_wireExactlyOnePushedCountsInterceptor() {
-        contextRunner
-            .withPropertyValues("query.pushed-counts.enabled=true")
-            .run(context -> {
-                assertThat(context).hasNotFailed();
-                assertThat(context).hasSingleBean(WebGraphQlHandler.class);
-                assertThat(context).hasSingleBean(PushedCountsWebSocketInterceptor.class);
-                assertThat(context.getBeansOfType(WebSocketGraphQlInterceptor.class)).hasSize(1);
-                assertThat(context).hasSingleBean(SubscriberRegistry.class);
+    void should_activateTheWebsocketTransport_and_wireExactlyOnePushedCountsInterceptor_when_thePropertyIsNotSet() {
+        contextRunner.run(context -> {
+            assertThat(context).hasNotFailed();
+            assertThat(context).hasSingleBean(WebGraphQlHandler.class);
+            assertThat(context).hasSingleBean(PushedCountsWebSocketInterceptor.class);
+            assertThat(context.getBeansOfType(WebSocketGraphQlInterceptor.class)).hasSize(1);
+            assertThat(context).hasSingleBean(SubscriberRegistry.class);
 
-                // Confirms the handler resolved this bean as its interceptor, not merely that it exists.
-                WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
-                assertThat(handler.getWebSocketInterceptor()).isInstanceOf(PushedCountsWebSocketInterceptor.class);
+            // Confirms the handler resolved this bean as its interceptor, not merely that it exists.
+            WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
+            assertThat(handler.getWebSocketInterceptor()).isInstanceOf(PushedCountsWebSocketInterceptor.class);
 
-                GraphQLSchema schema = context.getBean(GraphQlSource.class).schema();
-                assertThat(schema.getSubscriptionType())
-                    .isNotNull()
-                    .extracting(GraphQLObjectType::getFieldDefinitions)
-                    .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
-                    .extracting(GraphQLFieldDefinition::getName)
-                    .containsExactlyInAnyOrder("assignedTasks", "queuedTasks", "runningProcesses");
-            });
+            GraphQLSchema schema = context.getBean(GraphQlSource.class).schema();
+            assertThat(schema.getSubscriptionType())
+                .isNotNull()
+                .extracting(GraphQLObjectType::getFieldDefinitions)
+                .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
+                .extracting(GraphQLFieldDefinition::getName)
+                .containsExactlyInAnyOrder("assignedTasks", "queuedTasks", "runningProcesses");
+        });
     }
 
     @Test
-    void should_notWireAnyPushedCountsBean_when_thePropertyIsNotSet() {
-        contextRunner.run(context -> {
-            assertThat(context).hasNotFailed();
-            assertThat(context.getBeansOfType(PushedCountsWebSocketInterceptor.class)).isEmpty();
-            assertThat(context.getBeansOfType(SubscriberRegistry.class)).isEmpty();
+    void should_notWireAnyPushedCountsBean_when_thePropertyIsExplicitlyDisabled() {
+        contextRunner
+            .withPropertyValues("query.pushed-counts.enabled=false")
+            .run(context -> {
+                assertThat(context).hasNotFailed();
+                assertThat(context.getBeansOfType(PushedCountsWebSocketInterceptor.class)).isEmpty();
+                assertThat(context.getBeansOfType(SubscriberRegistry.class)).isEmpty();
 
-            WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
-            assertThat(handler.getWebSocketInterceptor()).isInstanceOf(SecurityWebSocketInterceptor.class);
-        });
+                WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
+                assertThat(handler.getWebSocketInterceptor()).isInstanceOf(SecurityWebSocketInterceptor.class);
+            });
     }
 
     @Configuration
