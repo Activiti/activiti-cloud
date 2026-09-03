@@ -31,6 +31,7 @@ import org.activiti.engine.impl.delegate.invocation.DefaultDelegateInterceptor;
 import org.activiti.engine.impl.el.ExpressionManager;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.TaskEntityImpl;
+import org.activiti.services.connectors.conf.ConnectorImplementationsProvider;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
@@ -84,6 +86,12 @@ public class RuntimeBundleApplicationIT {
 
     @Autowired
     private ProcessEngineConfigurationImpl processEngineConfiguration;
+
+    @Autowired
+    private ConnectorImplementationsProvider connectorImplementationsProvider;
+
+    @Autowired
+    private BindingServiceProperties bindingServiceProperties;
 
     @Test
     public void contextLoads() {
@@ -201,19 +209,75 @@ public class RuntimeBundleApplicationIT {
     }
 
     @Test
-    void transactedProducerBindings() {
+    void transactedRuntimeProducerBindings() {
         assertThat(
-            environment.getProperty(
-                "spring.cloud.stream.rabbit.bindings.auditProducer.producer.transacted",
-                Boolean.class
+            List.of(
+                "asyncExecutorJobsOutput",
+                "auditProducer",
+                "commandResults",
+                "messageConnectorOutput",
+                "messageEventsOutput",
+                "signalProducer"
             )
-        ).isTrue();
+        )
+            .satisfies(transactedBindings ->
+                assertThat(producerBindings()).isNotEmpty().containsAll(transactedBindings)
+            )
+            .satisfies(transactedBindings ->
+                assertThat(springCloudStreamRabbitBindingsProducerTransacted(transactedBindings))
+                    .isNotEmpty()
+                    .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isTrue())
+            );
+    }
 
-        assertThat(
-            environment.getProperty(
-                "spring.cloud.stream.rabbit.bindings.asyncExecutorJobsOutput.producer.transacted",
-                Boolean.class
+    @Test
+    void nonTransactedRuntimeProducerBindings() {
+        assertThat(List.of("auditProducerIncidents"))
+            .satisfies(nonTransactedBindings -> assertThat(producerBindings()).containsAll(nonTransactedBindings))
+            .satisfies(nonTransactedBindings ->
+                assertThat(springCloudStreamRabbitBindingsProducerTransacted(nonTransactedBindings))
+                    .isNotEmpty()
+                    .allSatisfy(property -> assertThat(environment.getProperty(property, Boolean.class)).isFalse())
+            );
+    }
+
+    @Test
+    void transactedConnectorProducerBindings() {
+        assertThat(connectorImplementationsProvider.getImplementations())
+            .isNotEmpty()
+            .containsOnly(
+                "content-service.SELECT_FILE",
+                "docgen-service.GENERATE",
+                "email-service.SEND",
+                "ExampleConnector",
+                "headers.GET",
+                "miCloudConnector",
+                "Movies.getMovieDesc",
+                "restconnector.POST",
+                "test-bpmn-error-connector.throwError",
+                "test-error-connector.throwError",
+                "script.EXECUTE"
             )
-        ).isTrue();
+            .satisfies(implementations -> assertThat(producerBindings()).containsAll(implementations))
+            .satisfies(implementations ->
+                implementations
+                    .stream()
+                    .map("spring.cloud.stream.rabbit.bindings.[%s].producer.transacted"::formatted)
+                    .forEach(name -> assertThat(environment.getProperty(name, Boolean.class)).isTrue())
+            );
+    }
+
+    private List<String> producerBindings() {
+        return bindingServiceProperties
+            .getBindings()
+            .entrySet()
+            .stream()
+            .filter(it -> it.getValue().getConsumer() == null)
+            .map(Map.Entry::getKey)
+            .toList();
+    }
+
+    private List<String> springCloudStreamRabbitBindingsProducerTransacted(List<? extends String> bindings) {
+        return bindings.stream().map("spring.cloud.stream.rabbit.bindings.%s.producer.transacted"::formatted).toList();
     }
 }
