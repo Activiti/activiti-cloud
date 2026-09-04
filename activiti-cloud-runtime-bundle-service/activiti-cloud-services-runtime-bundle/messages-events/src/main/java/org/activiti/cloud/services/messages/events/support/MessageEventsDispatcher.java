@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.messages.events.support;
 
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.messages.events.MessageEventHeaders;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -26,11 +26,14 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class MessageEventsDispatcher {
 
     private final MessageChannel messageEvents;
-    private final BindingServiceProperties bindingServiceProperties;
+    private final FunctionBindingConfiguration.BindingResolver bindingResolver;
 
-    public MessageEventsDispatcher(MessageChannel messageEvents, BindingServiceProperties bindingServiceProperties) {
+    public MessageEventsDispatcher(
+        MessageChannel messageEvents,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
+    ) {
         this.messageEvents = messageEvents;
-        this.bindingServiceProperties = bindingServiceProperties;
+        this.bindingResolver = bindingResolver;
     }
 
     public void dispatch(Message<?> message) {
@@ -38,7 +41,7 @@ public class MessageEventsDispatcher {
             throw new IllegalStateException("requires active transaction synchronization");
         }
 
-        String messageEventOutputDestination = bindingServiceProperties.getBindingDestination(
+        String messageEventOutputDestination = bindingResolver.getBindingDestination(
             ProcessEngineChannels.COMMAND_CONSUMER
         );
 
