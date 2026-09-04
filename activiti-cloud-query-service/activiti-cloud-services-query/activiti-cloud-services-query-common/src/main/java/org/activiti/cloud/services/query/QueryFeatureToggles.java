@@ -41,4 +41,12 @@ public final class QueryFeatureToggles {
      * Enables the short-lived in-memory cache for restricted process instance counts.
      */
     public static final String FEATURE_PROCESS_INSTANCE_COUNT_CACHE = "query.process-instance-count.cache";
+
+    /**
+     * Enables serving counts from pre-aggregated values pushed as events are consumed instead of
+     * computing them on demand. Resolved from
+     * {@code activiti.features.query.pushed-counts.enabled}, disabled by default. Evaluated on
+     * every call, so it can be toggled at runtime without a restart.
+     */
+    public static final String FEATURE_PUSHED_COUNTS = "query.pushed-counts";
 }
