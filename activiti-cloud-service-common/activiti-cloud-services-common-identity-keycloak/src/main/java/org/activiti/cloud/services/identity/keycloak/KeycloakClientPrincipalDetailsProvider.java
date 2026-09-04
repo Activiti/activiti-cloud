@@ -25,6 +25,7 @@ import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsProvider, PrincipalRolesProvider {
 
@@ -52,7 +53,16 @@ public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsPr
             .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
     }
 
+    /**
+     * The Keycloak Admin API identifies users by their internal id, not their username - so for a
+     * JWT-backed principal this must come from the {@code sub} claim. {@code principal.getName()}
+     * is not reliable here: this codebase's own {@code JwtAuthenticationToken} construction sets
+     * the principal name to the username, not the subject.
+     */
     protected String subjectId(Principal principal) {
+        if (principal instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+            return jwtAuthenticationToken.getToken().getSubject();
+        }
         return Optional.of(principal).map(Principal::getName).orElseThrow(this::securityException);
     }
 

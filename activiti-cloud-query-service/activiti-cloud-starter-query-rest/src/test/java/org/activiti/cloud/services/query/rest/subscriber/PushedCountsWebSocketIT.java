@@ -15,12 +15,16 @@
  */
 package org.activiti.cloud.services.query.rest.subscriber;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
@@ -34,7 +38,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.event.EventListener;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -58,12 +65,14 @@ import reactor.test.StepVerifier;
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(PushedCountsWebSocketIT.WentLiveEventCaptor.class)
 class PushedCountsWebSocketIT {
 
     private static final String WS_GRAPHQL_URI = "/v2/ws/graphql";
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
     private static final Duration WEB_SOCKET_STOP_TIMEOUT = Duration.ofSeconds(5);
     private static final String TEST_USER = "testuser";
+    private static final String TEST_USER_GROUP = "testgroup";
 
     @LocalServerPort
     private String port;
@@ -73,6 +82,9 @@ class PushedCountsWebSocketIT {
 
     @Autowired
     private Sinks.Many<CountChangedMessage> pushedCountsSink;
+
+    @Autowired
+    private WentLiveEventCaptor wentLiveEventCaptor;
 
     private WebSocketGraphQlTester graphQlTester;
 
@@ -98,7 +110,10 @@ class PushedCountsWebSocketIT {
 
     /**
      * Proves the handshake/schema/interceptor wiring alone works - a live subscription with no
-     * message sent - before any relay assertion depends on it too.
+     * message sent - before any relay assertion depends on it too. Also the first subscription
+     * opened in this class, so the {@link SubscriberRegistry} is still empty for {@link #TEST_USER}
+     * beforehand - the only point where a fresh 0 -&gt; 1 transition (and its
+     * {@link SubscriberWentLiveEvent}) is guaranteed, rather than racing an earlier test's cleanup.
      */
     @Test
     @Order(1)
@@ -109,6 +124,10 @@ class PushedCountsWebSocketIT {
             .toFlux("assignedTasks", Map.class);
 
         StepVerifier.create(flux).expectSubscription().thenAwait(Duration.ofMillis(300)).thenCancel().verify(TIMEOUT);
+
+        assertThat(wentLiveEventCaptor.events())
+            .as("the interceptor-resolved groups reached SubscriberRegistry.register(...) intact")
+            .anyMatch(event -> event.userId().equals(TEST_USER) && event.groups().equals(Set.of(TEST_USER_GROUP)));
     }
 
     @Test
@@ -177,5 +196,25 @@ class PushedCountsWebSocketIT {
 
     private void sendCountChanged(CountChangedMessage message) {
         pushedCountsSink.tryEmitNext(message);
+    }
+
+    /**
+     * Collects {@link SubscriberWentLiveEvent}s on whichever thread publishes them - the
+     * subscription is established on a server-side Reactor/Netty thread, not the test's own, so
+     * Spring Test's thread-local {@code ApplicationEvents} recording can't see it.
+     */
+    @TestConfiguration
+    static class WentLiveEventCaptor {
+
+        private final List<SubscriberWentLiveEvent> events = new CopyOnWriteArrayList<>();
+
+        @EventListener
+        void onSubscriberWentLive(SubscriberWentLiveEvent event) {
+            events.add(event);
+        }
+
+        List<SubscriberWentLiveEvent> events() {
+            return events;
+        }
     }
 }
