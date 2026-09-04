@@ -40,6 +40,7 @@ public class AuthorizationProperties {
 
         private String[] authRoles = new String[] {};
         private String[] authPermissions = new String[] {};
+        private String[] authScopes = new String[] {};
         private SecurityCollection[] securityCollections = new SecurityCollection[] {};
 
         public String[] getAuthRoles() {
@@ -64,6 +65,14 @@ public class AuthorizationProperties {
 
         public void setAuthPermissions(String[] authPermissions) {
             this.authPermissions = authPermissions;
+        }
+
+        public String[] getAuthScopes() {
+            return authScopes;
+        }
+
+        public void setAuthScopes(String[] authScopes) {
+            this.authScopes = authScopes;
         }
     }
 

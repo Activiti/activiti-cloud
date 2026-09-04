@@ -58,6 +58,11 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         "authorizations.security-constraints[4].authPermissions[1]=OTHER_DUMMY_PERMISSION",
         "authorizations.security-constraints[4].securityCollections[0].patterns[0]=/permission/dummy-endpoint/*",
         "authorizations.security-constraints[4].securityCollections[0].omittedMethods[0]=DELETE",
+        "authorizations.security-constraints[5].authScopes[0]=example.service.read.system",
+        "authorizations.security-constraints[5].securityCollections[0].patterns[0]=/scope/*",
+        "authorizations.security-constraints[6].authRoles[0]=DUMMY_COMBINED_ROLE",
+        "authorizations.security-constraints[6].authScopes[0]=example.combined.read",
+        "authorizations.security-constraints[6].securityCollections[0].patterns[0]=/combined/*",
     }
 )
 @EnableWebMvc
@@ -100,6 +105,7 @@ public class AuthorizationConfigurerIT {
         MockMvc mockMvc = mockMvcBuilder.build();
         mockMvc.perform(get(AuthorizationTestController.ROLE_GET)).andExpect(status().isUnauthorized());
         mockMvc.perform(get(AuthorizationTestController.PERMISSION_GET)).andExpect(status().isUnauthorized());
+        mockMvc.perform(get(AuthorizationTestController.SCOPE_GET)).andExpect(status().isUnauthorized());
         mockMvc.perform(post(AuthorizationTestController.PERMISSION_POST)).andExpect(status().isForbidden());
         mockMvc.perform(post(AuthorizationTestController.ROLE_POST)).andExpect(status().isForbidden());
         mockMvc.perform(put(AuthorizationTestController.ROLE_PUT)).andExpect(status().isForbidden());
@@ -156,6 +162,52 @@ public class AuthorizationConfigurerIT {
         when(jwtAdapterMock.getPermissions()).thenReturn(List.of("DUMMY_PERMISSION"));
         MockMvc mockMvc = mockMvcBuilder.alwaysExpect(status().isOk()).build();
         performPermissionRestrictedRequests(mockMvc);
+    }
+
+    @Test
+    void should_return403_whenJwtContainsNoScopes() throws Exception {
+        when(jwtAdapterMock.getScopes()).thenReturn(Collections.emptyList());
+        MockMvc mockMvc = mockMvcBuilder.build();
+
+        mockMvc
+            .perform(get(AuthorizationTestController.SCOPE_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_return403_whenJwtContainsWrongScope() throws Exception {
+        when(jwtAdapterMock.getScopes()).thenReturn(List.of("example.service.write.system"));
+        MockMvc mockMvc = mockMvcBuilder.build();
+
+        mockMvc
+            .perform(get(AuthorizationTestController.SCOPE_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_return200_whenJwtContainsCorrectScope() throws Exception {
+        when(jwtAdapterMock.getScopes()).thenReturn(List.of("example.service.read.system"));
+        MockMvc mockMvc = mockMvcBuilder.build();
+
+        mockMvc
+            .perform(get(AuthorizationTestController.SCOPE_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_grantCombinedConstraintAccessThroughEitherRoleOrScope() throws Exception {
+        MockMvc mockMvc = mockMvcBuilder.build();
+        when(jwtAdapterMock.getRoles()).thenReturn(List.of("DUMMY_COMBINED_ROLE"));
+        when(jwtAdapterMock.getScopes()).thenReturn(Collections.emptyList());
+        mockMvc
+            .perform(get(AuthorizationTestController.COMBINED_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
+
+        when(jwtAdapterMock.getRoles()).thenReturn(Collections.emptyList());
+        when(jwtAdapterMock.getScopes()).thenReturn(List.of("example.combined.read"));
+        mockMvc
+            .perform(get(AuthorizationTestController.COMBINED_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
     }
 
     @Test
