@@ -59,6 +59,8 @@ import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
+import org.activiti.cloud.services.core.validation.VariableProperties;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.engine.RepositoryService;
@@ -69,6 +71,7 @@ import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -81,6 +84,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
+@EnableConfigurationProperties(VariableProperties.class)
 public class ServicesCoreAutoConfiguration {
 
     @Bean
@@ -276,6 +280,15 @@ public class ServicesCoreAutoConfiguration {
         ProcessVariableValueConverter variableValueConverter
     ) {
         return new ProcessVariablesPayloadConverter(variableValueConverter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public VariableValueSizeValidator variableValueSizeValidator(
+        JsonMapper jsonMapper,
+        VariableProperties variableProperties
+    ) {
+        return new VariableValueSizeValidator(jsonMapper, variableProperties);
     }
 
     @Bean

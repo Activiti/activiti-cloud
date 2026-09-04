@@ -36,6 +36,8 @@ import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.core.validation.VariableProperties;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -54,6 +56,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -64,17 +67,20 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
+@EnableConfigurationProperties(VariableProperties.class)
 @Import(
     {
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ProcessEngineChannelsConfiguration.class,
         VariableValidationService.class,
+        VariableValueSizeValidator.class,
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
@@ -109,6 +115,9 @@ class ProcessInstanceVariableControllerImplIT {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private VariableProperties variableProperties;
+
     @MockitoSpyBean
     private CollectionModelAssembler resourcesAssembler;
 
@@ -135,6 +144,7 @@ class ProcessInstanceVariableControllerImplIT {
 
     @BeforeEach
     void setUp() {
+        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
         //this assertion is not really necessary. It's only here to remove warning
         //telling that resourcesAssembler is never used. Even if we are not directly
         //using it in the test we need to to declare it as @SpyBean so it get inject
@@ -192,5 +202,31 @@ class ProcessInstanceVariableControllerImplIT {
         ).andExpect(status().isOk());
 
         verify(processRuntime).setVariables(any());
+    }
+
+    @Test
+    void setVariablesShouldReturnBadRequestWhenVariableValueExceedsConfiguredSize() throws Exception {
+        variableProperties.setMaxValueSize(5);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("oversized", "abcd");
+
+        MvcResult result = this.mockMvc.perform(
+                put("/v1/process-instances/{processInstanceId}/variables", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder.setVariables()
+                                .withProcessInstanceId("1")
+                                .withVariables(variables)
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).contains(
+            "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
+        );
     }
 }
