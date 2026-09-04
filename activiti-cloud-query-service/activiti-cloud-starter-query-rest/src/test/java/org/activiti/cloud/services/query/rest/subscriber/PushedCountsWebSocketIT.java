@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest.subscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 import java.net.URI;
 import java.time.Duration;
@@ -45,6 +46,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
@@ -192,6 +194,58 @@ class PushedCountsWebSocketIT {
         ).build();
 
         assertThatThrownBy(() -> unauthenticatedTester.start().block(TIMEOUT)).isNotNull();
+    }
+
+    /**
+     * Proves the per-type filtering ({@link PushedCountDataFetcher#matches}) actually
+     * discriminates between all three fields on the same connection, not just the one
+     * (assigned-vs-queued) pair the other tests already cover.
+     */
+    @Test
+    @Order(6)
+    void should_notMixUpCounts_when_subscribedToAllThreeCountTypesConcurrently() throws InterruptedException {
+        List<Map> assignedTasksReceived = new CopyOnWriteArrayList<>();
+        List<Map> queuedTasksReceived = new CopyOnWriteArrayList<>();
+        List<Map> runningProcessesReceived = new CopyOnWriteArrayList<>();
+
+        Disposable assignedTasksSubscription = graphQlTester
+            .document("subscription { assignedTasks { count asOf } }")
+            .executeSubscription()
+            .toFlux("assignedTasks", Map.class)
+            .subscribe(assignedTasksReceived::add);
+        Disposable queuedTasksSubscription = graphQlTester
+            .document("subscription { queuedTasks { count asOf } }")
+            .executeSubscription()
+            .toFlux("queuedTasks", Map.class)
+            .subscribe(queuedTasksReceived::add);
+        Disposable runningProcessesSubscription = graphQlTester
+            .document("subscription { runningProcesses { count asOf } }")
+            .executeSubscription()
+            .toFlux("runningProcesses", Map.class)
+            .subscribe(runningProcessesReceived::add);
+
+        try {
+            // Give all three subscriptions time to reach the server - the relay is a multicast
+            // sink, which does not replay to a subscriber that attaches after a message is sent.
+            Thread.sleep(300);
+
+            Instant asOf = Instant.parse("2026-01-01T00:00:00Z");
+            sendCountChanged(new CountChangedMessage(ScopeKeys.assigned(TEST_USER), 1, asOf));
+            sendCountChanged(new CountChangedMessage(ScopeKeys.queued(TEST_USER), 2, asOf));
+            sendCountChanged(new CountChangedMessage(ScopeKeys.processes(TEST_USER), 3, asOf));
+
+            await()
+                .atMost(TIMEOUT)
+                .untilAsserted(() -> {
+                    assertThat(assignedTasksReceived).containsExactly(Map.of("count", 1, "asOf", asOf.toString()));
+                    assertThat(queuedTasksReceived).containsExactly(Map.of("count", 2, "asOf", asOf.toString()));
+                    assertThat(runningProcessesReceived).containsExactly(Map.of("count", 3, "asOf", asOf.toString()));
+                });
+        } finally {
+            assignedTasksSubscription.dispose();
+            queuedTasksSubscription.dispose();
+            runningProcessesSubscription.dispose();
+        }
     }
 
     private void sendCountChanged(CountChangedMessage message) {
