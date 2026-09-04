@@ -106,11 +106,8 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(
-        TaskAdminRuntime taskAdminRuntime,
-        VariableValueSizeValidator variableValueSizeValidator
-    ) {
-        return new CreateTaskVariableCmdExecutor(taskAdminRuntime, variableValueSizeValidator);
+    public CreateTaskVariableCmdExecutor createTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+        return new CreateTaskVariableCmdExecutor(taskAdminRuntime);
     }
 
     @Bean
@@ -121,11 +118,8 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(
-        TaskAdminRuntime taskAdminRuntime,
-        VariableValueSizeValidator variableValueSizeValidator
-    ) {
-        return new UpdateTaskVariableCmdExecutor(taskAdminRuntime, variableValueSizeValidator);
+    public UpdateTaskVariableCmdExecutor updateTaskVariableCmdExecutor(TaskAdminRuntime taskAdminRuntime) {
+        return new UpdateTaskVariableCmdExecutor(taskAdminRuntime);
     }
 
     @Bean
@@ -144,11 +138,8 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(
-        ProcessAdminRuntime processAdminRuntime,
-        VariableValueSizeValidator variableValueSizeValidator
-    ) {
-        return new SetProcessVariablesCmdExecutor(processAdminRuntime, variableValueSizeValidator);
+    public SetProcessVariablesCmdExecutor setProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+        return new SetProcessVariablesCmdExecutor(processAdminRuntime);
     }
 
     @Bean

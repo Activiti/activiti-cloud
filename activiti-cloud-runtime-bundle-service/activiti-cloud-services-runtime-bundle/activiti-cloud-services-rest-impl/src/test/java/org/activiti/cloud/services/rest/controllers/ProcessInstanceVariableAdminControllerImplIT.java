@@ -230,8 +230,9 @@ class ProcessInstanceVariableAdminControllerImplIT {
             .andExpect(status().isBadRequest())
             .andReturn();
 
-        assertThat(result.getResponse().getContentAsString())
-            .contains("Variable 'oversized' value exceeds maximum allowed size of 5 bytes");
+        assertThat(result.getResponse().getContentAsString()).contains(
+            "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
+        );
     }
 
     @Test

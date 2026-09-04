@@ -189,19 +189,20 @@ class TaskVariableControllerImplIT {
         variableProperties.setMaxValueSize(5);
 
         MvcResult result = this.mockMvc.perform(
-            post("/v1/tasks/{taskId}/variables", TASK_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    mapper.writeValueAsString(
-                        TaskPayloadBuilder.createVariable().withTaskId(TASK_ID).withVariable("name", "abcd").build()
+                post("/v1/tasks/{taskId}/variables", TASK_ID)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            TaskPayloadBuilder.createVariable().withTaskId(TASK_ID).withVariable("name", "abcd").build()
+                        )
                     )
-                )
-        )
+            )
             .andExpect(status().isBadRequest())
             .andReturn();
 
-        assertThat(result.getResponse().getContentAsString())
-            .contains("Variable 'name' value exceeds maximum allowed size of 5 bytes");
+        assertThat(result.getResponse().getContentAsString()).contains(
+            "Variable 'name' value exceeds maximum allowed size of 5 bytes"
+        );
     }
 
     @Test
@@ -225,18 +226,19 @@ class TaskVariableControllerImplIT {
         variableProperties.setMaxValueSize(5);
 
         MvcResult result = this.mockMvc.perform(
-            put("/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    mapper.writeValueAsString(
-                        TaskPayloadBuilder.updateVariable().withTaskId(TASK_ID).withVariable("name", "abcd").build()
+                put("/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            TaskPayloadBuilder.updateVariable().withTaskId(TASK_ID).withVariable("name", "abcd").build()
+                        )
                     )
-                )
-        )
+            )
             .andExpect(status().isBadRequest())
             .andReturn();
 
-        assertThat(result.getResponse().getContentAsString())
-            .contains("Variable 'name' value exceeds maximum allowed size of 5 bytes");
+        assertThat(result.getResponse().getContentAsString()).contains(
+            "Variable 'name' value exceeds maximum allowed size of 5 bytes"
+        );
     }
 }

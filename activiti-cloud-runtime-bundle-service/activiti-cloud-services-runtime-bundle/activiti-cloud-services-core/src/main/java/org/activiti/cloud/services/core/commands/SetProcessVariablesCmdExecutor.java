@@ -18,24 +18,17 @@ package org.activiti.cloud.services.core.commands;
 import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 
 public class SetProcessVariablesCmdExecutor extends AbstractCommandExecutor<SetProcessVariablesPayload> {
 
     private ProcessAdminRuntime processAdminRuntime;
-    private VariableValueSizeValidator variableValueSizeValidator;
 
-    public SetProcessVariablesCmdExecutor(
-        ProcessAdminRuntime processAdminRuntime,
-        VariableValueSizeValidator variableValueSizeValidator
-    ) {
+    public SetProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
         this.processAdminRuntime = processAdminRuntime;
-        this.variableValueSizeValidator = variableValueSizeValidator;
     }
 
     @Override
     public EmptyResult execute(SetProcessVariablesPayload setProcessVariablesPayload) {
-        variableValueSizeValidator.validate(setProcessVariablesPayload);
         processAdminRuntime.setVariables(setProcessVariablesPayload);
 
         return new EmptyResult(setProcessVariablesPayload);

@@ -211,18 +211,22 @@ class ProcessInstanceVariableControllerImplIT {
         variables.put("oversized", "abcd");
 
         MvcResult result = this.mockMvc.perform(
-            put("/v1/process-instances/{processInstanceId}/variables", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    mapper.writeValueAsString(
-                        ProcessPayloadBuilder.setVariables().withProcessInstanceId("1").withVariables(variables).build()
+                put("/v1/process-instances/{processInstanceId}/variables", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder.setVariables()
+                                .withProcessInstanceId("1")
+                                .withVariables(variables)
+                                .build()
+                        )
                     )
-                )
-        )
+            )
             .andExpect(status().isBadRequest())
             .andReturn();
 
-        assertThat(result.getResponse().getContentAsString())
-            .contains("Variable 'oversized' value exceeds maximum allowed size of 5 bytes");
+        assertThat(result.getResponse().getContentAsString()).contains(
+            "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
+        );
     }
 }
