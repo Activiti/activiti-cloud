@@ -33,6 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
 import org.springframework.graphql.server.support.BearerTokenAuthenticationExtractor;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
@@ -104,14 +105,24 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         }
 
         @Bean
+        @ConditionalOnMissingBean
+        public AuthorizationManager<RequestAuthorizationContext> graphQlWebSocketAuthorizationManager() {
+            return new CustomAuthorizationManager<>(authorities, permissions);
+        }
+
+        // Backs off if another WebSocketGraphQlInterceptor bean exists - spring-graphql allows
+        // only one per application.
+        @Bean
+        @ConditionalOnMissingBean(WebSocketGraphQlInterceptor.class)
         public WebSocketGraphQlInterceptor authenticationInterceptor(
             JWSAuthenticationManager jwsAuthenticationManager,
-            JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor
+            JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor,
+            AuthorizationManager<RequestAuthorizationContext> graphQlWebSocketAuthorizationManager
         ) {
             return new SecurityWebSocketInterceptor(
                 jwsBearerTokenAuthenticationExtractor,
                 jwsAuthenticationManager,
-                new CustomAuthorizationManager<RequestAuthorizationContext>(authorities, permissions)
+                graphQlWebSocketAuthorizationManager
             );
         }
     }

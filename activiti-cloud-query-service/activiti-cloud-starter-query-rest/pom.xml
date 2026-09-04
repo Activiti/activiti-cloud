@@ -51,12 +51,28 @@
       <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
     </dependency>
     <dependency>
+      <!-- Websocket transport (graphql-transport-ws) for the pushed-counts subscriber registry. -->
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-ws</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <!-- SecurityWebSocketInterceptor and its JWT auth chain, reused by PushedCountsWebSocketInterceptor. -->
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-security</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-error-handlers</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -112,6 +128,21 @@
     <dependency>
       <groupId>net.javacrumbs.json-unit</groupId>
       <artifactId>json-unit-assertj</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.graphql</groupId>
+      <artifactId>spring-graphql-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.projectreactor</groupId>
+      <artifactId>reactor-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
