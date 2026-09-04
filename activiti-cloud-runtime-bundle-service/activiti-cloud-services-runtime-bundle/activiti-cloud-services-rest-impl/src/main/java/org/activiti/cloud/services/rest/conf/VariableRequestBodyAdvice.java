@@ -19,6 +19,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.util.Optional;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
@@ -35,8 +36,8 @@ public class VariableRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
     private final VariableProperties variableProperties;
 
-    public VariableRequestBodyAdvice(VariableProperties variableProperties) {
-        this.variableProperties = variableProperties;
+    public VariableRequestBodyAdvice(Optional<VariableProperties> variableProperties) {
+        this.variableProperties = variableProperties.orElse(null);
     }
 
     @Override
@@ -45,6 +46,9 @@ public class VariableRequestBodyAdvice extends RequestBodyAdviceAdapter {
         Type targetType,
         Class<? extends HttpMessageConverter<?>> converterType
     ) {
+        if (variableProperties == null) {
+            return false;
+        }
         return (
             targetType == SetProcessVariablesPayload.class ||
             targetType == CreateTaskVariablePayload.class ||
