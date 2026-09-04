@@ -23,11 +23,11 @@ import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.services.core.validation.VariableProperties;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.method.support.MethodParameter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
 @ControllerAdvice
@@ -58,7 +58,7 @@ public class VariableRequestBodyAdvice extends RequestBodyAdviceAdapter {
         MethodParameter parameter,
         Type targetType,
         Class<? extends HttpMessageConverter<?>> converterType
-    ) {
+    ) throws IOException {
         InputStream body = new BoundedInputStream(inputMessage.getBody(), variableProperties.getMaxRequestSize());
         return new HttpInputMessage() {
             @Override
