@@ -187,6 +187,47 @@ class AuthorizationConfigurerTest {
     }
 
     @Test
+    public void should_configureScopeOnlyConstraintAsProtectedAndOrderItAfterPublicConstraint() throws Exception {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_1" }, new String[] { "/role" }),
+                createSecurityConstraintWithScopesAndPatterns(
+                    new String[] { "example.read", "example.write" },
+                    new String[] { "/scope" }
+                ),
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/public" })
+            )
+        );
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
+
+        when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
+        when(authorizeRequests.requestMatchers(any(String[].class))).thenReturn(authorizedUrl);
+
+        authorizationConfigurer.configure(http);
+
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(3);
+        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
+
+        InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactly("/public");
+        inOrder.verify(authorizedUrl).permitAll();
+
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactly("/scope");
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue().getAuthoritiesWithAccess()).containsExactlyInAnyOrder(
+            "SCOPE_example.read",
+            "SCOPE_example.write"
+        );
+
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactly("/role");
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+    }
+
+    @Test
     public void should_configureAuth_when_everythingIsAuthenticatedMethods() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
         authorizationProperties.setSecurityConstraints(
@@ -251,6 +292,17 @@ class AuthorizationConfigurerTest {
         String[] patterns
     ) {
         return createSecurityConstraint(new String[] {}, permissions, patterns, new String[] {});
+    }
+
+    private SecurityConstraint createSecurityConstraintWithScopesAndPatterns(String[] scopes, String[] patterns) {
+        SecurityConstraint securityConstraint = createSecurityConstraint(
+            new String[] {},
+            new String[] {},
+            patterns,
+            new String[] {}
+        );
+        securityConstraint.setAuthScopes(scopes);
+        return securityConstraint;
     }
 
     private SecurityConstraint createSecurityConstraint(
