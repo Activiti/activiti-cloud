@@ -40,7 +40,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootApplication
 @EnableActivitiCloudConnector
@@ -82,10 +81,9 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
         return event -> {
             verifyEventAndCreateResults(event);
             Map<String, Object> resultVariables = createResultVariables(event);
-            IntegrationResult integrationResultEvent = resultFor(event, connectorProperties)
+            Message<IntegrationResult> message = resultFor(event, connectorProperties)
                 .withOutboundVariables(resultVariables)
-                .build();
-            Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
+                .buildMessage();
 
             integrationResultSender.send(message);
         };

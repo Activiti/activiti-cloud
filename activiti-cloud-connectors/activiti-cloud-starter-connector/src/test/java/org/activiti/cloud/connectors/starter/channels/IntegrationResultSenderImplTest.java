@@ -20,7 +20,6 @@ import static org.mockito.BDDMockito.given;
 
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,19 +57,14 @@ public class IntegrationResultSenderImplTest {
     public void sendShouldSendMessageBasedOnTheTargetApplication() {
         //given
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        integrationRequest.setServiceFullName("myApp");
-        integrationRequest.setAppName("myAppName");
-        integrationRequest.setAppVersion("1.0");
-        integrationRequest.setServiceType("RUNTIME_BUNDLE");
-        integrationRequest.setServiceVersion("1.0");
-        IntegrationResult integrationResultEvent = new IntegrationResultImpl(
-            integrationRequest,
-            integrationRequest.getIntegrationContext()
-        );
+        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationContext);
 
-        Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
-        given(resolver.resolveDestination(integrationRequest)).willReturn("test-destination");
+        Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent)
+            .setHeader("targetAppName", "myAppName")
+            .setHeader("targetService", "myApp")
+            .setHeader("resultDestination", null)
+            .build();
+        given(resolver.resolveDestination(null, "myApp")).willReturn("test-destination");
 
         //when
         sender.send(message);

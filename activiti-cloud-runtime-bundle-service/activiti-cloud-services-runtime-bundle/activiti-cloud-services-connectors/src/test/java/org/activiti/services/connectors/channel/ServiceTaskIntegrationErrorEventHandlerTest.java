@@ -31,7 +31,6 @@ import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.BpmnError;
@@ -97,7 +96,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
-            new IntegrationRequestImpl(integrationContext),
+            integrationContext,
             new CloudBpmnError("Test Error")
         );
 
@@ -132,7 +131,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
-            new IntegrationRequestImpl(integrationContext),
+            integrationContext,
             new CloudBpmnError("Test Error")
         );
 
@@ -163,7 +162,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
-            new IntegrationRequestImpl(integrationContext),
+            integrationContext,
             new AnotherCloudException()
         );
 
@@ -196,7 +195,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
-            new IntegrationRequestImpl(integrationContext),
+            integrationContext,
             new CloudBpmnError("Test Error")
         );
 
