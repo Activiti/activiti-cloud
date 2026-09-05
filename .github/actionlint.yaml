@@ -1,0 +1,6 @@
+paths:
+  .github/workflows/**/*.{yml,yaml}:
+    ignore:
+      # concurrency.queue is valid GitHub Actions syntax but is not yet known to actionlint.
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#concurrencyqueue
+      - 'unexpected key "queue" for "concurrency" section'
