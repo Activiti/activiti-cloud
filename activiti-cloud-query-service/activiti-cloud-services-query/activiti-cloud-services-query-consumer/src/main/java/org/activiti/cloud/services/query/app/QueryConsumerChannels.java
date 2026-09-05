@@ -26,6 +26,8 @@ public interface QueryConsumerChannels {
 
     String QUERY_EVENTS_PRODUCER = "queryEventsProducer";
 
+    String TASK_COUNTS_PRODUCER = "taskCountsProducer";
+
     @InputBinding(QUERY_CONSUMER)
     default SubscribableChannel queryConsumer() {
         return MessageChannels.publishSubscribe(QUERY_CONSUMER).getObject();
@@ -34,5 +36,15 @@ public interface QueryConsumerChannels {
     @OutputBinding(QUERY_EVENTS_PRODUCER)
     default MessageChannel queryEventsProducer() {
         return MessageChannels.direct(QUERY_EVENTS_PRODUCER).getObject();
+    }
+
+    /**
+     * Recomputed task counts, one message per audience. Separate from {@link #QUERY_EVENTS_PRODUCER}
+     * because the two have different audiences and different retention needs: engine events are a
+     * durable stream, whereas a count is only interesting until the next one supersedes it.
+     */
+    @OutputBinding(TASK_COUNTS_PRODUCER)
+    default MessageChannel taskCountsProducer() {
+        return MessageChannels.direct(TASK_COUNTS_PRODUCER).getObject();
     }
 }

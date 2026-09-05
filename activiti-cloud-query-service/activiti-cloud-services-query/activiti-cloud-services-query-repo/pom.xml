@@ -15,8 +15,31 @@
       <artifactId>activiti-cloud-services-query-model</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-common-config</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+    </dependency>
+    <!--
+      The specifications throw ResponseStatusException on an invalid filter, so this module needs
+      spring-web. That is web vocabulary in the persistence tier: it arrived with the specifications
+      when they moved here from query-rest so that the event consumer could reuse them. Worth
+      replacing with a domain exception translated at the REST boundary; kept as-is here to keep the
+      move behaviour-neutral.
+    -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

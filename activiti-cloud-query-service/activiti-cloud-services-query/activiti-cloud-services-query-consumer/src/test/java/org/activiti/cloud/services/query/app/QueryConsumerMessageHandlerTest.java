@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.app;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,6 +29,7 @@ import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
+import org.activiti.cloud.services.query.app.count.TaskCountEmitter;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.junit.jupiter.api.Test;
@@ -59,6 +61,9 @@ public class QueryConsumerMessageHandlerTest {
     @Mock
     private MessageChannel queryEventsChannel;
 
+    @Mock
+    private TaskCountEmitter taskCountEmitter;
+
     @Test
     void handleMessageShouldHandleReceivedEventsAndPublishQueryEventMessage() {
         //given
@@ -80,6 +85,33 @@ public class QueryConsumerMessageHandlerTest {
         verify(eventHandlerContext).handle(processStartedEvent);
         verify(entityManager).clear();
         verify(queryEventsChannel).send(message);
+        verify(taskCountEmitter).emitFor(events);
+    }
+
+    @Test
+    void receiveShouldNotEmitTaskCountsWhenTransactionIsRollback() {
+        //given
+        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
+        List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent);
+
+        final var message = MessageBuilder.withPayload(events).build();
+
+        when(optimizer.optimize(events)).thenReturn(events);
+
+        //when
+        TransactionTemplate transactionTemplate = new TransactionTemplate(new PseudoTransactionManager());
+        assertThatThrownBy(() ->
+            transactionTemplate.executeWithoutResult(tx -> {
+                consumer.accept(message);
+
+                throw new IllegalStateException("rollback");
+            })
+        )
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("rollback");
+
+        //then a count read after a rolled-back batch would describe state no client can see
+        verify(taskCountEmitter, never()).emitFor(anyList());
     }
 
     @Test

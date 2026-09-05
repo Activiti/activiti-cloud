@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.specification;
+package org.activiti.cloud.services.query.app.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
 import org.hibernate.query.sqm.produce.function.FunctionArgumentException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
