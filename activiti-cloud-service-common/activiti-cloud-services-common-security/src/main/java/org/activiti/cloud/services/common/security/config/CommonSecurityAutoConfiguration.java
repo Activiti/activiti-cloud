@@ -27,6 +27,7 @@ import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
 import org.activiti.cloud.security.feign.TokenRelayRequestInterceptor;
 import org.activiti.cloud.services.common.security.CustomBearerTokenAccessDeniedHandler;
+import org.activiti.cloud.services.common.security.OptionalJwtAuthenticationFilter;
 import org.activiti.cloud.services.common.security.SecurityManagerImpl;
 import org.activiti.cloud.services.common.security.jwt.JtwAccessTokenPrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenPrincipalGroupsProvider;
@@ -52,9 +53,12 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
@@ -66,6 +70,7 @@ import org.springframework.web.cors.CorsConfiguration;
 
 @AutoConfiguration
 @EnableAuthorizationConfiguration
+@EnableMethodSecurity
 @ConditionalOnWebApplication
 @ConditionalOnMissingBean(value = { SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class })
 @Import(CommonJwtAuthenticationConverterConfiguration.class)
@@ -202,6 +207,37 @@ public class CommonSecurityAutoConfiguration {
     }
 
     @Bean
+    @Order(1)
+    public SecurityFilterChain publicFilterChain(HttpSecurity http, JwtDecoder jwtDecoder) {
+        List<String> publicPatterns = authorizationConfigurer.getPublicPatterns();
+        if (publicPatterns.isEmpty()) {
+            // No public paths declared: match nothing so the main chain handles every request.
+            http.securityMatcher(_ -> false);
+        } else {
+            http.securityMatcher(buildPublicPathsMatcher(publicPatterns));
+        }
+        http
+            .authorizeHttpRequests(spec -> spec.anyRequest().permitAll())
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(spec ->
+                spec.configurationSource(_ -> {
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedMethods(List.of("GET", "HEAD", "OPTION", "POST", "PUT", "DELETE"));
+                    corsConfiguration.setAllowedOrigins(allowedOrigins);
+                    return corsConfiguration.applyPermitDefaultValues();
+                })
+            )
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .anonymous(_ -> {})
+            .addFilterBefore(
+                new OptionalJwtAuthenticationFilter(jwtDecoder, jwtAuthenticationConverter),
+                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
+            );
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
     @SuppressWarnings({ "java:S4502", "java:S5122" })
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
@@ -210,7 +246,7 @@ public class CommonSecurityAutoConfiguration {
                 spec.requestMatchers(actuatorEndpointsMatcher()).authenticated().anyRequest().permitAll()
             )
             .cors(spec ->
-                spec.configurationSource(request -> {
+                spec.configurationSource(_ -> {
                     CorsConfiguration corsConfiguration = new CorsConfiguration();
                     corsConfiguration.setAllowedMethods(List.of("GET", "HEAD", "OPTION", "POST", "PUT", "DELETE"));
                     corsConfiguration.setAllowedOrigins(allowedOrigins);
@@ -220,7 +256,7 @@ public class CommonSecurityAutoConfiguration {
             .exceptionHandling(spec ->
                 spec.accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
             )
-            .httpBasic(spec -> spec.disable())
+            .httpBasic(AbstractHttpConfigurer::disable)
             .oauth2ResourceServer(spec -> spec.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
 
         for (HttpSecurityCustomizer customizer : httpSecurityCustomizers) {
@@ -228,6 +264,14 @@ public class CommonSecurityAutoConfiguration {
         }
 
         return http.build();
+    }
+
+    private RequestMatcher buildPublicPathsMatcher(List<String> publicPatterns) {
+        RequestMatcher[] matchers = publicPatterns
+            .stream()
+            .map(PathPatternRequestMatcher::pathPattern)
+            .toArray(RequestMatcher[]::new);
+        return RequestMatchers.anyOf(matchers);
     }
 
     private RequestMatcher actuatorEndpointsMatcher() {
