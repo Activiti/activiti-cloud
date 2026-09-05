@@ -28,7 +28,7 @@
     <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
     <spring-kafka.version>4.0.6</spring-kafka.version>
     <!-- Security fix AAE-49996: hibernate-platform pins micrometer-core below the version Spring Boot manages. -->
-    <micrometer.version>1.16.6</micrometer.version>
+    <micrometer.version>1.17.1</micrometer.version>
     <!-- Security fix AAE-50658: override httpcore5 (incl. httpcore5-h2) transitive version. -->
     <httpcore5.version>5.4.3</httpcore5.version>
     <!-- Security fix AAE-50658: override httpclient5 (incl. httpclient5-cache/-fluent) transitive version. -->
