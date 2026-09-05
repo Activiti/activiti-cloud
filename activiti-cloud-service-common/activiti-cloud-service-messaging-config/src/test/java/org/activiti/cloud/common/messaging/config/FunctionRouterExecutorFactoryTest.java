@@ -53,8 +53,8 @@ class FunctionRouterExecutorFactoryTest {
         executor.shutdown();
 
         assertThatThrownBy(() -> executor.submit(() -> {}))
-            .isInstanceOf(RejectedExecutionException.class)
-            .hasMessage("Executor has been shutdown");
+            .isInstanceOf(RequeueDeliveryException.class)
+            .hasMessage("Executor is shutting down; requeueing for redelivery");
     }
 
     @Test
@@ -121,7 +121,7 @@ class FunctionRouterExecutorFactoryTest {
         releaseTask.countDown();
         submitter.join();
 
-        assertThat(thrown.get()).isInstanceOf(RejectedExecutionException.class);
+        assertThat(thrown.get()).isInstanceOf(RequeueDeliveryException.class);
         assertThat(interrupted.get()).isTrue();
     }
 
