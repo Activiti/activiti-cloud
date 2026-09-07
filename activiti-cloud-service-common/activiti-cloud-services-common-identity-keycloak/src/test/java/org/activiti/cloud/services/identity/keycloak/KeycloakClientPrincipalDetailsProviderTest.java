@@ -91,4 +91,13 @@ class KeycloakClientPrincipalDetailsProviderTest {
 
         assertThatThrownBy(() -> provider.getGroups(principal)).isInstanceOf(SecurityException.class);
     }
+
+    @Test
+    void should_throwSecurityException_when_theJwtHasNoSubjectClaim() {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getSubject()).thenReturn(null);
+        JwtAuthenticationToken principal = new JwtAuthenticationToken(jwt, List.of(), "testuser");
+
+        assertThatThrownBy(() -> provider.getGroups(principal)).isInstanceOf(SecurityException.class);
+    }
 }

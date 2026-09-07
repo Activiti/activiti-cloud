@@ -72,6 +72,9 @@ public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsPr
     protected String subjectId(Principal principal) {
         if (principal instanceof JwtAuthenticationToken jwtAuthenticationToken) {
             String subject = jwtAuthenticationToken.getToken().getSubject();
+            if (subject == null) {
+                throw securityException();
+            }
             LOGGER.debug("Resolved Keycloak subject id {} from the JWT 'sub' claim", subject);
             return subject;
         }
