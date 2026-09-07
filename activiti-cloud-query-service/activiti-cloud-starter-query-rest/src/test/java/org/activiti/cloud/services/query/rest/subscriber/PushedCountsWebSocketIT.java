@@ -20,8 +20,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
 import java.net.URI;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.EventListener;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
@@ -63,11 +67,20 @@ import reactor.test.StepVerifier;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = { PushedCountsWebSocketTestApplication.class },
-    properties = { "activiti.features.query.pushed-counts.enabled=true" }
+    properties = {
+        "activiti.features.query.pushed-counts.enabled=true",
+        "query.pushed-counts.session.sweep-interval=PT1S",
+    }
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Import(PushedCountsWebSocketIT.WentLiveEventCaptor.class)
+@Import(
+    {
+        PushedCountsWebSocketIT.WentLiveEventCaptor.class,
+        PushedCountsWebSocketIT.WentQuietEventCaptor.class,
+        PushedCountsWebSocketIT.AdjustableClockConfiguration.class,
+    }
+)
 class PushedCountsWebSocketIT {
 
     private static final String WS_GRAPHQL_URI = "/v2/ws/graphql";
@@ -90,6 +103,12 @@ class PushedCountsWebSocketIT {
 
     @Autowired
     private WentLiveEventCaptor wentLiveEventCaptor;
+
+    @Autowired
+    private WentQuietEventCaptor wentQuietEventCaptor;
+
+    @Autowired
+    private AdjustableClock adjustableClock;
 
     private WebSocketGraphQlTester graphQlTester;
 
@@ -254,6 +273,39 @@ class PushedCountsWebSocketIT {
         }
     }
 
+    /**
+     * The backstop {@link SubscriberSessionExpirySweep} exists for: a socket that vanishes
+     * without a close frame, so the server-side subscription is never cancelled and
+     * {@link PushedCountDataFetcher}'s own {@code doFinally} never fires. Simulated here by
+     * jumping the shared clock forward instead of waiting out a real expiry window - the
+     * subscription itself is never cancelled from this test, deliberately.
+     */
+    @Test
+    @Order(7)
+    void should_removeTheSessionFromTheRegistry_when_itExpiresWithoutADisconnect() {
+        Disposable subscription = graphQlTester
+            .document("subscription { assignedTasks { count asOf } }")
+            .executeSubscription()
+            .toFlux("assignedTasks", Map.class)
+            .subscribe();
+
+        try {
+            await()
+                .atMost(TIMEOUT)
+                .until(() -> pushedCountsSubscriptionTracker.totalLiveSubscriptions() >= 1);
+
+            adjustableClock.advanceBy(Duration.ofDays(1));
+
+            await()
+                .atMost(TIMEOUT)
+                .untilAsserted(() ->
+                    assertThat(wentQuietEventCaptor.events()).anyMatch(event -> event.userId().equals(TEST_USER))
+                );
+        } finally {
+            subscription.dispose();
+        }
+    }
+
     private void sendCountChanged(CountChangedMessage message) {
         pushedCountsSink.tryEmitNext(message);
     }
@@ -275,6 +327,61 @@ class PushedCountsWebSocketIT {
 
         List<SubscriberWentLiveEvent> events() {
             return events;
+        }
+    }
+
+    /** Collects {@link SubscriberWentQuietEvent}s - see {@link WentLiveEventCaptor}. */
+    @TestConfiguration
+    static class WentQuietEventCaptor {
+
+        private final List<SubscriberWentQuietEvent> events = new CopyOnWriteArrayList<>();
+
+        @EventListener
+        void onSubscriberWentQuiet(SubscriberWentQuietEvent event) {
+            events.add(event);
+        }
+
+        List<SubscriberWentQuietEvent> events() {
+            return events;
+        }
+    }
+
+    /**
+     * Overrides the app's {@code pushedCountsClock} bean (by type, via
+     * {@code @ConditionalOnMissingBean}) so the expiration test can jump time forward instead of
+     * waiting out a real expiry window. Every other test never advances it, so it behaves like a
+     * clock frozen near context startup for them.
+     */
+    @TestConfiguration
+    static class AdjustableClockConfiguration {
+
+        @Bean
+        AdjustableClock adjustableClock() {
+            return new AdjustableClock();
+        }
+    }
+
+    static class AdjustableClock extends Clock {
+
+        private volatile Instant instant = Instant.now();
+
+        @Override
+        public ZoneId getZone() {
+            return ZoneOffset.UTC;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return instant;
+        }
+
+        void advanceBy(Duration duration) {
+            instant = instant.plus(duration);
         }
     }
 }
