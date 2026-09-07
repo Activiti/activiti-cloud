@@ -70,7 +70,7 @@ class CustomAuthorizationManagerTest {
             new String[] { "scope.1" }
         );
 
-        assertThat(manager.authorize(() -> authentication(), new Object()).isGranted()).isFalse();
+        assertThat(manager.authorize(this::authentication, new Object()).isGranted()).isFalse();
         assertThat(manager.authorize(() -> authentication("SCOPE_scope.2"), new Object()).isGranted()).isFalse();
     }
 
