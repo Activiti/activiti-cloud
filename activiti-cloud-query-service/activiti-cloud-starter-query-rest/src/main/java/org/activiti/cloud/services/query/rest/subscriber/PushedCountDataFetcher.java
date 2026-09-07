@@ -28,6 +28,8 @@ import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
 /**
@@ -39,6 +41,8 @@ import reactor.core.publisher.Flux;
  * message so it can be toggled at runtime without a restart.
  */
 public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PushedCountDataFetcher.class);
 
     private final PushedCountType type;
     private final Flux<CountChangedMessage> pushedCountsFlux;
@@ -69,18 +73,25 @@ public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount
             context.get(ConnectionContextWebSocketInterceptor.GROUPS_CONTEXT_KEY),
             Set.of()
         );
-        if (userId == null || sessionId == null || !isFeatureEnabled()) {
+        if (userId == null || sessionId == null) {
+            LOGGER.debug("Refusing {} subscription: userId or sessionId missing from the connection context", type);
+            return Flux.empty();
+        }
+        if (!isFeatureEnabled()) {
+            LOGGER.debug("Refusing {} subscription for user {}: runtime toggle is disabled", type, userId);
             return Flux.empty();
         }
         return pushedCountsFlux
             .filter(message -> isFeatureEnabled() && matches(message, userId))
             .map(message -> new PushedCount(clampToInt(message.count()), message.asOf().toString()))
             .doOnSubscribe(subscription -> {
+                LOGGER.debug("Session {} subscribed to {} for user {}", sessionId, type, userId);
                 if (subscriptionTracker.incrementAndCheckIfWasZero(sessionId)) {
                     subscriberRegistry.register(userId, groups, sessionId, clock.instant());
                 }
             })
             .doFinally(signalType -> {
+                LOGGER.debug("Session {} unsubscribed from {} for user {} ({})", sessionId, type, userId, signalType);
                 if (subscriptionTracker.decrementAndCheckIfNowZero(sessionId)) {
                     subscriberRegistry.unregister(userId, sessionId, clock.instant());
                 }

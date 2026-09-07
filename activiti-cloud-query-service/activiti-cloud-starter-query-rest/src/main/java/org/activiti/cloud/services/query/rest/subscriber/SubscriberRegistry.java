@@ -66,19 +66,29 @@ public class SubscriberRegistry {
             return registration;
         });
         if (wentLive.get()) {
+            LOGGER.debug("User {} went live (session {}, {} groups)", userId, sessionId, groups.size());
             eventPublisher.publishEvent(new SubscriberWentLiveEvent(userId, groups, now));
+        } else {
+            LOGGER.debug("User {} registered an additional session {}", userId, sessionId);
         }
     }
 
     public void unregister(String userId, String sessionId, Instant now) {
+        AtomicBoolean existed = new AtomicBoolean(false);
         AtomicBoolean wentQuiet = new AtomicBoolean(false);
         registrations.computeIfPresent(userId, (id, registration) -> {
+            existed.set(true);
             boolean isEmpty = registration.removeSession(sessionId);
             wentQuiet.set(isEmpty);
             return isEmpty ? null : registration;
         });
         if (wentQuiet.get()) {
+            LOGGER.debug("User {} went quiet (last session {} removed)", userId, sessionId);
             eventPublisher.publishEvent(new SubscriberWentQuietEvent(userId, now));
+        } else if (existed.get()) {
+            LOGGER.debug("User {} removed session {}, other sessions remain live", userId, sessionId);
+        } else {
+            LOGGER.debug("Ignoring unregister for user {} (session {}): no registration found", userId, sessionId);
         }
     }
 
@@ -93,6 +103,7 @@ public class SubscriberRegistry {
     public void expireSessionsOlderThan(Duration expiry, Instant now) {
         registrations.forEach((userId, registration) -> {
             for (String sessionId : registration.expiredSessionIds(now, expiry)) {
+                LOGGER.debug("Expiring session {} for user {}: no activity for at least {}", sessionId, userId, expiry);
                 unregister(userId, sessionId, now);
             }
         });

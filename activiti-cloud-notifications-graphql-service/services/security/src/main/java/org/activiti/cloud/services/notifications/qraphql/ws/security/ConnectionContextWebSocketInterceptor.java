@@ -77,6 +77,13 @@ public class ConnectionContextWebSocketInterceptor extends SecurityWebSocketInte
         String userId = authentication.getName();
         Set<String> groups = resolveGroups(authentication);
         String sessionId = sessionInfo.getId();
+        LOGGER.debug(
+            "Stashed connection context for user {} (session {}, {} groups) on operation {}",
+            userId,
+            sessionId,
+            groups.size(),
+            request.getId()
+        );
         request.configureExecutionInput((executionInput, builder) ->
             builder
                 .graphQLContext(context -> {

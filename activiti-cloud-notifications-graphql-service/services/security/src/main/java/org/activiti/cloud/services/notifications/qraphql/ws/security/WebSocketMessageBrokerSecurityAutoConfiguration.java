@@ -22,6 +22,8 @@ import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.jwt.JwtAccessTokenVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -44,6 +46,8 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
     matchIfMissing = true
 )
 public class WebSocketMessageBrokerSecurityAutoConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketMessageBrokerSecurityAutoConfiguration.class);
 
     @Bean
     @ConditionalOnMissingBean
@@ -119,6 +123,7 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
             JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor,
             AuthorizationManager<RequestAuthorizationContext> graphQlWebSocketAuthorizationManager
         ) {
+            LOGGER.debug("Wiring plain SecurityWebSocketInterceptor as the websocket GraphQL interceptor");
             return new SecurityWebSocketInterceptor(
                 jwsBearerTokenAuthenticationExtractor,
                 jwsAuthenticationManager,
