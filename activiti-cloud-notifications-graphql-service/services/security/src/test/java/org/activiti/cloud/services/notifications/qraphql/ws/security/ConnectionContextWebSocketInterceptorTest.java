@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.subscriber;
+package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +49,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
-class PushedCountsWebSocketInterceptorTest {
+class ConnectionContextWebSocketInterceptorTest {
 
     @Mock
     private AuthenticationExtractor authenticationExtractor;
@@ -67,7 +67,7 @@ class PushedCountsWebSocketInterceptorTest {
     private WebGraphQlInterceptor.Chain chain;
 
     @InjectMocks
-    private PushedCountsWebSocketInterceptor interceptor;
+    private ConnectionContextWebSocketInterceptor interceptor;
 
     @Test
     void should_stashUserIdSessionIdAndGroups_when_requestIsFromAWebSocket() {
@@ -78,7 +78,7 @@ class PushedCountsWebSocketInterceptorTest {
         when(sessionInfo.getId()).thenReturn("session-1");
         Map<String, Object> attributes = new HashMap<>();
         attributes.put(
-            PushedCountsWebSocketInterceptor.class.getName() + ".AUTHENTICATION",
+            ConnectionContextWebSocketInterceptor.class.getName() + ".AUTHENTICATION",
             new SecurityContextImpl(authentication)
         );
         when(sessionInfo.getAttributes()).thenReturn(attributes);
@@ -98,13 +98,13 @@ class PushedCountsWebSocketInterceptorTest {
         ExecutionInput transformed = original.transform(builder -> captor.getValue().apply(original, builder));
 
         assertThat(
-            transformed.getGraphQLContext().<String>get(PushedCountsWebSocketInterceptor.USER_ID_CONTEXT_KEY)
+            transformed.getGraphQLContext().<String>get(ConnectionContextWebSocketInterceptor.USER_ID_CONTEXT_KEY)
         ).isEqualTo("alice");
         assertThat(
-            transformed.getGraphQLContext().<String>get(PushedCountsWebSocketInterceptor.SESSION_ID_CONTEXT_KEY)
+            transformed.getGraphQLContext().<String>get(ConnectionContextWebSocketInterceptor.SESSION_ID_CONTEXT_KEY)
         ).isEqualTo("session-1");
         assertThat(
-            transformed.getGraphQLContext().<Set<String>>get(PushedCountsWebSocketInterceptor.GROUPS_CONTEXT_KEY)
+            transformed.getGraphQLContext().<Set<String>>get(ConnectionContextWebSocketInterceptor.GROUPS_CONTEXT_KEY)
         ).isEqualTo(Set.of());
     }
 
@@ -122,7 +122,7 @@ class PushedCountsWebSocketInterceptorTest {
         when(sessionInfo.getId()).thenReturn("session-1");
         Map<String, Object> attributes = new HashMap<>();
         attributes.put(
-            PushedCountsWebSocketInterceptor.class.getName() + ".AUTHENTICATION",
+            ConnectionContextWebSocketInterceptor.class.getName() + ".AUTHENTICATION",
             new SecurityContextImpl(authentication)
         );
         when(sessionInfo.getAttributes()).thenReturn(attributes);
@@ -142,7 +142,7 @@ class PushedCountsWebSocketInterceptorTest {
         ExecutionInput transformed = original.transform(builder -> captor.getValue().apply(original, builder));
 
         assertThat(
-            transformed.getGraphQLContext().<Set<String>>get(PushedCountsWebSocketInterceptor.GROUPS_CONTEXT_KEY)
+            transformed.getGraphQLContext().<Set<String>>get(ConnectionContextWebSocketInterceptor.GROUPS_CONTEXT_KEY)
         ).isEqualTo(Set.of());
     }
 

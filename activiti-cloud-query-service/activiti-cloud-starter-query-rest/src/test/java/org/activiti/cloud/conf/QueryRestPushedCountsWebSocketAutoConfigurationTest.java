@@ -26,9 +26,9 @@ import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalGroupsProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWebSocketMessageBrokerAutoConfiguration;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.ConnectionContextWebSocketInterceptor;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.SecurityWebSocketInterceptor;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.WebSocketMessageBrokerSecurityAutoConfiguration;
-import org.activiti.cloud.services.query.rest.subscriber.PushedCountsWebSocketInterceptor;
 import org.activiti.cloud.services.query.rest.subscriber.SubscriberRegistry;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
  * Boots the real autoconfiguration chain (including
  * {@link WebSocketMessageBrokerSecurityAutoConfiguration}) to confirm the real pushed-counts
  * schema activates the websocket transport by default, exposes the three count-type subscriptions,
- * and that {@link PushedCountsWebSocketInterceptor} wins as the single
+ * and that {@link ConnectionContextWebSocketInterceptor} wins as the single
  * {@link WebSocketGraphQlInterceptor} - and that none of this holds when
  * {@code query.pushed-counts.enabled=false} is set explicitly.
  */
@@ -82,13 +82,13 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
         contextRunner.run(context -> {
             assertThat(context).hasNotFailed();
             assertThat(context).hasSingleBean(WebGraphQlHandler.class);
-            assertThat(context).hasSingleBean(PushedCountsWebSocketInterceptor.class);
+            assertThat(context).hasSingleBean(ConnectionContextWebSocketInterceptor.class);
             assertThat(context.getBeansOfType(WebSocketGraphQlInterceptor.class)).hasSize(1);
             assertThat(context).hasSingleBean(SubscriberRegistry.class);
 
             // Confirms the handler resolved this bean as its interceptor, not merely that it exists.
             WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
-            assertThat(handler.getWebSocketInterceptor()).isInstanceOf(PushedCountsWebSocketInterceptor.class);
+            assertThat(handler.getWebSocketInterceptor()).isInstanceOf(ConnectionContextWebSocketInterceptor.class);
 
             GraphQLSchema schema = context.getBean(GraphQlSource.class).schema();
             assertThat(schema.getSubscriptionType())
@@ -106,7 +106,7 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
             .withPropertyValues("query.pushed-counts.enabled=false")
             .run(context -> {
                 assertThat(context).hasNotFailed();
-                assertThat(context.getBeansOfType(PushedCountsWebSocketInterceptor.class)).isEmpty();
+                assertThat(context.getBeansOfType(ConnectionContextWebSocketInterceptor.class)).isEmpty();
                 assertThat(context.getBeansOfType(SubscriberRegistry.class)).isEmpty();
 
                 WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);

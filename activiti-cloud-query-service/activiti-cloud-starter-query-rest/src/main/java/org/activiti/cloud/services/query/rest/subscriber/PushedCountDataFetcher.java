@@ -22,6 +22,7 @@ import java.time.Clock;
 import java.util.Objects;
 import java.util.Set;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.ConnectionContextWebSocketInterceptor;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
@@ -62,10 +63,10 @@ public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount
     @Override
     public Publisher<PushedCount> get(DataFetchingEnvironment environment) {
         GraphQLContext context = environment.getGraphQlContext();
-        String userId = context.get(PushedCountsWebSocketInterceptor.USER_ID_CONTEXT_KEY);
-        String sessionId = context.get(PushedCountsWebSocketInterceptor.SESSION_ID_CONTEXT_KEY);
+        String userId = context.get(ConnectionContextWebSocketInterceptor.USER_ID_CONTEXT_KEY);
+        String sessionId = context.get(ConnectionContextWebSocketInterceptor.SESSION_ID_CONTEXT_KEY);
         Set<String> groups = Objects.requireNonNullElse(
-            context.get(PushedCountsWebSocketInterceptor.GROUPS_CONTEXT_KEY),
+            context.get(ConnectionContextWebSocketInterceptor.GROUPS_CONTEXT_KEY),
             Set.of()
         );
         if (userId == null || sessionId == null || !isFeatureEnabled()) {

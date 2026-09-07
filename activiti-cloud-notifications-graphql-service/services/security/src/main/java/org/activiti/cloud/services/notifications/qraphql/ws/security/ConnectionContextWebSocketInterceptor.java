@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.subscriber;
+package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import java.util.List;
 import java.util.Set;
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalGroupsProviderChain;
-import org.activiti.cloud.services.notifications.qraphql.ws.security.SecurityWebSocketInterceptor;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,22 +33,25 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import reactor.core.publisher.Mono;
 
 /**
- * Websocket interceptor for the pushed-counts feature - a {@link SecurityWebSocketInterceptor}
- * that additionally stashes the connection's authenticated user id, groups, and session id into
- * the {@code GraphQLContext} of every request, since none of those are otherwise reachable from
- * a {@link PushedCountDataFetcher}.
+ * A {@link SecurityWebSocketInterceptor} that additionally stashes the connection's authenticated
+ * user id, groups, and session id into the {@code GraphQLContext} of every request, so any
+ * {@code DataFetcher} can read them without re-deriving authentication itself. Since spring-graphql
+ * allows only one {@code WebSocketGraphQlInterceptor} per application, this is the sole interceptor
+ * for every websocket GraphQL request in a deployment that registers it - not just the feature that
+ * first needed the stashed context.
  */
-public class PushedCountsWebSocketInterceptor extends SecurityWebSocketInterceptor {
+public class ConnectionContextWebSocketInterceptor extends SecurityWebSocketInterceptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PushedCountsWebSocketInterceptor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionContextWebSocketInterceptor.class);
 
-    static final String USER_ID_CONTEXT_KEY = PushedCountsWebSocketInterceptor.class.getName() + ".USER_ID";
-    static final String GROUPS_CONTEXT_KEY = PushedCountsWebSocketInterceptor.class.getName() + ".GROUPS";
-    static final String SESSION_ID_CONTEXT_KEY = PushedCountsWebSocketInterceptor.class.getName() + ".SESSION_ID";
+    public static final String USER_ID_CONTEXT_KEY = ConnectionContextWebSocketInterceptor.class.getName() + ".USER_ID";
+    public static final String GROUPS_CONTEXT_KEY = ConnectionContextWebSocketInterceptor.class.getName() + ".GROUPS";
+    public static final String SESSION_ID_CONTEXT_KEY =
+        ConnectionContextWebSocketInterceptor.class.getName() + ".SESSION_ID";
 
     private final JwtPrincipalGroupsProviderChain principalGroupsProvider;
 
-    public PushedCountsWebSocketInterceptor(
+    public ConnectionContextWebSocketInterceptor(
         AuthenticationExtractor authenticationExtractor,
         AuthenticationManager authenticationManager,
         AuthorizationManager<?> authorizationManager,

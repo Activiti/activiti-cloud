@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.ConnectionContextWebSocketInterceptor;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
@@ -74,12 +75,12 @@ class PushedCountDataFetcherTest {
         DataFetchingEnvironment environment = mock(DataFetchingEnvironment.class);
         Map<Object, Object> context = new HashMap<>();
         if (userId != null) {
-            context.put(PushedCountsWebSocketInterceptor.USER_ID_CONTEXT_KEY, userId);
+            context.put(ConnectionContextWebSocketInterceptor.USER_ID_CONTEXT_KEY, userId);
         }
         if (sessionId != null) {
-            context.put(PushedCountsWebSocketInterceptor.SESSION_ID_CONTEXT_KEY, sessionId);
+            context.put(ConnectionContextWebSocketInterceptor.SESSION_ID_CONTEXT_KEY, sessionId);
         }
-        context.put(PushedCountsWebSocketInterceptor.GROUPS_CONTEXT_KEY, groups);
+        context.put(ConnectionContextWebSocketInterceptor.GROUPS_CONTEXT_KEY, groups);
         when(environment.getGraphQlContext()).thenReturn(GraphQLContext.of(context));
         return environment;
     }
@@ -190,8 +191,8 @@ class PushedCountDataFetcherTest {
     void should_registerWithEmptyGroups_when_groupsAreMissingFromTheContext() {
         DataFetchingEnvironment environment = mock(DataFetchingEnvironment.class);
         Map<Object, Object> context = new HashMap<>();
-        context.put(PushedCountsWebSocketInterceptor.USER_ID_CONTEXT_KEY, "alice");
-        context.put(PushedCountsWebSocketInterceptor.SESSION_ID_CONTEXT_KEY, "session-1");
+        context.put(ConnectionContextWebSocketInterceptor.USER_ID_CONTEXT_KEY, "alice");
+        context.put(ConnectionContextWebSocketInterceptor.SESSION_ID_CONTEXT_KEY, "session-1");
         when(environment.getGraphQlContext()).thenReturn(GraphQLContext.of(context));
 
         PushedCountDataFetcher fetcher = new PushedCountDataFetcher(

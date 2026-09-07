@@ -20,12 +20,12 @@ import graphql.schema.idl.TypeRuntimeWiring;
 import java.time.Clock;
 import java.time.Duration;
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalGroupsProviderChain;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.ConnectionContextWebSocketInterceptor;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.JWSAuthenticationManager;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.JWSBearerTokenAuthenticationExtractor;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.WebSocketMessageBrokerSecurityAutoConfiguration;
 import org.activiti.cloud.services.query.rest.subscriber.PushedCountDataFetcher;
 import org.activiti.cloud.services.query.rest.subscriber.PushedCountsSubscriptionTracker;
-import org.activiti.cloud.services.query.rest.subscriber.PushedCountsWebSocketInterceptor;
 import org.activiti.cloud.services.query.rest.subscriber.SubscriberRegistry;
 import org.activiti.cloud.services.query.rest.subscriber.SubscriberSessionExpirySweep;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
@@ -50,8 +50,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 /**
- * Wires the pushed-counts websocket interceptor, in-memory {@link SubscriberRegistry}, session
- * expiry sweep, and the relay that fans a {@link CountChangedMessage} out to the three
+ * Wires the {@link ConnectionContextWebSocketInterceptor}, in-memory {@link SubscriberRegistry},
+ * session expiry sweep, and the relay that fans a {@link CountChangedMessage} out to the three
  * count-type subscriptions via {@link PushedCountDataFetcher}. Ordered before
  * {@link WebSocketMessageBrokerSecurityAutoConfiguration} so its default interceptor bean backs
  * off, since spring-graphql allows only one {@code WebSocketGraphQlInterceptor}.
@@ -91,13 +91,13 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(WebSocketGraphQlInterceptor.class)
-    public PushedCountsWebSocketInterceptor pushedCountsWebSocketInterceptor(
+    public ConnectionContextWebSocketInterceptor pushedCountsWebSocketInterceptor(
         JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor,
         JWSAuthenticationManager jwsAuthenticationManager,
         AuthorizationManager<RequestAuthorizationContext> graphQlWebSocketAuthorizationManager,
         JwtPrincipalGroupsProviderChain principalGroupsProvider
     ) {
-        return new PushedCountsWebSocketInterceptor(
+        return new ConnectionContextWebSocketInterceptor(
             jwsBearerTokenAuthenticationExtractor,
             jwsAuthenticationManager,
             graphQlWebSocketAuthorizationManager,
