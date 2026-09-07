@@ -91,7 +91,7 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(WebSocketGraphQlInterceptor.class)
-    public ConnectionContextWebSocketInterceptor pushedCountsWebSocketInterceptor(
+    public ConnectionContextWebSocketInterceptor connectionContextWebSocketInterceptor(
         JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor,
         JWSAuthenticationManager jwsAuthenticationManager,
         AuthorizationManager<RequestAuthorizationContext> graphQlWebSocketAuthorizationManager,
