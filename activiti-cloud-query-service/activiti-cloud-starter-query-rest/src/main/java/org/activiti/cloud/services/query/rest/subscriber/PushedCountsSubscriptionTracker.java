@@ -50,4 +50,9 @@ public class PushedCountsSubscriptionTracker {
         });
         return nowZero.get();
     }
+
+    /** @return the sum of live pushed-counts subscriptions across every session on this instance */
+    public int totalLiveSubscriptions() {
+        return counts.values().stream().mapToInt(AtomicInteger::get).sum();
+    }
 }

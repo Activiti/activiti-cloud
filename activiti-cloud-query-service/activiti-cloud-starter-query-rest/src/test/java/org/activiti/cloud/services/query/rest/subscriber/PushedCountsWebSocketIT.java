@@ -86,6 +86,9 @@ class PushedCountsWebSocketIT {
     private Sinks.Many<CountChangedMessage> pushedCountsSink;
 
     @Autowired
+    private PushedCountsSubscriptionTracker pushedCountsSubscriptionTracker;
+
+    @Autowired
     private WentLiveEventCaptor wentLiveEventCaptor;
 
     private WebSocketGraphQlTester graphQlTester;
@@ -203,7 +206,7 @@ class PushedCountsWebSocketIT {
      */
     @Test
     @Order(6)
-    void should_notMixUpCounts_when_subscribedToAllThreeCountTypesConcurrently() throws InterruptedException {
+    void should_notMixUpCounts_when_subscribedToAllThreeCountTypesConcurrently() {
         List<Map> assignedTasksReceived = new CopyOnWriteArrayList<>();
         List<Map> queuedTasksReceived = new CopyOnWriteArrayList<>();
         List<Map> runningProcessesReceived = new CopyOnWriteArrayList<>();
@@ -225,9 +228,12 @@ class PushedCountsWebSocketIT {
             .subscribe(runningProcessesReceived::add);
 
         try {
-            // Give all three subscriptions time to reach the server - the relay is a multicast
-            // sink, which does not replay to a subscriber that attaches after a message is sent.
-            Thread.sleep(300);
+            // Wait until all three subscriptions have actually reached the server - the relay is
+            // a multicast sink, which does not replay to a subscriber that attaches after a
+            // message is sent.
+            await()
+                .atMost(TIMEOUT)
+                .until(() -> pushedCountsSubscriptionTracker.totalLiveSubscriptions() >= 3);
 
             Instant asOf = Instant.parse("2026-01-01T00:00:00Z");
             sendCountChanged(new CountChangedMessage(ScopeKeys.assigned(TEST_USER), 1, asOf));
