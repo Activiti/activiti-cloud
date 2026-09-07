@@ -23,6 +23,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.math.BigDecimal;
@@ -35,10 +36,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
+import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntityFilterRequest;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
@@ -93,7 +96,7 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
 
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        applyProcessVariableFilters(joinProcessVariables(root), criteriaBuilder);
+        applyProcessVariableFilters(root, query, criteriaBuilder);
         if (!filterConditions.isEmpty()) {
             query.groupBy(root.get(getIdAttribute()));
             query.having(
@@ -119,12 +122,33 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
-    protected void applyProcessVariableFilters(
-        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
-            SetJoin<T, ProcessVariableEntity> pvRoot = joinSupplier.get();
+    /**
+     * Applies the {@code processVariableFilters} of the search request.
+     * <p>
+     * When {@link #useExistsSubqueries()} is enabled, each filter is translated into an
+     * independent correlated {@code EXISTS} subquery against the process-variable association,
+     * avoiding the {@code LEFT JOIN} fan-out (one row per matching process variable) and the
+     * subsequent {@code GROUP BY}/{@code HAVING} on a {@code MAX(CASE ...)} aggregate that the
+     * legacy join-based approach requires. This lets the database push the outer query's
+     * pagination ({@code LIMIT}/{@code OFFSET}) down instead of first materializing and grouping
+     * every matching (entity, process variable) row.
+     * <p>
+     * When disabled (the default), the legacy behavior is preserved: all filters share a single
+     * {@code LEFT JOIN} and are added to {@link #filterConditions} to be combined into a
+     * {@code HAVING} clause alongside a {@code GROUP BY} on the entity id.
+     */
+    protected void applyProcessVariableFilters(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        if (CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
+            return;
+        }
+        if (useExistsSubqueries()) {
+            searchRequest
+                .processVariableFilters()
+                .forEach(filter ->
+                    predicates.add(buildProcessVariableExistsPredicate(root, query, criteriaBuilder, filter))
+                );
+        } else {
+            SetJoin<T, ProcessVariableEntity> pvRoot = joinProcessVariables(root).get();
             filterConditions.addAll(
                 searchRequest
                     .processVariableFilters()
@@ -146,6 +170,37 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
                     .toList()
             );
         }
+    }
+
+    /**
+     * Builds {@code EXISTS (SELECT pv.id FROM ... WHERE pv.processDefinitionKey = ? AND
+     * pv.name = ? AND <value predicate> AND <correlation to root>)} for a single process
+     * variable filter, correlated to the outer query's {@code root}.
+     */
+    private Predicate buildProcessVariableExistsPredicate(
+        Root<T> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder,
+        VariableFilter filter
+    ) {
+        Subquery<Long> subquery = query.subquery(Long.class);
+        Root<T> correlatedRoot = subquery.correlate(root);
+        SetJoin<T, ProcessVariableEntity> pvJoin = correlatedRoot.join(getProcessVariablesAttribute());
+        VariableValueFilterConditionImpl<T, ProcessVariableEntity> condition = new VariableValueFilterConditionImpl<>(
+            pvJoin,
+            Map.of(
+                pvJoin.get(ProcessVariableEntity_.processDefinitionKey),
+                filter.processDefinitionKey(),
+                pvJoin.get(ProcessVariableEntity_.name),
+                filter.name()
+            ),
+            javaTypeMapping.get(filter.type()),
+            filter,
+            criteriaBuilder
+        );
+        subquery.select(pvJoin.get(ProcessVariableEntity_.id));
+        subquery.where(condition.getRowPredicate());
+        return criteriaBuilder.exists(subquery);
     }
 
     protected void applyIdFilter(Root<T> root) {
@@ -183,19 +238,23 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
             validateSort(sort);
             Expression<?> orderByClause;
             if (sort.isProcessVariable()) {
-                From<T, ProcessVariableEntity> joinRoot = joinSupplier.get();
-                orderByClause = new VariableSelectionExpressionImpl<>(
-                    joinRoot,
-                    Map.of(
-                        joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
-                        sort.processDefinitionKey(),
-                        joinRoot.get(ProcessVariableEntity_.name),
-                        sort.field()
-                    ),
-                    javaTypeMapping.get(sort.type()),
-                    criteriaBuilder
-                ).getSelectionExpression();
-                query.groupBy(root.get(getIdAttribute()));
+                if (useExistsSubqueries()) {
+                    orderByClause = buildProcessVariableSortExpression(root, query, criteriaBuilder, sort);
+                } else {
+                    From<T, ProcessVariableEntity> joinRoot = joinSupplier.get();
+                    orderByClause = new VariableSelectionExpressionImpl<>(
+                        joinRoot,
+                        Map.of(
+                            joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                            sort.processDefinitionKey(),
+                            joinRoot.get(ProcessVariableEntity_.name),
+                            sort.field()
+                        ),
+                        javaTypeMapping.get(sort.type()),
+                        criteriaBuilder
+                    ).getSelectionExpression();
+                    query.groupBy(root.get(getIdAttribute()));
+                }
             } else {
                 orderByClause = root.get(sort.field());
             }
@@ -205,6 +264,44 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
                     : criteriaBuilder.desc(orderByClause)
             );
         }
+    }
+
+    /**
+     * Builds a correlated scalar subquery selecting the (aggregated, to guard against
+     * duplicate rows) value of the process variable being sorted on, e.g.
+     * {@code (SELECT MAX(pv.value ->> 'x') FROM ... WHERE pv.processDefinitionKey = ? AND
+     * pv.name = ? AND <correlation to root>)}. Unlike the legacy join-based approach, this does
+     * not require joining every process variable into the outer query's {@code FROM} clause nor
+     * grouping the whole result set by the entity id, since the aggregation is confined to the
+     * (typically small) set of process variables matching the sort's name/definition key for a
+     * single correlated row.
+     */
+    private Expression<?> buildProcessVariableSortExpression(
+        Root<T> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder,
+        CloudRuntimeEntitySort sort
+    ) {
+        Class<?> variableJavaType = javaTypeMapping.get(sort.type());
+        Class<?> extractionReturnType = CustomPostgreSQLDialect.getExtractionReturnType(variableJavaType);
+        @SuppressWarnings("unchecked")
+        Subquery<Object> subquery = (Subquery<Object>) query.subquery(extractionReturnType);
+        Root<T> correlatedRoot = subquery.correlate(root);
+        SetJoin<T, ProcessVariableEntity> pvJoin = correlatedRoot.join(getProcessVariablesAttribute());
+        VariableSelectionExpressionImpl<T, ProcessVariableEntity> selection = new VariableSelectionExpressionImpl<>(
+            pvJoin,
+            Map.of(
+                pvJoin.get(ProcessVariableEntity_.processDefinitionKey),
+                sort.processDefinitionKey(),
+                pvJoin.get(ProcessVariableEntity_.name),
+                sort.field()
+            ),
+            variableJavaType,
+            criteriaBuilder
+        );
+        subquery.where(selection.getSelectionPredicate());
+        subquery.select((Expression) criteriaBuilder.greatest((Expression) selection.getExtractedValue()));
+        return (Expression<?>) subquery;
     }
 
     protected void validateSort(CloudRuntimeEntitySort sort) {

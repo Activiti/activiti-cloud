@@ -55,22 +55,38 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
 
     @Override
     public Predicate getPredicate() {
+        return buildComparisonPredicate(getSelectionExpression());
+    }
+
+    /**
+     * Row-level predicate combining the {@code process_definition_key}/{@code name} match with
+     * the value comparison, both evaluated directly on this filter's process-variable row.
+     * Unlike {@link #getPredicate()}, this does not rely on a {@code CASE}/aggregate expression,
+     * so it can be used in a correlated {@code EXISTS} subquery's {@code WHERE} clause instead of
+     * the outer query's {@code GROUP BY}/{@code HAVING}, avoiding the join fan-out across all of
+     * a task's/process instance's process variables.
+     */
+    public Predicate getRowPredicate() {
+        return criteriaBuilder.and(getSelectionPredicate(), buildComparisonPredicate(getExtractedValue()));
+    }
+
+    private Predicate buildComparisonPredicate(Expression<?> valueExpression) {
         try {
             return switch (filter.operator()) {
-                case EQUALS -> criteriaBuilder.equal(getSelectionExpression(), getConvertedFilterValue());
-                case NOT_EQUALS -> criteriaBuilder.notEqual(getSelectionExpression(), getConvertedFilterValue());
-                case GREATER_THAN -> criteriaBuilder.greaterThan(getSelectionExpression(), getConvertedFilterValue());
+                case EQUALS -> criteriaBuilder.equal(valueExpression, getConvertedFilterValue());
+                case NOT_EQUALS -> criteriaBuilder.notEqual(valueExpression, getConvertedFilterValue());
+                case GREATER_THAN -> criteriaBuilder.greaterThan(valueExpression, getConvertedFilterValue());
                 case GREATER_THAN_OR_EQUAL -> criteriaBuilder.greaterThanOrEqualTo(
-                    getSelectionExpression(),
+                    valueExpression,
                     getConvertedFilterValue()
                 );
-                case LESS_THAN -> criteriaBuilder.lessThan(getSelectionExpression(), getConvertedFilterValue());
+                case LESS_THAN -> criteriaBuilder.lessThan(valueExpression, getConvertedFilterValue());
                 case LESS_THAN_OR_EQUAL -> criteriaBuilder.lessThanOrEqualTo(
-                    getSelectionExpression(),
+                    valueExpression,
                     getConvertedFilterValue()
                 );
                 case LIKE -> criteriaBuilder.like(
-                    criteriaBuilder.lower((Expression<String>) getSelectionExpression()),
+                    criteriaBuilder.lower((Expression<String>) valueExpression),
                     "%" + filter.value().toLowerCase() + "%"
                 );
             };

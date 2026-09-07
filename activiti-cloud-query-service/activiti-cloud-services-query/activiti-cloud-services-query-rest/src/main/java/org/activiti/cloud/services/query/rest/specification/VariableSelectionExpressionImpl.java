@@ -54,6 +54,17 @@ public class VariableSelectionExpressionImpl<
         );
     }
 
+    /**
+     * @return the raw {@code process_definition_key}/{@code name} match predicate, without
+     *         the value extraction/aggregation applied by {@link #getSelectionExpression()}.
+     *         Used to build correlated {@code EXISTS} subqueries where the match can be
+     *         expressed directly in the subquery's {@code WHERE} clause instead of a
+     *         {@code CASE}/aggregate expression in the outer query's {@code HAVING}/{@code ORDER BY}.
+     */
+    protected Predicate getSelectionPredicate() {
+        return selectionPredicate;
+    }
+
     public Expression getExtractedValue() {
         String extractionFunctionName = CustomPostgreSQLDialect.getExtractionFunctionName(variableJavaType);
         Class<?> extractionFunctionReturnType = CustomPostgreSQLDialect.getExtractionReturnType(variableJavaType);
