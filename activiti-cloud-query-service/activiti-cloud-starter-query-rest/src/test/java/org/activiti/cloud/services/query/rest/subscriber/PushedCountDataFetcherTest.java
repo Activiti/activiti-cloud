@@ -202,9 +202,11 @@ class PushedCountDataFetcherTest {
             CLOCK
         );
 
-        Flux.from(fetcher.get(environment)).subscribe();
+        var disposable = Flux.from(fetcher.get(environment)).subscribe();
 
         verify(subscriberRegistry).register("alice", Set.of(), "session-1", NOW);
+
+        disposable.dispose();
     }
 
     @Test
