@@ -38,7 +38,7 @@ class PushedCountsAutoConfigurationTest {
             context.getBeanFactory().setConversionService(ApplicationConversionService.getSharedInstance())
         )
         .withBean(FeatureToggle.class, () -> name -> false)
-        .withBean("subscriberRegistryProducer", MessageChannel.class, () -> new NullChannel())
+        .withBean("subscriberRegistryProducer", MessageChannel.class, NullChannel::new)
         .withConfiguration(AutoConfigurations.of(PushedCountsAutoConfiguration.class));
 
     @Test
