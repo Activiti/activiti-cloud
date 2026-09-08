@@ -102,13 +102,13 @@ class SubscriberRegistryMessageTest {
     void canonicalConstructor_enforcesPerTypeRequiredFields() {
         assertThatThrownBy(() ->
             new SubscriberRegistryMessage(RegistryMessageType.REGISTERED, null, List.of("eng"), null, "rest-1", NOW)
-        ).isInstanceOf(NullPointerException.class);
+        ).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() ->
             new SubscriberRegistryMessage(RegistryMessageType.UNREGISTERED, null, null, null, "rest-1", NOW)
-        ).isInstanceOf(NullPointerException.class);
+        ).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() ->
             new SubscriberRegistryMessage(RegistryMessageType.SNAPSHOT, null, null, null, "rest-1", NOW)
-        ).isInstanceOf(NullPointerException.class);
+        ).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
