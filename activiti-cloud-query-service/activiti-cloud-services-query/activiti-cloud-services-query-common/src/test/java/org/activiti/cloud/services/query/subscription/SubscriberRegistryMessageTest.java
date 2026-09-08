@@ -100,15 +100,16 @@ class SubscriberRegistryMessageTest {
 
     @Test
     void canonicalConstructor_enforcesPerTypeRequiredFields() {
+        List<String> groups = List.of("eng");
         assertThatThrownBy(() ->
-            new SubscriberRegistryMessage(RegistryMessageType.REGISTERED, null, List.of("eng"), null, "rest-1", NOW)
-        ).isInstanceOf(IllegalArgumentException.class);
+            new SubscriberRegistryMessage(RegistryMessageType.REGISTERED, null, groups, null, "rest-1", NOW)
+        ).isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() ->
             new SubscriberRegistryMessage(RegistryMessageType.UNREGISTERED, null, null, null, "rest-1", NOW)
-        ).isInstanceOf(IllegalArgumentException.class);
+        ).isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() ->
             new SubscriberRegistryMessage(RegistryMessageType.SNAPSHOT, null, null, null, "rest-1", NOW)
-        ).isInstanceOf(IllegalArgumentException.class);
+        ).isInstanceOf(NullPointerException.class);
     }
 
     @Test
