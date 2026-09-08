@@ -74,16 +74,17 @@ class SubscriberRegistryMessageTest {
 
         assertThat(message.type()).isEqualTo(RegistryMessageType.SNAPSHOT);
         assertThat(message.entries()).hasSize(1);
-        assertThat(message.entries().get(0).userId()).isEqualTo("alice");
-        assertThat(message.entries().get(0).groups()).containsExactly("eng");
+        assertThat(message.entries().getFirst().userId()).isEqualTo("alice");
+        assertThat(message.entries().getFirst().groups()).containsExactly("eng");
     }
 
     @Test
     void requiredFieldsAreValidated() {
+        List<String> groups = List.of();
         assertThatThrownBy(() -> SubscriberRegistryMessage.heartbeat(null, NOW)).isInstanceOf(
             NullPointerException.class
         );
-        assertThatThrownBy(() -> SubscriberRegistryMessage.registered("alice", List.of(), "rest-1", null)).isInstanceOf(
+        assertThatThrownBy(() -> SubscriberRegistryMessage.registered("alice", groups, "rest-1", null)).isInstanceOf(
             NullPointerException.class
         );
     }
