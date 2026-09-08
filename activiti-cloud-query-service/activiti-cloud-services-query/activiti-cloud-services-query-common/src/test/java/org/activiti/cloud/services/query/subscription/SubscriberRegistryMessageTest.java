@@ -97,4 +97,27 @@ class SubscriberRegistryMessageTest {
 
         assertThat(message.groups()).containsExactly("eng");
     }
+
+    @Test
+    void canonicalConstructor_enforcesPerTypeRequiredFields() {
+        assertThatThrownBy(() ->
+            new SubscriberRegistryMessage(RegistryMessageType.REGISTERED, null, List.of("eng"), null, "rest-1", NOW)
+        ).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() ->
+            new SubscriberRegistryMessage(RegistryMessageType.UNREGISTERED, null, null, null, "rest-1", NOW)
+        ).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() ->
+            new SubscriberRegistryMessage(RegistryMessageType.SNAPSHOT, null, null, null, "rest-1", NOW)
+        ).isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void canonicalConstructor_allowsHeartbeatAndResyncWithoutUserOrEntries() {
+        assertThat(
+            new SubscriberRegistryMessage(RegistryMessageType.HEARTBEAT, null, null, null, "rest-1", NOW).type()
+        ).isEqualTo(RegistryMessageType.HEARTBEAT);
+        assertThat(
+            new SubscriberRegistryMessage(RegistryMessageType.RESYNC_REQUEST, null, null, null, "rest-1", NOW).type()
+        ).isEqualTo(RegistryMessageType.RESYNC_REQUEST);
+    }
 }
