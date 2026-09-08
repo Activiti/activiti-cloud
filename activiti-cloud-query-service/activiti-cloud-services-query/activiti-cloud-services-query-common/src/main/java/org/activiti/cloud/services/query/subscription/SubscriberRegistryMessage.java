@@ -49,16 +49,8 @@ public record SubscriberRegistryMessage(
         Objects.requireNonNull(sentAt, "sentAt");
         // JSON deserialization bypasses the static factories, so enforce each type's required fields here too.
         switch (type) {
-            case REGISTERED, UNREGISTERED -> {
-                if (userId == null) {
-                    throw new IllegalArgumentException(type + " requires a userId");
-                }
-            }
-            case SNAPSHOT -> {
-                if (entries == null) {
-                    throw new IllegalArgumentException("SNAPSHOT requires entries");
-                }
-            }
+            case REGISTERED, UNREGISTERED -> Objects.requireNonNull(userId, () -> type + " requires a userId");
+            case SNAPSHOT -> Objects.requireNonNull(entries, "SNAPSHOT requires entries");
             case HEARTBEAT, RESYNC_REQUEST -> {
                 // no per-type field to validate for these
             }
