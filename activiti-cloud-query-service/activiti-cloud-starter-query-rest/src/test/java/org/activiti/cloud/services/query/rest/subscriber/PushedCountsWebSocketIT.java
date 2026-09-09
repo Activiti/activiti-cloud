@@ -70,7 +70,7 @@ import reactor.test.StepVerifier;
     properties = {
         "activiti.cloud.query.pushed-counts.enabled=true",
         "activiti.features.query.pushed-counts.enabled=true",
-        "query.pushed-counts.session.sweep-interval=PT1S",
+        "activiti.cloud.query.pushed-counts.session.sweep-interval=PT1S",
     }
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
