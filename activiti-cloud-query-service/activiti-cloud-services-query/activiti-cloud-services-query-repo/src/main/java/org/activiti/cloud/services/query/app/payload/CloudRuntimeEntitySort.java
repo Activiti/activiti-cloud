@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.payload;
+package org.activiti.cloud.services.query.app.payload;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.app.filter.VariableType;
 import org.springframework.data.domain.Sort;
 
 public record CloudRuntimeEntitySort(

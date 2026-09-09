@@ -13,28 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.filter;
+package org.activiti.cloud.services.query.app.count;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.List;
 
-public enum VariableType {
-    STRING,
-    INTEGER,
-    BIGDECIMAL,
-    BOOLEAN,
-    DATE,
-    DATETIME;
-
-    @JsonValue
-    public String getValue() {
-        return name().toLowerCase();
-    }
-
-    public static VariableType fromString(String name) {
-        try {
-            return VariableType.valueOf(name.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(String.format("Cannot determine variable type from '%s'", name));
-        }
-    }
+/**
+ * Where recomputed counts go. Separated from {@link TaskCountEmitter} so that deciding <em>what</em> to
+ * recompute stays testable without a broker, and so a deployment can swap the transport.
+ */
+public interface TaskCountChangePublisher {
+    /**
+     * Publishes a batch of recomputed counts. Called after the event batch has committed, so throwing
+     * here cannot roll anything back - implementations are expected to handle their own failures rather
+     * than propagate.
+     */
+    void publish(List<TaskCountChangedEvent> changes);
 }

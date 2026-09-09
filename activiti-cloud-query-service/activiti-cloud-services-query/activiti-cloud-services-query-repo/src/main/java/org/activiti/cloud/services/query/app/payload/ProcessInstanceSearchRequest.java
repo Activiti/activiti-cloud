@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.payload;
+package org.activiti.cloud.services.query.app.payload;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
 
 public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterRequest {
 

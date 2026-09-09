@@ -31,8 +31,8 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
-import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;

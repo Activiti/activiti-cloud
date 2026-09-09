@@ -39,7 +39,7 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresent
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceSearchResultRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;

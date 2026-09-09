@@ -28,6 +28,7 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.activiti.cloud.services.query.app.count.SubscriberScopeRegistry;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -35,10 +36,10 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
-import org.activiti.cloud.services.query.rest.specification.TaskSpecification;
+import org.activiti.cloud.services.query.app.specification.TaskSpecification;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,6 +69,8 @@ public class TaskControllerHelper {
 
     private final Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache;
 
+    private final SubscriberScopeRegistry subscriberScopeRegistry;
+
     public TaskControllerHelper(
         TaskRepository taskRepository,
         TaskCandidateUserRepository taskCandidateUserRepository,
@@ -78,7 +81,8 @@ public class TaskControllerHelper {
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
         SecurityManager securityManager,
-        Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache
+        Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache,
+        SubscriberScopeRegistry subscriberScopeRegistry
     ) {
         this.taskRepository = taskRepository;
         this.taskCandidateUserRepository = taskCandidateUserRepository;
@@ -90,6 +94,7 @@ public class TaskControllerHelper {
         this.taskLookupRestrictionService = taskLookupRestrictionService;
         this.securityManager = securityManager;
         this.restrictedTaskCountCache = restrictedTaskCountCache;
+        this.subscriberScopeRegistry = subscriberScopeRegistry;
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAll(
@@ -262,6 +267,14 @@ public class TaskControllerHelper {
     public Long countTasksRestricted(TaskSearchRequest taskSearchRequest) {
         String authenticatedUserId = securityManager.getAuthenticatedUserId();
         List<String> authenticatedUserGroups = securityManager.getAuthenticatedUserGroups();
+
+        // Anyone worth pushing a count to has just fetched one, so recording the caller here is what lets
+        // the event consumer know whose counts to recompute after commit. Both halves matter: the user id is
+        // what the pushed count is keyed by, and the group set is the only place their membership exists in
+        // this service - no query can recover it.
+        // Deliberately outside the cache toggle below: the registry describes who is listening, which is
+        // independent of whether this particular count came from the cache.
+        subscriberScopeRegistry.record(authenticatedUserId, authenticatedUserGroups);
 
         if (!FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_TASK_COUNT_CACHE)) {
             return countRestrictedTasks(taskSearchRequest, authenticatedUserId, authenticatedUserGroups);

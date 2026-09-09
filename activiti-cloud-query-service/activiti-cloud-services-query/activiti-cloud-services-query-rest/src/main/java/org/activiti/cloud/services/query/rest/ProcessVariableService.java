@@ -28,7 +28,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.rest.specification.ProcessVariableSpecification;
+import org.activiti.cloud.services.query.app.specification.ProcessVariableSpecification;
 import org.springframework.util.CollectionUtils;
 
 public class ProcessVariableService {

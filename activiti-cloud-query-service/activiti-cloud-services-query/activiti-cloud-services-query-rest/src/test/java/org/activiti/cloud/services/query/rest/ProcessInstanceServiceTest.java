@@ -33,7 +33,7 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
+import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.junit.jupiter.api.BeforeEach;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.specification;
+package org.activiti.cloud.services.query.app.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -39,9 +39,9 @@ import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
-import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntityFilterRequest;
-import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
+import org.activiti.cloud.services.query.app.filter.VariableType;
+import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntityFilterRequest;
+import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;

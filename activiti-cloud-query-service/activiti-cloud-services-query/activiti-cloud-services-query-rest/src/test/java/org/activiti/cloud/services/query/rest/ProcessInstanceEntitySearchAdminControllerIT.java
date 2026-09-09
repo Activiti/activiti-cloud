@@ -26,7 +26,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
+import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

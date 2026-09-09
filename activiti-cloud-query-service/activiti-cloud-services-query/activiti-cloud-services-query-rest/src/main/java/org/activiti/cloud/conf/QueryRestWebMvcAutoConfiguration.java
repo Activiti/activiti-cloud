@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.services.query.app.count.SubscriberScopeRegistry;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -311,7 +312,8 @@ public class QueryRestWebMvcAutoConfiguration {
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
         SecurityManager securityManager,
-        Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache
+        Cache<RestrictedTaskCountCacheKey, Long> restrictedTaskCountCache,
+        SubscriberScopeRegistry subscriberScopeRegistry
     ) {
         return new TaskControllerHelper(
             taskRepository,
@@ -323,7 +325,8 @@ public class QueryRestWebMvcAutoConfiguration {
             taskRepresentationModelAssembler,
             taskLookupRestrictionService,
             securityManager,
-            restrictedTaskCountCache
+            restrictedTaskCountCache,
+            subscriberScopeRegistry
         );
     }
 

@@ -16,6 +16,7 @@
 package org.activiti.cloud.conf;
 
 import jakarta.persistence.EntityManager;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,10 @@ import org.activiti.cloud.common.messaging.config.PartitionedChannelGracefulShut
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
+import org.activiti.cloud.services.query.app.count.TaskCountChangePublisher;
+import org.activiti.cloud.services.query.app.count.TaskCountEmitter;
+import org.activiti.cloud.services.query.app.count.TaskCountRecomputer;
+import org.activiti.cloud.services.query.app.count.TaskCountsChannelPublisher;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.slf4j.Logger;
@@ -101,14 +106,30 @@ public class QueryConsumerAutoConfiguration {
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        IntegrationFlow queryEventsQueueIntegrationFlow
+        IntegrationFlow queryEventsQueueIntegrationFlow,
+        TaskCountEmitter taskCountEmitter
     ) {
         return new QueryConsumerMessageHandler(
             eventHandlerContext,
             optimizer,
             entityManager,
-            queryEventsQueueIntegrationFlow.getInputChannel()
+            queryEventsQueueIntegrationFlow.getInputChannel(),
+            taskCountEmitter
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TaskCountChangePublisher taskCountChangePublisher(
+        @Qualifier(QueryConsumerChannels.TASK_COUNTS_PRODUCER) MessageChannel taskCountsProducer
+    ) {
+        return new TaskCountsChannelPublisher(taskCountsProducer);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TaskCountEmitter taskCountEmitter(TaskCountRecomputer taskCountRecomputer, TaskCountChangePublisher publisher) {
+        return new TaskCountEmitter(taskCountRecomputer, publisher, Clock.systemUTC());
     }
 
     @Bean

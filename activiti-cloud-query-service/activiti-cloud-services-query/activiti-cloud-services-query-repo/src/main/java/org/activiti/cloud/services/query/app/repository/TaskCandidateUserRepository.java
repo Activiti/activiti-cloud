@@ -19,15 +19,19 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.QTaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserId;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface TaskCandidateUserRepository
     extends
@@ -37,6 +41,57 @@ public interface TaskCandidateUserRepository
         CrudRepository<TaskCandidateUserEntity, TaskCandidateUserId>
 {
     Set<TaskCandidateUserEntity> findByTaskIdIn(Collection<String> taskIds);
+
+    /**
+     * How many unassigned tasks each of {@code userIds} is individually named on that <b>none</b> of
+     * {@code excludedGroups} can already see.
+     * <p>
+     * This is the remainder half of a per-user queued count. For users who share a group set, the count
+     * differs only in the {@code candidateUser = me} term, so the shared part is counted once with
+     * {@code TaskSpecification.forGroups(filter, excludedGroups)} and this query supplies the rest -
+     * <b>one</b> round trip returning one row per member who has any, rather than one COUNT per member. That
+     * is what keeps the cost independent of how many people are in the group.
+     * <p>
+     * The {@code NOT EXISTS} is the whole correctness argument. It makes this a set <em>difference</em>
+     * ("tasks I am named on that my groups cannot already see"), so the two halves are disjoint and adding
+     * them is legal. Without it a task carrying both a candidate group in {@code excludedGroups} and a
+     * candidate user row for the same person is counted twice. Visibility is a union, not a partition.
+     * <p>
+     * Users absent from the result have no such task; the caller must read that as zero, not as unknown.
+     *
+     * @param userIds        the bucket's members
+     * @param statuses       task statuses to count, from the pinned pushed filter
+     * @param excludedGroups the bucket's group set; <b>must not be empty</b>, since an empty JPQL {@code IN}
+     *                       list is not portable - a subscriber holding no groups has no shared half to
+     *                       subtract and is counted directly instead
+     */
+    @Query(
+        """
+        SELECT cu.userId AS userId, COUNT(DISTINCT cu.taskId) AS count
+        FROM TaskCandidateUser cu
+        JOIN cu.task t
+        WHERE cu.userId IN :userIds
+          AND t.status IN :statuses
+          AND t.assignee IS NULL
+          AND NOT EXISTS (
+            SELECT cg.taskId FROM TaskCandidateGroup cg
+            WHERE cg.taskId = cu.taskId AND cg.groupId IN :excludedGroups
+          )
+        GROUP BY cu.userId
+        """
+    )
+    List<CandidateUserTaskCount> countTasksNamingUserOutsideGroups(
+        @Param("userIds") Collection<String> userIds,
+        @Param("statuses") Collection<Task.TaskStatus> statuses,
+        @Param("excludedGroups") Collection<String> excludedGroups
+    );
+
+    /** One row of {@link #countTasksNamingUserOutsideGroups}: a user and their remainder. */
+    interface CandidateUserTaskCount {
+        String getUserId();
+
+        long getCount();
+    }
 
     @Override
     default void customize(QuerydslBindings bindings, QTaskCandidateUserEntity root) {

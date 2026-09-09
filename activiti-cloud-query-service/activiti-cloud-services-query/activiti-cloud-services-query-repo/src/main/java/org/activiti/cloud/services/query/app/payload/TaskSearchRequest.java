@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.payload;
+package org.activiti.cloud.services.query.app.payload;
 
 import java.util.Date;
 import java.util.Set;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
 
 //prettier-ignore
 public record TaskSearchRequest (

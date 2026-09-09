@@ -22,9 +22,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
-import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
+import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import tools.jackson.databind.introspect.VisibilityChecker;
 import tools.jackson.databind.json.JsonMapper;
 
