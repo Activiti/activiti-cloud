@@ -22,8 +22,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.RegistryMessageType;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,26 +34,21 @@ class SubscriberRegistryResyncRequesterTest {
     private static final Instant T0 = Instant.parse("2026-01-01T00:00:00Z");
 
     private List<Message<?>> sent;
-    private boolean featureEnabled;
     private SubscriberRegistryResyncRequester requester;
 
     @BeforeEach
     void setUp() {
         sent = new ArrayList<>();
         MessageChannel registryProducer = (message, timeout) -> sent.add(message);
-        FeatureToggle featureToggle = name -> featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
         requester = new SubscriberRegistryResyncRequester(
             registryProducer,
-            featureToggle,
             "consumer-1",
             Clock.fixed(T0, ZoneOffset.UTC)
         );
     }
 
     @Test
-    void broadcastsResyncRequest_whenFeatureEnabled() {
-        featureEnabled = true;
-
+    void broadcastsResyncRequestOnStartup() {
         requester.requestResync();
 
         assertThat(sent).hasSize(1);
@@ -64,14 +57,5 @@ class SubscriberRegistryResyncRequesterTest {
         assertThat(message.type()).isEqualTo(RegistryMessageType.RESYNC_REQUEST);
         assertThat(message.sourceId()).isEqualTo("consumer-1");
         assertThat(message.sentAt()).isEqualTo(T0);
-    }
-
-    @Test
-    void broadcastsNothing_whenFeatureDisabled() {
-        featureEnabled = false;
-
-        requester.requestResync();
-
-        assertThat(sent).isEmpty();
     }
 }

@@ -27,18 +27,22 @@ import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.messaging.support.MessageBuilder;
 
 /**
- * End-to-end proof that the whole registry path stays inert while the pushed-counts toggle is off:
- * a message crosses the binding but the consumer drops it, so the registry never fills.
+ * End-to-end proof that registry upkeep is independent of the runtime feature toggle: with the
+ * startup property on but {@code activiti.features.query.pushed-counts.enabled=false}, a REGISTERED
+ * message crossing the binding is still applied. The runtime toggle gates the count push (later
+ * steps), not presence tracking.
  */
 @SpringBootTest(
     classes = QueryConsumerTestApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = {
-        "activiti.cloud.services.oauth2.iam-name=test", "activiti.features.query.pushed-counts.enabled=false",
+        "activiti.cloud.services.oauth2.iam-name=test",
+        "activiti.cloud.query.pushed-counts.enabled=true",
+        "activiti.features.query.pushed-counts.enabled=false",
     }
 )
 @EnableTestBinder
-class PushedCountsRegistryDisabledIT {
+class PushedCountsRegistryRuntimeToggleOffIT {
 
     @Autowired
     private InputDestination input;
@@ -47,7 +51,7 @@ class PushedCountsRegistryDisabledIT {
     private ConsumerSubscriberRegistry registry;
 
     @Test
-    void registeredMessage_isIgnored_whenFeatureDisabled() {
+    void registeredMessage_isStillApplied_whenRuntimeToggleOff() {
         input.send(
             MessageBuilder.withPayload(
                 """
@@ -60,7 +64,7 @@ class PushedCountsRegistryDisabledIT {
             "subscriberRegistry"
         );
 
-        assertThat(registry.isWatching("frank")).isFalse();
-        assertThat(registry.size()).isZero();
+        assertThat(registry.isWatching("frank")).isTrue();
+        assertThat(registry.size()).isEqualTo(1);
     }
 }
