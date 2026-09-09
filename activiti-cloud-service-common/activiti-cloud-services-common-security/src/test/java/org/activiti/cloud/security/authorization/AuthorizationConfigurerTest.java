@@ -87,7 +87,7 @@ class AuthorizationConfigurerTest {
         authorizationConfigurer.configure(http);
 
         assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(2);
-        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
+        authorizeHttpRequestsCustomizer.getAllValues().forEach(customizer -> customizer.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
@@ -130,7 +130,7 @@ class AuthorizationConfigurerTest {
 
         assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(2);
 
-        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
+        authorizeHttpRequestsCustomizer.getAllValues().forEach(customizer -> customizer.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
@@ -169,7 +169,7 @@ class AuthorizationConfigurerTest {
         authorizationConfigurer.configure(http);
 
         assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(2);
-        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
+        authorizeHttpRequestsCustomizer.getAllValues().forEach(customizer -> customizer.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
@@ -207,7 +207,7 @@ class AuthorizationConfigurerTest {
         authorizationConfigurer.configure(http);
 
         assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(3);
-        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
+        authorizeHttpRequestsCustomizer.getAllValues().forEach(customizer -> customizer.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
         inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
@@ -248,7 +248,7 @@ class AuthorizationConfigurerTest {
         authorizationConfigurer.configure(http);
 
         assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(5);
-        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
+        authorizeHttpRequestsCustomizer.getAllValues().forEach(customizer -> customizer.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
