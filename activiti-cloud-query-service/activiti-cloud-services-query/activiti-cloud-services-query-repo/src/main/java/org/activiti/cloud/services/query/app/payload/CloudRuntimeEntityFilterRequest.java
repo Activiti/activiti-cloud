@@ -13,28 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.filter;
+package org.activiti.cloud.services.query.app.payload;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Set;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
 
-public enum VariableType {
-    STRING,
-    INTEGER,
-    BIGDECIMAL,
-    BOOLEAN,
-    DATE,
-    DATETIME;
-
-    @JsonValue
-    public String getValue() {
-        return name().toLowerCase();
-    }
-
-    public static VariableType fromString(String name) {
-        try {
-            return VariableType.valueOf(name.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(String.format("Cannot determine variable type from '%s'", name));
-        }
-    }
+public interface CloudRuntimeEntityFilterRequest {
+    Set<String> id();
+    Set<String> parentId();
+    Set<VariableFilter> processVariableFilters();
+    CloudRuntimeEntitySort sort();
 }

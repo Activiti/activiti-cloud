@@ -13,10 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.specification;
+package org.activiti.cloud.services.query.app.filter;
 
-import jakarta.persistence.criteria.Predicate;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public interface VariableValueFilterCondition {
-    Predicate getPredicate();
+public enum FilterOperator {
+    @JsonProperty("eq")
+    EQUALS,
+    @JsonProperty("ne")
+    NOT_EQUALS,
+    @JsonProperty("like")
+    LIKE,
+    @JsonProperty("gt")
+    GREATER_THAN,
+    @JsonProperty("gte")
+    GREATER_THAN_OR_EQUAL,
+    @JsonProperty("lt")
+    LESS_THAN,
+    @JsonProperty("lte")
+    LESS_THAN_OR_EQUAL,
 }

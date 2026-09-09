@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.specification;
+package org.activiti.cloud.services.query.app.filter;
 
-import jakarta.persistence.criteria.Expression;
+import jakarta.annotation.Nullable;
 
-public interface VariableSelectionExpression {
-    Expression<?> getSelectionExpression();
-}
+public record VariableFilter(
+    @Nullable String processDefinitionKey,
+    String name,
+    VariableType type,
+    String value,
+    FilterOperator operator
+) {}

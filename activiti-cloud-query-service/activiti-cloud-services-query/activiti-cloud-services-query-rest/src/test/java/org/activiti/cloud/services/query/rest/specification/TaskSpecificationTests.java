@@ -24,9 +24,10 @@ import static org.mockito.Mockito.verify;
 
 import jakarta.persistence.criteria.JoinType;
 import java.util.List;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
+import org.activiti.cloud.services.query.app.specification.TaskSpecification;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

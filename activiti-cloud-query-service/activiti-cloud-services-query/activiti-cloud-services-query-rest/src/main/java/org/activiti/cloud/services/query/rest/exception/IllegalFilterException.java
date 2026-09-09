@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest.exception;
 
-import org.activiti.cloud.services.query.rest.filter.FilterOperator;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.app.filter.FilterOperator;
+import org.activiti.cloud.services.query.app.filter.VariableType;
 
 public class IllegalFilterException extends IllegalArgumentException {
 

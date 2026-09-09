@@ -23,9 +23,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import jakarta.persistence.criteria.JoinType;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.junit.jupiter.api.Test;
 
 /**
