@@ -60,7 +60,7 @@ import reactor.core.publisher.Sinks;
  * that needs a real Spring Cloud Stream binder at boot, which this bare REST starter does not
  * carry - added instead by whichever starter combines it with a messaging-capable module.
  *
- * <p>Enabled at startup unless {@code query.pushed-counts.enabled=false}, in which case none of
+ * <p>Disabled at startup unless {@code query.pushed-counts.enabled=true}, in which case none of
  * this class's beans are created and {@code WebSocketMessageBrokerSecurityAutoConfiguration}'s
  * plain interceptor is used instead. Actual count delivery is a separate, runtime-toggleable
  * switch - see {@link PushedCountDataFetcher}.
@@ -68,7 +68,7 @@ import reactor.core.publisher.Sinks;
 @AutoConfiguration(before = WebSocketMessageBrokerSecurityAutoConfiguration.class)
 @ConditionalOnWebApplication
 @ConditionalOnClass({ GraphQL.class, WebSocketGraphQlInterceptor.class })
-@ConditionalOnProperty(name = "query.pushed-counts.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "query.pushed-counts.enabled", havingValue = "true", matchIfMissing = false)
 @EnableScheduling
 public class QueryRestPushedCountsWebSocketAutoConfiguration {
 
