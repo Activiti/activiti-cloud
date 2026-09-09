@@ -53,8 +53,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
  * {@link WebSocketMessageBrokerSecurityAutoConfiguration}) to confirm the real pushed-counts
  * schema activates the websocket transport, exposes the three count-type subscriptions, and that
  * {@link ConnectionContextWebSocketInterceptor} wins as the single {@link WebSocketGraphQlInterceptor}
- * when {@code query.pushed-counts.enabled=true} is set explicitly - and that none of this holds by
- * default, when the property is not set.
+ * when {@code activiti.cloud.query.pushed-counts.enabled=true} is set explicitly - and that none of
+ * this holds by default, when the property is not set.
  */
 class QueryRestPushedCountsWebSocketAutoConfigurationTest {
 
@@ -80,7 +80,7 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
     @Test
     void should_activateTheWebsocketTransport_and_wireExactlyOnePushedCountsInterceptor_when_thePropertyIsExplicitlyEnabled() {
         contextRunner
-            .withPropertyValues("query.pushed-counts.enabled=true")
+            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
             .run(context -> {
                 assertThat(context).hasNotFailed();
                 assertThat(context).hasSingleBean(WebGraphQlHandler.class);

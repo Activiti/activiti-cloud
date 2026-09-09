@@ -68,7 +68,7 @@ import reactor.test.StepVerifier;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = { PushedCountsWebSocketTestApplication.class },
     properties = {
-        "query.pushed-counts.enabled=true",
+        "activiti.cloud.query.pushed-counts.enabled=true",
         "activiti.features.query.pushed-counts.enabled=true",
         "query.pushed-counts.session.sweep-interval=PT1S",
     }
