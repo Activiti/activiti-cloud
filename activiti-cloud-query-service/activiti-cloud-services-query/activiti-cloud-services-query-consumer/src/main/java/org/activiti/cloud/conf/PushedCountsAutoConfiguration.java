@@ -19,7 +19,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Consumer;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
@@ -33,6 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -43,8 +43,19 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * (no consumer group) so every consumer instance builds the full picture of subscribers; the actual
  * broker destinations are configured through {@code spring.cloud.stream.bindings.*} so they can be
  * agreed and changed without code changes.
+ *
+ * <p>Gated at startup by {@code activiti.cloud.query.pushed-counts.enabled} (off by default here,
+ * turned on in hxp-process-services): when off, none of these beans are wired. Registry upkeep is
+ * intentionally independent of the {@code activiti.features.query.pushed-counts.enabled} runtime
+ * toggle - that toggle gates the count push (later steps), not presence tracking, so a runtime flip
+ * can never leave the registry holding stale or leftover instances.
  */
 @AutoConfiguration(after = QueryConsumerAutoConfiguration.class)
+@ConditionalOnProperty(
+    name = "activiti.cloud.query.pushed-counts.enabled",
+    havingValue = "true",
+    matchIfMissing = false
+)
 @EnableScheduling
 public class PushedCountsAutoConfiguration {
 
@@ -63,10 +74,9 @@ public class PushedCountsAutoConfiguration {
     @Bean
     @FunctionBinding(input = QueryConsumerChannels.SUBSCRIBER_REGISTRY_CONSUMER)
     public Consumer<Message<SubscriberRegistryMessage>> subscriberRegistryConsumerFunction(
-        SubscriberRegistryMessageHandler handler,
-        FeatureToggle featureToggle
+        SubscriberRegistryMessageHandler handler
     ) {
-        return new SubscriberRegistryConsumer(handler, featureToggle);
+        return new SubscriberRegistryConsumer(handler);
     }
 
     @Bean
@@ -79,23 +89,14 @@ public class PushedCountsAutoConfiguration {
     }
 
     @Bean
-    SubscriberInstanceRemovalScheduler subscriberInstanceRemovalScheduler(
-        SubscriberInstanceRemover remover,
-        FeatureToggle featureToggle
-    ) {
-        return new SubscriberInstanceRemovalScheduler(remover, featureToggle);
+    SubscriberInstanceRemovalScheduler subscriberInstanceRemovalScheduler(SubscriberInstanceRemover remover) {
+        return new SubscriberInstanceRemovalScheduler(remover);
     }
 
     @Bean
     SubscriberRegistryResyncRequester subscriberRegistryResyncRequester(
-        @Qualifier(QueryConsumerChannels.SUBSCRIBER_REGISTRY_PRODUCER) MessageChannel registryProducer,
-        FeatureToggle featureToggle
+        @Qualifier(QueryConsumerChannels.SUBSCRIBER_REGISTRY_PRODUCER) MessageChannel registryProducer
     ) {
-        return new SubscriberRegistryResyncRequester(
-            registryProducer,
-            featureToggle,
-            UUID.randomUUID().toString(),
-            Clock.systemUTC()
-        );
+        return new SubscriberRegistryResyncRequester(registryProducer, UUID.randomUUID().toString(), Clock.systemUTC());
     }
 }

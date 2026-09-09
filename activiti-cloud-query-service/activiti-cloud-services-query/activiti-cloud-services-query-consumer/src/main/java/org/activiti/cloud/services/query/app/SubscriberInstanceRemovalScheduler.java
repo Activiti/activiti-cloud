@@ -15,29 +15,24 @@
  */
 package org.activiti.cloud.services.query.app;
 
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * Periodically drives {@link SubscriberInstanceRemover} so instances that stopped sending
- * heartbeats are reclaimed. Runs only while the pushed-counts toggle is on, so it can be switched
- * off at runtime without a redeploy.
+ * heartbeats are reclaimed. Runs whenever the feature is wired (the startup property); cleanup is
+ * deliberately independent of the runtime feature toggle so the registry can never be left holding
+ * leftover instances when the toggle flips.
  */
 public class SubscriberInstanceRemovalScheduler {
 
     private final SubscriberInstanceRemover remover;
-    private final FeatureToggle featureToggle;
 
-    public SubscriberInstanceRemovalScheduler(SubscriberInstanceRemover remover, FeatureToggle featureToggle) {
+    public SubscriberInstanceRemovalScheduler(SubscriberInstanceRemover remover) {
         this.remover = remover;
-        this.featureToggle = featureToggle;
     }
 
     @Scheduled(fixedDelayString = "${activiti.cloud.query.pushed-counts.removal-interval:PT1M}")
     public void removeExpiredInstances() {
-        if (featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS)) {
-            remover.removeExpiredInstances();
-        }
+        remover.removeExpiredInstances();
     }
 }

@@ -20,8 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.time.Instant;
 import java.util.List;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,34 +31,20 @@ class SubscriberRegistryConsumerTest {
     private static final Instant T0 = Instant.parse("2026-01-01T00:00:00Z");
 
     private ConsumerSubscriberRegistry registry;
-    private boolean featureEnabled;
     private SubscriberRegistryConsumer consumer;
 
     @BeforeEach
     void setUp() {
         registry = new ConsumerSubscriberRegistry();
         SubscriberRegistryMessageHandler handler = new SubscriberRegistryMessageHandler(registry);
-        FeatureToggle featureToggle = name -> featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
-        consumer = new SubscriberRegistryConsumer(handler, featureToggle);
+        consumer = new SubscriberRegistryConsumer(handler);
     }
 
     @Test
-    void appliesMessage_whenFeatureEnabled() {
-        featureEnabled = true;
-
+    void appliesMessage() {
         consumer.accept(registeredMessage());
 
         assertThat(registry.isWatching("alice")).isTrue();
-    }
-
-    @Test
-    void dropsMessage_whenFeatureDisabled() {
-        featureEnabled = false;
-
-        consumer.accept(registeredMessage());
-
-        assertThat(registry.isWatching("alice")).isFalse();
-        assertThat(registry.size()).isZero();
     }
 
     @Test
@@ -71,10 +55,7 @@ class SubscriberRegistryConsumerTest {
                 throw new IllegalStateException("boom");
             }
         };
-        SubscriberRegistryConsumer resilientConsumer = new SubscriberRegistryConsumer(
-            throwingHandler,
-            QueryFeatureToggles.FEATURE_PUSHED_COUNTS::equals
-        );
+        SubscriberRegistryConsumer resilientConsumer = new SubscriberRegistryConsumer(throwingHandler);
 
         assertThatCode(() -> resilientConsumer.accept(registeredMessage())).doesNotThrowAnyException();
     }
