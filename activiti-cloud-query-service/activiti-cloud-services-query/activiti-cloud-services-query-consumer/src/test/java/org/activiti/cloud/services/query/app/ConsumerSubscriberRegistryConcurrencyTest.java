@@ -37,12 +37,15 @@ class ConsumerSubscriberRegistryConcurrencyTest {
         int instances = 16;
         ExecutorService pool = Executors.newFixedThreadPool(instances);
 
-        // All instances first-register the same user at once: the put + sources.add compound must not lose any.
-        CountDownLatch registered = submitEach(pool, instances, source ->
-            registry.register("alice", List.of("eng"), source, T0)
-        );
-        assertThat(registered.await(30, TimeUnit.SECONDS)).isTrue();
-        pool.shutdownNow();
+        try {
+            // All instances first-register the same user at once: the put + sources.add compound must not lose any.
+            CountDownLatch registered = submitEach(pool, instances, source ->
+                registry.register("alice", List.of("eng"), source, T0)
+            );
+            assertThat(registered.await(30, TimeUnit.SECONDS)).isTrue();
+        } finally {
+            pool.shutdownNow();
+        }
 
         assertThat(registry.isWatching("alice")).isTrue();
         assertThat(registry.sourcesOf("alice")).hasSize(instances);
@@ -56,18 +59,21 @@ class ConsumerSubscriberRegistryConcurrencyTest {
         String lastSource = "rest-" + (instances - 1);
         ExecutorService pool = Executors.newFixedThreadPool(instances);
 
-        CountDownLatch registered = submitEach(pool, instances, source ->
-            registry.register("alice", List.of("eng"), source, T0)
-        );
-        assertThat(registered.await(30, TimeUnit.SECONDS)).isTrue();
-        assertThat(registry.sourcesOf("alice")).hasSize(instances);
+        try {
+            CountDownLatch registered = submitEach(pool, instances, source ->
+                registry.register("alice", List.of("eng"), source, T0)
+            );
+            assertThat(registered.await(30, TimeUnit.SECONDS)).isTrue();
+            assertThat(registry.sourcesOf("alice")).hasSize(instances);
 
-        // Concurrently drop every holder but the last; the user must stay watched throughout.
-        CountDownLatch allButLastRemoved = submitEach(pool, instances - 1, source ->
-            registry.unregister("alice", source)
-        );
-        assertThat(allButLastRemoved.await(30, TimeUnit.SECONDS)).isTrue();
-        pool.shutdownNow();
+            // Concurrently drop every holder but the last; the user must stay watched throughout.
+            CountDownLatch allButLastRemoved = submitEach(pool, instances - 1, source ->
+                registry.unregister("alice", source)
+            );
+            assertThat(allButLastRemoved.await(30, TimeUnit.SECONDS)).isTrue();
+        } finally {
+            pool.shutdownNow();
+        }
 
         assertThat(registry.isWatching("alice")).isTrue();
         assertThat(registry.sourcesOf("alice")).containsExactly(lastSource);

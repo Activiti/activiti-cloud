@@ -115,7 +115,7 @@ public class ConsumerSubscriberRegistry {
      * every user's holders and dropping any user left with no holders. This is the backstop for an
      * instance dying without sending UNREGISTERED for the users it held.
      *
-     * @return the ids of users dropped as a result, in the order they were dropped
+     * @return the ids of users dropped as a result
      */
     public synchronized Set<String> expireInstances(Instant now, Duration threshold) {
         Instant deadline = now.minus(threshold);
