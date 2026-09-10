@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.payload;
+package org.activiti.cloud.services.query.app.payload;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.api.task.model.Task;
-import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.junit.jupiter.api.Test;
 
