@@ -42,11 +42,6 @@ import reactor.core.publisher.Sinks;
  * <p>Ordered after {@code QueryRestPushedCountsWebSocketAutoConfiguration} by name (no compile-time
  * class reference - that class lives in query-rest, not on this module's classpath) purely so the
  * sink bean it creates exists before this class's {@code @Bean} method looks for it.
- *
- * <p>{@link CountConsumerChannels} (imported via {@link CountConsumerChannelsConfiguration}) supplies
- * the {@code countConsumer} channel bean that {@code @FunctionBinding} attaches to - without it,
- * Spring Cloud Stream never declares a real binding on the broker for this function, no matter how
- * the destination property is set.
  */
 @AutoConfiguration(afterName = "org.activiti.cloud.conf.QueryRestPushedCountsWebSocketAutoConfiguration")
 @ConditionalOnProperty(name = "activiti.cloud.query.pushed-counts.enabled", havingValue = "true")

@@ -19,11 +19,6 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
-/**
- * The channel {@code @FunctionBinding(input = COUNT_CONSUMER)} attaches to. Without this, Spring Cloud
- * Stream never learns that {@code countConsumer} is a real binding to declare on the broker - the
- * function bean would still exist, but only wired to an unbound, in-memory channel.
- */
 public interface CountConsumerChannels {
     String COUNT_CONSUMER = "countConsumer";
 

@@ -42,13 +42,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import reactor.core.publisher.Flux;
 
 /**
- * Proves the count bridge over a real broker, not the in-memory test binder: a message published
- * onto the {@code pushedCounts} destination - exactly as the (separately delivered) recompute
- * pipeline will do once an event batch commits - actually arrives at {@code countConsumer} and lands
- * on this instance's {@code pushedCountsFlux}. {@link StreamBridge} stands in for "some other
- * process/instance sending a count", the same way a real query-consumer pod would, without needing a
- * second Spring context: it publishes through the app's own real RabbitMQ binder, onto an arbitrary
- * destination, exactly as an out-of-process sender would.
+ * Proves the count bridge over a real broker: a message sent to the {@code pushedCounts} destination
+ * arrives at {@code countConsumer} and lands on this instance's {@code pushedCountsFlux}.
  */
 @SpringBootTest(
     classes = { QueryRestApplication.class },
