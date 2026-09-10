@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Optional;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.services.core.validation.VariableProperties;
@@ -51,6 +52,7 @@ public class VariableRequestBodyAdvice extends RequestBodyAdviceAdapter {
         }
         return (
             targetType == SetProcessVariablesPayload.class ||
+            targetType == StartProcessPayload.class ||
             targetType == CreateTaskVariablePayload.class ||
             targetType == UpdateTaskVariablePayload.class
         );

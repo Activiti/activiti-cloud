@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
@@ -81,5 +83,44 @@ class VariableValueSizeValidatorTest {
         variableProperties.setMaxValueSize(-1);
 
         assertThatCode(() -> validator.validate("name", "abcd")).doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldPassStartProcessPayloadWhenVariablesAreUnderLimit() {
+        variableProperties.setMaxValueSize(50);
+        StartProcessPayload payload = ProcessPayloadBuilder.start()
+            .withProcessDefinitionId("proc1")
+            .withVariable("smallVar", "hello")
+            .build();
+
+        assertThatCode(() -> validator.validate(payload)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldFailStartProcessPayloadWhenVariableExceedsLimit() {
+        variableProperties.setMaxValueSize(5);
+        StartProcessPayload payload = ProcessPayloadBuilder.start()
+            .withProcessDefinitionId("proc1")
+            .withVariable("oversized", "abcd")
+            .build();
+
+        assertThatThrownBy(() -> validator.validate(payload))
+            .isInstanceOf(VariableValueSizeLimitExceededException.class)
+            .hasMessage("Variable 'oversized' value exceeds maximum allowed size of 5 bytes");
+    }
+
+    @Test
+    void shouldPassStartProcessPayloadWhenNull() {
+        variableProperties.setMaxValueSize(5);
+
+        assertThatCode(() -> validator.validate((StartProcessPayload) null)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldPassStartProcessPayloadWhenVariablesMapIsNull() {
+        variableProperties.setMaxValueSize(5);
+        StartProcessPayload payload = ProcessPayloadBuilder.start().withProcessDefinitionId("proc1").build();
+
+        assertThatCode(() -> validator.validate(payload)).doesNotThrowAnyException();
     }
 }

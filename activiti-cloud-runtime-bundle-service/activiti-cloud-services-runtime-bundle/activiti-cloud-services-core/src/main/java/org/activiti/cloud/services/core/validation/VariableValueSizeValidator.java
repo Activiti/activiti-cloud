@@ -18,6 +18,7 @@ package org.activiti.cloud.services.core.validation;
 import java.io.OutputStream;
 import java.util.Objects;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import tools.jackson.core.JacksonException;
@@ -34,6 +35,14 @@ public class VariableValueSizeValidator {
     }
 
     public void validate(SetProcessVariablesPayload payload) {
+        if (payload == null || payload.getVariables() == null || isDisabled()) {
+            return;
+        }
+
+        payload.getVariables().forEach(this::validate);
+    }
+
+    public void validate(StartProcessPayload payload) {
         if (payload == null || payload.getVariables() == null || isDisabled()) {
             return;
         }

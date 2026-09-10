@@ -36,6 +36,7 @@ import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -46,6 +47,7 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
+import org.activiti.cloud.services.core.validation.VariableProperties;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -76,6 +78,7 @@ import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
@@ -142,6 +145,9 @@ class ProcessInstanceAdminControllerImplIT {
 
     @MockitoBean
     private ProcessDefinitionsSyncService processDefinitionsSyncService;
+
+    @Autowired
+    private VariableProperties variableProperties;
 
     @BeforeEach
     void setUp() {
@@ -303,5 +309,40 @@ class ProcessInstanceAdminControllerImplIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(cmd))
         ).andExpect(status().isOk());
+    }
+
+    @Test
+    void startProcess() throws Exception {
+        StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
+        when(processAdminRuntime.start(any(StartProcessPayload.class))).thenReturn(defaultProcessInstance());
+
+        this.mockMvc.perform(
+            post("/admin/v1/process-instances")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(cmd))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    void startProcessShouldReturnBadRequestWhenVariableValueExceedsConfiguredSize() throws Exception {
+        variableProperties.setMaxValueSize(5);
+        StartProcessPayload cmd = ProcessPayloadBuilder.start()
+            .withProcessDefinitionId("1")
+            .withVariable("oversized", "abcd")
+            .build();
+
+        MvcResult result = this.mockMvc.perform(
+                post("/admin/v1/process-instances")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd))
+            )
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).contains(
+            "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
+        );
+
+        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
     }
 }
