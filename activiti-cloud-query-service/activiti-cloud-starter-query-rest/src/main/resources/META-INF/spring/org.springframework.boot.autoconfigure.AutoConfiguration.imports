@@ -1,1 +1,2 @@
 org.activiti.cloud.starter.query.configuration.ActivitiQueryAutoConfiguration
+org.activiti.cloud.conf.QueryRestPushedCountsWebSocketAutoConfiguration
