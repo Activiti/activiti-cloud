@@ -42,16 +42,6 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import reactor.core.publisher.Sinks;
 
-/**
- * Confirms {@code countConsumer} - the missing half of the pushed-counts broker relay - is wired
- * exactly when {@code activiti.cloud.query.pushed-counts.enabled=true}, and not otherwise, since it
- * depends on the {@code pushedCountsSink} bean that
- * {@link QueryRestPushedCountsWebSocketAutoConfiguration} only creates under that same property.
- * The actual broker round trip (destination -&gt; function binding -&gt; this bean) is covered by
- * {@link org.activiti.cloud.services.query.app.CountConsumerTest} at the unit level; assembling the
- * full Spring Cloud Stream function-binding machinery in a narrow test context here would test the
- * framework, not this code.
- */
 class PushedCountsMessagingBridgeAutoConfigurationTest {
 
     private final WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
