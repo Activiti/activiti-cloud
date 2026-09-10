@@ -13,28 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.filter;
+package org.activiti.cloud.services.query.app.filter;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import jakarta.annotation.Nullable;
 
-public enum VariableType {
-    STRING,
-    INTEGER,
-    BIGDECIMAL,
-    BOOLEAN,
-    DATE,
-    DATETIME;
-
-    @JsonValue
-    public String getValue() {
-        return name().toLowerCase();
-    }
-
-    public static VariableType fromString(String name) {
-        try {
-            return VariableType.valueOf(name.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(String.format("Cannot determine variable type from '%s'", name));
-        }
-    }
-}
+public record VariableFilter(
+    @Nullable String processDefinitionKey,
+    String name,
+    VariableType type,
+    String value,
+    FilterOperator operator
+) {}

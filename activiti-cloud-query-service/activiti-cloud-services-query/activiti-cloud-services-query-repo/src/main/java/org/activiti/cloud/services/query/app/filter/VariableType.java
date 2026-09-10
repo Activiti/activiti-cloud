@@ -13,10 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.specification;
+package org.activiti.cloud.services.query.app.filter;
 
-import jakarta.persistence.criteria.Predicate;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-public interface VariableValueFilterCondition {
-    Predicate getPredicate();
+public enum VariableType {
+    STRING,
+    INTEGER,
+    BIGDECIMAL,
+    BOOLEAN,
+    DATE,
+    DATETIME;
+
+    @JsonValue
+    public String getValue() {
+        return name().toLowerCase();
+    }
+
+    public static VariableType fromString(String name) {
+        try {
+            return VariableType.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(String.format("Cannot determine variable type from '%s'", name));
+        }
+    }
 }

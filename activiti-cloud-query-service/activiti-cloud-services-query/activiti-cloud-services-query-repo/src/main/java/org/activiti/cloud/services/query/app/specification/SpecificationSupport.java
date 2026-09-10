@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.specification;
+package org.activiti.cloud.services.query.app.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -36,16 +36,14 @@ import java.util.Set;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.activiti.cloud.services.query.app.filter.VariableType;
+import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntityFilterRequest;
+import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
-import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntityFilterRequest;
-import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilterRequest> implements Specification<T> {
 
@@ -210,16 +208,10 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
     protected void validateSort(CloudRuntimeEntitySort sort) {
         if (sort.isProcessVariable()) {
             if (sort.processDefinitionKey() == null) {
-                throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Process definition key is required when sorting by process variable"
-                );
+                throw new InvalidSortException("Process definition key is required when sorting by process variable");
             }
             if (sort.type() == null) {
-                throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Variable type is required when sorting by process variable"
-                );
+                throw new InvalidSortException("Variable type is required when sorting by process variable");
             }
         }
     }
