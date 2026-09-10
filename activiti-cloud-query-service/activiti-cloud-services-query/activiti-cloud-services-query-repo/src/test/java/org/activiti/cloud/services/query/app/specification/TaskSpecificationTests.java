@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 
 import jakarta.persistence.criteria.JoinType;
 import java.util.List;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.app.filter.VariableType;
 import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
@@ -36,11 +37,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
 
 /**
- * Verifies that toggling the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag changes
- * the way {@link TaskSpecification} builds its predicates: when the flag is OFF (default) the
- * legacy join-based code paths are used and the outer query is forced to {@code SELECT DISTINCT};
- * when the flag is ON correlated EXISTS subqueries are produced instead and {@code DISTINCT} is
- * skipped.
+ * Verifies that toggling the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag changes the
+ * way {@link TaskSpecification} builds its predicates: when the flag is OFF (default) the legacy
+ * join-based code paths are used and the outer query is forced to {@code SELECT DISTINCT}; when the
+ * flag is ON correlated EXISTS subqueries are produced instead and {@code DISTINCT} is skipped.
  */
 class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
@@ -124,7 +124,10 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
             TaskSpecification spec = TaskSpecification.unrestricted(request);
             CriteriaContext<TaskEntity> ctx = newCriteriaContext();
 
-            assertThatThrownBy(() -> spec.toPredicate(ctx.root(), ctx.query(), ctx.cb()))
+            var root = ctx.root();
+            var query = ctx.query();
+            var cb = ctx.cb();
+            assertThatThrownBy(() -> spec.toPredicate(root, query, cb))
                 .isInstanceOf(InvalidSortException.class)
                 .hasMessage("Process definition key is required when sorting by process variable");
         }
@@ -142,7 +145,10 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
             TaskSpecification spec = TaskSpecification.unrestricted(request);
             CriteriaContext<TaskEntity> ctx = newCriteriaContext();
 
-            assertThatThrownBy(() -> spec.toPredicate(ctx.root(), ctx.query(), ctx.cb()))
+            var root = ctx.root();
+            var query = ctx.query();
+            var cb = ctx.cb();
+            assertThatThrownBy(() -> spec.toPredicate(root, query, cb))
                 .isInstanceOf(InvalidSortException.class)
                 .hasMessage("Variable type is required when sorting by process variable");
         }
