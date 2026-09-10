@@ -38,6 +38,7 @@ import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import reactor.core.publisher.Sinks;
 
@@ -81,7 +82,8 @@ class PushedCountsMessagingBridgeAutoConfigurationTest {
             .run(context -> {
                 assertThat(context).hasNotFailed();
                 assertThat(context).hasSingleBean(Sinks.Many.class);
-                assertThat(context.getBean("countConsumer")).isInstanceOf(CountConsumer.class);
+                assertThat(context.getBean("countConsumerFunction")).isInstanceOf(CountConsumer.class);
+                assertThat(context.getBean("countConsumer")).isInstanceOf(SubscribableChannel.class);
             });
     }
 
@@ -90,6 +92,7 @@ class PushedCountsMessagingBridgeAutoConfigurationTest {
         contextRunner.run(context -> {
             assertThat(context).hasNotFailed();
             assertThat(context.getBeansOfType(Sinks.Many.class)).isEmpty();
+            assertThat(context.containsBean("countConsumerFunction")).isFalse();
             assertThat(context.containsBean("countConsumer")).isFalse();
         });
     }

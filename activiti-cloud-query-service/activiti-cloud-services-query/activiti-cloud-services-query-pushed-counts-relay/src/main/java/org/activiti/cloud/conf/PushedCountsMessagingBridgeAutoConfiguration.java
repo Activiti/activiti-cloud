@@ -19,10 +19,12 @@ import java.util.function.Consumer;
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.CountConsumer;
+import org.activiti.cloud.services.query.app.CountConsumerChannels;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
 import reactor.core.publisher.Sinks;
@@ -40,15 +42,21 @@ import reactor.core.publisher.Sinks;
  * <p>Ordered after {@code QueryRestPushedCountsWebSocketAutoConfiguration} by name (no compile-time
  * class reference - that class lives in query-rest, not on this module's classpath) purely so the
  * sink bean it creates exists before this class's {@code @Bean} method looks for it.
+ *
+ * <p>{@link CountConsumerChannels} (imported via {@link CountConsumerChannelsConfiguration}) supplies
+ * the {@code countConsumer} channel bean that {@code @FunctionBinding} attaches to - without it,
+ * Spring Cloud Stream never declares a real binding on the broker for this function, no matter how
+ * the destination property is set.
  */
 @AutoConfiguration(afterName = "org.activiti.cloud.conf.QueryRestPushedCountsWebSocketAutoConfiguration")
 @ConditionalOnProperty(name = "activiti.cloud.query.pushed-counts.enabled", havingValue = "true")
 @PropertySource("classpath:pushed-counts-messaging.properties")
+@Import(CountConsumerChannelsConfiguration.class)
 public class PushedCountsMessagingBridgeAutoConfiguration {
 
     @Bean
-    @FunctionBinding(input = "countConsumer")
-    public Consumer<Message<CountChangedMessage>> countConsumer(
+    @FunctionBinding(input = CountConsumerChannels.COUNT_CONSUMER)
+    public Consumer<Message<CountChangedMessage>> countConsumerFunction(
         Sinks.Many<CountChangedMessage> pushedCountsSink,
         FeatureToggle featureToggle
     ) {
