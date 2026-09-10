@@ -208,10 +208,10 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
     protected void validateSort(CloudRuntimeEntitySort sort) {
         if (sort.isProcessVariable()) {
             if (sort.processDefinitionKey() == null) {
-                throw new IllegalStateException("Process definition key is required when sorting by process variable");
+                throw new InvalidSortException("Process definition key is required when sorting by process variable");
             }
             if (sort.type() == null) {
-                throw new IllegalStateException("Variable type is required when sorting by process variable");
+                throw new InvalidSortException("Variable type is required when sorting by process variable");
             }
         }
     }

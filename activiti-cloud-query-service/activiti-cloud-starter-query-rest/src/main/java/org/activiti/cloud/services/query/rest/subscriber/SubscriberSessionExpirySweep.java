@@ -37,8 +37,8 @@ public class SubscriberSessionExpirySweep {
     }
 
     @Scheduled(
-        fixedRateString = "${query.pushed-counts.session.sweep-interval:PT30S}",
-        initialDelayString = "${query.pushed-counts.session.sweep-interval:PT30S}"
+        fixedRateString = "${activiti.cloud.query.pushed-counts.session.sweep-interval:PT30S}",
+        initialDelayString = "${activiti.cloud.query.pushed-counts.session.sweep-interval:PT30S}"
     )
     public void sweep() {
         subscriberRegistry.expireSessionsOlderThan(sessionExpiry, clock.instant());

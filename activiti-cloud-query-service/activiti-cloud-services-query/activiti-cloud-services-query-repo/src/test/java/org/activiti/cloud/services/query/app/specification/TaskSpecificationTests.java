@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.specification;
+package org.activiti.cloud.services.query.app.specification;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -24,20 +25,22 @@ import static org.mockito.Mockito.verify;
 
 import jakarta.persistence.criteria.JoinType;
 import java.util.List;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.activiti.cloud.services.query.app.filter.VariableType;
+import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
-import org.activiti.cloud.services.query.app.specification.TaskSpecification;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Sort;
 
 /**
- * Verifies that toggling the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag changes
- * the way {@link TaskSpecification} builds its predicates: when the flag is OFF (default) the
- * legacy join-based code paths are used and the outer query is forced to {@code SELECT DISTINCT};
- * when the flag is ON correlated EXISTS subqueries are produced instead and {@code DISTINCT} is
- * skipped.
+ * Verifies that toggling the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag changes the
+ * way {@link TaskSpecification} builds its predicates: when the flag is OFF (default) the legacy
+ * join-based code paths are used and the outer query is forced to {@code SELECT DISTINCT}; when the
+ * flag is ON correlated EXISTS subqueries are produced instead and {@code DISTINCT} is skipped.
  */
 class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
@@ -102,6 +105,52 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
             verify(ctx.query(), atLeastOnce()).subquery(any(Class.class));
             verify(ctx.root(), never()).join(TaskEntity_.taskCandidateUsers);
+        }
+    }
+
+    @Nested
+    class SortValidation {
+
+        @Test
+        void shouldThrowInvalidSortException_whenProcessDefinitionKeyIsMissing() {
+            CloudRuntimeEntitySort sort = new CloudRuntimeEntitySort(
+                "varName",
+                Sort.Direction.ASC,
+                true,
+                null,
+                VariableType.STRING
+            );
+            TaskSearchRequest request = new TaskSearchRequestBuilder().withSort(sort).build();
+            TaskSpecification spec = TaskSpecification.unrestricted(request);
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            var root = ctx.root();
+            var query = ctx.query();
+            var cb = ctx.cb();
+            assertThatThrownBy(() -> spec.toPredicate(root, query, cb))
+                .isInstanceOf(InvalidSortException.class)
+                .hasMessage("Process definition key is required when sorting by process variable");
+        }
+
+        @Test
+        void shouldThrowInvalidSortException_whenVariableTypeIsMissing() {
+            CloudRuntimeEntitySort sort = new CloudRuntimeEntitySort(
+                "varName",
+                Sort.Direction.ASC,
+                true,
+                "procDefKey",
+                null
+            );
+            TaskSearchRequest request = new TaskSearchRequestBuilder().withSort(sort).build();
+            TaskSpecification spec = TaskSpecification.unrestricted(request);
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            var root = ctx.root();
+            var query = ctx.query();
+            var cb = ctx.cb();
+            assertThatThrownBy(() -> spec.toPredicate(root, query, cb))
+                .isInstanceOf(InvalidSortException.class)
+                .hasMessage("Variable type is required when sorting by process variable");
         }
     }
 }

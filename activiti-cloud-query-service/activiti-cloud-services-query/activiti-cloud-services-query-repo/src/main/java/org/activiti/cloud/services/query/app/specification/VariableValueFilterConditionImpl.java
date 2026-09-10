@@ -73,7 +73,7 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
                 );
             };
         } catch (FunctionArgumentException | IllegalArgumentException e) {
-            throw new IllegalFilterException(filter.type(), filter.operator(), filter.value());
+            throw new IllegalFilterException(filter.type(), filter.operator(), filter.value(), e);
         }
     }
 

@@ -88,7 +88,7 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
     @ConditionalOnMissingBean
     public SubscriberRegistry subscriberRegistry(
         ApplicationEventPublisher eventPublisher,
-        @Value("${query.pushed-counts.registry.max-size:50000}") long maxSize
+        @Value("${activiti.cloud.query.pushed-counts.registry.max-size:50000}") long maxSize
     ) {
         LOGGER.debug("Creating SubscriberRegistry with a maximum size of {}", maxSize);
         return new SubscriberRegistry(eventPublisher, maxSize);
@@ -118,7 +118,7 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
     public SubscriberSessionExpirySweep subscriberSessionExpirySweep(
         SubscriberRegistry subscriberRegistry,
         Clock pushedCountsClock,
-        @Value("${query.pushed-counts.session.expiry:PT5M}") Duration sessionExpiry
+        @Value("${activiti.cloud.query.pushed-counts.session.expiry:PT5M}") Duration sessionExpiry
     ) {
         LOGGER.debug("Creating SubscriberSessionExpirySweep with a session expiry of {}", sessionExpiry);
         return new SubscriberSessionExpirySweep(subscriberRegistry, pushedCountsClock, sessionExpiry);

@@ -15,19 +15,28 @@
  */
 package org.activiti.cloud.services.query.app.specification;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.services.query.app.filter.FilterOperator;
 import org.activiti.cloud.services.query.app.filter.VariableType;
+import org.junit.jupiter.api.Test;
 
-/**
- * A variable filter's value could not be applied for its declared type and operator. Deliberately
- * not an {@link IllegalArgumentException}/{@link IllegalStateException} - those get silently
- * translated into a message-bearing {@code InvalidDataAccessApiUsageException} by Spring's JPA
- * exception translation when thrown from inside a {@code Specification}, which would leak this
- * detail into the HTTP response body. Callers map this to a plain 400 with no body instead.
- */
-public class IllegalFilterException extends RuntimeException {
+class IllegalFilterExceptionTest {
 
-    public IllegalFilterException(VariableType type, FilterOperator operator, String value, Throwable cause) {
-        super("Illegal filter for variable type %s. Operator: %s, value: %s".formatted(type, operator, value), cause);
+    @Test
+    void should_preserveTheOriginalCause_forDiagnosability() {
+        NumberFormatException cause = new NumberFormatException("not a number");
+
+        IllegalFilterException ex = new IllegalFilterException(
+            VariableType.BIGDECIMAL,
+            FilterOperator.GREATER_THAN,
+            "not-a-number",
+            cause
+        );
+
+        assertThat(ex.getCause()).isSameAs(cause);
+        assertThat(ex.getMessage()).isEqualTo(
+            "Illegal filter for variable type BIGDECIMAL. Operator: GREATER_THAN, value: not-a-number"
+        );
     }
 }
