@@ -68,6 +68,12 @@ public class SecurityWebSocketInterceptor extends AbstractAuthenticationWebSocke
             );
     }
 
+    /** The connection's authenticated {@link Authentication}, or {@code null} if none. */
+    protected final Authentication currentAuthentication(WebSocketSessionInfo sessionInfo) {
+        SecurityContext securityContext = (SecurityContext) sessionInfo.getAttributes().get(authenticationAttribute);
+        return securityContext != null ? securityContext.getAuthentication() : null;
+    }
+
     @Override
     protected Mono<Authentication> authenticate(Authentication authentication) {
         return Mono.just(this.authenticationManager.authenticate(authentication));
