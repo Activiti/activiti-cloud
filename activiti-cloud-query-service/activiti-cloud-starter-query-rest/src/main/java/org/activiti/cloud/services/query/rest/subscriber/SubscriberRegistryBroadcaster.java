@@ -61,7 +61,9 @@ public class SubscriberRegistryBroadcaster {
 
     @EventListener
     public void onWentLive(SubscriberWentLiveEvent event) {
-        broadcast(SubscriberRegistryMessage.registered(event.userId(), List.copyOf(event.groups()), sourceId, event.at()));
+        broadcast(
+            SubscriberRegistryMessage.registered(event.userId(), List.copyOf(event.groups()), sourceId, event.at())
+        );
     }
 
     @EventListener

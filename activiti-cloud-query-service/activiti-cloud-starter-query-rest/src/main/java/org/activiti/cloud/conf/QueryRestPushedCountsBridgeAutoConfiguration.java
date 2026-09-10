@@ -51,7 +51,11 @@ import org.springframework.util.StringUtils;
  */
 @AutoConfiguration(after = QueryRestPushedCountsWebSocketAutoConfiguration.class)
 @ConditionalOnClass(StreamBridge.class)
-@ConditionalOnProperty(name = "activiti.cloud.query.pushed-counts.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(
+    name = "activiti.cloud.query.pushed-counts.enabled",
+    havingValue = "true",
+    matchIfMissing = false
+)
 @PropertySource("classpath:pushed-counts-bridge.properties")
 @EnableScheduling
 public class QueryRestPushedCountsBridgeAutoConfiguration {

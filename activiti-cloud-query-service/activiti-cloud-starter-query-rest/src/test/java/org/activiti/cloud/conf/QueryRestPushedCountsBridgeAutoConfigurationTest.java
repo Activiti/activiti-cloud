@@ -35,9 +35,8 @@ class QueryRestPushedCountsBridgeAutoConfigurationTest {
         .withConfiguration(AutoConfigurations.of(QueryRestPushedCountsBridgeAutoConfiguration.class))
         .withBean(StreamBridge.class, () -> mock(StreamBridge.class))
         .withBean(Clock.class, Clock::systemUTC)
-        .withBean(
-            SubscriberRegistry.class,
-            () -> new SubscriberRegistry(mock(ApplicationEventPublisher.class), 50_000)
+        .withBean(SubscriberRegistry.class, () ->
+            new SubscriberRegistry(mock(ApplicationEventPublisher.class), 50_000)
         );
 
     @Test

@@ -51,8 +51,13 @@ class SubscriberResyncResponderTest {
         registry = new SubscriberRegistry(mock(ApplicationEventPublisher.class), 50_000);
         registry.register("alice", Set.of("eng"), "session-1", NOW);
         streamBridge = mock(StreamBridge.class);
-        responder =
-            new SubscriberResyncResponder(registry, streamBridge, SOURCE_ID, DESTINATION, Clock.fixed(NOW, ZoneOffset.UTC));
+        responder = new SubscriberResyncResponder(
+            registry,
+            streamBridge,
+            SOURCE_ID,
+            DESTINATION,
+            Clock.fixed(NOW, ZoneOffset.UTC)
+        );
     }
 
     @Test

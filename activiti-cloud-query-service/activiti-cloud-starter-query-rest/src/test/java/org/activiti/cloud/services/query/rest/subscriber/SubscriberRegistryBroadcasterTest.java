@@ -46,14 +46,13 @@ class SubscriberRegistryBroadcasterTest {
     void setUp() {
         streamBridge = mock(StreamBridge.class);
         registry = new SubscriberRegistry(mock(ApplicationEventPublisher.class), 50_000);
-        broadcaster =
-            new SubscriberRegistryBroadcaster(
-                streamBridge,
-                registry,
-                SOURCE_ID,
-                DESTINATION,
-                Clock.fixed(NOW, ZoneOffset.UTC)
-            );
+        broadcaster = new SubscriberRegistryBroadcaster(
+            streamBridge,
+            registry,
+            SOURCE_ID,
+            DESTINATION,
+            Clock.fixed(NOW, ZoneOffset.UTC)
+        );
     }
 
     @Test
