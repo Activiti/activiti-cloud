@@ -42,6 +42,10 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-pushed-counts-relay</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-query-liquibase</artifactId>
     </dependency>
     <dependency>
