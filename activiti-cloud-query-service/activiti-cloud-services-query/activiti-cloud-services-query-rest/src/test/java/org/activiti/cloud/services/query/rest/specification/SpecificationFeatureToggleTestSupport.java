@@ -33,7 +33,8 @@ import org.mockito.Answers;
  * <ul>
  *     <li>helpers to enable / reset the feature toggle at test level;</li>
  *     <li>a factory of deep-stubbed JPA criteria mocks pre-configured to drive the
- *     {@link SpecificationSupport#toPredicate} control flow without {@code NullPointerException}s.</li>
+ *     {@link org.activiti.cloud.services.query.app.specification.SpecificationSupport#toPredicate} control flow
+ *     without {@code NullPointerException}s.</li>
  * </ul>
  */
 abstract class SpecificationFeatureToggleTestSupport {

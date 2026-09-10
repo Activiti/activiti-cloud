@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest.payload;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.api.task.model.Task;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.junit.jupiter.api.Test;
 

@@ -25,8 +25,8 @@ public final class QueryFeatureToggles {
     private QueryFeatureToggles() {}
 
     /**
-     * Switches the {@link org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification}
-     * and {@link org.activiti.cloud.services.query.rest.specification.TaskSpecification} between
+     * Switches the {@link org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification}
+     * and {@link org.activiti.cloud.services.query.app.specification.TaskSpecification} between
      * the legacy join-based queries (flag {@code false}, the default) and the {@code EXISTS}
      * subquery-based queries (flag {@code true}).
      */
