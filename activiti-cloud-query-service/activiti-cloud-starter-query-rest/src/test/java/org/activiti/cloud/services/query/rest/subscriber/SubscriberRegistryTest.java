@@ -23,11 +23,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -101,6 +103,27 @@ class SubscriberRegistryTest {
         registry.unregister("nobody", "session-1", NOW);
 
         verifyNoInteractions(eventPublisher);
+    }
+
+    @Test
+    void should_returnAnEntryPerLiveUserWithTheirGroups_when_snapshotEntriesIsCalled() {
+        registry.register("alice", Set.of("eng"), "session-1", NOW);
+        registry.register("bob", Set.of("sales", "ops"), "session-2", NOW);
+
+        List<SubscriberRegistryMessage.Entry> entries = registry.snapshotEntries();
+
+        assertThat(entries)
+            .extracting(SubscriberRegistryMessage.Entry::userId)
+            .containsExactlyInAnyOrder("alice", "bob");
+        assertThat(entries)
+            .filteredOn(entry -> entry.userId().equals("bob"))
+            .singleElement()
+            .satisfies(entry -> assertThat(entry.groups()).containsExactlyInAnyOrder("sales", "ops"));
+    }
+
+    @Test
+    void should_returnAnEmptyList_when_snapshotEntriesIsCalledOnAnEmptyRegistry() {
+        assertThat(registry.snapshotEntries()).isEmpty();
     }
 
     @Test
