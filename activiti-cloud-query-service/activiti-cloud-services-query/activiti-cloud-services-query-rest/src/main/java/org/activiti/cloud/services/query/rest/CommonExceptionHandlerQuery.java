@@ -21,6 +21,8 @@ import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
 import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
+import org.activiti.cloud.services.query.app.specification.IllegalFilterException;
+import org.activiti.cloud.services.query.app.specification.InvalidSortException;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +59,20 @@ public class CommonExceptionHandlerQuery {
         IllegalStateException ex,
         HttpServletResponse response
     ) {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+
+    // Deliberately no body: the underlying value/type/operator mismatch is not the client's to see.
+    @ExceptionHandler(IllegalFilterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void handleAppException(IllegalFilterException ex) {
+        LOGGER.warn(ex.getMessage(), ex);
+    }
+
+    @ExceptionHandler(InvalidSortException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public EntityModel<ActivitiErrorMessage> handleAppException(InvalidSortException ex, HttpServletResponse response) {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
     }

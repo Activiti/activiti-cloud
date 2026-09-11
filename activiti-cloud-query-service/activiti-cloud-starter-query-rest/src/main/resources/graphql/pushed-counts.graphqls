@@ -1,0 +1,18 @@
+"""
+A schema must have a Query type - this field exists only to satisfy that, for deployments
+where nothing else supplies one (e.g. query-rest without notifications-graphql-service).
+"""
+type Query {
+    _pushedCountsSchemaPlaceholder: Boolean
+}
+
+type Subscription {
+    assignedTasks: PushedCount
+    queuedTasks: PushedCount
+    runningProcesses: PushedCount
+}
+
+type PushedCount {
+    count: Int!
+    asOf: String!
+}
