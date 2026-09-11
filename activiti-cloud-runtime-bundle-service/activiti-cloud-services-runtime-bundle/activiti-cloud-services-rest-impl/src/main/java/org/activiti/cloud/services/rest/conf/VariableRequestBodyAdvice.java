@@ -24,6 +24,7 @@ import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
+import org.activiti.cloud.services.core.validation.RequestBodySizeLimitExceededException;
 import org.activiti.cloud.services.core.validation.VariableProperties;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -47,7 +48,7 @@ public class VariableRequestBodyAdvice extends RequestBodyAdviceAdapter {
         Type targetType,
         Class<? extends HttpMessageConverter<?>> converterType
     ) {
-        if (variableProperties == null) {
+        if (variableProperties == null || variableProperties.getMaxRequestSize() <= 0) {
             return false;
         }
         return (
@@ -116,10 +117,10 @@ public class VariableRequestBodyAdvice extends RequestBodyAdviceAdapter {
             return skipped;
         }
 
-        private void increment(long amount) throws IOException {
+        private void increment(long amount) {
             count += amount;
             if (limit > 0 && count > limit) {
-                throw new IOException("Request body exceeds the configured maximum size");
+                throw new RequestBodySizeLimitExceededException(limit);
             }
         }
     }

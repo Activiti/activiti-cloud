@@ -229,4 +229,31 @@ class ProcessInstanceVariableControllerImplIT {
             "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
         );
     }
+
+    @Test
+    void setVariablesShouldReturnBadRequestWhenRequestBodyExceedsConfiguredSize() throws Exception {
+        variableProperties.setMaxRequestSize(50);
+        String largeValue = "x".repeat(100);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("bigVar", largeValue);
+
+        MvcResult result = this.mockMvc.perform(
+                put("/v1/process-instances/{processInstanceId}/variables", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder.setVariables()
+                                .withProcessInstanceId("1")
+                                .withVariables(variables)
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).contains(
+            "Request body exceeds the configured maximum size of 50 bytes"
+        );
+    }
 }

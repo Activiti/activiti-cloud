@@ -42,6 +42,35 @@ class VariableValueSizeValidatorTest {
     }
 
     @Test
+    void shouldDeriveMaxRequestSizeFromMaxValueSize() {
+        assertThat(variableProperties.getMaxRequestSize()).isEqualTo(5 * 1024 * 1024 + 1024);
+    }
+
+    @Test
+    void shouldDisableMaxRequestSizeWhenMaxValueSizeIsDisabled() {
+        variableProperties.setMaxValueSize(0);
+        assertThat(variableProperties.getMaxRequestSize()).isEqualTo(0);
+
+        variableProperties.setMaxValueSize(-1);
+        assertThat(variableProperties.getMaxRequestSize()).isEqualTo(0);
+    }
+
+    @Test
+    void shouldUseExplicitMaxRequestSizeWhenSet() {
+        variableProperties.setMaxRequestSize(10_000);
+        assertThat(variableProperties.getMaxRequestSize()).isEqualTo(10_000);
+
+        variableProperties.setMaxValueSize(0);
+        assertThat(variableProperties.getMaxRequestSize()).isEqualTo(10_000);
+    }
+
+    @Test
+    void shouldDeriveMaxRequestSizeWhenMaxValueSizeIsChanged() {
+        variableProperties.setMaxValueSize(10 * 1024 * 1024);
+        assertThat(variableProperties.getMaxRequestSize()).isEqualTo(10 * 1024 * 1024 + 1024);
+    }
+
+    @Test
     void shouldPassWhenValueIsUnderLimit() {
         variableProperties.setMaxValueSize(5);
 

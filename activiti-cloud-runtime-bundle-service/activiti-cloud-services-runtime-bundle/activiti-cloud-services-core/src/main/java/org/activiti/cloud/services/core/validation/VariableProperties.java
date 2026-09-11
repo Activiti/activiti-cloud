@@ -21,10 +21,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class VariableProperties {
 
     public static final int DEFAULT_MAX_VALUE_SIZE = 5 * 1024 * 1024;
-    public static final int DEFAULT_MAX_REQUEST_SIZE = DEFAULT_MAX_VALUE_SIZE + 1024;
+    private static final int REQUEST_SIZE_OVERHEAD = 1024;
 
     private int maxValueSize = DEFAULT_MAX_VALUE_SIZE;
-    private int maxRequestSize = DEFAULT_MAX_REQUEST_SIZE;
+    private Integer maxRequestSize;
 
     public int getMaxValueSize() {
         return maxValueSize;
@@ -34,8 +34,21 @@ public class VariableProperties {
         this.maxValueSize = maxValueSize;
     }
 
+    /**
+     * Returns the maximum allowed request body size in bytes.
+     * When explicitly configured via {@code activiti.cloud.variable.max-request-size},
+     * that value is used as-is. Otherwise the limit is derived from {@code maxValueSize}:
+     * disabled (0) when {@code maxValueSize} is disabled ({@code <= 0}),
+     * or {@code maxValueSize + 1 KB} otherwise.
+     */
     public int getMaxRequestSize() {
-        return maxRequestSize;
+        if (maxRequestSize != null) {
+            return maxRequestSize;
+        }
+        if (maxValueSize <= 0) {
+            return 0;
+        }
+        return maxValueSize + REQUEST_SIZE_OVERHEAD;
     }
 
     public void setMaxRequestSize(int maxRequestSize) {
