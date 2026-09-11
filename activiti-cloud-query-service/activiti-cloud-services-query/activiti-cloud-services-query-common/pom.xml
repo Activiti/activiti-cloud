@@ -9,4 +9,11 @@
   </parent>
   <artifactId>activiti-cloud-services-query-common</artifactId>
   <name>Activiti Cloud Query :: Services :: Query Common</name>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>

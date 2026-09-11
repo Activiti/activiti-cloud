@@ -75,7 +75,7 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
 @EnableCleanupLiquibaseAfterTest
 @EnableBinderFactoryListenerTestContext
 @ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
-public class QueryRestApplicationIT {
+class QueryRestApplicationIT {
 
     @ServiceConnection
     static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
@@ -116,12 +116,12 @@ public class QueryRestApplicationIT {
     protected BindingServiceProperties bindingServiceProperties;
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         assertThat(applicationContext).isNotNull();
     }
 
     @Test
-    public void defaultSpecificationFileShouldBeAlfrescoFormat() throws Exception {
+    void defaultSpecificationFileShouldBeAlfrescoFormat() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
         mockMvc
             .perform(MockMvcRequestBuilders.get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
@@ -183,12 +183,13 @@ public class QueryRestApplicationIT {
                 "ProcessModels",
                 "ServiceTask",
                 "ServiceTasks",
-                "hello"
+                "hello",
+                "_pushedCountsSchemaPlaceholder"
             );
     }
 
     @Test
-    public void testGraphqlModelerUserShouldNotSeeTasks() {
+    void testGraphqlModelerUserShouldNotSeeTasks() {
         GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
             "{Tasks{select{name assignee priority}}}"
         );
@@ -205,11 +206,11 @@ public class QueryRestApplicationIT {
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors()).isNull();
-        assertThat("{Tasks={select=[]}}").isEqualTo(result.getData().toString());
+        assertThat(result.getData().toString()).hasToString("{Tasks={select=[]}}");
     }
 
     @Test
-    public void testGraphqlAdminUserShouldSeeAllTasks() {
+    void testGraphqlAdminUserShouldSeeAllTasks() {
         GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
             "{Tasks{select{name assignee priority}}}"
         );
@@ -239,7 +240,7 @@ public class QueryRestApplicationIT {
     }
 
     @Test
-    public void testGraphqlUserShouldSeeInvolvedTasks() {
+    void testGraphqlUserShouldSeeInvolvedTasks() {
         GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
             "{Tasks{select{name assignee priority}}}"
         );
