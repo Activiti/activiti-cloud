@@ -24,6 +24,7 @@ import jakarta.persistence.criteria.Predicate;
 import java.io.Serializable;
 import java.util.Collections;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
+import org.activiti.cloud.services.query.app.repository.config.AdminRequestContext;
 import org.activiti.cloud.services.query.app.repository.function.CustomSQLFunction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
@@ -75,7 +76,8 @@ public class CustomizedJpaSpecificationExecutorImpl<T, I extends Serializable>
     }
 
     private <T> void applyQueryTimeout(TypedQuery<T> query) {
-        if (queryTimeout > 0) {
+        // Only apply query timeout for admin endpoints during heavy operations
+        if (queryTimeout > 0 && AdminRequestContext.isAdminRequest()) {
             query.setHint("jakarta.persistence.query.timeout", queryTimeout);
             query.setHint("org.hibernate.timeout", queryTimeout / 1000);
         }

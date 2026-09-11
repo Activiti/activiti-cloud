@@ -4,6 +4,8 @@
 
 This document describes the query timeout protection mechanisms implemented to prevent long-running database queries from consuming resources during heavy database loads in the Activiti Query Service.
 
+**Note:** Query timeouts are applied **only to admin endpoints** (`/admin/*`) to protect from heavy load during administrative operations while allowing user endpoints to run without strict timeout constraints.
+
 ## Problem Statement
 
 During heavy database loads, some queries (particularly in the `/admin/*` endpoints) can exceed 17 minutes, while the application drops the connection after 2 minutes. This causes:
@@ -57,11 +59,12 @@ spring.datasource.hikari.leak-detection-threshold=30000 # 30 seconds
 - `idle-timeout`: Releases unused connections (10min)
 - `leak-detection-threshold`: Logs connections held > 30s
 
-### Phase 3: Application-Level Query Timeout
+### Phase 3: Application-Level Query Timeout (Admin Endpoints Only)
 
 **Configuration Properties:**
 ```properties
 # JPA/Hibernate Query Timeout (in milliseconds)
+# ONLY applied to /admin/* endpoints
 spring.jpa.properties.hibernate.query.timeout=120000  # 2 minutes
 
 # Statement cache
@@ -72,14 +75,16 @@ spring.jpa.properties.org.hibernate.jdbc.fetch_size=100
 ```
 
 **Implementation:**
-- `CustomizedJpaSpecificationExecutorImpl` applies timeout hints to all JPA queries
-- Timeout is set on both JPA (`jakarta.persistence.query.timeout`) and Hibernate (`org.hibernate.timeout`) levels
-- Converts milliseconds to seconds for Hibernate where needed
+- `AdminRequestInterceptor` detects requests to `/admin/*` endpoints
+- `AdminRequestContext` tracks if current request is admin
+- `CustomizedJpaSpecificationExecutorImpl` only applies timeout hints when `AdminRequestContext.isAdminRequest()` returns true
+- **User endpoints** (`/v1/*`) are NOT affected by the query timeout
 
 **Benefits:**
-- Application gracefully handles query timeouts
-- Allows proper error handling and logging
-- Prevents query threads from hanging indefinitely
+- Admin/operational queries are protected from long execution times
+- User-facing queries can run without timeout constraints
+- Enables proper error handling and logging for admin operations
+- Prevents resource starvation during administrative bulk operations
 
 ### Phase 4: Request-Level Timeout (Future Enhancement)
 
@@ -121,34 +126,79 @@ public class QueryTimeoutConfiguration {
 
 ### 2. CustomizedJpaSpecificationExecutorImpl.java (ENHANCED)
 
-Enhanced to apply query timeout hints to all queries:
+Enhanced to apply query timeout hints only to admin queries:
 
 ```java
 private void applyQueryTimeout(TypedQuery<T> query) {
-    if (queryTimeout > 0) {
+    // Only apply query timeout for admin endpoints during heavy operations
+    if (queryTimeout > 0 && AdminRequestContext.isAdminRequest()) {
         query.setHint("jakarta.persistence.query.timeout", queryTimeout);
         query.setHint("org.hibernate.timeout", queryTimeout / 1000);
     }
 }
 ```
 
-### 3. QueryRepositoryAutoConfiguration.java (ENHANCED)
+### 3. AdminRequestContext.java (NEW)
+
+ThreadLocal-based context holder to track if current request is admin:
+
+```java
+public class AdminRequestContext {
+    private static final ThreadLocal<Boolean> ADMIN_REQUEST = ThreadLocal.withInitial(() -> false);
+    
+    public static void markAsAdminRequest() { ... }
+    public static void markAsUserRequest() { ... }
+    public static boolean isAdminRequest() { ... }
+    public static void clear() { ... }
+}
+```
+
+### 4. AdminRequestInterceptor.java (NEW)
+
+Spring HandlerInterceptor that marks admin requests:
+
+```java
+@Component
+public class AdminRequestInterceptor implements HandlerInterceptor {
+    // Detects /admin/ prefix in request URI
+    // Calls AdminRequestContext.markAsAdminRequest() for admin endpoints
+    // Clears context in afterCompletion() to prevent ThreadLocal leaks
+}
+```
+
+### 5. QueryWebMvcConfig.java (NEW)
+
+WebMvcConfigurer to register the AdminRequestInterceptor:
+
+```java
+@AutoConfiguration
+public class QueryWebMvcConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(adminRequestInterceptor);
+    }
+}
+```
+
+### 6. QueryRepositoryAutoConfiguration.java (ENHANCED)
 
 Updated to register the QueryTimeoutConfiguration bean.
 
-### 4. ProcessInstanceAdminService.java (ENHANCED)
+### 7. ProcessInstanceAdminService.java (ENHANCED)
 
 Updated to accept optional QueryTimeoutProperties for future timeout-aware query building.
 
 ## Timeout Values Recommended
 
 ### Development/Testing
-- Query timeout: 120 seconds (2 minutes)
+- Admin query timeout: 120 seconds (2 minutes) - only on `/admin/*` endpoints
+- User query timeout: No timeout - `/v1/*` endpoints run without strict timeout
 - Connection timeout: 30 seconds
 - Pool size: 5-10 connections
 
 ### Production
-- Query timeout: 300 seconds (5 minutes) - allows sufficient time for complex queries
+- Admin query timeout: 300 seconds (5 minutes) - allows sufficient time for complex admin queries
+- User query timeout: No timeout - user endpoints have no strict timeout
 - Connection timeout: 30-60 seconds
 - Pool size: 20-50 connections (depends on load)
 - Database statement_timeout: 600 seconds (10 minutes) - prevents stuck queries
