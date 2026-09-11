@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import java.util.List;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 
 public record RestrictedTaskCountCacheKey(
     String authenticatedUserId,
