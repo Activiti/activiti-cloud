@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 
 class SubscriberRegistryResyncRequesterTest {
 
@@ -52,10 +54,24 @@ class SubscriberRegistryResyncRequesterTest {
         requester.requestResync();
 
         assertThat(sent).hasSize(1);
-        assertThat(sent.get(0).getPayload()).isInstanceOf(SubscriberRegistryMessage.class);
-        SubscriberRegistryMessage message = (SubscriberRegistryMessage) sent.get(0).getPayload();
+        assertThat(sent.getFirst().getPayload()).isInstanceOf(SubscriberRegistryMessage.class);
+        SubscriberRegistryMessage message = (SubscriberRegistryMessage) sent.getFirst().getPayload();
         assertThat(message.type()).isEqualTo(RegistryMessageType.RESYNC_REQUEST);
         assertThat(message.sourceId()).isEqualTo("consumer-1");
         assertThat(message.sentAt()).isEqualTo(T0);
+    }
+
+    @Test
+    void doesNotPropagate_whenBrokerSendFails() {
+        MessageChannel failingProducer = (message, timeout) -> {
+            throw new MessageDeliveryException(message, "broker unavailable");
+        };
+        SubscriberRegistryResyncRequester requesterWithFailingProducer = new SubscriberRegistryResyncRequester(
+            failingProducer,
+            "consumer-1",
+            Clock.fixed(T0, ZoneOffset.UTC)
+        );
+
+        assertThatCode(requesterWithFailingProducer::requestResync).doesNotThrowAnyException();
     }
 }
