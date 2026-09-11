@@ -31,6 +31,7 @@ import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.config.QueryTimeoutConfiguration;
 import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
@@ -38,6 +39,7 @@ import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggrega
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.hibernate.Filter;
 import org.hibernate.Session;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +56,8 @@ public class ProcessInstanceAdminService {
 
     private final QueryDslPredicateAggregator predicateAggregator;
 
+    private final QueryTimeoutConfiguration.QueryTimeoutProperties queryTimeoutProperties;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -63,10 +67,28 @@ public class ProcessInstanceAdminService {
         EntityFinder entityFinder,
         QueryDslPredicateAggregator queryDslPredicateAggregator
     ) {
+        this(
+            processInstanceRepository,
+            processInstanceSearchService,
+            entityFinder,
+            queryDslPredicateAggregator,
+            null
+        );
+    }
+
+    @Autowired(required = false)
+    public ProcessInstanceAdminService(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceSearchService processInstanceSearchService,
+        EntityFinder entityFinder,
+        QueryDslPredicateAggregator queryDslPredicateAggregator,
+        Optional<QueryTimeoutConfiguration.QueryTimeoutProperties> queryTimeoutProperties
+    ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceSearchService = processInstanceSearchService;
         this.entityFinder = entityFinder;
         this.predicateAggregator = queryDslPredicateAggregator;
+        this.queryTimeoutProperties = queryTimeoutProperties.orElse(null);
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {

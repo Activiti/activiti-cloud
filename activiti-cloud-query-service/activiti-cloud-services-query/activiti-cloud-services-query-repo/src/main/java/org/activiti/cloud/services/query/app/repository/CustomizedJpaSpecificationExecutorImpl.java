@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.app.repository.function.CustomSQLFunction;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
@@ -37,6 +38,9 @@ public class CustomizedJpaSpecificationExecutorImpl<T, I extends Serializable>
 {
 
     private final EntityManager entityManager;
+
+    @Value("${spring.jpa.properties.hibernate.query.timeout:120000}")
+    private int queryTimeout;
 
     public CustomizedJpaSpecificationExecutorImpl(
         JpaEntityInformation<T, ?> entityInformation,
@@ -61,9 +65,19 @@ public class CustomizedJpaSpecificationExecutorImpl<T, I extends Serializable>
                 query.orderBy(Collections.emptyList());
                 TypedQuery<Long> typedQuery = entityManager.createQuery(query);
                 typedQuery.setMaxResults(1);
+                applyQueryTimeout(typedQuery);
                 return typedQuery;
             }
         }
-        return super.getCountQuery(spec, domainClass);
+        TypedQuery<Long> typedQuery = super.getCountQuery(spec, domainClass);
+        applyQueryTimeout(typedQuery);
+        return typedQuery;
+    }
+
+    private <T> void applyQueryTimeout(TypedQuery<T> query) {
+        if (queryTimeout > 0) {
+            query.setHint("jakarta.persistence.query.timeout", queryTimeout);
+            query.setHint("org.hibernate.timeout", queryTimeout / 1000);
+        }
     }
 }

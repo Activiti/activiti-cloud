@@ -38,4 +38,10 @@ public class QueryRepositoryAutoConfiguration {
     public EntityFinder entityFinder() {
         return new EntityFinder();
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public QueryTimeoutConfiguration queryTimeoutConfiguration() {
+        return new QueryTimeoutConfiguration();
+    }
 }
