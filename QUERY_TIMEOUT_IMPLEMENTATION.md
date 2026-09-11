@@ -77,13 +77,15 @@ spring.jpa.properties.org.hibernate.jdbc.fetch_size=100
 **Implementation:**
 - `AdminRequestInterceptor` detects requests to `/admin/*` endpoints
 - `AdminRequestContext` tracks if current request is admin
-- `CustomizedJpaSpecificationExecutorImpl` only applies timeout hints when `AdminRequestContext.isAdminRequest()` returns true
+- `CustomizedJpaSpecificationExecutorImpl.getCountQuery()` applies timeout hints **ONLY for SELECT queries**
+- **Timeout hints are NOT applied to DELETE or INSERT operations** (they use different repository methods)
 - **User endpoints** (`/v1/*`) are NOT affected by the query timeout
 
 **Benefits:**
-- Admin/operational queries are protected from long execution times
+- Admin/operational READ queries are protected from long execution times
+- DELETE and INSERT operations can run without timeout constraints
 - User-facing queries can run without timeout constraints
-- Enables proper error handling and logging for admin operations
+- Enables proper error handling and logging for admin read operations
 - Prevents resource starvation during administrative bulk operations
 
 ### Phase 4: Request-Level Timeout (Future Enhancement)
@@ -203,7 +205,19 @@ Updated to accept optional QueryTimeoutProperties for future timeout-aware query
 - Pool size: 20-50 connections (depends on load)
 - Database statement_timeout: 600 seconds (10 minutes) - prevents stuck queries
 
-## Monitoring and Alerts
+## Timeout Scope: What Gets Protected
+
+### Operations WITH Query Timeout (Admin Endpoints Only)
+✅ **SELECT queries** - Process instance searches, counts, retrievals
+✅ **SELECT for UPDATE** - Pessimistic locking queries
+✅ **Complex analytics** - Aggregations, grouping, large result sets
+
+### Operations WITHOUT Query Timeout (All Endpoints)
+❌ **DELETE operations** - Cascade deletions can take legitimate time
+❌ **INSERT operations** - Bulk inserts with constraints checking
+❌ **UPDATE operations** - Large batch updates
+❌ **User endpoint queries** (`/v1/*`) - No timeout constraints
+❌ **System operations** - Background jobs, event processing
 
 ### Log Messages to Monitor
 
