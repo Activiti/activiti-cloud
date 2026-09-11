@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 public class QueryTimeoutConfiguration {
 
-    @Value("${spring.jpa.properties.hibernate.query.timeout:120000}")
+    @Value("${spring.jpa.properties.hibernate.query.timeout:300000}")
     private int queryTimeout;
 
     @Value("${spring.datasource.hikari.connection-timeout:30000}")

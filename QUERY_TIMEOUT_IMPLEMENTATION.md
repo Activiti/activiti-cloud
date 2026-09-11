@@ -65,7 +65,7 @@ spring.datasource.hikari.leak-detection-threshold=30000 # 30 seconds
 ```properties
 # JPA/Hibernate Query Timeout (in milliseconds)
 # ONLY applied to /admin/* endpoints
-spring.jpa.properties.hibernate.query.timeout=120000  # 2 minutes
+spring.jpa.properties.hibernate.query.timeout=300000  # 5 minutes
 
 # Statement cache
 spring.jpa.properties.hibernate.jdbc.statement_cache_size=250
@@ -193,7 +193,7 @@ Updated to accept optional QueryTimeoutProperties for future timeout-aware query
 ## Timeout Values Recommended
 
 ### Development/Testing
-- Admin query timeout: 120 seconds (2 minutes) - only on `/admin/*` endpoints
+- Admin query timeout: 300 seconds (5 minutes) - only on `/admin/*` endpoints
 - User query timeout: No timeout - `/v1/*` endpoints run without strict timeout
 - Connection timeout: 30 seconds
 - Pool size: 5-10 connections
@@ -251,7 +251,7 @@ ERROR: Database connection leaked - connection held for XXms
 
 ### Issue: "Query timeout" errors increasing in logs
 
-**Cause:** Queries are legitimately taking > 2 minutes
+**Cause:** Queries are legitimately taking > 5 minutes
 
 **Solutions:**
 1. Increase `spring.jpa.properties.hibernate.query.timeout` value
@@ -297,7 +297,7 @@ ERROR: Database connection leaked - connection held for XXms
 1. **Dynamic Timeout Configuration:**
    - Make timeouts configurable per endpoint
    - Admin endpoints: longer timeout (5 minutes)
-   - User endpoints: shorter timeout (2 minutes)
+   - User endpoints: shorter timeout (5 minutes)
 
 2. **Query Metrics Collection:**
    - Instrument queries to collect execution time metrics

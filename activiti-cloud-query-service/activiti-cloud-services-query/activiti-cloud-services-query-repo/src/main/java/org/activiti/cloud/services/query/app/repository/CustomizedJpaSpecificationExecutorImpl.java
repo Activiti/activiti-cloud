@@ -40,7 +40,7 @@ public class CustomizedJpaSpecificationExecutorImpl<T, I extends Serializable>
 
     private final EntityManager entityManager;
 
-    @Value("${spring.jpa.properties.hibernate.query.timeout:120000}")
+    @Value("${spring.jpa.properties.hibernate.query.timeout:300000}")
     private int queryTimeout;
 
     public CustomizedJpaSpecificationExecutorImpl(
