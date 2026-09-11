@@ -112,6 +112,11 @@ spring.webflux.httpclient.max-idle-time=5m
 3. **Test Configuration:**
    - `activiti-cloud-starter-query/src/test/resources/application-test.properties`
 
+**Override Settings in Your Environment:**
+- Set environment variable: `SPRING_JPA_PROPERTIES_HIBERNATE_QUERY_TIMEOUT=300000`
+- In your `application.properties`: `spring.jpa.properties.hibernate.query.timeout=300000`
+- As Java system property: `-Dspring.jpa.properties.hibernate.query.timeout=300000`
+
 ## Code Changes
 
 ### 1. QueryTimeoutConfiguration.java (NEW)
