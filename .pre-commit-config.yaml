@@ -26,14 +26,14 @@ repos:
           - prettier-plugin-java@2.8.1
         exclude: ^\.github/workflows/.*\.(lock\.yml|md)$
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 6b63472e72e1a91ed8a2f6d483790dfb644fa1d3 # frozen: 0.37.4
+    rev: 12e63946db2c5cfcc9030fac21c3883ba88c6ed8 # frozen: 0.38.0
     hooks:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
         exclude: ^\.github/workflows/.*\.lock\.yml$
   - repo: https://github.com/returntocorp/semgrep
-    rev: 16f6e92bb512558496b05c1b695e482245876fc0 # frozen: v1.59.1
+    rev: 5bdaec16e18e33c520426dc1e4417161219daf35 # frozen: v1.176.0
     hooks:
       - id: semgrep
         types_or:
