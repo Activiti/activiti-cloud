@@ -18,11 +18,18 @@ package org.activiti.cloud.starter.tests.conf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
+import org.activiti.cloud.starter.rb.configuration.ResourceQueryConfigurer;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.impl.interceptor.Command;
+import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ResourceEntity;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ActivitiProperties;
@@ -232,5 +239,39 @@ class EngineConfigurationIT {
         assertThat(
             ((CaffeineCache) springProcessDefinitionCache.getDelegate()).getNativeCache().estimatedSize()
         ).isEqualTo(Long.valueOf(activitiProperties.getProcessDefinitionCacheLimit()));
+    }
+
+    @Test
+    void shouldRegisterCustomResourceMapperAndFetchSize() {
+        assertThat(configuration.getCustomMybatisXMLMappers())
+            .extracting(resource -> resource.getDescription())
+            .anyMatch(description -> description.contains(ResourceQueryConfigurer.RESOURCE_MAPPER_PATH));
+    }
+
+    @Test
+    void shouldNotLoadDeploymentResourceBytesEagerlyButStillLoadSingleResourceOnDemand() throws IOException {
+        var deployment = repositoryService.createDeployment()
+            .addClasspathResource("processes/SimpleProcess.bpmn20.xml")
+            .deploy();
+
+        List<ResourceEntity> resources = configuration.getCommandExecutor().execute(
+            new Command<List<ResourceEntity>>() {
+                @Override
+                public List<ResourceEntity> execute(CommandContext commandContext) {
+                    return commandContext.getResourceEntityManager().findResourcesByDeploymentId(deployment.getId());
+                }
+            }
+        );
+
+        assertThat(resources).isNotEmpty();
+        assertThat(resources).allMatch(resource -> resource.getBytes() == null);
+        try (var resourceStream = repositoryService.getResourceAsStream(
+            deployment.getId(),
+            "processes/SimpleProcess.bpmn20.xml"
+        )) {
+            assertThat(resourceStream.readAllBytes()).contains(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>".getBytes(StandardCharsets.UTF_8)
+            );
+        }
     }
 }
