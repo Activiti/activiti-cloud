@@ -357,17 +357,17 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
     private void handleRetryDiscardFlow(IntegrationFlowDefinition<?> flow, int maxRetry, long retryDelay) {
         flow.handle((payload, headers) -> {
-            Message<?> newMessage = handleMessagingExceptionIfPossible(payload, headers).orElse(
-                buildNewMessage(headers, payload)
-            );
             final var destination = headers.get("spring.cloud.function.destination", String.class);
             if (destination != null) {
                 int retryCount = getRetryCount(headers);
-                if (retryCount < maxRetry - 1) {
+                if (retryCount < maxRetry) {
+                    Message<?> newMessage = handleMessagingExceptionIfPossible(payload, headers).orElse(
+                        buildNewMessage(headers, payload)
+                    );
                     safeSleep(retryDelay);
                     getStreamBridge().send(destination, newMessage);
                 } else {
-                    LOGGER.error("Cannot retry message because retry limited exceeded: {}", maxRetry);
+                    LOGGER.error("Cannot retry message because retry limit exceeded: {}", maxRetry);
                 }
             } else {
                 LOGGER.error("Cannot retry message because destination from headers is null: {}", headers);

@@ -17,13 +17,13 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -40,12 +40,15 @@ import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
@@ -55,6 +58,7 @@ import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.MessageDispatchingException;
@@ -69,6 +73,18 @@ import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
+/**
+ * Routes connector messages to per-connector executors under manual acknowledgment: the router acks
+ * only once the fire-and-forget handoff to the executor has genuinely completed, and redelivers
+ * delivery failures rather than dropping the work.
+ *
+ * <p>A destination may fan out to several registrations sharing a single broker delivery. Delivery
+ * failures are handled so that already-succeeded registrations are not re-run: when all registrations
+ * fail the whole message is nack+requeued; when only some fail, just those are re-published pinned via
+ * the {@link #TARGET_REGISTRATIONS} header and the original message is acked. If the re-publish cannot
+ * be sent, the router falls back to requeueing the whole message so nothing is lost, so consumers
+ * sharing a destination should still tolerate occasional redelivery.
+ */
 @AutoConfiguration(
     before = InputBindingConfiguration.class,
     after = { BinderFactoryAutoConfiguration.class, ActivitiMessagingDestinationsAutoConfiguration.class }
@@ -82,6 +98,7 @@ public class FunctionRouterConfiguration {
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
     public static final String FUNCTION_ROUTER_ANONYMOUS_INPUT = "functionRouterAnonymousInput";
     public static final String CONNECTOR_TYPE = "connectorType";
+    public static final String TARGET_REGISTRATIONS = "functionRouterTargetRegistrations";
     private static final String QUEUE_MASTER_LOCATOR = "x-queue-master-locator";
 
     @Bean
@@ -165,6 +182,31 @@ public class FunctionRouterConfiguration {
         return message -> functionRegistrationSelector.andThen(functionRouterExecutorFactory).apply(message);
     }
 
+    /**
+     * Binder-neutral acknowledgment used when no binder-specific implementation is on the classpath.
+     * A {@code DeliveryAcknowledgment} bean declared by the application overrides it.
+     */
+    @Bean
+    @ConditionalOnMissingBean(DeliveryAcknowledgment.class)
+    @ConditionalOnMissingClass("com.rabbitmq.client.Channel")
+    DeliveryAcknowledgment deliveryAcknowledgment() {
+        return new NeutralDeliveryAcknowledgment();
+    }
+
+    /**
+     * RabbitMQ-specific acknowledgment, contributed only when the AMQP client is on the classpath.
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(name = "com.rabbitmq.client.Channel")
+    static class RabbitDeliveryAcknowledgmentConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(DeliveryAcknowledgment.class)
+        DeliveryAcknowledgment rabbitDeliveryAcknowledgment() {
+            return new RabbitDeliveryAcknowledgment();
+        }
+    }
+
     @Bean
     BiConsumer<Message<?>, String> functionRouterMessageHandler(
         RoutingFunction routingFunction,
@@ -172,12 +214,16 @@ public class FunctionRouterConfiguration {
         FunctionCatalog functionCatalog,
         Function<Message<?>, ExecutorService> functionExecutorSelector,
         MessageContentTypeNormalizer messageContentTypeNormalizer,
-        BindingServiceProperties bindingServiceProperties
+        BindingServiceProperties bindingServiceProperties,
+        ObjectProvider<StreamBridge> streamBridgeProvider,
+        DeliveryAcknowledgment deliveryAcknowledgment
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
         return (message, routingContext) -> {
-            Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
+            final var resolvedDestination = Optional.ofNullable(
+                message.getHeaders().get(FUNCTION_DESTINATION, String.class)
+            )
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
                 .or(() ->
                     Optional.ofNullable(messagingProperties.getRabbitmq().getPrefix())
@@ -188,13 +234,23 @@ public class FunctionRouterConfiguration {
                                 .map(exchange -> exchange.substring(prefix.length()))
                         )
                 )
-                .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
-                .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
-                .filter(Predicate.not(Collection::isEmpty))
+                .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)));
+
+            resolvedDestination
+                .map(destination ->
+                    Map.entry(
+                        destination,
+                        filterToTargetRegistrations(
+                            message,
+                            messagingProperties.getFunctionRouter().registrations(routingContext).get(destination)
+                        )
+                    )
+                )
+                .filter(entry -> !entry.getValue().isEmpty())
                 .ifPresentOrElse(
-                    registrations -> {
-                        Function<Message<?>, String> resolveFunctionDefinition = functionMessage ->
-                            functionMessage.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class);
+                    entry -> {
+                        final var destination = entry.getKey();
+                        final var registrations = entry.getValue();
                         BiFunction<Message<?>, String, Message<?>> toFunctionRequest = (
                             functionMessage,
                             functionRegistration
@@ -204,94 +260,170 @@ public class FunctionRouterConfiguration {
                                 .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
                                 .map(BindingProperties::getContentType)
                                 .orElse(null);
-                            return MessageBuilder.fromMessage(
+                            var builder = MessageBuilder.fromMessage(
                                 messageContentTypeNormalizer.normalizeToExpected(functionMessage, expectedContentType)
                             )
                                 .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
-                                .build();
+                                .removeHeader(TARGET_REGISTRATIONS);
+                            // The acknowledgment handle is live and non-serializable, so it must not
+                            // leak into the routed business message: a handler that persists it (e.g.
+                            // the messages-service's JdbcMessageStore aggregator serializes the message)
+                            // would fail. The outer message keeps it for acknowledge()/requeue().
+                            deliveryAcknowledgment.acknowledgmentHeaders().forEach(builder::removeHeader);
+                            return builder.build();
+                        };
+
+                        Function<Message<?>, CompletableFuture<Object>> submitFunctionRequest = functionRequest -> {
+                            // supplyAsync() submits synchronously, so a throwing
+                            // RejectedExecutionHandler (queue full / executor shutting down) would
+                            // escape here instead of failing the future - wrap it so the retry and
+                            // exceptionally() handling below still apply.
+                            try {
+                                return CompletableFuture.supplyAsync(
+                                    () -> routingFunction.apply(functionRequest),
+                                    functionExecutorSelector.apply(functionRequest)
+                                );
+                            } catch (RuntimeException e) {
+                                return CompletableFuture.failedFuture(e);
+                            }
                         };
 
                         var functions = registrations
                             .stream()
-                            .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
-                            .map(functionRequest ->
-                                supplyAsyncWithRetry(
-                                    () ->
-                                        CompletableFuture.supplyAsync(
-                                            () -> routingFunction.apply(functionRequest),
-                                            functionExecutorSelector.apply(functionRequest)
-                                        ),
+                            .map(functionRegistration -> {
+                                var functionRequest = toFunctionRequest.apply(message, functionRegistration);
+                                return supplyAsyncWithRetry(
+                                    () -> submitFunctionRequest.apply(functionRequest),
                                     functionRouter.getMaxRetries(),
                                     functionRouter.getRetryInterval()
                                 )
                                     .thenApply(result -> {
-                                        var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
                                         log.debug(
                                             "Function message request {} successfully routed to {}",
                                             functionRequest,
-                                            functionDefinition
+                                            functionRegistration
                                         );
-                                        return Map.entry(functionDefinition, Optional.ofNullable(result));
+                                        return new RegistrationOutcome(functionRegistration, Optional.empty(), false);
                                     })
                                     .exceptionally(error -> {
-                                        var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
+                                        var cause = error instanceof CompletionException ce ? ce.getCause() : error;
+
+                                        // Delivery failures are redelivered (only the failed
+                                        // registration, see below), not reported to the service task
+                                        // as errors. debug, not warn: an unclearing failure loops with
+                                        // no backoff and would flood the logs.
+                                        if (
+                                            cause instanceof RejectedExecutionException ||
+                                            cause instanceof RequeueDeliveryException
+                                        ) {
+                                            log.debug(
+                                                "Delivery failure for registration {} - will be redelivered",
+                                                functionRegistration,
+                                                error
+                                            );
+                                            return new RegistrationOutcome(
+                                                functionRegistration,
+                                                Optional.empty(),
+                                                true
+                                            );
+                                        }
+
                                         log.error(
                                             "Error routing message request {} to function registration {}",
                                             functionRequest,
-                                            functionDefinition,
+                                            functionRegistration,
                                             error
                                         );
-                                        return Map.entry(functionDefinition, Optional.of(error));
-                                    })
-                            )
+                                        return new RegistrationOutcome(functionRegistration, Optional.of(error), false);
+                                    });
+                            })
                             .toArray(CompletableFuture[]::new);
 
-                        var completed = CompletableFuture.allOf(functions).thenApply(v ->
-                            Stream.of(functions).map(CompletableFuture::join).toList()
-                        );
+                        CompletableFuture.allOf(functions)
+                            .thenApply(v ->
+                                Stream.of(functions)
+                                    .map(future -> (RegistrationOutcome) future.join())
+                                    .toList()
+                            )
+                            .thenAccept(outcomes -> {
+                                var executionErrors = outcomes
+                                    .stream()
+                                    .map(RegistrationOutcome::executionError)
+                                    .flatMap(Optional::stream)
+                                    .toList();
 
-                        completed.thenAccept(results -> {
-                            var errors = results
-                                .stream()
-                                .map(Map.Entry.class::cast)
-                                .filter(entry ->
-                                    Optional.class.cast(entry.getValue())
-                                        .filter(Exception.class::isInstance)
-                                        .isPresent()
-                                )
-                                .map(entry -> Optional.class.cast(entry.getValue()).get())
-                                .toList();
+                                if (!executionErrors.isEmpty()) {
+                                    log.debug("Errors handling function route message request {}", executionErrors);
 
-                            if (!errors.isEmpty()) {
-                                log.debug("Errors handling function route message request {}", errors);
+                                    Optional.ofNullable(
+                                        messagingProperties.getFunctionRouter().getErrorHandlerDefinition()
+                                    )
+                                        .filter(StringUtils::hasText)
+                                        .map(functionCatalog::lookup)
+                                        .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
+                                        .ifPresent(errorHandlerDefinition ->
+                                            executionErrors
+                                                .stream()
+                                                .map(CompletionException.class::cast)
+                                                .map(CompletionException::getCause)
+                                                .map(exception -> {
+                                                    if (exception instanceof MessagingException messagingException) {
+                                                        return new ErrorMessage(messagingException, message);
+                                                    } else {
+                                                        return new ErrorMessage(
+                                                            new MessagingException(message, exception),
+                                                            message
+                                                        );
+                                                    }
+                                                })
+                                                .forEach(errorHandlerDefinition)
+                                        );
+                                }
 
-                                Optional.ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
-                                    .filter(StringUtils::hasText)
-                                    .map(functionCatalog::lookup)
-                                    .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
-                                    .ifPresent(errorHandlerDefinition -> {
-                                        errors
-                                            .stream()
-                                            .map(CompletionException.class::cast)
-                                            .map(CompletionException::getCause)
-                                            .map(exception -> {
-                                                if (exception instanceof MessagingException messagingException) {
-                                                    return new ErrorMessage(messagingException, message);
-                                                } else {
-                                                    return new ErrorMessage(
-                                                        new MessagingException(message, exception),
-                                                        message
-                                                    );
-                                                }
-                                            })
-                                            .forEach(errorMessage -> {
-                                                errorHandlerDefinition.accept(errorMessage);
-                                            });
-                                    });
-                            } else {
-                                log.debug("Successfully completed function route message request {}", message);
-                            }
-                        });
+                                var failedRegistrations = outcomes
+                                    .stream()
+                                    .filter(RegistrationOutcome::deliveryFailure)
+                                    .map(RegistrationOutcome::registration)
+                                    .toList();
+
+                                if (failedRegistrations.isEmpty()) {
+                                    // every registration reached a final outcome (success or an error
+                                    // already reported): ack so the broker does not redeliver.
+                                    log.debug("Successfully completed function route message request {}", message);
+                                    deliveryAcknowledgment.acknowledge(message);
+                                } else if (failedRegistrations.size() == outcomes.size()) {
+                                    // no registration succeeded, so requeueing the whole message cannot
+                                    // re-run already-done work: nack+requeue and let the broker redeliver.
+                                    log.debug("Delivery failure for all registrations, message will be requeued");
+                                    deliveryAcknowledgment.requeue(message);
+                                } else if (
+                                    redeliverFailedRegistrations(
+                                        streamBridgeProvider,
+                                        deliveryAcknowledgment,
+                                        destination,
+                                        message,
+                                        failedRegistrations
+                                    )
+                                ) {
+                                    // partial failure: re-publish only the failed registrations (pinned)
+                                    // so the ones that already succeeded do not re-run, then ack the original.
+                                    deliveryAcknowledgment.acknowledge(message);
+                                } else {
+                                    // could not re-publish (broker/producer unavailable): requeue the
+                                    // whole message so nothing is lost, at the cost of re-running the
+                                    // registrations that already succeeded.
+                                    deliveryAcknowledgment.requeue(message);
+                                }
+                            })
+                            .exceptionally(unexpectedError -> {
+                                log.warn(
+                                    "Unexpected error completing function route message request {}, requeueing",
+                                    message,
+                                    unexpectedError
+                                );
+                                deliveryAcknowledgment.requeue(message);
+                                return null;
+                            });
                     },
                     () -> {
                         final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
@@ -306,10 +438,82 @@ public class FunctionRouterConfiguration {
                             destination,
                             registration
                         );
+
+                        // no registration for this destination: requeuing would loop forever, so ack
+                        deliveryAcknowledgment.acknowledge(message);
                     }
                 );
         };
     }
+
+    /**
+     * Restricts the destination's registrations to those pinned by the {@link #TARGET_REGISTRATIONS}
+     * header when present (a redelivery of specific failed registrations); otherwise returns all of
+     * them. Never returns {@code null}: an empty list means there is nothing for this router to run
+     * (e.g. a pinned redelivery that reached another application which does not host that
+     * registration), so the caller acks it as a no-op.
+     */
+    static List<String> filterToTargetRegistrations(Message<?> message, List<String> registrations) {
+        if (registrations == null || registrations.isEmpty()) {
+            return List.of();
+        }
+
+        final var targetRegistrations = message.getHeaders().get(TARGET_REGISTRATIONS, String.class);
+        if (targetRegistrations == null || targetRegistrations.isBlank()) {
+            return registrations;
+        }
+
+        final var targets = List.of(targetRegistrations.split(","));
+        return registrations.stream().filter(targets::contains).toList();
+    }
+
+    /**
+     * Re-publishes only the registrations that hit a delivery failure - pinned via the
+     * {@link #TARGET_REGISTRATIONS} header - back to the source destination, so the broker redelivers
+     * just those. The registrations that already succeeded are not re-run. Returns {@code true} once
+     * the redelivery has been sent, {@code false} if it could not be (so the caller can requeue the
+     * whole message rather than lose the failed work).
+     */
+    static boolean redeliverFailedRegistrations(
+        ObjectProvider<StreamBridge> streamBridgeProvider,
+        DeliveryAcknowledgment deliveryAcknowledgment,
+        String destination,
+        Message<?> message,
+        List<String> failedRegistrations
+    ) {
+        try {
+            final var builder = MessageBuilder.fromMessage(message)
+                .setHeader(FUNCTION_DESTINATION, destination)
+                .setHeader(TARGET_REGISTRATIONS, String.join(",", failedRegistrations));
+            // never carry the original delivery's live, non-serializable ack handle into the copy
+            deliveryAcknowledgment.acknowledgmentHeaders().forEach(builder::removeHeader);
+            final var redelivery = builder.build();
+
+            final var sent = streamBridgeProvider.getObject().send(destination, redelivery);
+            if (!sent) {
+                log.warn(
+                    "Re-publish for redelivery of registrations {} to '{}' returned false",
+                    failedRegistrations,
+                    destination
+                );
+            }
+            return sent;
+        } catch (Exception e) {
+            log.warn(
+                "Failed to re-publish registrations {} to '{}' for redelivery; requeueing whole message",
+                failedRegistrations,
+                destination,
+                e
+            );
+            return false;
+        }
+    }
+
+    private record RegistrationOutcome(
+        String registration,
+        Optional<Throwable> executionError,
+        boolean deliveryFailure
+    ) {}
 
     @Bean
     MessageRoutingCallback functionRouterMessageRoutingCallback() {
@@ -331,7 +535,7 @@ public class FunctionRouterConfiguration {
             public Object postProcessAfterInitialization(Object bean, String beanName) {
                 if (bean instanceof DirectChannel messageChannel) {
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class)).ifPresent(
-                        outputBinding -> {
+                        outputBinding ->
                             messageChannel.addInterceptor(
                                 new ChannelInterceptor() {
                                     @Override
@@ -345,8 +549,7 @@ public class FunctionRouterConfiguration {
                                             .orElse(message);
                                     }
                                 }
-                            );
-                        }
+                            )
                     );
                 }
                 return bean;
