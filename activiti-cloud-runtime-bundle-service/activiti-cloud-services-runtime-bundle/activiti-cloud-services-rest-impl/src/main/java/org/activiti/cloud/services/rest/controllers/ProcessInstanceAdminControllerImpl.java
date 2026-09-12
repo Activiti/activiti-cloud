@@ -46,6 +46,7 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceRepresentationModelAssembler;
@@ -86,13 +87,16 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     private final CloudProcessDeletedService cloudProcessDeletedService;
 
+    private final VariableValueSizeValidator variableValueSizeValidator;
+
     public ProcessInstanceAdminControllerImpl(
         ProcessInstanceRepresentationModelAssembler representationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
         ProcessAdminRuntime processAdminRuntime,
         SpringPageConverter pageConverter,
         ProcessVariablesPayloadConverter variablesPayloadConverter,
-        CloudProcessDeletedService cloudProcessDeletedService
+        CloudProcessDeletedService cloudProcessDeletedService,
+        VariableValueSizeValidator variableValueSizeValidator
     ) {
         this.representationModelAssembler = representationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
@@ -100,6 +104,7 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         this.pageConverter = pageConverter;
         this.variablesPayloadConverter = variablesPayloadConverter;
         this.cloudProcessDeletedService = cloudProcessDeletedService;
+        this.variableValueSizeValidator = variableValueSizeValidator;
     }
 
     @Override
@@ -116,6 +121,7 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     @Override
     public EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
+        variableValueSizeValidator.validate(startProcessPayload);
         StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
 
         return representationModelAssembler.toModel(processAdminRuntime.start(convertedStartProcessPayload));

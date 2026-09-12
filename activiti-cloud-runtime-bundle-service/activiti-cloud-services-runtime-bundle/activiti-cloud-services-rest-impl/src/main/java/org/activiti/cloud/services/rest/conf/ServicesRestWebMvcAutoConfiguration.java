@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
+import org.activiti.cloud.services.core.validation.VariableProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
@@ -37,12 +38,14 @@ import org.activiti.cloud.services.rest.controllers.RuntimeBundleLinkRelationPro
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @AutoConfiguration
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
+@EnableConfigurationProperties(VariableProperties.class)
 public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
 
     @Bean

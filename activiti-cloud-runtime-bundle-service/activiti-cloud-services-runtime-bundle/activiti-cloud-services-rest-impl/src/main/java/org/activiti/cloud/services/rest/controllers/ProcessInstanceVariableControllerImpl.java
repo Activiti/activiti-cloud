@@ -34,6 +34,7 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableController;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableRepresentationModelAssembler;
@@ -52,16 +53,19 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     private final ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler;
     private final ProcessRuntime processRuntime;
     private final CollectionModelAssembler resourcesAssembler;
+    private final VariableValueSizeValidator variableValueSizeValidator;
 
     @Autowired
     public ProcessInstanceVariableControllerImpl(
         ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
         ProcessRuntime processRuntime,
-        CollectionModelAssembler resourcesAssembler
+        CollectionModelAssembler resourcesAssembler,
+        VariableValueSizeValidator variableValueSizeValidator
     ) {
         this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.processRuntime = processRuntime;
         this.resourcesAssembler = resourcesAssembler;
+        this.variableValueSizeValidator = variableValueSizeValidator;
     }
 
     @Override
@@ -83,6 +87,7 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
             setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         }
 
+        variableValueSizeValidator.validate(setProcessVariablesPayload);
         processRuntime.setVariables(setProcessVariablesPayload);
         return new ResponseEntity<>(HttpStatus.OK);
     }

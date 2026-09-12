@@ -20,6 +20,7 @@ import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableAdminController;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableRepresentationModelAssembler;
@@ -38,16 +39,19 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
     private final ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler;
     private final ProcessAdminRuntime processAdminRuntime;
     private final CollectionModelAssembler resourcesAssembler;
+    private final VariableValueSizeValidator variableValueSizeValidator;
 
     @Autowired
     public ProcessInstanceVariableAdminControllerImpl(
         ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
         ProcessAdminRuntime processAdminRuntime,
-        CollectionModelAssembler resourcesAssembler
+        CollectionModelAssembler resourcesAssembler,
+        VariableValueSizeValidator variableValueSizeValidator
     ) {
         this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.processAdminRuntime = processAdminRuntime;
         this.resourcesAssembler = resourcesAssembler;
+        this.variableValueSizeValidator = variableValueSizeValidator;
     }
 
     @Override
@@ -69,6 +73,7 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
             setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         }
 
+        variableValueSizeValidator.validate(setProcessVariablesPayload);
         processAdminRuntime.setVariables(setProcessVariablesPayload);
         return new ResponseEntity<>(HttpStatus.OK);
     }
