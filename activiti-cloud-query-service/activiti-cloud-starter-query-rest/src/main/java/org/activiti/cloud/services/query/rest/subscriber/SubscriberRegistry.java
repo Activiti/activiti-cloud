@@ -17,9 +17,12 @@ package org.activiti.cloud.services.query.rest.subscriber;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -111,5 +114,17 @@ public class SubscriberRegistry {
 
     public int size() {
         return registrations.size();
+    }
+
+    /**
+     * An immutable point-in-time view of every live user and their groups, used to build a SNAPSHOT.
+     * Read-only: it never mutates the registry nor fires a live/quiet event.
+     */
+    public List<SubscriberRegistryMessage.Entry> snapshotEntries() {
+        List<SubscriberRegistryMessage.Entry> entries = new ArrayList<>();
+        registrations.forEach((userId, registration) ->
+            entries.add(new SubscriberRegistryMessage.Entry(userId, List.copyOf(registration.getGroups())))
+        );
+        return List.copyOf(entries);
     }
 }
