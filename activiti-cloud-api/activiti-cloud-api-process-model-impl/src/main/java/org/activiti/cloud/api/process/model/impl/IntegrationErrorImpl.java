@@ -25,12 +25,10 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.springframework.util.StringUtils;
 
 public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements IntegrationError {
 
-    private IntegrationRequest integrationRequest;
     private IntegrationContext integrationContext;
 
     private String errorCode;
@@ -41,9 +39,8 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     @JsonCreator
     public IntegrationErrorImpl() {}
 
-    public IntegrationErrorImpl(IntegrationRequest integrationRequest, Throwable error) {
-        this.integrationRequest = integrationRequest;
-        this.integrationContext = integrationRequest.getIntegrationContext();
+    public IntegrationErrorImpl(IntegrationContext integrationContext, Throwable error) {
+        this.integrationContext = integrationContext;
         this.errorClassName = error.getClass().getName();
         this.errorCode = Optional.of(error)
             .filter(CloudBpmnError.class::isInstance)
@@ -57,8 +54,8 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
 
-    public IntegrationErrorImpl(IntegrationRequest integrationRequest, Throwable error, String customErrorMessage) {
-        this(integrationRequest, error);
+    public IntegrationErrorImpl(IntegrationContext integrationContext, Throwable error, String customErrorMessage) {
+        this(integrationContext, error);
         if (StringUtils.hasText(customErrorMessage)) {
             this.errorMessage = customErrorMessage;
         }
@@ -67,11 +64,6 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     @Override
     public IntegrationContext getIntegrationContext() {
         return integrationContext;
-    }
-
-    @Override
-    public IntegrationRequest getIntegrationRequest() {
-        return integrationRequest;
     }
 
     @Override
@@ -92,10 +84,6 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     @Override
     public String getErrorCode() {
         return errorCode;
-    }
-
-    public void setIntegrationRequest(IntegrationRequest integrationRequest) {
-        this.integrationRequest = integrationRequest;
     }
 
     public void setIntegrationContext(IntegrationContext integrationContext) {
@@ -122,9 +110,7 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result =
-            prime * result +
-            Objects.hash(errorClassName, errorMessage, integrationContext, integrationRequest, stackTraceElements);
+        result = prime * result + Objects.hash(errorClassName, errorMessage, integrationContext, stackTraceElements);
         return result;
     }
 
@@ -144,7 +130,6 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
             Objects.equals(errorClassName, other.errorClassName) &&
             Objects.equals(errorMessage, other.errorMessage) &&
             Objects.equals(integrationContext, other.integrationContext) &&
-            Objects.equals(integrationRequest, other.integrationRequest) &&
             Objects.equals(stackTraceElements, other.stackTraceElements)
         );
     }
@@ -154,9 +139,7 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
         builder
-            .append("IntegrationErrorImpl [integrationRequest=")
-            .append(integrationRequest)
-            .append(", integrationContext=")
+            .append("IntegrationErrorImpl [integrationContext=")
             .append(integrationContext)
             .append(", errorMessage=")
             .append(errorMessage)

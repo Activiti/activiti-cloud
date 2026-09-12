@@ -60,7 +60,6 @@ public class IntegrationErrorBuilder {
         Objects.requireNonNull(integrationRequest);
         Objects.requireNonNull(error);
 
-        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error, customErrorMessage);
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         IntegrationContextImpl sanitizedIntegrationContext = null;
 
@@ -69,7 +68,11 @@ public class IntegrationErrorBuilder {
             sanitizedIntegrationContext.clearInBoundVariables();
         }
 
-        integrationError.setIntegrationContext(sanitizedIntegrationContext);
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(
+            sanitizedIntegrationContext,
+            error,
+            customErrorMessage
+        );
 
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
@@ -92,6 +95,8 @@ public class IntegrationErrorBuilder {
         return MessageBuilder.withPayload(integrationError)
             .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
             .setHeader("targetAppName", integrationRequest.getAppName())
-            .setHeader("targetService", integrationRequest.getServiceFullName());
+            .setHeader("targetService", integrationRequest.getServiceFullName())
+            .setHeader("resultDestination", integrationRequest.getResultDestination())
+            .setHeader("errorDestination", integrationRequest.getErrorDestination());
     }
 }

@@ -179,6 +179,6 @@ public class TestGatewayConcurrencyIT {
     }
 
     private IntegrationResult createIntegrationResult(IntegrationRequest integrationRequest) {
-        return new IntegrationResultImpl(integrationRequest, integrationRequest.getIntegrationContext());
+        return new IntegrationResultImpl(integrationRequest.getIntegrationContext());
     }
 }

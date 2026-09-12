@@ -17,7 +17,6 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
@@ -35,9 +34,10 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
     @Override
     public void send(Message<IntegrationResult> message) {
-        IntegrationRequest request = message.getPayload().getIntegrationRequest();
+        String resultDestination = (String) message.getHeaders().get("resultDestination");
+        String serviceFullName = (String) message.getHeaders().get("targetService");
 
-        String destination = resolver.resolveDestination(request);
+        String destination = resolver.resolveDestination(resultDestination, serviceFullName);
 
         streamBridge.send(
             destination,

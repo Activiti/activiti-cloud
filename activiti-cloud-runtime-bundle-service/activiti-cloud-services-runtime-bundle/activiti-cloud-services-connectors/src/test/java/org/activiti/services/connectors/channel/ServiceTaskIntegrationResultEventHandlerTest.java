@@ -32,7 +32,6 @@ import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
@@ -89,7 +88,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
             List.of(executionEntity)
         );
 
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.receive(new IntegrationResultImpl(integrationContext));
 
         ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
         verify(managementService).executeCommand(captor.capture());
@@ -114,9 +113,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         ActivitiOptimisticLockingException ex = new ActivitiOptimisticLockingException("concurrent update");
         doThrow(ex).when(managementService).executeCommand(any());
 
-        assertThatThrownBy(() ->
-            handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext))
-        ).isSameAs(ex);
+        assertThatThrownBy(() -> handler.receive(new IntegrationResultImpl(integrationContext))).isSameAs(ex);
     }
 
     @Test
@@ -132,7 +129,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         RuntimeException generic = new RuntimeException("boom");
         doThrow(generic).when(managementService).executeCommand(any());
 
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.receive(new IntegrationResultImpl(integrationContext));
 
         // verify delegation to external completion handler
         ArgumentCaptor<IntegrationErrorImpl> errorCaptor = ArgumentCaptor.forClass(IntegrationErrorImpl.class);
@@ -156,7 +153,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         );
 
         //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.receive(new IntegrationResultImpl(integrationContext));
 
         //then
         final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
@@ -190,7 +187,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(null);
 
         //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.receive(new IntegrationResultImpl(integrationContext));
 
         //then
         verify(managementService, never()).executeCommand(any());

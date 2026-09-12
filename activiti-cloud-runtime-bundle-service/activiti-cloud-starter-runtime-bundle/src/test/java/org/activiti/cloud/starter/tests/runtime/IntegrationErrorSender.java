@@ -32,7 +32,10 @@ public class IntegrationErrorSender {
     }
 
     public void send(IntegrationRequest integrationRequest, Exception error) {
-        IntegrationErrorImpl integrationResult = new IntegrationErrorImpl(integrationRequest, error);
+        IntegrationErrorImpl integrationResult = new IntegrationErrorImpl(
+            integrationRequest.getIntegrationContext(),
+            error
+        );
         Message<IntegrationErrorImpl> message = MessageBuilder.withPayload(integrationResult).build();
 
         String destination = integrationRequest.getErrorDestination();

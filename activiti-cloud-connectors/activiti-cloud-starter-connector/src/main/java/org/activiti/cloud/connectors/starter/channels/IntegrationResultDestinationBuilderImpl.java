@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import java.util.Optional;
-import java.util.function.Predicate;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.util.ObjectUtils;
 
@@ -30,23 +27,25 @@ public class IntegrationResultDestinationBuilderImpl implements IntegrationResul
     }
 
     @Override
-    public String buildDestination(IntegrationRequest event) {
+    public String buildDestination(String resultDestination, String serviceFullName) {
         String resultDestinationOverride = connectorProperties.getResultDestinationOverride();
 
-        String destination = ObjectUtils.isEmpty(resultDestinationOverride)
-            ? Optional.of(event)
-                  .map(IntegrationRequest::getResultDestination)
-                  .filter(Predicate.not(ObjectUtils::isEmpty))
-                  .orElseGet(() -> getServiceDestination(event))
-            : resultDestinationOverride;
+        String destination;
+        if (!ObjectUtils.isEmpty(resultDestinationOverride)) {
+            destination = resultDestinationOverride;
+        } else if (!ObjectUtils.isEmpty(resultDestination)) {
+            destination = resultDestination;
+        } else {
+            destination = getServiceDestination(serviceFullName);
+        }
 
         return destination;
     }
 
-    protected String getServiceDestination(IntegrationRequest event) {
+    protected String getServiceDestination(String serviceFullName) {
         return new StringBuilder("integrationResult")
             .append(connectorProperties.getMqDestinationSeparator())
-            .append(event.getServiceFullName())
+            .append(serviceFullName)
             .toString();
     }
 }

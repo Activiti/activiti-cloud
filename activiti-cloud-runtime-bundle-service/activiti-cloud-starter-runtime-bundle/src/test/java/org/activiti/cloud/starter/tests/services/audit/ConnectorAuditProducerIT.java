@@ -48,7 +48,6 @@ import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceived
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
@@ -322,7 +321,7 @@ public class ConnectorAuditProducerIT {
         integrationRequestedEvents
             .stream()
             .map(request -> {
-                return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()), error);
+                return new IntegrationErrorImpl(request.getEntity(), error);
             })
             .map(payload -> MessageBuilder.withPayload(payload).build())
             .forEach(request -> streamBridge.send(INTEGRATION_ERRORS_CONSUMER, request));
@@ -643,7 +642,7 @@ public class ConnectorAuditProducerIT {
         integrationRequestedEvents
             .stream()
             .map(request -> {
-                return new IntegrationResultImpl(new IntegrationRequestImpl(request.getEntity()), request.getEntity());
+                return new IntegrationResultImpl(request.getEntity());
             })
             .map(payload -> MessageBuilder.withPayload(payload).build())
             .forEach(request -> streamBridge.send(INTEGRATION_RESULTS_CONSUMER, request));
@@ -730,7 +729,7 @@ public class ConnectorAuditProducerIT {
         integrationRequestedEvents
             .stream()
             .map(request -> {
-                return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()), error);
+                return new IntegrationErrorImpl(request.getEntity(), error);
             })
             .map(payload -> MessageBuilder.withPayload(payload).build())
             .forEach(request -> streamBridge.send(INTEGRATION_ERRORS_CONSUMER, request));

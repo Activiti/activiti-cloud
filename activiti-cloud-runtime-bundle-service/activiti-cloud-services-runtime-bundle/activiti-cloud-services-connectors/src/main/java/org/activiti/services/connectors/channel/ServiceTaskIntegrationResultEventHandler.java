@@ -20,10 +20,8 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
@@ -139,8 +137,7 @@ public class ServiceTaskIntegrationResultEventHandler {
                     integrationContext.getId(),
                     triggerException
                 );
-                IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
-                IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
+                IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationContext, triggerException);
                 this.serviceTaskIntegrationCompletionHandler.handlePropagationFailure(
                     integrationError,
                     integrationContextEntity

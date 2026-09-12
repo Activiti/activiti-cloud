@@ -18,7 +18,6 @@ package org.activiti.cloud.connectors.starter.channels;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 
 import org.activiti.cloud.api.process.model.IntegrationError;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -35,9 +34,10 @@ public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
     @Override
     public void send(Message<IntegrationError> message) {
-        IntegrationRequest request = message.getPayload().getIntegrationRequest();
+        String errorDestination = (String) message.getHeaders().get("errorDestination");
+        String serviceFullName = (String) message.getHeaders().get("targetService");
 
-        String destination = resolver.resolveDestination(request);
+        String destination = resolver.resolveDestination(errorDestination, serviceFullName);
 
         streamBridge.send(
             destination,

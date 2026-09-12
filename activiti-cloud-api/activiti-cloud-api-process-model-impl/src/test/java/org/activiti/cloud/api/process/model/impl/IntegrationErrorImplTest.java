@@ -16,12 +16,9 @@
 package org.activiti.cloud.api.process.model.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 import java.util.stream.Stream;
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,15 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class IntegrationErrorImplTest {
 
     @Mock
-    private IntegrationRequest integrationRequest;
-
-    @Mock
     private IntegrationContext integrationContext;
-
-    @BeforeEach
-    void setUp() {
-        given(integrationRequest.getIntegrationContext()).willReturn(integrationContext);
-    }
 
     @ParameterizedTest
     @NullSource
@@ -80,7 +69,7 @@ class IntegrationErrorImplTest {
     @ParameterizedTest
     @MethodSource("combinedMessagesProvider")
     void should_returnCombinedMessage_when_messagesAreDifferent(Throwable error, String expected) {
-        var result = new IntegrationErrorImpl(integrationRequest, error);
+        var result = new IntegrationErrorImpl(integrationContext, error);
 
         assertThat(result.getErrorMessage()).isEqualTo(expected);
     }
@@ -101,7 +90,7 @@ class IntegrationErrorImplTest {
     void should_returnErrorMessage_when_errorHasNoCause() {
         var error = new RuntimeException("Error message");
 
-        var result = new IntegrationErrorImpl(integrationRequest, error);
+        var result = new IntegrationErrorImpl(integrationContext, error);
 
         assertThat(result.getErrorMessage()).isEqualTo("Error message");
     }
@@ -109,7 +98,7 @@ class IntegrationErrorImplTest {
     @ParameterizedTest
     @MethodSource("nullMessagesProvider")
     void should_returnNull_when_bothMessagesAreNull(Throwable error) {
-        var result = new IntegrationErrorImpl(integrationRequest, error);
+        var result = new IntegrationErrorImpl(integrationContext, error);
 
         assertThat(result.getErrorMessage()).isNull();
     }
@@ -148,7 +137,7 @@ class IntegrationErrorImplTest {
         var rootCause = new RuntimeException(rootCauseMessage);
         var error = new RuntimeException(errorMessage, rootCause);
 
-        var result = new IntegrationErrorImpl(integrationRequest, error);
+        var result = new IntegrationErrorImpl(integrationContext, error);
 
         assertThat(result.getErrorMessage()).isEqualTo(expected);
     }
@@ -245,7 +234,7 @@ class IntegrationErrorImplTest {
         var rootCause = new RuntimeException("root error");
         var error = new RuntimeException("com.example.MyClass: ", rootCause);
 
-        var result = new IntegrationErrorImpl(integrationRequest, error);
+        var result = new IntegrationErrorImpl(integrationContext, error);
 
         assertThat(result.getErrorMessage()).isEqualTo("root error");
     }
@@ -255,7 +244,7 @@ class IntegrationErrorImplTest {
         var rootCause = new RuntimeException("com.example.MyClass: ");
         var error = new RuntimeException("actual error", rootCause);
 
-        var result = new IntegrationErrorImpl(integrationRequest, error);
+        var result = new IntegrationErrorImpl(integrationContext, error);
 
         assertThat(result.getErrorMessage()).isEqualTo("actual error");
     }
@@ -266,7 +255,7 @@ class IntegrationErrorImplTest {
         var error = new RuntimeException("Error message", rootCause);
         String customMessage = "Request content violates guardrail policy";
 
-        var result = new IntegrationErrorImpl(integrationRequest, error, customMessage);
+        var result = new IntegrationErrorImpl(integrationContext, error, customMessage);
 
         assertThat(result.getErrorMessage()).isEqualTo(customMessage);
     }
@@ -278,7 +267,7 @@ class IntegrationErrorImplTest {
         var rootCause = new RuntimeException("Root cause message");
         var error = new RuntimeException("Error message", rootCause);
 
-        var result = new IntegrationErrorImpl(integrationRequest, error, customMessage);
+        var result = new IntegrationErrorImpl(integrationContext, error, customMessage);
 
         assertThat(result.getErrorMessage()).isEqualTo("Error message caused by: Root cause message");
     }

@@ -33,6 +33,8 @@ public class IntegrationResultBuilderTest {
     private static final String ACTIVITY_ELEMENT_ID = "activitiElementId";
     private static final String RB_NAME = "rbName";
     private static final String APP_NAME = "appName";
+    private static final String RESULT_DESTINATION = "resultDest";
+    private static final String ERROR_DESTINATION = "errorDest";
     private static final String VAR = "var";
     private static final String VALUE = "value";
 
@@ -76,6 +78,8 @@ public class IntegrationResultBuilderTest {
         IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
         integrationRequestEvent.setAppName(APP_NAME);
         integrationRequestEvent.setServiceFullName(RB_NAME);
+        integrationRequestEvent.setResultDestination(RESULT_DESTINATION);
+        integrationRequestEvent.setErrorDestination(ERROR_DESTINATION);
 
         //when
         Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(
@@ -86,7 +90,9 @@ public class IntegrationResultBuilderTest {
         //then
         assertThat(message.getHeaders())
             .containsEntry("targetService", RB_NAME)
-            .containsEntry("targetAppName", APP_NAME);
+            .containsEntry("targetAppName", APP_NAME)
+            .containsEntry("resultDestination", RESULT_DESTINATION)
+            .containsEntry("errorDestination", ERROR_DESTINATION);
     }
 
     @Test

@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.activiti.cloud.api.process.model.IntegrationRequest;
-
 public interface IntegrationErrorChannelResolver {
-    String resolveDestination(IntegrationRequest event);
+    String resolveDestination(String errorDestination, String serviceFullName);
 }

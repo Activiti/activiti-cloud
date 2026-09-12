@@ -18,7 +18,6 @@ package org.activiti.services.connectors.recovery;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -29,16 +28,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextQuery;
 import org.activiti.engine.integration.IntegrationContextService;
-import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,9 +48,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
 
     @Mock
     IntegrationContextService integrationContextService;
-
-    @Mock
-    IntegrationRequestBuilder integrationRequestBuilder;
 
     @Mock
     ServiceTaskIntegrationErrorEventHandler errorEventHandler;
@@ -71,7 +64,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
     void setUp() {
         scheduler = new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
-            integrationRequestBuilder,
             errorEventHandler,
             0,
             featureToggle
@@ -101,7 +93,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
     @Test
     void should_sendCloudBpmnError_when_orphanedIntegrationIsFound() {
         givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "ServiceTask")));
-        givenBuilderReturnsRealRequest();
 
         scheduler.recoverOrphanedIntegrations();
 
@@ -117,15 +108,14 @@ class OrphanedIntegrationRecoverySchedulerTest {
     }
 
     @Test
-    void should_populateIntegrationContextFromEntity_when_buildingIntegrationRequest() {
+    void should_populateIntegrationContextFromEntity_when_buildingIntegrationError() {
         givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "ServiceTask")));
-        givenBuilderReturnsRealRequest();
 
         scheduler.recoverOrphanedIntegrations();
 
-        var contextCaptor = ArgumentCaptor.forClass(IntegrationContext.class);
-        verify(integrationRequestBuilder).build(contextCaptor.capture());
-        assertThat(contextCaptor.getValue()).satisfies(ctx -> {
+        var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
+        verify(errorEventHandler).receive(errorCaptor.capture());
+        assertThat(errorCaptor.getValue().getIntegrationContext()).satisfies(ctx -> {
             assertThat(ctx.getId()).isEqualTo("ctx-1");
             assertThat(ctx.getExecutionId()).isEqualTo("exec-1");
             assertThat(ctx.getProcessInstanceId()).isEqualTo("proc-1");
@@ -142,7 +132,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
                 entity("ctx-2", "exec-2", "proc-2", "procDef-2", "Task")
             )
         );
-        givenBuilderReturnsRealRequest();
         willThrow(new RuntimeException("handler failure")).given(errorEventHandler).receive(any());
 
         scheduler.recoverOrphanedIntegrations();
@@ -154,7 +143,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
     void should_queryWithThresholdBasedOnConstructorValue_when_recoveringOrphanedIntegrations() {
         var customScheduler = new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
-            integrationRequestBuilder,
             errorEventHandler,
             300,
             featureToggle
@@ -173,12 +161,6 @@ class OrphanedIntegrationRecoverySchedulerTest {
         given(integrationContextService.createIntegrationContextQuery()).willReturn(query);
         given(query.createdBefore(any())).willReturn(query);
         given(query.list()).willReturn(entities);
-    }
-
-    private void givenBuilderReturnsRealRequest() {
-        willAnswer(inv -> new IntegrationRequestImpl((IntegrationContext) inv.getArgument(0)))
-            .given(integrationRequestBuilder)
-            .build(any());
     }
 
     private IntegrationContextEntityImpl entity(
