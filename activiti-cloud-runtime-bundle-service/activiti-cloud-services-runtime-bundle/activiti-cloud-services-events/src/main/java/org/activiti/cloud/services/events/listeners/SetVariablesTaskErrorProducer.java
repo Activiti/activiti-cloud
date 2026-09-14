@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
-import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.api.runtime.shared.events.RuntimeEventListener;
 import org.activiti.cloud.services.events.converter.ToSetVariablesTaskErrorEventConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SetVariablesTaskErrorProducer implements RuntimeEventListener<SetVariablesTaskErrorEvent> {
+public class SetVariablesTaskErrorProducer
+    implements RuntimeEventListener<org.activiti.api.process.model.events.SetVariablesTaskErrorEvent> {
 
     private final ToSetVariablesTaskErrorEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
@@ -35,7 +35,7 @@ public class SetVariablesTaskErrorProducer implements RuntimeEventListener<SetVa
     }
 
     @Override
-    public void onEvent(SetVariablesTaskErrorEvent event) {
+    public void onEvent(org.activiti.api.process.model.events.SetVariablesTaskErrorEvent event) {
         eventsAggregator.add(eventConverter.convert(event));
     }
 }
