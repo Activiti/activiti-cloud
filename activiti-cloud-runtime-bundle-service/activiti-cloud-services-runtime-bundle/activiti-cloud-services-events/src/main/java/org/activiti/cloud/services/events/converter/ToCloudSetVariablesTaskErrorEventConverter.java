@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.cloud.api.process.model.events.CloudSetVariablesTaskErrorEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudSetVariablesTaskErrorEventImpl;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class ToCloudSetVariablesTaskErrorEventConverter {
 
     public CloudSetVariablesTaskErrorEvent convert(
-        org.activiti.api.process.model.events.SetVariablesTaskErrorEvent event
+        SetVariablesTaskErrorEvent event
     ) {
         if (event == null) {
             return null;

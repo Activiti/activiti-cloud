@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
-import org.activiti.api.process.model.events.RuntimeEvent;
+import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.cloud.services.events.converter.ToCloudSetVariablesTaskErrorEventConverter;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ public class CloudSetVariablesTaskErrorProducer {
     }
 
     @EventListener
-    public void onEvent(org.activiti.api.process.model.events.SetVariablesTaskErrorEvent event) {
+    public void onEvent(SetVariablesTaskErrorEvent event) {
         eventsAggregator.add(eventConverter.convert(event));
     }
 }
