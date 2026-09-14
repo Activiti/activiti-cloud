@@ -24,7 +24,8 @@ public class CloudSetVariablesTaskErrorEventImpl
         SetVariablesTaskError,
         org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents
     >
-    implements CloudSetVariablesTaskErrorEvent {
+    implements CloudSetVariablesTaskErrorEvent
+{
 
     public CloudSetVariablesTaskErrorEventImpl() {}
 

@@ -23,9 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ToCloudSetVariablesTaskErrorEventConverter {
 
-    public CloudSetVariablesTaskErrorEvent convert(
-        SetVariablesTaskErrorEvent event
-    ) {
+    public CloudSetVariablesTaskErrorEvent convert(SetVariablesTaskErrorEvent event) {
         if (event == null) {
             return null;
         }
