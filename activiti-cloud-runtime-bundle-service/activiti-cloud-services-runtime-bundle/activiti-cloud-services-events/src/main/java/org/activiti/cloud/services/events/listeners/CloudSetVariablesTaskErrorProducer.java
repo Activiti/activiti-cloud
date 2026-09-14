@@ -15,14 +15,17 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
+import org.activiti.api.process.model.events.RuntimeEvent;
 import org.activiti.cloud.services.events.converter.ToCloudSetVariablesTaskErrorEventConverter;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Producer that listens for SetVariablesTaskErrorEvent from the engine and
+ * publishes the Cloud event version to the events aggregator.
+ */
 @Component
-public class CloudSetVariablesTaskErrorProducer
-    implements ProcessEventListener<org.activiti.api.process.model.events.SetVariablesTaskErrorEvent> {
+public class CloudSetVariablesTaskErrorProducer {
 
     private final ToCloudSetVariablesTaskErrorEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
@@ -35,7 +38,7 @@ public class CloudSetVariablesTaskErrorProducer
         this.eventsAggregator = eventsAggregator;
     }
 
-    @Override
+    @EventListener
     public void onEvent(org.activiti.api.process.model.events.SetVariablesTaskErrorEvent event) {
         eventsAggregator.add(eventConverter.convert(event));
     }
