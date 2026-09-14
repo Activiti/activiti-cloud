@@ -15,26 +15,26 @@
  */
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.cloud.api.process.model.events.SetVariablesTaskErrorEvent;
-import org.activiti.cloud.api.process.model.impl.events.SetVariablesTaskErrorEventImpl;
+import org.activiti.cloud.api.process.model.events.CloudSetVariablesTaskErrorEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudSetVariablesTaskErrorEventImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ToSetVariablesTaskErrorEventConverter
+public class ToCloudSetVariablesTaskErrorEventConverter
     implements RuntimeEventConverter<
         org.activiti.api.process.model.events.SetVariablesTaskErrorEvent,
-        SetVariablesTaskErrorEvent
+        CloudSetVariablesTaskErrorEvent
     > {
 
     @Override
-    public SetVariablesTaskErrorEvent convert(
+    public CloudSetVariablesTaskErrorEvent convert(
         org.activiti.api.process.model.events.SetVariablesTaskErrorEvent event
     ) {
         if (event == null) {
             return null;
         }
 
-        SetVariablesTaskErrorEventImpl cloudEvent = new SetVariablesTaskErrorEventImpl(
+        CloudSetVariablesTaskErrorEventImpl cloudEvent = new CloudSetVariablesTaskErrorEventImpl(
             event.getId(),
             event.getTimestamp(),
             event.getEntity(),

@@ -46,6 +46,7 @@ import org.activiti.cloud.services.query.events.handlers.ProcessUpdatedEventHand
 import org.activiti.cloud.services.query.events.handlers.ProcessVariableCreatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessVariableDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdateEventHandler;
+import org.activiti.cloud.services.query.events.handlers.SetVariablesTaskErrorEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdater;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;

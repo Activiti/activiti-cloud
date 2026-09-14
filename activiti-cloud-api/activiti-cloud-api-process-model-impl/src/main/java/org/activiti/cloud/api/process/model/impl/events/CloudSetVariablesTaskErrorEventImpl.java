@@ -17,18 +17,18 @@ package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.SetVariablesTaskError;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.process.model.events.SetVariablesTaskErrorEvent;
+import org.activiti.cloud.api.process.model.events.CloudSetVariablesTaskErrorEvent;
 
-public class SetVariablesTaskErrorEventImpl
+public class CloudSetVariablesTaskErrorEventImpl
     extends CloudRuntimeEventImpl<
         SetVariablesTaskError,
         org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents
     >
-    implements SetVariablesTaskErrorEvent {
+    implements CloudSetVariablesTaskErrorEvent {
 
-    public SetVariablesTaskErrorEventImpl() {}
+    public CloudSetVariablesTaskErrorEventImpl() {}
 
-    public SetVariablesTaskErrorEventImpl(
+    public CloudSetVariablesTaskErrorEventImpl(
         SetVariablesTaskError entity,
         String processDefinitionId,
         String processInstanceId
@@ -42,7 +42,7 @@ public class SetVariablesTaskErrorEventImpl
         }
     }
 
-    public SetVariablesTaskErrorEventImpl(
+    public CloudSetVariablesTaskErrorEventImpl(
         String id,
         Long timestamp,
         SetVariablesTaskError entity,
@@ -67,7 +67,7 @@ public class SetVariablesTaskErrorEventImpl
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder
-            .append("SetVariablesTaskErrorEventImpl [getEventType()=")
+            .append("CloudSetVariablesTaskErrorEventImpl [getEventType()=")
             .append(getEventType())
             .append(", toString()=")
             .append(super.toString())

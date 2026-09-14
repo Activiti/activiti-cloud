@@ -18,10 +18,9 @@ package org.activiti.cloud.services.query.events.handlers;
 import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
-import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
-import org.activiti.cloud.api.process.model.events.SetVariablesTaskErrorEvent;
+import org.activiti.cloud.api.process.model.events.CloudSetVariablesTaskErrorEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.slf4j.Logger;
@@ -43,7 +42,7 @@ public class SetVariablesTaskErrorEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        SetVariablesTaskErrorEvent errorEvent = (SetVariablesTaskErrorEvent) event;
+        CloudSetVariablesTaskErrorEvent errorEvent = (CloudSetVariablesTaskErrorEvent) event;
 
         try {
             String executionId = errorEvent.getEntity().getExecutionId();
