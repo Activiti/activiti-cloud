@@ -37,10 +37,9 @@ public class SetVariablesTaskEventListenerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SetVariablesTaskErrorProducer setVariablesTaskErrorProducer(
-        RuntimeService runtimeService,
         ProcessEngineEventsAggregator processEngineEventsAggregator
     ) {
-        return new SetVariablesTaskErrorProducer(runtimeService, processEngineEventsAggregator);
+        return new SetVariablesTaskErrorProducer(processEngineEventsAggregator);
     }
 
     public static class ProcessEngineEventListenerRegistration {

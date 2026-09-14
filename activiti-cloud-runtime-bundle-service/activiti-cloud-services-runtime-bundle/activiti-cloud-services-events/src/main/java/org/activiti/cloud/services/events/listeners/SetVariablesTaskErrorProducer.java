@@ -18,10 +18,11 @@ package org.activiti.cloud.services.events.listeners;
 import java.util.ArrayList;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
-import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
-import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +35,8 @@ public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
     private static final String ERROR_CLASS_VARIABLE = "_SET_VARIABLES_TASK_ERROR_CLASS";
 
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
-    private final RuntimeService runtimeService;
 
-    public SetVariablesTaskErrorProducer(
-        RuntimeService runtimeService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
-    ) {
-        this.runtimeService = runtimeService;
+    public SetVariablesTaskErrorProducer(ProcessEngineEventsAggregator processEngineEventsAggregator) {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
     }
 
@@ -52,12 +48,22 @@ public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
         }
 
         try {
-            Execution execution = runtimeService.createExecutionQuery().executionId(executionId).singleResult();
+            // Access the execution through the current CommandContext instead of RuntimeService.
+            // Going through RuntimeService here would start a nested command execution that
+            // reuses (and drains) the agenda of the command currently dispatching this event,
+            // causing the in-flight operation to be re-run and this listener to be invoked again
+            // recursively, eventually resulting in a StackOverflowError.
+            CommandContext commandContext = Context.getCommandContext();
+            if (commandContext == null) {
+                return;
+            }
+
+            ExecutionEntity execution = commandContext.getExecutionEntityManager().findById(executionId);
             if (execution != null) {
-                Object errorMarker = runtimeService.getVariables(executionId).get(ERROR_MARKER_VARIABLE);
-                if (errorMarker != null && Boolean.TRUE.equals(errorMarker)) {
-                    Object errorMessageObj = runtimeService.getVariables(executionId).get(ERROR_MESSAGE_VARIABLE);
-                    Object errorClassNameObj = runtimeService.getVariables(executionId).get(ERROR_CLASS_VARIABLE);
+                Object errorMarker = execution.getVariable(ERROR_MARKER_VARIABLE);
+                if (Boolean.TRUE.equals(errorMarker)) {
+                    Object errorMessageObj = execution.getVariable(ERROR_MESSAGE_VARIABLE);
+                    Object errorClassNameObj = execution.getVariable(ERROR_CLASS_VARIABLE);
 
                     String errorMessage = errorMessageObj != null ? errorMessageObj.toString() : null;
                     String errorClassName = errorClassNameObj != null ? errorClassNameObj.toString() : null;
@@ -71,9 +77,9 @@ public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
                     );
 
                     // Clean up error variables
-                    runtimeService.removeVariable(executionId, ERROR_MARKER_VARIABLE);
-                    runtimeService.removeVariable(executionId, ERROR_MESSAGE_VARIABLE);
-                    runtimeService.removeVariable(executionId, ERROR_CLASS_VARIABLE);
+                    execution.removeVariable(ERROR_MARKER_VARIABLE);
+                    execution.removeVariable(ERROR_MESSAGE_VARIABLE);
+                    execution.removeVariable(ERROR_CLASS_VARIABLE);
                 }
             }
         } catch (Exception e) {
