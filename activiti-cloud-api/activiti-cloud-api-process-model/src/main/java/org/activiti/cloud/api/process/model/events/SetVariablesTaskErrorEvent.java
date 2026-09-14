@@ -16,8 +16,7 @@
 package org.activiti.cloud.api.process.model.events;
 
 import org.activiti.api.process.model.SetVariablesTaskError;
-import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudSetVariablesTaskErrorEvent
-    extends CloudRuntimeEvent<SetVariablesTaskError, SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents> {}
+public interface SetVariablesTaskErrorEvent
+    extends CloudRuntimeEvent<SetVariablesTaskError, org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents> {}

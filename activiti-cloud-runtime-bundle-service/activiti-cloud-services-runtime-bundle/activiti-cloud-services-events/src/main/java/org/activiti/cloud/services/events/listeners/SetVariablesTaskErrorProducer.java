@@ -17,17 +17,17 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.api.runtime.shared.events.RuntimeEventListener;
-import org.activiti.cloud.services.events.converter.ToCloudSetVariablesTaskErrorEventConverter;
+import org.activiti.cloud.services.events.converter.ToSetVariablesTaskErrorEventConverter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CloudSetVariablesTaskErrorProducer implements RuntimeEventListener<SetVariablesTaskErrorEvent> {
+public class SetVariablesTaskErrorProducer implements RuntimeEventListener<SetVariablesTaskErrorEvent> {
 
-    private final ToCloudSetVariablesTaskErrorEventConverter eventConverter;
+    private final ToSetVariablesTaskErrorEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudSetVariablesTaskErrorProducer(
-        ToCloudSetVariablesTaskErrorEventConverter eventConverter,
+    public SetVariablesTaskErrorProducer(
+        ToSetVariablesTaskErrorEventConverter eventConverter,
         ProcessEngineEventsAggregator eventsAggregator
     ) {
         this.eventConverter = eventConverter;

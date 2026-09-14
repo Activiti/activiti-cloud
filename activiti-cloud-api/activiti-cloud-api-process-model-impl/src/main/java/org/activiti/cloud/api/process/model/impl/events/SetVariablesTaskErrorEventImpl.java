@@ -18,15 +18,15 @@ package org.activiti.cloud.api.process.model.impl.events;
 import org.activiti.api.process.model.SetVariablesTaskError;
 import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.process.model.events.CloudSetVariablesTaskErrorEvent;
+import org.activiti.cloud.api.process.model.events.SetVariablesTaskErrorEvent;
 
-public class CloudSetVariablesTaskErrorEventImpl
+public class SetVariablesTaskErrorEventImpl
     extends CloudRuntimeEventImpl<SetVariablesTaskError, SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents>
-    implements CloudSetVariablesTaskErrorEvent {
+    implements SetVariablesTaskErrorEvent {
 
-    public CloudSetVariablesTaskErrorEventImpl() {}
+    public SetVariablesTaskErrorEventImpl() {}
 
-    public CloudSetVariablesTaskErrorEventImpl(
+    public SetVariablesTaskErrorEventImpl(
         SetVariablesTaskError entity,
         String processDefinitionId,
         String processInstanceId
@@ -40,7 +40,7 @@ public class CloudSetVariablesTaskErrorEventImpl
         }
     }
 
-    public CloudSetVariablesTaskErrorEventImpl(
+    public SetVariablesTaskErrorEventImpl(
         String id,
         Long timestamp,
         SetVariablesTaskError entity,
@@ -57,15 +57,15 @@ public class CloudSetVariablesTaskErrorEventImpl
     }
 
     @Override
-    public SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents getEventType() {
-        return SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents.SET_VARIABLES_TASK_ERROR_RECEIVED;
+    public org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents getEventType() {
+        return org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents.SET_VARIABLES_TASK_ERROR_RECEIVED;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder
-            .append("CloudSetVariablesTaskErrorEventImpl [getEventType()=")
+            .append("SetVariablesTaskErrorEventImpl [getEventType()=")
             .append(getEventType())
             .append(", toString()=")
             .append(super.toString())
