@@ -84,16 +84,14 @@ public class SetVariablesTaskErrorEventHandler implements QueryEventHandler {
         }
     }
 
-    private Optional<BaseBPMNActivityEntity> findActivityByExecutionId(
-        String processInstanceId,
-        String executionId
-    ) {
+    private Optional<BaseBPMNActivityEntity> findActivityByExecutionId(String processInstanceId, String executionId) {
         try {
-            BaseBPMNActivityEntity activity = entityManager.createQuery(
+            BaseBPMNActivityEntity activity = entityManager
+                .createQuery(
                     "SELECT a FROM BaseBPMNActivityEntity a " +
-                    "WHERE a.processInstanceId = :processInstanceId " +
-                    "AND a.executionId = :executionId " +
-                    "ORDER BY a.completedDate DESC, a.id DESC",
+                        "WHERE a.processInstanceId = :processInstanceId " +
+                        "AND a.executionId = :executionId " +
+                        "ORDER BY a.completedDate DESC, a.id DESC",
                     BaseBPMNActivityEntity.class
                 )
                 .setParameter("processInstanceId", processInstanceId)

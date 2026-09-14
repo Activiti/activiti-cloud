@@ -22,7 +22,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ToSetVariablesTaskErrorEventConverter
-    implements RuntimeEventConverter<SetVariablesTaskErrorEvent, SetVariablesTaskErrorEvent> {
+    implements RuntimeEventConverter<SetVariablesTaskErrorEvent, SetVariablesTaskErrorEvent>
+{
 
     @Override
     public SetVariablesTaskErrorEvent convert(SetVariablesTaskErrorEvent event) {

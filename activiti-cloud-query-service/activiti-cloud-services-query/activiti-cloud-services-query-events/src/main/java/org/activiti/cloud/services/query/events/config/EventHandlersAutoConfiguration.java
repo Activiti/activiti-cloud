@@ -44,13 +44,13 @@ import org.activiti.cloud.services.query.events.handlers.ProcessStartedEventHand
 import org.activiti.cloud.services.query.events.handlers.ProcessSuspendedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessUpdatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessVariableCreatedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.SetVariablesTaskErrorEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessVariableDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdateEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdater;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.activiti.cloud.services.query.events.handlers.SetVariablesTaskErrorEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskActivatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskAssignedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskCancelledEventHandler;
