@@ -24,10 +24,7 @@ import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(SetVariablesTaskErrorProducer.class);
@@ -36,11 +33,16 @@ public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
     private static final String ERROR_MESSAGE_VARIABLE = "_SET_VARIABLES_TASK_ERROR_MESSAGE";
     private static final String ERROR_CLASS_VARIABLE = "_SET_VARIABLES_TASK_ERROR_CLASS";
 
-    @Autowired
-    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private final ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private final RuntimeService runtimeService;
 
-    @Autowired
-    private RuntimeService runtimeService;
+    public SetVariablesTaskErrorProducer(
+        RuntimeService runtimeService,
+        ProcessEngineEventsAggregator processEngineEventsAggregator
+    ) {
+        this.runtimeService = runtimeService;
+        this.processEngineEventsAggregator = processEngineEventsAggregator;
+    }
 
     @Override
     public void onEvent(ActivitiEvent event) {

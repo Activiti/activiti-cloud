@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.events.config;
 
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.events.listeners.SetVariablesTaskErrorProducer;
 import org.activiti.engine.RuntimeService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -31,6 +32,15 @@ public class SetVariablesTaskEventListenerAutoConfiguration {
         SetVariablesTaskErrorProducer setVariablesTaskErrorProducer
     ) {
         return new ProcessEngineEventListenerRegistration(runtimeService, setVariablesTaskErrorProducer);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SetVariablesTaskErrorProducer setVariablesTaskErrorProducer(
+        RuntimeService runtimeService,
+        ProcessEngineEventsAggregator processEngineEventsAggregator
+    ) {
+        return new SetVariablesTaskErrorProducer(runtimeService, processEngineEventsAggregator);
     }
 
     public static class ProcessEngineEventListenerRegistration {
