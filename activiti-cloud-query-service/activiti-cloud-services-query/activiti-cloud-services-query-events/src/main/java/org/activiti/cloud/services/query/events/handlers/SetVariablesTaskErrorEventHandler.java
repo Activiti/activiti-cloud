@@ -43,6 +43,11 @@ public class SetVariablesTaskErrorEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
+        if (!(event instanceof CloudSetVariablesTaskErrorEvent)) {
+            logger.warn("Received unexpected event type: {}", event.getClass().getName());
+            return;
+        }
+
         CloudSetVariablesTaskErrorEvent errorEvent = (CloudSetVariablesTaskErrorEvent) event;
 
         try {
