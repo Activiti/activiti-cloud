@@ -50,7 +50,6 @@ import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdater;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
-import org.activiti.cloud.services.query.events.handlers.SetVariablesTaskErrorEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskActivatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskAssignedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskCancelledEventHandler;
@@ -368,11 +367,5 @@ public class EventHandlersAutoConfiguration {
         EntityManager entityManager
     ) {
         return new ProcessCandidateStarterGroupRemovedEventHandler(entityManager);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public SetVariablesTaskErrorEventHandler setVariablesTaskErrorEventHandler(EntityManager entityManager) {
-        return new SetVariablesTaskErrorEventHandler(entityManager);
     }
 }
