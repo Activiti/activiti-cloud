@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
-import org.activiti.cloud.api.process.model.events.CloudSetVariablesTaskErrorEvent;
+import org.activiti.cloud.api.process.model.events.SetVariablesTaskErrorEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class SetVariablesTaskErrorEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudSetVariablesTaskErrorEvent errorEvent = (CloudSetVariablesTaskErrorEvent) event;
+        SetVariablesTaskErrorEvent errorEvent = (SetVariablesTaskErrorEvent) event;
 
         try {
             String executionId = errorEvent.getEntity().getExecutionId();
