@@ -53,10 +53,11 @@ public class QueryApplicationRabbitmqPrefixIT extends QueryApplicationIT {
     void anonymousRabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
             .isNotEmpty()
-            .hasSize(1)
-            .satisfies(map ->
-                assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.queryEvents.anonymous."))
-            );
+            .hasSize(2)
+            .satisfies(map -> {
+                assertThat(map.keySet()).anyMatch(key -> key.startsWith("default-app.queryEvents.anonymous."));
+                assertThat(map.keySet()).anyMatch(key -> key.startsWith("default-app.subscriberRegistry.anonymous."));
+            });
     }
 
     @Test
@@ -64,6 +65,11 @@ public class QueryApplicationRabbitmqPrefixIT extends QueryApplicationIT {
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("default-app.engineEvents", "default-app.queryEvents");
+            .containsOnlyKeys(
+                "default-app.engineEvents",
+                "default-app.queryEvents",
+                "default-app.subscriberRegistry",
+                "default-app.pushedCounts"
+            );
     }
 }

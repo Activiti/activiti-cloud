@@ -47,9 +47,25 @@ public class QueryConsumerApplicationFunctionRouterRabbitmqPrefixIT extends Quer
 
     @Test
     @Override
+    void anonymousRabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
+            .isNotEmpty()
+            .hasSize(1)
+            .satisfies(map ->
+                assertThat(map.keySet()).anyMatch(key -> key.startsWith("default-app.subscriberRegistry.anonymous."))
+            );
+    }
+
+    @Test
+    @Override
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("default-app.engineEvents", "default-app.queryEvents");
+            .containsOnlyKeys(
+                "default-app.engineEvents",
+                "default-app.queryEvents",
+                "default-app.subscriberRegistry",
+                "default-app.pushedCounts"
+            );
     }
 }
