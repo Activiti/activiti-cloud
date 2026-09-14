@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.events.config;
 
 import org.activiti.cloud.services.events.listeners.SetVariablesTaskErrorProducer;
-import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

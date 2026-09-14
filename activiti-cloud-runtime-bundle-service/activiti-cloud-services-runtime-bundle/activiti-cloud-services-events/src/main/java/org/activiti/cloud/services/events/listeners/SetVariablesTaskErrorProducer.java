@@ -16,14 +16,13 @@
 package org.activiti.cloud.services.events.listeners;
 
 import java.util.ArrayList;
-import java.util.List;
-import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
-import org.activiti.cloud.services.events.ProcessEngineEventsAggregator;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
-import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,27 +40,41 @@ public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
     @Autowired
     private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
+    @Autowired
+    private RuntimeService runtimeService;
+
     @Override
     public void onEvent(ActivitiEvent event) {
-        if (event.getExecutionId() == null) {
+        String executionId = event.getExecutionId();
+        if (executionId == null) {
             return;
         }
 
         try {
-            if (event.getSource() instanceof ExecutionEntity) {
-                ExecutionEntity execution = (ExecutionEntity) event.getSource();
-
-                Object errorMarker = execution.getVariable(ERROR_MARKER_VARIABLE);
+            Execution execution = runtimeService.createExecutionQuery().executionId(executionId).singleResult();
+            if (execution != null) {
+                Object errorMarker = runtimeService
+                    .getVariables(executionId)
+                    .get(ERROR_MARKER_VARIABLE);
                 if (errorMarker != null && Boolean.TRUE.equals(errorMarker)) {
-                    String errorMessage = (String) execution.getVariable(ERROR_MESSAGE_VARIABLE);
-                    String errorClassName = (String) execution.getVariable(ERROR_CLASS_VARIABLE);
+                    Object errorMessageObj = runtimeService.getVariables(executionId).get(ERROR_MESSAGE_VARIABLE);
+                    Object errorClassNameObj = runtimeService.getVariables(executionId).get(ERROR_CLASS_VARIABLE);
 
-                    publishIntegrationErrorEvent(execution, errorMessage, errorClassName);
+                    String errorMessage = errorMessageObj != null ? errorMessageObj.toString() : null;
+                    String errorClassName = errorClassNameObj != null ? errorClassNameObj.toString() : null;
+
+                    publishIntegrationErrorEvent(
+                        executionId,
+                        event.getProcessInstanceId(),
+                        event.getProcessDefinitionId(),
+                        errorMessage,
+                        errorClassName
+                    );
 
                     // Clean up error variables
-                    execution.removeVariable(ERROR_MARKER_VARIABLE);
-                    execution.removeVariable(ERROR_MESSAGE_VARIABLE);
-                    execution.removeVariable(ERROR_CLASS_VARIABLE);
+                    runtimeService.removeVariable(executionId, ERROR_MARKER_VARIABLE);
+                    runtimeService.removeVariable(executionId, ERROR_MESSAGE_VARIABLE);
+                    runtimeService.removeVariable(executionId, ERROR_CLASS_VARIABLE);
                 }
             }
         } catch (Exception e) {
@@ -75,16 +88,18 @@ public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
     }
 
     private void publishIntegrationErrorEvent(
-        ExecutionEntity execution,
+        String executionId,
+        String processInstanceId,
+        String processDefinitionId,
         String errorMessage,
         String errorClassName
     ) {
         try {
-            IntegrationContext integrationContext = new IntegrationContextImpl();
-            integrationContext.setId(execution.getId());
-            integrationContext.setExecutionId(execution.getId());
-            integrationContext.setProcessInstanceId(execution.getProcessInstanceId());
-            integrationContext.setProcessDefinitionId(execution.getProcessDefinitionId());
+            IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+            integrationContext.setId(executionId);
+            integrationContext.setExecutionId(executionId);
+            integrationContext.setProcessInstanceId(processInstanceId);
+            integrationContext.setProcessDefinitionId(processDefinitionId);
 
             CloudIntegrationErrorReceivedEventImpl event = new CloudIntegrationErrorReceivedEventImpl(
                 integrationContext,
@@ -94,12 +109,12 @@ public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
                 new ArrayList<>()
             );
 
-            event.setProcessInstanceId(execution.getProcessInstanceId());
-            event.setProcessDefinitionId(execution.getProcessDefinitionId());
+            event.setProcessInstanceId(processInstanceId);
+            event.setProcessDefinitionId(processDefinitionId);
 
-            processEngineEventsAggregator.sendCloudEvent(event);
+            processEngineEventsAggregator.add(event);
 
-            logger.debug("Published integration error event for SetVariablesTask execution {}", execution.getId());
+            logger.debug("Published integration error event for SetVariablesTask execution {}", executionId);
         } catch (Exception e) {
             logger.warn("Failed to publish integration error event for SetVariablesTask", e);
         }
