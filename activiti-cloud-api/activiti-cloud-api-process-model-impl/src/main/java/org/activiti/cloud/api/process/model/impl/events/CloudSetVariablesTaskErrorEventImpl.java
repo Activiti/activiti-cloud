@@ -16,14 +16,12 @@
 package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.SetVariablesTaskError;
+import org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudSetVariablesTaskErrorEvent;
 
 public class CloudSetVariablesTaskErrorEventImpl
-    extends CloudRuntimeEventImpl<
-        SetVariablesTaskError,
-        org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents
-    >
+    extends CloudRuntimeEventImpl<SetVariablesTaskError, SetVariablesTaskErrorEvents>
     implements CloudSetVariablesTaskErrorEvent
 {
 
@@ -60,8 +58,8 @@ public class CloudSetVariablesTaskErrorEventImpl
     }
 
     @Override
-    public org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents getEventType() {
-        return org.activiti.api.process.model.events.SetVariablesTaskErrorEvent.SetVariablesTaskErrorEvents.SET_VARIABLES_TASK_ERROR_RECEIVED;
+    public SetVariablesTaskErrorEvents getEventType() {
+        return SetVariablesTaskErrorEvents.SET_VARIABLES_TASK_ERROR_RECEIVED;
     }
 
     @Override
