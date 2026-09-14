@@ -52,9 +52,7 @@ public class SetVariablesTaskErrorProducer implements ActivitiEventListener {
         try {
             Execution execution = runtimeService.createExecutionQuery().executionId(executionId).singleResult();
             if (execution != null) {
-                Object errorMarker = runtimeService
-                    .getVariables(executionId)
-                    .get(ERROR_MARKER_VARIABLE);
+                Object errorMarker = runtimeService.getVariables(executionId).get(ERROR_MARKER_VARIABLE);
                 if (errorMarker != null && Boolean.TRUE.equals(errorMarker)) {
                     Object errorMessageObj = runtimeService.getVariables(executionId).get(ERROR_MESSAGE_VARIABLE);
                     Object errorClassNameObj = runtimeService.getVariables(executionId).get(ERROR_CLASS_VARIABLE);
