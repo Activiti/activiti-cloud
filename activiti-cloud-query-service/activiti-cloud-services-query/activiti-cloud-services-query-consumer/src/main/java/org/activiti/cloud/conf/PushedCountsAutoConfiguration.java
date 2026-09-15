@@ -19,7 +19,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Consumer;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
