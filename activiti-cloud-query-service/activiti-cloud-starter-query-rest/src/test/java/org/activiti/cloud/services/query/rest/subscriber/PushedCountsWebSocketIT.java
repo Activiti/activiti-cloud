@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
+import org.activiti.cloud.services.query.subscription.SubscriberWentLiveEvent;
+import org.activiti.cloud.services.query.subscription.SubscriberWentQuietEvent;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.services.test.identity.JwtGraphQlClientInterceptor;

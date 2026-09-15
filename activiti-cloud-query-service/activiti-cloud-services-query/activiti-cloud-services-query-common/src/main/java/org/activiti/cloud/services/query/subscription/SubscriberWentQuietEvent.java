@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.subscriber;
+package org.activiti.cloud.services.query.subscription;
 
 import java.time.Instant;
-import java.util.Set;
 
-/** Published when a user goes from no live sessions on this instance to at least one. */
-public record SubscriberWentLiveEvent(String userId, Set<String> groups, Instant at) {}
+/** Published when a user's last live session on this instance closes. */
+public record SubscriberWentQuietEvent(String userId, Instant at) {}
