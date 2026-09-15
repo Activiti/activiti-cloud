@@ -18,6 +18,7 @@ package org.activiti.cloud.conf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.time.Clock;
 import java.util.List;
 import org.activiti.cloud.common.feature.FeatureToggleAutoConfiguration;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
@@ -26,6 +27,8 @@ import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticat
 import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWebSocketMessageBrokerAutoConfiguration;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.WebSocketMessageBrokerSecurityAutoConfiguration;
 import org.activiti.cloud.services.query.app.CountConsumer;
+import org.activiti.cloud.services.query.app.SubscriberRegistryBroadcaster;
+import org.activiti.cloud.services.query.app.SubscriberResyncResponder;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.convert.ApplicationConversionService;
@@ -38,6 +41,7 @@ import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import reactor.core.publisher.Sinks;
@@ -84,6 +88,43 @@ class PushedCountsMessagingBridgeAutoConfigurationTest {
             assertThat(context.getBeansOfType(Sinks.Many.class)).isEmpty();
             assertThat(context.containsBean("countConsumerFunction")).isFalse();
             assertThat(context.containsBean("countConsumer")).isFalse();
+        });
+    }
+
+    @Test
+    void should_notRegisterASecondClock_when_theWebSocketAutoConfigurationAlreadyProvidesOne() {
+        contextRunner
+            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
+            .run(context -> {
+                assertThat(context).hasNotFailed();
+                // Relay's pushedCountsClock is @ConditionalOnMissingBean; the WS auto-config already provides one.
+                assertThat(context).hasSingleBean(Clock.class);
+            });
+    }
+
+    @Test
+    void should_wireTheSubscriberRegistryRelayBeans_when_thePropertyIsExplicitlyEnabled() {
+        contextRunner
+            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
+            .run(context -> {
+                assertThat(context).hasNotFailed();
+                assertThat(context).hasSingleBean(SubscriberRegistryBroadcaster.class);
+                assertThat(context.getBean("subscriberRegistryResyncResponder")).isInstanceOf(
+                    SubscriberResyncResponder.class
+                );
+                assertThat(context.getBean("pushedCountsRegistryProducer")).isInstanceOf(MessageChannel.class);
+                assertThat(context.getBean("subscriberRegistryResyncConsumer")).isInstanceOf(SubscribableChannel.class);
+            });
+    }
+
+    @Test
+    void should_notWireTheSubscriberRegistryRelayBeans_when_thePropertyIsNotSet() {
+        contextRunner.run(context -> {
+            assertThat(context).hasNotFailed();
+            assertThat(context.getBeansOfType(SubscriberRegistryBroadcaster.class)).isEmpty();
+            assertThat(context.containsBean("subscriberRegistryResyncResponder")).isFalse();
+            assertThat(context.containsBean("pushedCountsRegistryProducer")).isFalse();
+            assertThat(context.containsBean("subscriberRegistryResyncConsumer")).isFalse();
         });
     }
 
