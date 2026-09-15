@@ -79,6 +79,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration;
@@ -159,6 +160,12 @@ class ProcessInstanceControllerImplIT {
 
     @Autowired
     private VariableProperties variableProperties;
+
+    @BeforeEach
+    void setUp() {
+        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
+        variableProperties.setMaxRequestSize(null);
+    }
 
     @Test
     void getProcessInstances() throws Exception {
@@ -468,8 +475,6 @@ class ProcessInstanceControllerImplIT {
         assertThat(result.getResponse().getContentAsString()).contains(
             "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
         );
-
-        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
     }
 
     @Test
@@ -492,7 +497,5 @@ class ProcessInstanceControllerImplIT {
         assertThat(result.getResponse().getContentAsString()).contains(
             "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
         );
-
-        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
     }
 }

@@ -151,6 +151,8 @@ class ProcessInstanceAdminControllerImplIT {
 
     @BeforeEach
     void setUp() {
+        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
+        variableProperties.setMaxRequestSize(null);
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
         assertThat(processRuntime).isNotNull();
@@ -342,7 +344,5 @@ class ProcessInstanceAdminControllerImplIT {
         assertThat(result.getResponse().getContentAsString()).contains(
             "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
         );
-
-        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
     }
 }

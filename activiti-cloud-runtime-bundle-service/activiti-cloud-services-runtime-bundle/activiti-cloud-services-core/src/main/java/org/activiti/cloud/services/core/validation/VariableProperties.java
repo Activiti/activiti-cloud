@@ -51,7 +51,7 @@ public class VariableProperties {
         return maxValueSize + REQUEST_SIZE_OVERHEAD;
     }
 
-    public void setMaxRequestSize(int maxRequestSize) {
+    public void setMaxRequestSize(Integer maxRequestSize) {
         this.maxRequestSize = maxRequestSize;
     }
 }

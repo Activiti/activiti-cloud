@@ -145,6 +145,7 @@ class ProcessInstanceVariableControllerImplIT {
     @BeforeEach
     void setUp() {
         variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
+        variableProperties.setMaxRequestSize(null);
         //this assertion is not really necessary. It's only here to remove warning
         //telling that resourcesAssembler is never used. Even if we are not directly
         //using it in the test we need to to declare it as @SpyBean so it get inject
