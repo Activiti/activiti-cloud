@@ -16,62 +16,62 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.RegistryMessageType;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 
 class SubscriberRegistryResyncRequesterTest {
 
     private static final Instant T0 = Instant.parse("2026-01-01T00:00:00Z");
 
     private List<Message<?>> sent;
-    private boolean featureEnabled;
     private SubscriberRegistryResyncRequester requester;
 
     @BeforeEach
     void setUp() {
         sent = new ArrayList<>();
         MessageChannel registryProducer = (message, timeout) -> sent.add(message);
-        FeatureToggle featureToggle = name -> featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
         requester = new SubscriberRegistryResyncRequester(
             registryProducer,
-            featureToggle,
             "consumer-1",
             Clock.fixed(T0, ZoneOffset.UTC)
         );
     }
 
     @Test
-    void broadcastsResyncRequest_whenFeatureEnabled() {
-        featureEnabled = true;
-
+    void broadcastsResyncRequestOnStartup() {
         requester.requestResync();
 
         assertThat(sent).hasSize(1);
-        assertThat(sent.get(0).getPayload()).isInstanceOf(SubscriberRegistryMessage.class);
-        SubscriberRegistryMessage message = (SubscriberRegistryMessage) sent.get(0).getPayload();
+        assertThat(sent.getFirst().getPayload()).isInstanceOf(SubscriberRegistryMessage.class);
+        SubscriberRegistryMessage message = (SubscriberRegistryMessage) sent.getFirst().getPayload();
         assertThat(message.type()).isEqualTo(RegistryMessageType.RESYNC_REQUEST);
         assertThat(message.sourceId()).isEqualTo("consumer-1");
         assertThat(message.sentAt()).isEqualTo(T0);
     }
 
     @Test
-    void broadcastsNothing_whenFeatureDisabled() {
-        featureEnabled = false;
+    void doesNotPropagate_whenBrokerSendFails() {
+        MessageChannel failingProducer = (message, timeout) -> {
+            throw new MessageDeliveryException(message, "broker unavailable");
+        };
+        SubscriberRegistryResyncRequester requesterWithFailingProducer = new SubscriberRegistryResyncRequester(
+            failingProducer,
+            "consumer-1",
+            Clock.fixed(T0, ZoneOffset.UTC)
+        );
 
-        requester.requestResync();
-
-        assertThat(sent).isEmpty();
+        assertThatCode(requesterWithFailingProducer::requestResync).doesNotThrowAnyException();
     }
 }

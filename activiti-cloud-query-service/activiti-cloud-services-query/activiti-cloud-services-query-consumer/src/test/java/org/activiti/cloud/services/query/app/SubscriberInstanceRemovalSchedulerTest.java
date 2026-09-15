@@ -16,10 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,30 +29,17 @@ class SubscriberInstanceRemovalSchedulerTest {
     @Mock
     private SubscriberInstanceRemover remover;
 
-    private boolean featureEnabled;
     private SubscriberInstanceRemovalScheduler scheduler;
 
     @BeforeEach
     void setUp() {
-        FeatureToggle featureToggle = name -> featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
-        scheduler = new SubscriberInstanceRemovalScheduler(remover, featureToggle);
+        scheduler = new SubscriberInstanceRemovalScheduler(remover);
     }
 
     @Test
-    void runsRemoval_whenFeatureEnabled() {
-        featureEnabled = true;
-
+    void runsRemoval() {
         scheduler.removeExpiredInstances();
 
         verify(remover).removeExpiredInstances();
-    }
-
-    @Test
-    void skipsRemoval_whenFeatureDisabled() {
-        featureEnabled = false;
-
-        scheduler.removeExpiredInstances();
-
-        verifyNoInteractions(remover);
     }
 }

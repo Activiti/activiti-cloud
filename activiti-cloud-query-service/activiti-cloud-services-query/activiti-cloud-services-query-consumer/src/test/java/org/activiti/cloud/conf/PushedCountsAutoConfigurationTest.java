@@ -17,7 +17,6 @@ package org.activiti.cloud.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemovalScheduler;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemover;
@@ -37,12 +36,12 @@ class PushedCountsAutoConfigurationTest {
         .withInitializer(context ->
             context.getBeanFactory().setConversionService(ApplicationConversionService.getSharedInstance())
         )
-        .withBean(FeatureToggle.class, () -> name -> false)
         .withBean("subscriberRegistryProducer", MessageChannel.class, NullChannel::new)
+        .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
         .withConfiguration(AutoConfigurations.of(PushedCountsAutoConfiguration.class));
 
     @Test
-    void registersRegistryHandlerAndFeatureGatedConsumerFunction() {
+    void registersAllRegistryBeans() {
         contextRunner.run(context -> {
             assertThat(context).hasSingleBean(ConsumerSubscriberRegistry.class);
             assertThat(context).hasSingleBean(SubscriberRegistryMessageHandler.class);
@@ -54,6 +53,16 @@ class PushedCountsAutoConfigurationTest {
                 SubscriberRegistryConsumer.class
             );
         });
+    }
+
+    @Test
+    void backsOffEntirely_whenStartupPropertyIsDisabled() {
+        contextRunner
+            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=false")
+            .run(context -> {
+                assertThat(context).doesNotHaveBean(ConsumerSubscriberRegistry.class);
+                assertThat(context).doesNotHaveBean("subscriberRegistryConsumerFunction");
+            });
     }
 
     @Test
