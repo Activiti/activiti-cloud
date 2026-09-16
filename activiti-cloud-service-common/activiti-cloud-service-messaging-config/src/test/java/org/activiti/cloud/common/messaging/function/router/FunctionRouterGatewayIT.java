@@ -166,17 +166,13 @@ class FunctionRouterGatewayIT {
         @Bean
         @FunctionBinding(input = QUERY_CONSUMER)
         public Consumer<Message<?>> queryConsumerHandler() {
-            return message -> {
-                queryMessage.set(message);
-            };
+            return queryMessage::set;
         }
 
         @Bean
         @FunctionBinding(input = AUDIT_CONSUMER)
         public Consumer<Message<?>> auditConsumerHandler() {
-            return message -> {
-                auditMessage.set(message);
-            };
+            return auditMessage::set;
         }
 
         @Bean
