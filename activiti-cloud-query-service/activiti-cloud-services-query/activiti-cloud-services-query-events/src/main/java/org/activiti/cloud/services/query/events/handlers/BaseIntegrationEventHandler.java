@@ -80,7 +80,6 @@ public abstract class BaseIntegrationEventHandler {
         if (serviceTaskEntity != null && entity.getServiceTask() == null) {
             entity.setServiceTask(serviceTaskEntity);
 
-            // Increment counter if this is a newly created entity
             if (isNewEntity) {
                 serviceTaskEntity.incrementIntegrationContextCounter();
             }
