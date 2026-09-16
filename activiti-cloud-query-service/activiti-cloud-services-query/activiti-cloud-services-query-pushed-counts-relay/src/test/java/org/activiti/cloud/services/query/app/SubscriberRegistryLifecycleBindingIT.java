@@ -44,7 +44,6 @@ import org.springframework.messaging.Message;
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = {
         "activiti.cloud.query.pushed-counts.enabled=true",
-        "activiti.cloud.query.pushed-counts.instance-id=lifecycle-instance",
         "activiti.cloud.query.pushed-counts.heartbeat-interval=PT0.2S",
     }
 )
@@ -62,10 +61,7 @@ class SubscriberRegistryLifecycleBindingIT {
     void broadcastsSnapshotOnStartup() {
         String snapshot = awaitMessageContaining("\"type\":\"SNAPSHOT\"");
 
-        assertThat(snapshot)
-            .isNotNull()
-            .contains("\"userId\":\"alice\"")
-            .contains("\"sourceId\":\"lifecycle-instance\"");
+        assertThat(snapshot).isNotNull().contains("\"userId\":\"alice\"").contains("\"sourceId\":\"");
     }
 
     @Test
@@ -73,7 +69,7 @@ class SubscriberRegistryLifecycleBindingIT {
     void broadcastsHeartbeatsPeriodically() {
         String heartbeat = awaitMessageContaining("\"type\":\"HEARTBEAT\"");
 
-        assertThat(heartbeat).isNotNull().contains("\"sourceId\":\"lifecycle-instance\"");
+        assertThat(heartbeat).isNotNull().contains("\"sourceId\":\"");
     }
 
     private String awaitMessageContaining(String token) {

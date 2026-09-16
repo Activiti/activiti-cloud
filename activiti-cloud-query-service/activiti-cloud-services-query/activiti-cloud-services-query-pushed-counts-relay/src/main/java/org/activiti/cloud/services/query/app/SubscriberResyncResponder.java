@@ -61,10 +61,21 @@ public class SubscriberResyncResponder implements Consumer<Message<SubscriberReg
             return;
         }
         LOGGER.debug("Replying with a registry snapshot to a resync request from {}", request.sourceId());
-        registryProducer.send(
-            new GenericMessage<>(
-                SubscriberRegistryMessage.snapshot(registry.snapshotEntries(), sourceId, clock.instant())
-            )
+        SubscriberRegistryMessage reply = SubscriberRegistryMessage.snapshot(
+            registry.snapshotEntries(),
+            sourceId,
+            clock.instant()
         );
+        try {
+            if (!registryProducer.send(new GenericMessage<>(reply))) {
+                LOGGER.warn(
+                    "Registry channel rejected the snapshot reply to a resync request from {}",
+                    request.sourceId()
+                );
+            }
+        } catch (RuntimeException e) {
+            // Best-effort reply: a broker hiccup must not propagate into the resync consumer binding.
+            LOGGER.warn("Failed to reply with a registry snapshot to a resync request from {}", request.sourceId(), e);
+        }
     }
 }
