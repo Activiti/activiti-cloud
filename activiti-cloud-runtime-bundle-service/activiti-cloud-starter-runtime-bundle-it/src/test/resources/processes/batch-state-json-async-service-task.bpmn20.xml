@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+  xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:activiti="http://activiti.org/bpmn"
+  targetNamespace="Examples">
+
+  <process id="batchStateJsonAsyncServiceTask" isExecutable="true">
+
+    <startEvent id="theStart" />
+
+    <sequenceFlow sourceRef="theStart" targetRef="materializeBatchState" />
+
+    <serviceTask
+      id="materializeBatchState"
+      name="Materialize batch state"
+      activiti:async="true"
+      activiti:delegateExpression="${batchStateReaderDelegate}">
+      <extensionElements>
+        <activiti:failedJobRetryTimeCycle>R3/PT1S</activiti:failedJobRetryTimeCycle>
+      </extensionElements>
+    </serviceTask>
+
+    <sequenceFlow sourceRef="materializeBatchState" targetRef="reviewTask" />
+
+    <userTask id="reviewTask" name="Review batch state" />
+
+    <sequenceFlow sourceRef="reviewTask" targetRef="theEnd" />
+
+    <endEvent id="theEnd" />
+
+  </process>
+
+</definitions>

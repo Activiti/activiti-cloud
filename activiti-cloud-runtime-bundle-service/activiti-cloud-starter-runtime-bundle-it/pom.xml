@@ -61,4 +61,26 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <profiles>
+    <profile>
+      <id>batch-state-oom-reproducer</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <argLine>@{argLine} -Xmx256m ${mockito.agent.arg}</argLine>
+              <includes>
+                <include>**/BatchStateJsonJobExecutorIT.java</include>
+              </includes>
+              <systemPropertyVariables>
+                <batch.state.reproducer.large-json-bytes>8388608</batch.state.reproducer.large-json-bytes>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
