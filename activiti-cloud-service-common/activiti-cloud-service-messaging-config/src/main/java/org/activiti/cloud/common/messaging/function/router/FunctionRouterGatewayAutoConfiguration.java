@@ -17,7 +17,7 @@ package org.activiti.cloud.common.messaging.function.router;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTE;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DEFINITION;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
 import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 
@@ -78,8 +78,10 @@ public class FunctionRouterGatewayAutoConfiguration {
     }
 
     @Bean
-    FunctionRouterMessageDestinationResolver functionRouterMessageDestinationResolver() {
-        return new FunctionRouterMessageDestinationResolver();
+    FunctionRouterMessageDestinationResolver functionRouterMessageDestinationResolver(
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
+        return new FunctionRouterMessageDestinationResolver(messagingProperties);
     }
 
     @Bean
@@ -269,7 +271,7 @@ public class FunctionRouterGatewayAutoConfiguration {
         return new StatefulRequestHandlerCircuitBreakerAdvice(
             functionRouterIdempotentInterceptorKeyStrategy,
             "rootProcessInstanceId",
-            ROUTE
+            FUNCTION_DEFINITION
         );
     }
 

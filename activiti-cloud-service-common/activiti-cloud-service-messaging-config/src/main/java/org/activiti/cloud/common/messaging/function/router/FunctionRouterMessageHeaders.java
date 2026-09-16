@@ -16,8 +16,8 @@
 package org.activiti.cloud.common.messaging.function.router;
 
 public interface FunctionRouterMessageHeaders {
-    String DESTINATION = "spring.cloud.function.destination";
-    String ROUTE = "spring.cloud.function.definition";
+    String FUNCTION_DESTINATION = "spring.cloud.function.destination";
+    String FUNCTION_DEFINITION = "spring.cloud.function.definition";
     String ROUTE_CORRELATION_ID = "routeCorrelationId";
     String ROUTING_CONTEXT = "routingContext";
 }

@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.function.router;
 
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.DESTINATION;
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTE;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DEFINITION;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DESTINATION;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.DUPLICATE_MESSAGE;
 
 import java.util.Optional;
@@ -62,7 +62,7 @@ public class FunctionRouterMessageHandler implements GenericHandler<Object> {
 
         logger.debug(
             "route {}, partition {}, payload: {}, headers: {}",
-            headers.get(ROUTE),
+            headers.get(FUNCTION_DEFINITION),
             Thread.currentThread().getName(),
             payload,
             headers
@@ -76,11 +76,11 @@ public class FunctionRouterMessageHandler implements GenericHandler<Object> {
         }
 
         final var route = functionRouterMessageDestinationSelector.apply(headers);
-        final var destination = headers.get(DESTINATION);
+        final var destination = headers.get(FUNCTION_DESTINATION);
 
         headerAccessor.removeHeaders("amqp_*", "kafka_*", MessageHeaders.REPLY_CHANNEL, MessageHeaders.ERROR_CHANNEL);
-        headerAccessor.setHeader(DESTINATION, destination);
-        headerAccessor.setHeader(ROUTE, route);
+        headerAccessor.setHeader(FUNCTION_DESTINATION, destination);
+        headerAccessor.setHeader(FUNCTION_DEFINITION, route);
 
         final var routeHeaders = headerAccessor.toMessageHeaders();
         final var routeMessage = MessageBuilder.withPayload(payload).copyHeaders(routeHeaders).build();

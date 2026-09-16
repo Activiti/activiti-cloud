@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.function.router;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.CONNECTOR_TYPE;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
@@ -41,6 +42,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.common.messaging.config.test.FunctionRouterBindingConfigurationIT;
 import org.activiti.cloud.common.messaging.config.test.TestBindingsChannels;
@@ -104,6 +106,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
         "activiti.cloud.messaging.function-router.routes.commandConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.restConsumer.enabled=true",
+        "function-router.request-timeout=10s",
     }
 )
 @EnableTestBinder
@@ -153,6 +156,9 @@ class FunctionRouterGatewayIT {
 
     @Autowired
     private FunctionBindingConfiguration.BindingResolver bindingResolver;
+
+    @Autowired
+    private ActivitiCloudMessagingProperties messagingProperties;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -322,6 +328,23 @@ class FunctionRouterGatewayIT {
     }
 
     @Test
+    void testConnectorTypeBindings() {
+        // given
+        Message<String> message = MessageBuilder.withPayload("run_test();")
+            .setHeader(AmqpHeaders.MESSAGE_ID, UUID.randomUUID().toString())
+            .setHeader(CONNECTOR_TYPE, "script.EXECUTE")
+            .build();
+
+        // when
+        inputDestination.send(message, "script.EXECUTE");
+
+        // then
+        await().untilAsserted(() -> {
+            assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+        });
+    }
+
+    @Test
     void functionRouterGateway() {
         final var request = MessageBuilder.withPayload("buz")
             .setHeader(AmqpHeaders.MESSAGE_ID, UUID.randomUUID().toString())
@@ -385,8 +408,44 @@ class FunctionRouterGatewayIT {
 
         // then
         await().untilAsserted(() -> {
-            AssertionsForClassTypes.assertThat(postPayload.get()).isNotNull().isEqualTo("POST http://localhost:8080");
-            AssertionsForClassTypes.assertThat(getPayload.get()).isNull();
+            assertThat(postPayload.get()).isNotNull().isEqualTo("POST http://localhost:8080");
+            assertThat(getPayload.get()).isNull();
+        });
+    }
+
+    @Test
+    void testConnectorBindingsAmqpHeaders() {
+        // given
+        Message<String> message = MessageBuilder.withPayload("run_test();")
+            .setHeader(AmqpHeaders.MESSAGE_ID, UUID.randomUUID().toString())
+            .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, "script.EXECUTE")
+            .build();
+
+        // when
+        inputDestination.send(message, "script.EXECUTE");
+
+        // then
+        await().untilAsserted(() -> {
+            assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+        });
+    }
+
+    @Test
+    void testConnectorBindingsAmqpHeadersWithPrefix() {
+        withRabbitMqPrefix("myapp.", prefix -> {
+            // given
+            Message<String> message = MessageBuilder.withPayload("run_test();")
+                .setHeader(AmqpHeaders.MESSAGE_ID, UUID.randomUUID().toString())
+                .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, prefix.concat("script.EXECUTE"))
+                .build();
+
+            // when
+            inputDestination.send(message, "script.EXECUTE");
+
+            // then
+            await().untilAsserted(() -> {
+                assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+            });
         });
     }
 
@@ -507,6 +566,18 @@ class FunctionRouterGatewayIT {
 
                 throw e;
             }
+        }
+    }
+
+    void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {
+        final var current = messagingProperties.getRabbitmq().getPrefix();
+
+        try {
+            messagingProperties.getRabbitmq().setPrefix(prefix);
+
+            runnable.accept(prefix);
+        } finally {
+            messagingProperties.getRabbitmq().setPrefix(current);
         }
     }
 }

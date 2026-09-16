@@ -15,21 +15,42 @@
  */
 package org.activiti.cloud.common.messaging.function.router;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.CONNECTOR_TYPE;
+
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 
 public class FunctionRouterMessageDestinationResolver implements Function<Message<?>, String> {
 
+    private final ActivitiCloudMessagingProperties messagingProperties;
+
+    public FunctionRouterMessageDestinationResolver(ActivitiCloudMessagingProperties messagingProperties) {
+        this.messagingProperties = messagingProperties;
+    }
+
     @Override
     public String apply(Message<?> message) {
         return Optional.of(message.getHeaders())
             .flatMap(headers ->
-                Optional.ofNullable(headers.get(FunctionRouterMessageHeaders.DESTINATION, String.class)).or(() ->
-                    Optional.ofNullable(headers.get(AmqpHeaders.RECEIVED_EXCHANGE, String.class))
-                )
+                Optional.ofNullable(headers.get(FunctionRouterMessageHeaders.FUNCTION_DESTINATION, String.class))
+                    .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
+                    .or(() ->
+                        Optional.ofNullable(messagingProperties.getRabbitmq().getPrefix())
+                            .filter(Predicate.not(String::isBlank))
+                            .flatMap(prefix ->
+                                Optional.ofNullable(
+                                    message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)
+                                )
+                                    .filter(exchange -> exchange.startsWith(prefix))
+                                    .map(exchange -> exchange.substring(prefix.length()))
+                            )
+                            .or(() -> Optional.ofNullable(headers.get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
+                    )
             )
             .orElseThrow(() -> new MessageDeliveryException("Missing route destination"));
     }

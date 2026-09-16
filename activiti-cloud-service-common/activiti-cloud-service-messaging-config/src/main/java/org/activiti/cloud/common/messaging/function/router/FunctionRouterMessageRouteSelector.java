@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.function.router;
 
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTE;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DEFINITION;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -25,7 +25,7 @@ public class FunctionRouterMessageRouteSelector implements Function<MessageHeade
 
     @Override
     public String apply(MessageHeaders headers) {
-        return Optional.ofNullable(headers.get(ROUTE, String.class)).orElseThrow(() ->
+        return Optional.ofNullable(headers.get(FUNCTION_DEFINITION, String.class)).orElseThrow(() ->
             new RuntimeException("route not found")
         );
     }

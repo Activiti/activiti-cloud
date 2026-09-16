@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.function.router;
 
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.DESTINATION;
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTE;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DEFINITION;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DESTINATION;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -37,13 +37,13 @@ public interface FunctionRouterGateway extends Function<Message<?>, FunctionRout
 
     CompletableFuture<RouteResult> applyAsync(Message<?> message);
 
-    RouteResult forwardTo(@Header(DESTINATION) String destination, Message<?> message);
+    RouteResult forwardTo(@Header(FUNCTION_DESTINATION) String destination, Message<?> message);
 
-    CompletableFuture<RouteResult> forwardToAsync(@Header(DESTINATION) String destination, Message<?> message);
+    CompletableFuture<RouteResult> forwardToAsync(@Header(FUNCTION_DESTINATION) String destination, Message<?> message);
 
-    RouteResult routeTo(@Header(ROUTE) String route, Message<?> message);
+    RouteResult routeTo(@Header(FUNCTION_DEFINITION) String route, Message<?> message);
 
-    CompletableFuture<RouteResult> routeToAsync(@Header(ROUTE) String route, Message<?> message);
+    CompletableFuture<RouteResult> routeToAsync(@Header(FUNCTION_DEFINITION) String route, Message<?> message);
 
     record RouteResult(Message<?> request, MessageGroup results) {
         public boolean hasErrors() {

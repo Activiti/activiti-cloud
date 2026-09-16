@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.function.router;
 
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTE;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DEFINITION;
 import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTE_CORRELATION_ID;
 
 import org.jspecify.annotations.Nullable;
@@ -27,7 +27,9 @@ public class FunctionRouterIdempotentInterceptorKeyStrategy implements MessagePr
     @Override
     public @Nullable String processMessage(Message<?> message) {
         return (
-            message.getHeaders().getOrDefault(ROUTE, "unknown") + ":" + message.getHeaders().get(ROUTE_CORRELATION_ID)
+            message.getHeaders().getOrDefault(FUNCTION_DEFINITION, "unknown") +
+            ":" +
+            message.getHeaders().get(ROUTE_CORRELATION_ID)
         );
     }
 }

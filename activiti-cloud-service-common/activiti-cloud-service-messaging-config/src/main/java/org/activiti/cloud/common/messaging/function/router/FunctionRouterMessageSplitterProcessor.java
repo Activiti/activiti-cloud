@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.common.messaging.function.router;
 
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.DESTINATION;
-import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTE;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DEFINITION;
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DESTINATION;
 import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTE_CORRELATION_ID;
 import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTING_CONTEXT;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
 
-import java.util.Collection;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.jspecify.annotations.Nullable;
@@ -42,18 +41,20 @@ public class FunctionRouterMessageSplitterProcessor extends AbstractMessageSplit
 
     @Override
     protected @Nullable Object splitMessage(Message<?> message) {
-        final var routingContext = Optional.ofNullable(
-            message.getHeaders().get(ROUTING_CONTEXT, String.class)
-        ).orElseThrow(() -> new MessageRejectedException(message, "missing routing context"));
+        final var registrations = Optional.ofNullable(message.getHeaders().get(ROUTING_CONTEXT, String.class))
+            .map(functionRouterProperties::registrations)
+            .orElseThrow(() -> new MessageRejectedException(message, "missing routing context"));
 
-        return Optional.ofNullable(message.getHeaders().get(DESTINATION, String.class))
-            .map(functionRouterProperties.registrations(routingContext)::get)
+        final var destinations = Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
+            .map(registrations::get)
+            .orElseThrow(() -> new MessageRejectedException(message, "missing destination context"));
+
+        return destinations
             .stream()
-            .flatMap(Collection::stream)
             .map(functionName ->
                 MessageBuilder.fromMessage(message)
                     .setHeader(ROUTE_CORRELATION_ID, message.getHeaders().get(CORRELATION_ID))
-                    .setHeader(ROUTE, functionName)
+                    .setHeader(FUNCTION_DEFINITION, functionName)
                     .build()
             )
             .toList();
