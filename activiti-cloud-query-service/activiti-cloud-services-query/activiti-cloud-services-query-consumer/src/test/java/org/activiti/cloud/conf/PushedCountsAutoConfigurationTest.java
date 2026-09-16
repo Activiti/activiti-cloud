@@ -63,6 +63,7 @@ class PushedCountsAutoConfigurationTest {
             assertThat(context).hasSingleBean(SubscriberInstanceRemover.class);
             assertThat(context).hasSingleBean(SubscriberInstanceRemovalScheduler.class);
             assertThat(context).hasSingleBean(SubscriberRegistryResyncRequester.class);
+            assertThat(context).hasSingleBean(AssignedTaskCounter.class);
             assertThat(context).hasBean("subscriberRegistryConsumerFunction");
             assertThat(context.getBean("subscriberRegistryConsumerFunction")).isInstanceOf(
                 SubscriberRegistryConsumer.class
@@ -81,6 +82,7 @@ class PushedCountsAutoConfigurationTest {
             .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=false")
             .run(context -> {
                 assertThat(context).doesNotHaveBean(ConsumerSubscriberRegistry.class);
+                assertThat(context).doesNotHaveBean(AssignedTaskCounter.class);
                 assertThat(context).doesNotHaveBean("subscriberRegistryConsumerFunction");
             });
     }

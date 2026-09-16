@@ -24,6 +24,7 @@ import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.ConsumerRecomputeBuffer;
 import org.activiti.cloud.services.query.app.ConsumerRecomputeScheduler;
+import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.RecomputeAudienceResolver;
@@ -37,6 +38,7 @@ import org.activiti.cloud.services.query.app.SubscriberRegistryResyncRequester;
 import org.activiti.cloud.services.query.app.count.PushedCounter;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -166,5 +168,11 @@ public class PushedCountsAutoConfiguration {
             maxWindow,
             maxBatchSize
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    AssignedTaskCounter assignedTaskCounter(TaskRepository taskRepository) {
+        return new AssignedTaskCounter(taskRepository);
     }
 }
