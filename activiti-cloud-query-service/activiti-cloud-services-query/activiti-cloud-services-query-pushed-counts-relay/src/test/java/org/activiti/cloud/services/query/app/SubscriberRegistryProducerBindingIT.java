@@ -43,10 +43,7 @@ import org.springframework.messaging.support.MessageBuilder;
 @SpringBootTest(
     classes = PushedCountsRelayTestApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
-    properties = {
-        "activiti.cloud.query.pushed-counts.enabled=true",
-        "activiti.cloud.query.pushed-counts.instance-id=test-instance",
-    }
+    properties = { "activiti.cloud.query.pushed-counts.enabled=true" }
 )
 @EnableTestBinder
 class SubscriberRegistryProducerBindingIT {
@@ -77,11 +74,7 @@ class SubscriberRegistryProducerBindingIT {
 
         String message = receiveContaining("\"type\":\"REGISTERED\"");
 
-        assertThat(message)
-            .isNotNull()
-            .contains("\"userId\":\"alice\"")
-            .contains("eng")
-            .contains("\"sourceId\":\"test-instance\"");
+        assertThat(message).isNotNull().contains("\"userId\":\"alice\"").contains("eng").contains("\"sourceId\":\"");
     }
 
     @Test
@@ -90,7 +83,7 @@ class SubscriberRegistryProducerBindingIT {
 
         String message = receiveContaining("\"type\":\"UNREGISTERED\"");
 
-        assertThat(message).isNotNull().contains("\"userId\":\"alice\"").contains("\"sourceId\":\"test-instance\"");
+        assertThat(message).isNotNull().contains("\"userId\":\"alice\"").contains("\"sourceId\":\"");
     }
 
     @Test

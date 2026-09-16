@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -88,6 +89,23 @@ class SubscriberResyncResponderTest {
         responder.accept(message(SubscriberRegistryMessage.registered("alice", List.of("dev"), "instance-b", NOW)));
 
         assertThat(sent).isEmpty();
+    }
+
+    @Test
+    void swallowsSendFailure_soABrokerHiccupNeverWedgesTheResyncConsumer() {
+        MessageChannel failing = (message, timeout) -> {
+            throw new RuntimeException("broker down");
+        };
+        SubscriberResyncResponder resilient = new SubscriberResyncResponder(
+            () -> List.of(new SubscriberRegistryMessage.Entry("alice", List.of("dev"))),
+            failing,
+            SOURCE_ID,
+            CLOCK
+        );
+
+        assertThatCode(() ->
+            resilient.accept(message(SubscriberRegistryMessage.resyncRequest("instance-b", NOW)))
+        ).doesNotThrowAnyException();
     }
 
     private static Message<SubscriberRegistryMessage> message(SubscriberRegistryMessage payload) {
