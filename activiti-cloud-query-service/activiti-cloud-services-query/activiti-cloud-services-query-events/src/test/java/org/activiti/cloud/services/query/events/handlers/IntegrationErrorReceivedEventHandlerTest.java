@@ -24,6 +24,7 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.cloud.api.events.CloudRuntimeEventType;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
@@ -43,7 +44,6 @@ class IntegrationErrorReceivedEventHandlerTest {
     private static final String PROCESS_INSTANCE_ID = "process-instance-id";
     private static final String CLIENT_ID = "client-id";
     private static final String EXECUTION_ID = "execution-id";
-    private static final String SERVICE_TASK_ID = PROCESS_INSTANCE_ID + ":" + CLIENT_ID + ":" + EXECUTION_ID;
 
     private static final String ERROR_CODE = "500";
     private static final String ERROR_MESSAGE = "Connector invocation failed";
@@ -57,8 +57,8 @@ class IntegrationErrorReceivedEventHandlerTest {
 
     @Test
     void should_keepInBoundVariablesOfExistingEntity_when_errorEventCarriesNoInBoundVariables() {
-        IntegrationContextImpl integrationContext = buildIntegrationContext();
-        integrationContext.addOutBoundVariables(Map.of("out", "error-payload"));
+        IntegrationContextImpl errorIntegrationContext = buildIntegrationContext();
+        errorIntegrationContext.addOutBoundVariables(Map.of("out", "error-payload"));
 
         IntegrationContextEntity existingEntity = buildIntegrationContextEntity();
         existingEntity.setInBoundVariables(Map.of("in", "requested-value"));
@@ -66,9 +66,14 @@ class IntegrationErrorReceivedEventHandlerTest {
         ServiceTaskEntity serviceTaskEntity = buildServiceTaskEntity();
 
         when(entityManager.find(IntegrationContextEntity.class, INTEGRATION_CONTEXT_ID)).thenReturn(existingEntity);
-        when(entityManager.find(ServiceTaskEntity.class, SERVICE_TASK_ID)).thenReturn(serviceTaskEntity);
+        when(
+            entityManager.find(
+                ServiceTaskEntity.class,
+                IntegrationContextEntity.IdBuilderHelper.from(errorIntegrationContext)
+            )
+        ).thenReturn(serviceTaskEntity);
 
-        handler.handle(buildErrorEvent(integrationContext, List.of()));
+        handler.handle(buildErrorEvent(errorIntegrationContext, List.of()));
 
         verify(entityManager).persist(existingEntity);
         assertThat(existingEntity.getInBoundVariables()).containsExactlyEntriesOf(Map.of("in", "requested-value"));
@@ -85,8 +90,8 @@ class IntegrationErrorReceivedEventHandlerTest {
 
     @Test
     void should_notOverwriteInBoundVariablesOfExistingEntity_when_errorEventCarriesInBoundVariables() {
-        IntegrationContextImpl integrationContext = buildIntegrationContext();
-        integrationContext.addInBoundVariables(Map.of("in", "stale-value"));
+        IntegrationContextImpl errorIntegrationContext = buildIntegrationContext();
+        errorIntegrationContext.addInBoundVariables(Map.of("in", "stale-value"));
 
         IntegrationContextEntity existingEntity = buildIntegrationContextEntity();
         existingEntity.setInBoundVariables(Map.of("in", "requested-value"));
@@ -94,9 +99,14 @@ class IntegrationErrorReceivedEventHandlerTest {
         ServiceTaskEntity serviceTaskEntity = buildServiceTaskEntity();
 
         when(entityManager.find(IntegrationContextEntity.class, INTEGRATION_CONTEXT_ID)).thenReturn(existingEntity);
-        when(entityManager.find(ServiceTaskEntity.class, SERVICE_TASK_ID)).thenReturn(serviceTaskEntity);
+        when(
+            entityManager.find(
+                ServiceTaskEntity.class,
+                IntegrationContextEntity.IdBuilderHelper.from(errorIntegrationContext)
+            )
+        ).thenReturn(serviceTaskEntity);
 
-        handler.handle(buildErrorEvent(integrationContext, List.of()));
+        handler.handle(buildErrorEvent(errorIntegrationContext, List.of()));
 
         verify(entityManager).persist(existingEntity);
         assertThat(existingEntity.getInBoundVariables()).containsExactlyEntriesOf(Map.of("in", "requested-value"));
@@ -104,16 +114,21 @@ class IntegrationErrorReceivedEventHandlerTest {
 
     @Test
     void should_addFullErrorMessageAsFirstStackTraceElement_when_eventHasStackTrace() {
-        IntegrationContextImpl integrationContext = buildIntegrationContext();
+        IntegrationContextImpl errorIntegrationContext = buildIntegrationContext();
         StackTraceElement eventElement = new StackTraceElement("MyConnector", "invoke", "MyConnector.java", 42);
 
         IntegrationContextEntity existingEntity = buildIntegrationContextEntity();
         ServiceTaskEntity serviceTaskEntity = buildServiceTaskEntity();
 
         when(entityManager.find(IntegrationContextEntity.class, INTEGRATION_CONTEXT_ID)).thenReturn(existingEntity);
-        when(entityManager.find(ServiceTaskEntity.class, SERVICE_TASK_ID)).thenReturn(serviceTaskEntity);
+        when(
+            entityManager.find(
+                ServiceTaskEntity.class,
+                IntegrationContextEntity.IdBuilderHelper.from(errorIntegrationContext)
+            )
+        ).thenReturn(serviceTaskEntity);
 
-        handler.handle(buildErrorEvent(integrationContext, List.of(eventElement)));
+        handler.handle(buildErrorEvent(errorIntegrationContext, List.of(eventElement)));
 
         assertThat(existingEntity.getStackTraceElements())
             .extracting(StackTraceElement::getClassName, StackTraceElement::getFileName)
@@ -122,19 +137,29 @@ class IntegrationErrorReceivedEventHandlerTest {
 
     @Test
     void should_createEntityWithInBoundVariablesFromEvent_when_entityDoesNotExist() {
-        IntegrationContextImpl integrationContext = buildIntegrationContext();
-        integrationContext.addInBoundVariables(Map.of("in", "recovered-value"));
-        integrationContext.addOutBoundVariables(Map.of("out", "error-payload"));
+        IntegrationContextImpl errorIntegrationContext = buildIntegrationContext();
+        errorIntegrationContext.addInBoundVariables(Map.of("in", "recovered-value"));
+        errorIntegrationContext.addOutBoundVariables(Map.of("out", "error-payload"));
 
         when(entityManager.find(IntegrationContextEntity.class, INTEGRATION_CONTEXT_ID)).thenReturn(null);
-        when(entityManager.find(ServiceTaskEntity.class, SERVICE_TASK_ID)).thenReturn(null);
+        when(
+            entityManager.find(
+                ServiceTaskEntity.class,
+                IntegrationContextEntity.IdBuilderHelper.from(errorIntegrationContext)
+            )
+        ).thenReturn(null);
 
-        handler.handle(buildErrorEvent(integrationContext, List.of()));
+        handler.handle(buildErrorEvent(errorIntegrationContext, List.of()));
 
         ArgumentCaptor<IntegrationContextEntity> captor = ArgumentCaptor.forClass(IntegrationContextEntity.class);
         verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getInBoundVariables()).containsExactlyEntriesOf(Map.of("in", "recovered-value"));
         assertThat(captor.getValue().getOutBoundVariables()).containsExactlyEntriesOf(Map.of("out", "error-payload"));
+    }
+
+    @Test
+    void should_returnIntegrationErrorReceivedEventName_when_getHandledEventIsCalled() {
+        assertThat(handler.getHandledEvent()).isEqualTo(CloudRuntimeEventType.INTEGRATION_ERROR_RECEIVED.name());
     }
 
     private IntegrationContextImpl buildIntegrationContext() {

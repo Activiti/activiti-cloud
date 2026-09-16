@@ -20,12 +20,9 @@ import java.util.Optional;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public abstract class BaseIntegrationEventHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
 
     protected final EntityManager entityManager;
 
@@ -70,5 +67,24 @@ public abstract class BaseIntegrationEventHandler {
         entity.setInBoundVariables(integrationContext.getInBoundVariables());
 
         return entity;
+    }
+
+    protected ServiceTaskEntity linkServiceTaskAndHandleCounter(
+        CloudIntegrationEvent integrationEvent,
+        IntegrationContextEntity entity,
+        boolean isNewEntity
+    ) {
+        String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
+
+        if (serviceTaskEntity != null && entity.getServiceTask() == null) {
+            entity.setServiceTask(serviceTaskEntity);
+
+            // Increment counter if this is a newly created entity
+            if (isNewEntity) {
+                serviceTaskEntity.incrementIntegrationContextCounter();
+            }
+        }
+        return serviceTaskEntity;
     }
 }

@@ -55,17 +55,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         entity.setStackTraceElements(addFullErrorMessageAsFirstStackTraceElement(integrationEvent));
         entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
-        String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
-        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
-
-        if (serviceTaskEntity != null && entity.getServiceTask() == null) {
-            entity.setServiceTask(serviceTaskEntity);
-
-            // Increment counter if this is a newly created entity
-            if (isNewEntity) {
-                serviceTaskEntity.incrementIntegrationContextCounter();
-            }
-        }
+        ServiceTaskEntity serviceTaskEntity = linkServiceTaskAndHandleCounter(integrationEvent, entity, isNewEntity);
 
         entityManager.persist(entity);
 
