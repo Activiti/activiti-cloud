@@ -41,10 +41,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import reactor.core.publisher.Flux;
 
-/**
- * Proves the count bridge over a real broker: a message sent to the {@code pushedCounts} destination
- * arrives at {@code countConsumer} and lands on this instance's {@code pushedCountsFlux}.
- */
 @SpringBootTest(
     classes = { QueryRestApplication.class },
     properties = {

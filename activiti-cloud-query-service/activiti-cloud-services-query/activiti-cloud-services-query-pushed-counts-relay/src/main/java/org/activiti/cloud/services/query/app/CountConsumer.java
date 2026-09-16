@@ -25,10 +25,9 @@ import org.springframework.messaging.Message;
 import reactor.core.publisher.Sinks;
 
 /**
- * Feature-gated entry point for pushed counts arriving on the broker, relaying each one into the
- * local {@link Sinks.Many} that feeds every subscription this instance is serving. While the
- * pushed-counts toggle is off the message is dropped, so the binding can stay in place idle and the
- * feature can be switched on at runtime without a redeploy.
+ * Entry point for pushed counts arriving on the broker, relaying each one into the local
+ * {@link Sinks.Many} that feeds every subscription this instance is serving. Dropped while the
+ * pushed-counts toggle is off.
  */
 public class CountConsumer implements Consumer<Message<CountChangedMessage>> {
 
