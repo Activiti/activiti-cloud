@@ -108,14 +108,13 @@ class BatchStateJsonJobExecutorIT {
             asyncExecutorProperty,
         };
 
-        rbCtx =
-            TestPropertyValues.of(rabbitMqProperties)
-                .and(datasource)
-                .applyToSystemProperties(() ->
-                    new SpringApplicationBuilder(RbApplication.class)
-                        .properties("server.port=" + TestSocketUtils.findAvailableTcpPort())
-                        .run()
-                );
+        rbCtx = TestPropertyValues.of(rabbitMqProperties)
+            .and(datasource)
+            .applyToSystemProperties(() ->
+                new SpringApplicationBuilder(RbApplication.class)
+                    .properties("server.port=" + TestSocketUtils.findAvailableTcpPort())
+                    .run()
+            );
     }
 
     @AfterAll
@@ -132,60 +131,83 @@ class BatchStateJsonJobExecutorIT {
     @Test
     void shouldPersistBatchStateInActGeByteArrayAndCompleteForSmallerPayload() {
         String batchStateJson = buildBatchStateJson(SMALL_BATCH_STATE_BYTES);
-        ProcessInstance processInstance = runtimeService()
-            .startProcessInstanceByKey(PROCESS_KEY, variables(batchStateJson, false));
+        ProcessInstance processInstance = runtimeService().startProcessInstanceByKey(
+            PROCESS_KEY,
+            variables(batchStateJson, false)
+        );
 
-        await().atMost(Duration.ofMinutes(1)).untilAsserted(() -> {
-            Task task = taskService().createTaskQuery().processInstanceId(processInstance.getProcessInstanceId()).singleResult();
+        await()
+            .atMost(Duration.ofMinutes(1))
+            .untilAsserted(() -> {
+                Task task = taskService()
+                    .createTaskQuery()
+                    .processInstanceId(processInstance.getProcessInstanceId())
+                    .singleResult();
 
-            assertThat(task).isNotNull();
-            assertThat(task.getName()).isEqualTo("Review batch state");
-        });
+                assertThat(task).isNotNull();
+                assertThat(task.getName()).isEqualTo("Review batch state");
+            });
 
         String byteArrayId = findBatchStateByteArrayId(processInstance.getProcessInstanceId());
-        Integer persistedBytes = jdbcTemplate()
-            .queryForObject(
-                "select octet_length(BYTES_) from ACT_GE_BYTEARRAY where ID_ = ?",
-                Integer.class,
-                byteArrayId
-            );
+        Integer persistedBytes = jdbcTemplate().queryForObject(
+            "select octet_length(BYTES_) from ACT_GE_BYTEARRAY where ID_ = ?",
+            Integer.class,
+            byteArrayId
+        );
 
         assertThat(byteArrayId).isNotBlank();
         assertThat(persistedBytes).isGreaterThanOrEqualTo(batchStateJson.getBytes(StandardCharsets.UTF_8).length);
         assertThat(delegate().getInvocationCount()).isEqualTo(1);
-        assertThat(delegate().getLargestMaterializedBatchStateBytes())
-            .isGreaterThanOrEqualTo(batchStateJson.getBytes(StandardCharsets.UTF_8).length);
+        assertThat(delegate().getLargestMaterializedBatchStateBytes()).isGreaterThanOrEqualTo(
+            batchStateJson.getBytes(StandardCharsets.UTF_8).length
+        );
         verify(jobMessageHandler(), atLeastOnce()).handleMessage(any());
 
-        taskService()
-            .complete(taskService().createTaskQuery().processInstanceId(processInstance.getProcessInstanceId()).singleResult().getId());
-
-        await().atMost(Duration.ofMinutes(1)).untilAsserted(() ->
-            assertThat(runtimeService().createProcessInstanceQuery().processInstanceId(processInstance.getId()).count()).isZero()
+        taskService().complete(
+            taskService()
+                .createTaskQuery()
+                .processInstanceId(processInstance.getProcessInstanceId())
+                .singleResult()
+                .getId()
         );
+
+        await()
+            .atMost(Duration.ofMinutes(1))
+            .untilAsserted(() ->
+                assertThat(
+                    runtimeService().createProcessInstanceQuery().processInstanceId(processInstance.getId()).count()
+                ).isZero()
+            );
     }
 
     @Test
     void shouldRetryAfterMaterializingLargeBatchStateJson() {
-        String batchStateJson = buildBatchStateJson(Integer.getInteger("batch.state.reproducer.large-json-bytes", DEFAULT_LARGE_BATCH_STATE_BYTES));
-        ProcessInstance processInstance = runtimeService()
-            .startProcessInstanceByKey(PROCESS_KEY, variables(batchStateJson, true));
+        String batchStateJson = buildBatchStateJson(
+            Integer.getInteger("batch.state.reproducer.large-json-bytes", DEFAULT_LARGE_BATCH_STATE_BYTES)
+        );
+        ProcessInstance processInstance = runtimeService().startProcessInstanceByKey(
+            PROCESS_KEY,
+            variables(batchStateJson, true)
+        );
 
-        await().atMost(Duration.ofMinutes(1)).untilAsserted(() -> {
-            assertThat(
-                managementService().createDeadLetterJobQuery().processInstanceId(processInstance.getProcessInstanceId()).count()
-            )
-                .isEqualTo(1);
-            assertThat(delegate().getInvocationCount()).isEqualTo(RETRY_COUNT);
-        });
+        await()
+            .atMost(Duration.ofMinutes(1))
+            .untilAsserted(() -> {
+                assertThat(
+                    managementService()
+                        .createDeadLetterJobQuery()
+                        .processInstanceId(processInstance.getProcessInstanceId())
+                        .count()
+                ).isEqualTo(1);
+                assertThat(delegate().getInvocationCount()).isEqualTo(RETRY_COUNT);
+            });
 
         String byteArrayId = findBatchStateByteArrayId(processInstance.getProcessInstanceId());
-        Integer persistedBytes = jdbcTemplate()
-            .queryForObject(
-                "select octet_length(BYTES_) from ACT_GE_BYTEARRAY where ID_ = ?",
-                Integer.class,
-                byteArrayId
-            );
+        Integer persistedBytes = jdbcTemplate().queryForObject(
+            "select octet_length(BYTES_) from ACT_GE_BYTEARRAY where ID_ = ?",
+            Integer.class,
+            byteArrayId
+        );
         Job deadLetterJob = managementService()
             .createDeadLetterJobQuery()
             .processInstanceId(processInstance.getProcessInstanceId())
@@ -194,9 +216,12 @@ class BatchStateJsonJobExecutorIT {
 
         assertThat(byteArrayId).isNotBlank();
         assertThat(persistedBytes).isGreaterThanOrEqualTo(batchStateJson.getBytes(StandardCharsets.UTF_8).length);
-        assertThat(delegate().getLargestMaterializedBatchStateBytes())
-            .isGreaterThanOrEqualTo(batchStateJson.getBytes(StandardCharsets.UTF_8).length);
-        assertThat(deadLetterJob.getExceptionMessage()).contains("Simulated failure after materializing batchState JSON");
+        assertThat(delegate().getLargestMaterializedBatchStateBytes()).isGreaterThanOrEqualTo(
+            batchStateJson.getBytes(StandardCharsets.UTF_8).length
+        );
+        assertThat(deadLetterJob.getExceptionMessage()).contains(
+            "Simulated failure after materializing batchState JSON"
+        );
         verify(jobMessageHandler(), times(RETRY_COUNT)).handleMessage(any());
     }
 
@@ -232,13 +257,12 @@ class BatchStateJsonJobExecutorIT {
     }
 
     private String findBatchStateByteArrayId(String processInstanceId) {
-        return jdbcTemplate()
-            .queryForObject(
-                "select BYTEARRAY_ID_ from ACT_RU_VARIABLE where PROC_INST_ID_ = ? and NAME_ = ?",
-                String.class,
-                processInstanceId,
-                BATCH_STATE
-            );
+        return jdbcTemplate().queryForObject(
+            "select BYTEARRAY_ID_ from ACT_RU_VARIABLE where PROC_INST_ID_ = ? and NAME_ = ?",
+            String.class,
+            processInstanceId,
+            BATCH_STATE
+        );
     }
 
     private static String buildBatchStateJson(int targetBytes) {
