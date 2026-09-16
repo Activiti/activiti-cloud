@@ -29,7 +29,6 @@ import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistrySnapshot;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -70,14 +69,13 @@ import reactor.core.publisher.Sinks;
 @Import({ CountConsumerChannelsConfiguration.class, SubscriberRegistryChannelsConfiguration.class })
 public class PushedCountsMessagingBridgeAutoConfiguration {
 
-    /** Stable per-instance id stamped on every registry message; a configured value wins, else a random UUID. */
-    private final String sourceId;
-
-    public PushedCountsMessagingBridgeAutoConfiguration(
-        @Value("${activiti.cloud.query.pushed-counts.instance-id:}") String instanceId
-    ) {
-        this.sourceId = (instanceId == null || instanceId.isBlank()) ? UUID.randomUUID().toString() : instanceId;
-    }
+    /**
+     * A fresh random id per process. On restart the previous incarnation goes silent under its old id and
+     * is reclaimed by heartbeat expiry, so its subscribers are never pinned; a stable/reused id would keep a
+     * dead incarnation's users counted forever. WebSocket connections don't survive a restart anyway, so
+     * there is no local presence worth preserving across one.
+     */
+    private final String sourceId = UUID.randomUUID().toString();
 
     @Bean
     @ConditionalOnMissingBean
