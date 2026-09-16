@@ -119,7 +119,9 @@ class BatchStateJsonJobExecutorIT {
 
     @AfterAll
     static void tearDown() {
-        rbCtx.close();
+        if (rbCtx != null) {
+            rbCtx.close();
+        }
     }
 
     @BeforeEach
@@ -149,13 +151,12 @@ class BatchStateJsonJobExecutorIT {
             });
 
         String byteArrayId = findBatchStateByteArrayId(processInstance.getProcessInstanceId());
+        assertThat(byteArrayId).isNotBlank();
         Integer persistedBytes = jdbcTemplate().queryForObject(
             "select octet_length(BYTES_) from ACT_GE_BYTEARRAY where ID_ = ?",
             Integer.class,
             byteArrayId
         );
-
-        assertThat(byteArrayId).isNotBlank();
         assertThat(persistedBytes).isGreaterThanOrEqualTo(batchStateJson.getBytes(StandardCharsets.UTF_8).length);
         assertThat(delegate().getInvocationCount()).isEqualTo(1);
         assertThat(delegate().getLargestMaterializedBatchStateBytes()).isGreaterThanOrEqualTo(
@@ -203,11 +204,6 @@ class BatchStateJsonJobExecutorIT {
             });
 
         String byteArrayId = findBatchStateByteArrayId(processInstance.getProcessInstanceId());
-        Integer persistedBytes = jdbcTemplate().queryForObject(
-            "select octet_length(BYTES_) from ACT_GE_BYTEARRAY where ID_ = ?",
-            Integer.class,
-            byteArrayId
-        );
         Job deadLetterJob = managementService()
             .createDeadLetterJobQuery()
             .processInstanceId(processInstance.getProcessInstanceId())
@@ -215,6 +211,11 @@ class BatchStateJsonJobExecutorIT {
             .singleResult();
 
         assertThat(byteArrayId).isNotBlank();
+        Integer persistedBytes = jdbcTemplate().queryForObject(
+            "select octet_length(BYTES_) from ACT_GE_BYTEARRAY where ID_ = ?",
+            Integer.class,
+            byteArrayId
+        );
         assertThat(persistedBytes).isGreaterThanOrEqualTo(batchStateJson.getBytes(StandardCharsets.UTF_8).length);
         assertThat(delegate().getLargestMaterializedBatchStateBytes()).isGreaterThanOrEqualTo(
             batchStateJson.getBytes(StandardCharsets.UTF_8).length
