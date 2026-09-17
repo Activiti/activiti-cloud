@@ -133,4 +133,24 @@ class SubscriberRegistryBroadcasterTest {
             resilient.onWentLive(new SubscriberWentLiveEvent("alice", Set.of("dev"), NOW))
         ).doesNotThrowAnyException();
     }
+
+    @Test
+    void doesNotFail_whenTheRegistryChannelRejectsTheMessage() {
+        List<SubscriberRegistryMessage> rejected = new ArrayList<>();
+        MessageChannel rejecting = (message, timeout) -> {
+            rejected.add((SubscriberRegistryMessage) message.getPayload());
+            return false;
+        };
+        SubscriberRegistryBroadcaster resilient = new SubscriberRegistryBroadcaster(
+            rejecting,
+            () -> registrySnapshot,
+            SOURCE_ID,
+            CLOCK
+        );
+
+        assertThatCode(() ->
+            resilient.onWentLive(new SubscriberWentLiveEvent("alice", Set.of("dev"), NOW))
+        ).doesNotThrowAnyException();
+        assertThat(rejected).hasSize(1);
+    }
 }

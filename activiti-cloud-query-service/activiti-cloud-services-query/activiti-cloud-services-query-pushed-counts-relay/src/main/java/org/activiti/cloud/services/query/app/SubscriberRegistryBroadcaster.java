@@ -89,7 +89,13 @@ public class SubscriberRegistryBroadcaster {
     private void broadcast(SubscriberRegistryMessage message) {
         LOGGER.debug("Broadcasting {} from instance {}", message.type(), sourceId);
         try {
-            registryProducer.send(new GenericMessage<>(message));
+            if (!registryProducer.send(new GenericMessage<>(message))) {
+                LOGGER.warn(
+                    "Registry channel rejected {} from instance {}; presence update dropped",
+                    message.type(),
+                    sourceId
+                );
+            }
         } catch (RuntimeException e) {
             // Presence is best-effort: a broker hiccup must never bubble into the subscribe flow.
             LOGGER.warn(
