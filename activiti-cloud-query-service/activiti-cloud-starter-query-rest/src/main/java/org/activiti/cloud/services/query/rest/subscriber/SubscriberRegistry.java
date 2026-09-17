@@ -120,8 +120,10 @@ public class SubscriberRegistry implements SubscriberRegistrySnapshot {
     }
 
     /**
-     * An immutable point-in-time view of every live user and their groups, used to build a SNAPSHOT.
-     * Read-only: it never mutates the registry nor fires a live/quiet event.
+     * A view of every live user and their groups, used to build a SNAPSHOT. The scan runs without locking
+     * the registry, so the caller stamps the message time before it starts: a user who leaves mid-scan then
+     * loses to their UNREGISTERED on the consumer instead of being re-added. Read-only: never mutates the
+     * registry nor fires an event.
      */
     @Override
     public List<SubscriberRegistryMessage.Entry> snapshotEntries() {

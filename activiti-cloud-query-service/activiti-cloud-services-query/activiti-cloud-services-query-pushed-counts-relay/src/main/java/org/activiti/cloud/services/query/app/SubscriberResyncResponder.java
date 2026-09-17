@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.function.Consumer;
 import org.activiti.cloud.services.query.subscription.RegistryMessageType;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
@@ -61,10 +62,12 @@ public class SubscriberResyncResponder implements Consumer<Message<SubscriberReg
             return;
         }
         LOGGER.debug("Replying with a registry snapshot to a resync request from {}", request.sourceId());
+        // Stamp before scanning so a user who leaves mid-scan loses to their UNREGISTERED instead of being re-added.
+        Instant capturedAt = clock.instant();
         SubscriberRegistryMessage reply = SubscriberRegistryMessage.snapshot(
             registry.snapshotEntries(),
             sourceId,
-            clock.instant()
+            capturedAt
         );
         try {
             if (!registryProducer.send(new GenericMessage<>(reply))) {

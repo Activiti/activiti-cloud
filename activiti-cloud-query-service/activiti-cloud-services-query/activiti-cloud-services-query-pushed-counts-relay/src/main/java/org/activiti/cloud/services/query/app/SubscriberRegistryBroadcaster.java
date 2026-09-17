@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistrySnapshot;
@@ -75,7 +76,9 @@ public class SubscriberRegistryBroadcaster {
     /** Announces this instance and replays whatever it already holds so a running consumer learns of it at once. */
     @EventListener(ApplicationReadyEvent.class)
     public void onStartup() {
-        broadcast(SubscriberRegistryMessage.snapshot(registry.snapshotEntries(), sourceId, clock.instant()));
+        // Stamp before scanning so a user who leaves mid-scan loses to their UNREGISTERED instead of being re-added.
+        Instant capturedAt = clock.instant();
+        broadcast(SubscriberRegistryMessage.snapshot(registry.snapshotEntries(), sourceId, capturedAt));
     }
 
     @Scheduled(fixedRateString = "${activiti.cloud.query.pushed-counts.heartbeat-interval:PT1M}")
