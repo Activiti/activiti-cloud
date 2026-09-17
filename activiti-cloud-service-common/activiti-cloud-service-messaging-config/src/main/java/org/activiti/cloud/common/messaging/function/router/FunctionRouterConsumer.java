@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 public class FunctionRouterConsumer implements Function<Flux<Message<?>>, Mono<Void>> {
 
     private static final Logger log = LoggerFactory.getLogger(FunctionRouterConsumer.class);
+    private static final Integer PREFETCH_ONE = 1;
 
     private final FunctionRouterGateway functionRouterGateway;
     private final Function<Message<?>, String> destinationResolver;
@@ -65,7 +66,7 @@ public class FunctionRouterConsumer implements Function<Flux<Message<?>>, Mono<V
                             .onErrorResume(error -> onErrorResume(message, error))
                     ),
                 destinations.size(),
-                1
+                PREFETCH_ONE
             )
             .onErrorContinue((error, _) -> log.error("onErrorContinue", error))
             .then();
