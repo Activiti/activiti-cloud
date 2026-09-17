@@ -17,6 +17,7 @@ package org.activiti.cloud.examples.connectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -53,9 +54,40 @@ public class ExampleConnectorIT {
 
     @Test
     public void accept_ShouldSendIntegrationResult() throws Exception {
-        //given
+        IntegrationResult integrationResult = sendRequest(Map.of());
+        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables()).containsEntry(
+            "var1",
+            "ExampleConnector was called for instance 10"
+        );
+    }
+
+    @Test
+    public void accept_ShouldInspectLongJson_WhenUnderConfiguredLimit() throws Exception {
+        IntegrationResult integrationResult = sendRequest(
+            Map.of("test_long_json_variable_name", Map.of("verylongjson", "x".repeat(5000)))
+        );
+
+        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables()).containsEntry(
+            "test_long_json_variable_result",
+            "able to read long json"
+        );
+    }
+
+    @Test
+    public void accept_ShouldSkipLongJsonInspection_WhenOverConfiguredLimit() throws Exception {
+        IntegrationResult integrationResult = sendRequest(
+            Map.of("test_long_json_variable_name", Map.of("verylongjson", "x".repeat(300_000)))
+        );
+
+        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables()).doesNotContainKey(
+            "test_long_json_variable_result"
+        );
+    }
+
+    private IntegrationResult sendRequest(Map<String, Object> inBoundVariables) throws Exception {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setProcessInstanceId("10");
+        inBoundVariables.forEach(integrationContext::addInBoundVariable);
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName("myApp");
         integrationRequest.setAppName("myAppName");
@@ -64,22 +96,12 @@ public class ExampleConnectorIT {
         integrationRequest.setServiceVersion("1.0");
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
-
         Message<?> message = MessageBuilder.withPayload(payload).setHeader("connectorType", "ExampleConnector").build();
 
-        //when
         input.send(message, "ExampleConnector");
 
-        //then
         Message<?> outputMessage = output.receive(10000, "integrationResult_myApp");
         assertThat(outputMessage).isNotNull();
-        IntegrationResult integrationResult = objectMapper.readValue(
-            (byte[]) outputMessage.getPayload(),
-            IntegrationResultImpl.class
-        );
-        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables()).containsEntry(
-            "var1",
-            "ExampleConnector was called for instance 10"
-        );
+        return objectMapper.readValue((byte[]) outputMessage.getPayload(), IntegrationResultImpl.class);
     }
 }

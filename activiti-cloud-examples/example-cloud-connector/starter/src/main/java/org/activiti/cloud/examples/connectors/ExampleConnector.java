@@ -19,6 +19,7 @@ import static net.logstash.logback.marker.Markers.append;
 import static org.activiti.cloud.examples.connectors.ExampleConnector.EXAMPLE_CONNECTOR_CONSUMER;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -52,6 +53,9 @@ public class ExampleConnector implements ConsumerConnector<IntegrationRequest> {
 
     @Value("${spring.application.name}")
     private String appName;
+
+    @Value("${example.connector.long-json.max-bytes-for-inspection:256000}")
+    private int longJsonMaxBytesForInspection;
 
     //just a convenience - not recommended in real implementations
     private String var1Copy = "";
@@ -139,9 +143,15 @@ public class ExampleConnector implements ConsumerConnector<IntegrationRequest> {
     }
 
     private void processLongJsonVar(Object longJsonVar, Map<String, Object> results) {
+        if (!(longJsonVar instanceof LinkedHashMap<?, ?> longJsonMap)) {
+            return;
+        }
+
+        Object longJsonValue = longJsonMap.get("verylongjson");
         if (
-            longJsonVar instanceof LinkedHashMap &&
-            ((LinkedHashMap<?, ?>) longJsonVar).get("verylongjson").toString().length() >= 4000
+            longJsonValue instanceof String longJsonString &&
+            longJsonString.getBytes(StandardCharsets.UTF_8).length <= longJsonMaxBytesForInspection &&
+            longJsonString.length() >= 4000
         ) {
             results.put("test_long_json_variable_result", "able to read long json");
         }
