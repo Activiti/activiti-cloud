@@ -157,6 +157,10 @@ export class QueryTasksEndpoint extends BaseService {
 
     async deleteAllTasks(): Promise<CloudTask[]> {
         const response = await this.delete(`${this.basePath}/tasks`);
+        if (response.httpStatus && response.httpStatus >= 400) {
+            const detail = typeof response.body === 'string' ? response.body : JSON.stringify(response);
+            throw new Error(`deleteAllTasks failed (${response.httpStatus}): ${detail}`);
+        }
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 

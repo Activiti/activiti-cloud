@@ -17,6 +17,8 @@ package org.activiti.cloud.services.query.rest.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 
 /** Request for the batch count endpoint: a list of filters per resource type, each identified by a unique requestId. */
 public record BatchCountRequest(

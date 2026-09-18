@@ -37,6 +37,9 @@ The configuration below contains a mixed case for properties to check if it does
         "authorizations.security-constraints[2].authPermissions[0]=permissionA",
         "authorizations.security-constraints[2].auth-permissions[1]=permissionB",
         "authorizations.security-constraints[2].securityCollections[0].patterns[0]=/v1/jkl/*",
+        "authorizations.security-constraints[3].authScopes[0]=scopeA",
+        "authorizations.security-constraints[3].auth-scopes[1]=scopeB",
+        "authorizations.security-constraints[3].securityCollections[0].patterns[0]=/v1/scopes/*",
     },
     classes = { AuthorizationProperties.class }
 )
@@ -48,7 +51,7 @@ class AuthorizationPropertiesTest {
 
     @Test
     public void configurationLoadTest() {
-        assertEquals(3, authorizationProperties.getSecurityConstraints().size());
+        assertEquals(4, authorizationProperties.getSecurityConstraints().size());
         assertEquals(2, authorizationProperties.getSecurityConstraints().getFirst().getAuthRoles().length);
         assertEquals("ACTIVITI_USER", authorizationProperties.getSecurityConstraints().getFirst().getAuthRoles()[0]);
         assertEquals("ACTIVITI_ADMIN", authorizationProperties.getSecurityConstraints().getFirst().getAuthRoles()[1]);
@@ -93,6 +96,12 @@ class AuthorizationPropertiesTest {
         assertEquals(
             "/v1/jkl/*",
             authorizationProperties.getSecurityConstraints().get(2).getSecurityCollections()[0].getPatterns()[0]
+        );
+        assertEquals("scopeA", authorizationProperties.getSecurityConstraints().get(3).getAuthScopes()[0]);
+        assertEquals("scopeB", authorizationProperties.getSecurityConstraints().get(3).getAuthScopes()[1]);
+        assertEquals(
+            "/v1/scopes/*",
+            authorizationProperties.getSecurityConstraints().get(3).getSecurityCollections()[0].getPatterns()[0]
         );
     }
 }

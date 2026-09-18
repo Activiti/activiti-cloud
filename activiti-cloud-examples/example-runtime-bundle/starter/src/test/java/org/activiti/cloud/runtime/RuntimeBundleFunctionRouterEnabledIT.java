@@ -91,7 +91,17 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
             "signalProducer",
             "movies-conn",
             "restconnector.GET",
-            "restconnector.POST"
+            "restconnector.POST",
+            "content-service.SELECT_FILE",
+            "docgen-service.GENERATE",
+            "email-service.SEND",
+            "ExampleConnector",
+            "headers.GET",
+            "miCloudConnector",
+            "Movies.getMovieDesc",
+            "test-bpmn-error-connector.throwError",
+            "test-error-connector.throwError",
+            "script.EXECUTE"
         );
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))

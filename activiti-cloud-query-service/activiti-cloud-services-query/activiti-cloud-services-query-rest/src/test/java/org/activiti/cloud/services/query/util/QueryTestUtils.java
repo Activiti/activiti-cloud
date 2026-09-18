@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.util;
 
+import org.activiti.cloud.services.query.app.filter.VariableType;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
@@ -23,7 +24,6 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateUserReposit
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

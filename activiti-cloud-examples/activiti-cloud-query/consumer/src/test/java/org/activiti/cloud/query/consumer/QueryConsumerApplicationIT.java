@@ -103,13 +103,18 @@ public class QueryConsumerApplicationIT {
 
     @Test
     void anonymousRabbitQueues() {
-        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
+            .isNotEmpty()
+            .hasSize(1)
+            .satisfies(map ->
+                assertThat(map.keySet()).anyMatch(key -> key.startsWith("subscriberRegistry.anonymous."))
+            );
     }
 
     @Test
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("engineEvents", "queryEvents");
+            .containsOnlyKeys("engineEvents", "queryEvents", "subscriberRegistry", "pushedCounts");
     }
 }

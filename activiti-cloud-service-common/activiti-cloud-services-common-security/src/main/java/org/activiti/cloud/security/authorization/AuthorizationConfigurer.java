@@ -82,7 +82,7 @@ public class AuthorizationConfigurer {
         );
         List<String> publicUrls = new ArrayList<>();
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
-            if (!hasRoleOrPermissionConstraint(securityConstraint)) {
+            if (!hasAuthorizationConstraint(securityConstraint)) {
                 List<String> patterns = Arrays.stream(securityConstraint.getSecurityCollections())
                     .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
                     .toList();
@@ -99,12 +99,13 @@ public class AuthorizationConfigurer {
 
     private void configureAuthorization(HttpSecurity http, SecurityConstraint securityConstraint) throws Exception {
         Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
-        if (hasRoleOrPermissionConstraint(securityConstraint)) {
+        if (hasAuthorizationConstraint(securityConstraint)) {
             authorizedUrlConsumer = a ->
                 a.access(
                     new CustomAuthorizationManager<RequestAuthorizationContext>(
                         securityConstraint.getAuthRoles(),
-                        securityConstraint.getAuthPermissions()
+                        securityConstraint.getAuthPermissions(),
+                        securityConstraint.getAuthScopes()
                     )
                 );
         } else {
@@ -115,11 +116,14 @@ public class AuthorizationConfigurer {
             LOGGER.debug(
                 "Setting access {} to {}",
                 securityConstraint.getSecurityCollections(),
-                hasRoleOrPermissionConstraint(securityConstraint)
-                    ? Stream.concat(
+                hasAuthorizationConstraint(securityConstraint)
+                    ? Stream.of(
                           Arrays.stream(securityConstraint.getAuthRoles()),
-                          Arrays.stream(securityConstraint.getAuthPermissions())
-                      ).collect(Collectors.joining(", "))
+                          Arrays.stream(securityConstraint.getAuthPermissions()),
+                          Arrays.stream(securityConstraint.getAuthScopes())
+                      )
+                          .flatMap(stream -> stream)
+                          .collect(Collectors.joining(", "))
                     : "anonymous"
             );
         }
@@ -149,8 +153,9 @@ public class AuthorizationConfigurer {
     }
 
     /**
-     * If a security constraint hasn't any roles it means that it can be accessed from anyone. It must be the first one
-     * in order to avoid being overridden by other rules. The order is reversed to mimic the security-constraint behaviour.
+     * If a security constraint has no roles, permissions, or scopes, it can be accessed by anyone. It must be the first
+     * one in order to avoid being overridden by other rules. The order is reversed to mimic the security-constraint
+     * behaviour.
      *
      * @param securityConstraints
      * @return
@@ -160,7 +165,7 @@ public class AuthorizationConfigurer {
         Collections.reverse(reversed);
         List<SecurityConstraint> result = new ArrayList<>();
         reversed.forEach(securityConstraint -> {
-            if (hasRoleOrPermissionConstraint(securityConstraint)) {
+            if (hasAuthorizationConstraint(securityConstraint)) {
                 result.add(securityConstraint);
             } else {
                 result.addFirst(securityConstraint);
@@ -179,7 +184,11 @@ public class AuthorizationConfigurer {
         return array != null && array.length > 0;
     }
 
-    private boolean hasRoleOrPermissionConstraint(SecurityConstraint securityConstraint) {
-        return isNotEmpty(securityConstraint.getAuthRoles()) || isNotEmpty(securityConstraint.getAuthPermissions());
+    private boolean hasAuthorizationConstraint(SecurityConstraint securityConstraint) {
+        return (
+            isNotEmpty(securityConstraint.getAuthRoles()) ||
+            isNotEmpty(securityConstraint.getAuthPermissions()) ||
+            isNotEmpty(securityConstraint.getAuthScopes())
+        );
     }
 }

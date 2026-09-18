@@ -33,32 +33,32 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check dependabot build
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "Fork PRs cannot be validated in this repository."
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: "dependabot[bot]"
           label: github_actions
       - name: Check skip tests
         id: check-skip-tests
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           label: skip-tests
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
       - name: Ensure all actions are covered by Dependabot
-        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
 
   create-tag:
     runs-on: ubuntu-latest
@@ -75,7 +75,7 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         if: github.event_name == 'push'
         id: tag
         env:
@@ -100,12 +100,17 @@ jobs:
       - name: Export build version
         id: export-version
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TAG_VERSION: ${{ steps.tag.outputs.version }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "version=${{ steps.tag.outputs.version }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "pull_request" ] \
-            && [[ ",${{ join(github.event.pull_request.labels.*.name, ',') }}," == *",preview,"* ]]; then
-            echo "version=0.0.1-PR-${{ github.event.pull_request.number }}-SNAPSHOT" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT_NAME" = "pull_request" ] \
+            && [[ ",${PR_LABELS}," == *",preview,"* ]]; then
+            echo "version=0.0.1-PR-${PR_NUMBER}-SNAPSHOT" >> "$GITHUB_OUTPUT"
           else
             echo "version=$(yq e '.project.version' pom.xml)" >> "$GITHUB_OUTPUT"
           fi
@@ -148,9 +153,9 @@ jobs:
               printf '%s\n' "${STANDALONE_MODULES[@]}"
             } | sort -u | tr '\n' ',' | sed 's/,$//'
           )
-          echo "modules=$MODULES" >> $GITHUB_OUTPUT
+          echo "modules=$MODULES" >> "$GITHUB_OUTPUT"
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -178,7 +183,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - id: scan
-        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
 
       - id: transform
         name: Transform docker image matrix
@@ -216,7 +221,7 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -268,7 +273,7 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -366,11 +371,11 @@ jobs:
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
           VERSION: ${{ needs.create-tag.outputs.version }}
         run: |
-          if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
+          if [ "$IS_PREVIEW" = true ] || [ "$GITHUB_EVENT_NAME" = "push" ]
           then
               echo "Skipping delete Docker images"
           else
-              echo $VERSION > VERSION
+              echo "$VERSION" > VERSION
               echo "Delete Docker images"
               make docker-delete-all
           fi
@@ -444,7 +449,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         with:
           version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "true"
@@ -478,14 +483,14 @@ jobs:
       - name: Update image tags in Helm chart
         working-directory: ${{ env.FULL_CHART_DIR }}/charts/activiti-cloud-full-example
         run: |
-          git checkout -b $FULL_CHART_PR_BRANCH
+          git checkout -b "$FULL_CHART_PR_BRANCH"
           yq -i e '.runtime-bundle.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-consumer.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
@@ -526,8 +531,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
-          git push origin $FULL_CHART_PR_BRANCH
-          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot --head $(git branch --show-current)
+          git push origin "$FULL_CHART_PR_BRANCH"
+          gh pr create --fill --base "$FULL_CHART_BASE_BRANCH" --label updatebot --head "$(git branch --show-current)"
 
   notify:
     runs-on: ubuntu-latest
@@ -537,6 +542,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@da99ab845e78301fcb0680d16cbc185a40a1938c # v18.24.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}

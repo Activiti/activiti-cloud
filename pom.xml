@@ -198,8 +198,8 @@
     <!-- Pin spring-amqp to 4.0.3 to avoid x-queue-leader-locator regression (spring-projects/spring-amqp#3478).
          Remove when upgrading to Spring AMQP 4.0.5+ or 4.1.1+ which contains the fix. -->
     <spring-amqp.version>4.0.3</spring-amqp.version>
-    <!-- AAE-46198 temporary Tomcat version override. Remove when upgrading to Spring Boot 4.1.x -->
-    <tomcat.version>11.0.24</tomcat.version>
+    <!-- AAE-51380 temporary Tomcat version override. Remove when upgrading to Spring Boot 4.1.x -->
+    <tomcat.version>11.0.25</tomcat.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>

@@ -17,52 +17,18 @@ package org.activiti.cloud.services.query.rest.payload;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Set;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.RestrictedProcessInstanceCountCacheKey;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.junit.jupiter.api.Test;
 
+/**
+ * {@link ProcessInstanceSearchRequest}'s own equals/hashCode tests moved to the query-repo module
+ * alongside the class; this one stays here because {@link RestrictedProcessInstanceCountCacheKey}
+ * is query-rest-only.
+ */
 class ProcessInstanceSearchRequestTest {
-
-    @Test
-    void should_beEqualAndShareHashCode_forIdenticalRequests() {
-        ProcessInstanceSearchRequest first = new ProcessInstanceSearchRequestBuilder()
-            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
-            .withNames("process-a")
-            .build();
-        ProcessInstanceSearchRequest second = new ProcessInstanceSearchRequestBuilder()
-            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
-            .withNames("process-a")
-            .build();
-
-        assertThat(first).isEqualTo(second).hasSameHashCodeAs(second);
-    }
-
-    @Test
-    void should_notBeEqual_whenFilterFieldsDiffer() {
-        ProcessInstanceSearchRequest running = new ProcessInstanceSearchRequestBuilder()
-            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
-            .build();
-        ProcessInstanceSearchRequest completed = new ProcessInstanceSearchRequestBuilder()
-            .withStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED)
-            .build();
-
-        assertThat(running).isNotEqualTo(completed);
-    }
-
-    @Test
-    void should_notBeEqual_whenSubprocessParentIdsDiffer() {
-        ProcessInstanceSearchRequest first = new ProcessInstanceSearchRequestBuilder()
-            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
-            .build();
-        ProcessInstanceSearchRequest second = new ProcessInstanceSearchRequestBuilder()
-            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
-            .build();
-        second.setSubprocessParentIds(Set.of("parent-1", "parent-2"));
-
-        assertThat(first).isNotEqualTo(second);
-    }
 
     @Test
     void should_produceEqualCountCacheKeys_forIdenticalRequests() {

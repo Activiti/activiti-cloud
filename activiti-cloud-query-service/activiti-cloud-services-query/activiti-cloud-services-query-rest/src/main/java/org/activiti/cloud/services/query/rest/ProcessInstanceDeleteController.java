@@ -24,16 +24,23 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -66,6 +73,12 @@ public class ProcessInstanceDeleteController {
 
     private final BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
 
+    private final TaskCandidateUserRepository taskCandidateUserRepository;
+
+    private final TaskCandidateGroupRepository taskCandidateGroupRepository;
+
+    private final TaskVariableRepository taskVariableRepository;
+
     private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
     @Autowired
@@ -76,6 +89,9 @@ public class ProcessInstanceDeleteController {
         ServiceTaskRepository serviceTaskRepository,
         BPMNActivityRepository bpmnActivityRepository,
         BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
+        TaskCandidateUserRepository taskCandidateUserRepository,
+        TaskCandidateGroupRepository taskCandidateGroupRepository,
+        TaskVariableRepository taskVariableRepository,
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler
     ) {
         this.processInstanceRepository = processInstanceRepository;
@@ -84,6 +100,9 @@ public class ProcessInstanceDeleteController {
         this.serviceTaskRepository = serviceTaskRepository;
         this.bpmnActivityRepository = bpmnActivityRepository;
         this.bpmnSequenceFlowRepository = bpmnSequenceFlowRepository;
+        this.taskCandidateUserRepository = taskCandidateUserRepository;
+        this.taskCandidateGroupRepository = taskCandidateGroupRepository;
+        this.taskVariableRepository = taskVariableRepository;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
     }
 
@@ -95,21 +114,51 @@ public class ProcessInstanceDeleteController {
             root = ProcessInstanceEntity.class
         ) Predicate predicate
     ) {
+        List<ProcessInstanceEntity> processInstances = StreamSupport.stream(
+            processInstanceRepository.findAll(predicate).spliterator(),
+            false
+        ).toList();
+        Set<String> processInstanceIds = processInstances
+            .stream()
+            .map(ProcessInstanceEntity::getId)
+            .collect(Collectors.toSet());
+
         Collection<EntityModel<QueryCloudProcessInstance>> result = new ArrayList<>();
-        Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
-
-        for (ProcessInstanceEntity entity : iterable) {
-            Optional.ofNullable(entity.getTasks()).ifPresent(taskRepository::deleteAll);
-            Optional.ofNullable(entity.getVariables()).ifPresent(variableRepository::deleteAll);
-            Optional.ofNullable(entity.getServiceTasks()).ifPresent(serviceTaskRepository::deleteAll);
-            Optional.ofNullable(entity.getActivities()).ifPresent(bpmnActivityRepository::deleteAll);
-            Optional.ofNullable(entity.getSequenceFlows()).ifPresent(bpmnSequenceFlowRepository::deleteAll);
-
+        for (ProcessInstanceEntity entity : processInstances) {
             result.add(processInstanceRepresentationModelAssembler.toModel(entity));
         }
 
-        processInstanceRepository.deleteAll(iterable);
+        if (!processInstanceIds.isEmpty()) {
+            deleteRelatedTasks(processInstanceIds);
+            variableRepository.deleteAll(variableRepository.findByProcessInstanceIdIn(processInstanceIds));
+            serviceTaskRepository.deleteAll(serviceTaskRepository.findByProcessInstanceIdIn(processInstanceIds));
+            bpmnActivityRepository.deleteAll(bpmnActivityRepository.findByProcessInstanceIdIn(processInstanceIds));
+            bpmnSequenceFlowRepository.deleteAll(
+                bpmnSequenceFlowRepository.findByProcessInstanceIdIn(processInstanceIds)
+            );
+        }
+
+        processInstanceRepository.deleteAll(processInstances);
 
         return CollectionModel.of(result);
+    }
+
+    /**
+     * Deletes child rows via fresh queries (by processInstanceId / taskId) rather than by navigating the
+     * process instance's lazy collections. Initializing a collection and then deleting its managed elements
+     * leaves dangling references in the collection, which triggers a TransientPropertyValueException on flush.
+     * Nothing lazy is serialized under {@link JsonViews.General}, so the collections are never touched.
+     */
+    private void deleteRelatedTasks(Set<String> processInstanceIds) {
+        List<TaskEntity> tasks = taskRepository.findByProcessInstanceIdIn(processInstanceIds);
+        if (tasks.isEmpty()) {
+            return;
+        }
+
+        Set<String> taskIds = tasks.stream().map(TaskEntity::getId).collect(Collectors.toSet());
+        taskCandidateUserRepository.deleteAll(taskCandidateUserRepository.findByTaskIdIn(taskIds));
+        taskCandidateGroupRepository.deleteAll(taskCandidateGroupRepository.findByTaskIdIn(taskIds));
+        taskVariableRepository.deleteAll(taskVariableRepository.findByTaskIdIn(taskIds));
+        taskRepository.deleteAll(tasks);
     }
 }

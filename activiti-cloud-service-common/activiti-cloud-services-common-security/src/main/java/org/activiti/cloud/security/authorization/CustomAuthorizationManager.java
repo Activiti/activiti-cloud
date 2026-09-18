@@ -36,10 +36,17 @@ public class CustomAuthorizationManager<
     private final Set<String> authoritiesWithAccess;
 
     public CustomAuthorizationManager(String[] roles, String[] permissions) {
-        this.authoritiesWithAccess = Stream.concat(
+        this(roles, permissions, new String[] {});
+    }
+
+    public CustomAuthorizationManager(String[] roles, String[] permissions, String[] scopes) {
+        this.authoritiesWithAccess = Stream.of(
             Stream.of(roles).map(role -> ROLE_PREFIX + role),
-            Stream.of(permissions).map(permission -> PERMISSION_PREFIX + permission)
-        ).collect(Collectors.toSet());
+            Stream.of(permissions).map(permission -> PERMISSION_PREFIX + permission),
+            Stream.of(scopes).map(scope -> SCOPE_PREFIX + scope)
+        )
+            .flatMap(stream -> stream)
+            .collect(Collectors.toSet());
     }
 
     @Override

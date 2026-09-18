@@ -32,6 +32,7 @@ import java.util.Set;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.ProcessInstanceSearchResult;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.advice.SerializationViewResponseBodyAdvice;
@@ -39,7 +40,6 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresent
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceSearchResultRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;

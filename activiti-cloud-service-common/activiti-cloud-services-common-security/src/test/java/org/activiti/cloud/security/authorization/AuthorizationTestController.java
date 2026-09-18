@@ -41,6 +41,8 @@ public class AuthorizationTestController {
     public static final String PERMISSION_DUMMY_ENDPOINT = "/permission/dummy-endpoint";
     public static final String ROLE_DUMMY_ENDPOINT_RESTRICTED = ROLE_DUMMY_ENDPOINT + "/restricted";
     public static final String PERMISSION_DUMMY_ENDPOINT_RESTRICTED = PERMISSION_DUMMY_ENDPOINT + "/restricted";
+    public static final String SCOPE_GET = "/scope/get";
+    public static final String COMBINED_GET = "/combined/get";
 
     @GetMapping(PUBLIC_GET)
     public ResponseEntity<Void> publicGet() {
@@ -139,6 +141,16 @@ public class AuthorizationTestController {
 
     @DeleteMapping(PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
     public ResponseEntity<Void> permissionDummyEndpointRestrictedDelete() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(SCOPE_GET)
+    public ResponseEntity<Void> scopeGet() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(COMBINED_GET)
+    public ResponseEntity<Void> combinedGet() {
         return ResponseEntity.ok().build();
     }
 }
