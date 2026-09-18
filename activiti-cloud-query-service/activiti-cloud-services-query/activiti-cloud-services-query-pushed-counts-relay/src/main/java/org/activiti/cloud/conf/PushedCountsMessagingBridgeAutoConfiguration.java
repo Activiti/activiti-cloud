@@ -30,18 +30,10 @@ import org.springframework.messaging.Message;
 import reactor.core.publisher.Sinks;
 
 /**
- * Wires the broker-side half of the pushed-counts relay that {@code activiti-cloud-starter-query-rest}
- * deliberately leaves unwired: a {@code pushedCountsSink} bean with no input binding, because that
- * bare REST starter carries no messaging binder. Deliberately its own small module - not folded into
- * either query-rest or query-consumer, and with no compile-time dependency on either - so that any
- * app combining query-rest with a binder-carrying module can pull this in independently, the same way
- * {@code EngineEventsConsumerChannels} works for engine events. {@code activiti-cloud-starter-query}
- * depends on it directly; a split rest/consumer deployment (query-rest + a separate binder-carrying
- * module in the same process) needs to add the same dependency itself.
- *
- * <p>Ordered after {@code QueryRestPushedCountsWebSocketAutoConfiguration} by name (no compile-time
- * class reference - that class lives in query-rest, not on this module's classpath) purely so the
- * sink bean it creates exists before this class's {@code @Bean} method looks for it.
+ * Standalone module (no dependency on query-rest or query-consumer) so any app combining query-rest
+ * with a binder-carrying module can pull this in, including a split rest/consumer deployment.
+ * Ordered by name, not by class reference, since {@code QueryRestPushedCountsWebSocketAutoConfiguration}
+ * isn't on this module's classpath.
  */
 @AutoConfiguration(afterName = "org.activiti.cloud.conf.QueryRestPushedCountsWebSocketAutoConfiguration")
 @ConditionalOnProperty(name = "activiti.cloud.query.pushed-counts.enabled", havingValue = "true")

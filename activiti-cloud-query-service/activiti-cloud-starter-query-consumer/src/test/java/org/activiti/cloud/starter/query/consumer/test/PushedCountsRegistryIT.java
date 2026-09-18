@@ -39,7 +39,9 @@ import org.springframework.messaging.support.MessageBuilder;
     classes = QueryConsumerTestApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = {
-        "activiti.cloud.services.oauth2.iam-name=test", "activiti.features.query.pushed-counts.enabled=true",
+        "activiti.cloud.services.oauth2.iam-name=test",
+        "activiti.cloud.query.pushed-counts.enabled=true",
+        "activiti.features.query.pushed-counts.enabled=true",
     }
 )
 @EnableTestBinder

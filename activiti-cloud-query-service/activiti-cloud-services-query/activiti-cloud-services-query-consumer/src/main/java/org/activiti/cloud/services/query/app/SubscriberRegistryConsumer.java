@@ -16,35 +16,30 @@
 package org.activiti.cloud.services.query.app;
 
 import java.util.function.Consumer;
-import org.activiti.cloud.common.feature.FeatureToggle;
-import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 
 /**
- * Feature-gated entry point for registry messages arriving on the broker. While the pushed-counts
- * toggle is off the message is dropped, so the binding can stay in place with the registry idle and
- * the feature can be switched on at runtime without a redeploy.
+ * Entry point for registry messages arriving on the broker. Applies each message to the registry;
+ * one bad message is logged and skipped so it can't wedge the shared channel. Whether this is wired
+ * at all is decided at startup by {@code activiti.cloud.query.pushed-counts.enabled}; registry
+ * upkeep is intentionally independent of the runtime feature toggle, which gates the count push
+ * (later steps), not presence tracking.
  */
 public class SubscriberRegistryConsumer implements Consumer<Message<SubscriberRegistryMessage>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubscriberRegistryConsumer.class);
 
     private final SubscriberRegistryMessageHandler handler;
-    private final FeatureToggle featureToggle;
 
-    public SubscriberRegistryConsumer(SubscriberRegistryMessageHandler handler, FeatureToggle featureToggle) {
+    public SubscriberRegistryConsumer(SubscriberRegistryMessageHandler handler) {
         this.handler = handler;
-        this.featureToggle = featureToggle;
     }
 
     @Override
     public void accept(Message<SubscriberRegistryMessage> message) {
-        if (!featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS)) {
-            return;
-        }
         SubscriberRegistryMessage payload = message.getPayload();
         try {
             handler.handle(payload);
