@@ -62,7 +62,7 @@ class ConsumerSubscriberRegistryTest {
         registry.register("alice", List.of("eng"), "rest-1", T0);
         registry.register("alice", List.of("eng"), "rest-2", T0);
 
-        boolean removed = registry.unregister("alice", "rest-1");
+        boolean removed = registry.unregister("alice", "rest-1", T0);
 
         assertThat(removed).isFalse();
         assertThat(registry.isWatching("alice")).isTrue();
@@ -73,7 +73,7 @@ class ConsumerSubscriberRegistryTest {
     void unregister_lastInstance_dropsUser() {
         registry.register("alice", List.of("eng"), "rest-1", T0);
 
-        boolean removed = registry.unregister("alice", "rest-1");
+        boolean removed = registry.unregister("alice", "rest-1", T0);
 
         assertThat(removed).isTrue();
         assertThat(registry.isWatching("alice")).isFalse();
@@ -82,7 +82,7 @@ class ConsumerSubscriberRegistryTest {
 
     @Test
     void unregister_unknownUser_isNoOp() {
-        assertThat(registry.unregister("ghost", "rest-1")).isFalse();
+        assertThat(registry.unregister("ghost", "rest-1", T0)).isFalse();
     }
 
     @Test
@@ -186,7 +186,7 @@ class ConsumerSubscriberRegistryTest {
     @Test
     void unregisterBeforeRegister_isNoOp_thenRegisterStillWorks() {
         // at-least-once delivery can reorder: an UNREGISTERED for an unknown user must be harmless
-        assertThat(registry.unregister("alice", "rest-1")).isFalse();
+        assertThat(registry.unregister("alice", "rest-1", T0)).isFalse();
 
         boolean firstAppearance = registry.register("alice", List.of("eng"), "rest-1", T0);
 
@@ -197,12 +197,87 @@ class ConsumerSubscriberRegistryTest {
     @Test
     void staleUnregister_afterReregisterOnAnotherInstance_onlyRemovesItsOwnSource() {
         registry.register("alice", List.of("eng"), "rest-1", T0);
-        registry.unregister("alice", "rest-1");
+        registry.unregister("alice", "rest-1", T0);
         registry.register("alice", List.of("eng"), "rest-2", T0);
 
-        boolean removed = registry.unregister("alice", "rest-1");
+        boolean removed = registry.unregister("alice", "rest-1", T0);
 
         assertThat(removed).isFalse();
         assertThat(registry.sourcesOf("alice")).containsExactly("rest-2");
+    }
+
+    @Test
+    void staleResyncSnapshot_doesNotReAddAUserRemovedByALaterUnregister() {
+        // alice is watched on rest-1, then disconnects; the UNREGISTERED lands before a resync SNAPSHOT
+        // rest-1 had captured while she was still connected.
+        registry.register("alice", List.of("eng"), "rest-1", T0);
+        registry.unregister("alice", "rest-1", T0.plusSeconds(10));
+        assertThat(registry.isWatching("alice")).isFalse();
+
+        registry.applySnapshot(
+            "rest-1",
+            List.of(new SubscriberRegistryMessage.Entry("alice", List.of("eng"))),
+            T0.plusSeconds(5)
+        );
+
+        assertThat(registry.isWatching("alice")).isFalse();
+    }
+
+    @Test
+    void resyncSnapshot_dropsAUserTheInstanceNoLongerLists() {
+        // bob's UNREGISTERED was lost; a later snapshot from rest-1 that omits him must reconcile him away.
+        registry.register("alice", List.of("eng"), "rest-1", T0);
+        registry.register("bob", List.of("eng"), "rest-1", T0);
+
+        registry.applySnapshot(
+            "rest-1",
+            List.of(new SubscriberRegistryMessage.Entry("alice", List.of("eng"))),
+            T0.plusSeconds(10)
+        );
+
+        assertThat(registry.isWatching("alice")).isTrue();
+        assertThat(registry.isWatching("bob")).isFalse();
+        assertThat(registry.sourcesOf("alice")).containsExactly("rest-1");
+    }
+
+    @Test
+    void resyncSnapshot_preservesAUserRegisteredAfterItWasCaptured() {
+        // rest-1 captured a snapshot holding only alice; bob then registered and that REGISTERED arrived
+        // before the older snapshot. Reconciling to the snapshot must not drop the newer bob.
+        registry.register("alice", List.of("eng"), "rest-1", T0);
+        registry.register("bob", List.of("eng"), "rest-1", T0.plusSeconds(10));
+
+        registry.applySnapshot(
+            "rest-1",
+            List.of(new SubscriberRegistryMessage.Entry("alice", List.of("eng"))),
+            T0.plusSeconds(5)
+        );
+
+        assertThat(registry.isWatching("alice")).isTrue();
+        assertThat(registry.isWatching("bob")).isTrue();
+    }
+
+    @Test
+    void staleRegister_doesNotResurrectAUserRemovedByANewerUnregister() {
+        // a duplicate REGISTERED redelivered after a newer UNREGISTERED must not bring the user back.
+        registry.register("alice", List.of("eng"), "rest-1", T0);
+        registry.unregister("alice", "rest-1", T0.plusSeconds(10));
+
+        registry.register("alice", List.of("eng"), "rest-1", T0.plusSeconds(5));
+
+        assertThat(registry.isWatching("alice")).isFalse();
+    }
+
+    @Test
+    void userCanReRegisterOnTheSameInstance_afterUnregister() {
+        // the tombstone left by an unregister must not block a genuinely newer re-registration.
+        registry.register("alice", List.of("eng"), "rest-1", T0);
+        registry.unregister("alice", "rest-1", T0.plusSeconds(10));
+
+        boolean firstAppearance = registry.register("alice", List.of("eng"), "rest-1", T0.plusSeconds(20));
+
+        assertThat(firstAppearance).isTrue();
+        assertThat(registry.isWatching("alice")).isTrue();
+        assertThat(registry.sourcesOf("alice")).containsExactly("rest-1");
     }
 }
