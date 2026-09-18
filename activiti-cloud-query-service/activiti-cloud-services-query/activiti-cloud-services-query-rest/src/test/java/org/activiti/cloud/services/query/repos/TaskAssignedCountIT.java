@@ -71,7 +71,7 @@ class TaskAssignedCountIT {
     }
 
     @Test
-    void countsOnlyAssignedTasks_groupedByAssignee_omittingUsersWithNone() {
+    void shouldCountOnlyAssignedTasksGroupedByAssignee_whenSomeUsersHaveNoAssignedTask() {
         queryTestUtils.buildTask().withAssignee("alice").buildAndSave();
         queryTestUtils.buildTask().withAssignee("alice").buildAndSave();
         queryTestUtils.buildTask().withAssignee("bob").buildAndSave();
@@ -88,7 +88,7 @@ class TaskAssignedCountIT {
     }
 
     @Test
-    void groupedCountMatchesTheRestrictedRestCount_perUser() {
+    void shouldMatchTheRestrictedRestCountPerUser_whenCountingAssignedTasks() {
         queryTestUtils.buildTask().withAssignee("alice").buildAndSave();
         queryTestUtils.buildTask().withAssignee("alice").buildAndSave();
         queryTestUtils.buildTask().withAssignee("bob").buildAndSave();

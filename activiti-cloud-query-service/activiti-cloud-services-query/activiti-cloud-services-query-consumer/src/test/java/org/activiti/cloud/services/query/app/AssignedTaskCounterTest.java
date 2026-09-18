@@ -38,12 +38,12 @@ class AssignedTaskCounterTest {
     private final AssignedTaskCounter counter = new AssignedTaskCounter(taskRepository);
 
     @Test
-    void reportsTheAssignedCountType() {
+    void shouldReportTheAssignedCountType() {
         assertThat(counter.type()).isEqualTo(ScopeKeys.PushedCountType.ASSIGNED);
     }
 
     @Test
-    void emitsOneAbsoluteCountPerAffectedUser_treatingUsersAbsentFromTheResultAsZero() {
+    void shouldEmitOneAbsoluteCountPerAffectedUser_whenAUserIsAbsentFromTheResult() {
         Instant asOf = Instant.parse("2026-09-16T10:15:30Z");
         when(taskRepository.countGroupedByAssignee(any(), eq(Task.TaskStatus.ASSIGNED)))
             .thenReturn(List.of(assigneeCount("alice", 2L), assigneeCount("bob", 1L)));
@@ -60,7 +60,7 @@ class AssignedTaskCounterTest {
     }
 
     @Test
-    void returnsEmptyAndDoesNotQuery_whenThereAreNoAffectedUsers() {
+    void shouldReturnEmptyAndNotQuery_whenThereAreNoAffectedUsers() {
         assertThat(counter.countFor(Set.of(), Instant.now())).isEmpty();
         assertThat(counter.countFor(null, Instant.now())).isEmpty();
         verifyNoInteractions(taskRepository);
