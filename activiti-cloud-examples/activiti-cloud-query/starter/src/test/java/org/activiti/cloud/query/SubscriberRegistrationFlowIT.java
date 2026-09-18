@@ -26,8 +26,6 @@ import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.rest.subscriber.SubscriberRegistry;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -39,10 +37,9 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 /**
  * Exercises the subscriber presence flows across both halves of the all-in-one query service over a real
@@ -62,18 +59,15 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
     },
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
-)
-@TestExecutionListeners(
-    value = RabbitMQQueuesCleanupTestExecutionListener.class,
-    mergeMode = MergeMode.MERGE_WITH_DEFAULTS
-)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @EnableCleanupLiquibaseAfterTest
 @ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 class SubscriberRegistrationFlowIT {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
+
+    @ServiceConnection
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
     @ServiceConnection
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
@@ -94,10 +88,14 @@ class SubscriberRegistrationFlowIT {
     @Test
     void should_propagateRegistrationAndUnregistration_when_aUserSubscribesOnRest() {
         restRegistry.register("alice", Set.of("eng"), "session-1", Instant.now());
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("alice")).isTrue());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("alice")).isTrue());
 
         restRegistry.unregister("alice", "session-1", Instant.now());
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("alice")).isFalse());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("alice")).isFalse());
     }
 
     @Test
@@ -112,7 +110,9 @@ class SubscriberRegistrationFlowIT {
             });
 
         restRegistry.unregister("bob", "session-1", Instant.now());
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("bob")).isFalse());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("bob")).isFalse());
     }
 
     @Test
@@ -130,7 +130,9 @@ class SubscriberRegistrationFlowIT {
             .untilAsserted(() -> assertThat(consumerRegistry.sourcesOf("dave")).containsExactly("peer-instance-A"));
 
         peerSends(SubscriberRegistryMessage.unregistered("dave", "peer-instance-A", Instant.now()));
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("dave")).isFalse());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("dave")).isFalse());
     }
 
     @Test
@@ -176,10 +178,14 @@ class SubscriberRegistrationFlowIT {
         Instant unregistered = registered.plusSeconds(10);
 
         peerSends(SubscriberRegistryMessage.registered("grace", List.of("eng"), "peer-instance-C", registered));
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("grace")).isTrue());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("grace")).isTrue());
 
         peerSends(SubscriberRegistryMessage.unregistered("grace", "peer-instance-C", unregistered));
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("grace")).isFalse());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("grace")).isFalse());
 
         // the stale snapshot still lists grace but carries an older timestamp than the unregister
         peerSends(
@@ -193,7 +199,9 @@ class SubscriberRegistrationFlowIT {
         peerSends(
             SubscriberRegistryMessage.registered("heidi", List.of("eng"), "peer-instance-C", registered.plusSeconds(20))
         );
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("heidi")).isTrue());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("heidi")).isTrue());
 
         assertThat(consumerRegistry.isWatching("grace")).isFalse();
     }
@@ -202,14 +210,18 @@ class SubscriberRegistrationFlowIT {
     void should_dropTheUserOnlyAfterTheLastSession_when_aUserHasTwoRestSessions() {
         restRegistry.register("nina", Set.of("eng"), "session-1", Instant.now());
         restRegistry.register("nina", Set.of("eng"), "session-2", Instant.now());
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("nina")).isTrue());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("nina")).isTrue());
 
         // releasing one of two sessions is not an empty transition, so nothing is broadcast and nina stays watched
         restRegistry.unregister("nina", "session-1", Instant.now());
         assertThat(consumerRegistry.isWatching("nina")).isTrue();
 
         restRegistry.unregister("nina", "session-2", Instant.now());
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("nina")).isFalse());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("nina")).isFalse());
     }
 
     @Test
@@ -221,7 +233,9 @@ class SubscriberRegistrationFlowIT {
             SubscriberRegistryMessage.registered("ivan", List.of("eng"), "peer-instance-D", early.plusSeconds(5))
         );
 
-        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(consumerRegistry.isWatching("ivan")).isTrue());
+        await()
+            .atMost(TIMEOUT)
+            .untilAsserted(() -> assertThat(consumerRegistry.isWatching("ivan")).isTrue());
     }
 
     private void peerSends(SubscriberRegistryMessage message) {
