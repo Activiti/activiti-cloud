@@ -495,6 +495,7 @@ public abstract class AbstractMQServiceTaskIT {
 
     @Test
     public void should_map_output_variables_from_multi_instance_document_batch_process() {
+        auditConsumer.clear();
         //given
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder.start().withProcessDefinitionKey("Process_1770387614252").build()

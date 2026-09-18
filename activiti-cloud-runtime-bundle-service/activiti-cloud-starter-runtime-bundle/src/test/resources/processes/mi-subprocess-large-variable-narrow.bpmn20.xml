@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions id="definition"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples">
+
+  <process id="miSubprocessLargeVariableNarrow">
+
+    <startEvent id="theStart"/>
+    <sequenceFlow id="flow1" sourceRef="theStart" targetRef="miSubProcess"/>
+
+    <subProcess id="miSubProcess">
+      <multiInstanceLoopCharacteristics isSequential="false"
+                                        activiti:collection="${batchState.documents}"
+                                        activiti:elementIndexVariable="index"/>
+
+      <startEvent id="subStart"/>
+      <sequenceFlow id="subFlow1" sourceRef="subStart" targetRef="qaReview"/>
+
+      <userTask id="qaReview" name="Quality Review" activiti:assignee="hruser"/>
+
+      <sequenceFlow id="subFlow2" sourceRef="qaReview" targetRef="subEnd"/>
+      <endEvent id="subEnd"/>
+    </subProcess>
+
+    <sequenceFlow id="flow2" sourceRef="miSubProcess" targetRef="theEnd"/>
+    <endEvent id="theEnd"/>
+
+  </process>
+
+</definitions>

@@ -1,0 +1,126 @@
+{
+  "id": "miSubprocessLargeVariableModel",
+  "name": "mi-subprocess-large-variable",
+  "extensions": {
+    "miSubprocessLargeVariableAsync": {
+      "properties": {
+        "c2c0f3b7-0000-4000-8000-000000000001": {
+          "id": "c2c0f3b7-0000-4000-8000-000000000001",
+          "name": "batchState",
+          "type": "json",
+          "required": false,
+          "ephemeral": false,
+          "description": "large JSON document holding the whole batch",
+          "category": "input/output"
+        }
+      },
+      "mappings": {
+        "qaReview": {
+          "inputs": {
+            "documentIndex": {
+              "type": "value",
+              "value": "${index}"
+            },
+            "batchState": {
+              "type": "variable",
+              "value": "batchState"
+            }
+          },
+          "outputs": {
+            "batchState": {
+              "type": "jsonPatch",
+              "value": [
+                {
+                  "op": "add",
+                  "path": "/documents/${index}",
+                  "value": "${document}"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "constants": {}
+    },
+    "miSubprocessLargeVariableSync": {
+      "properties": {
+        "c2c0f3b7-0000-4000-8000-000000000002": {
+          "id": "c2c0f3b7-0000-4000-8000-000000000002",
+          "name": "batchState",
+          "type": "json",
+          "required": false,
+          "ephemeral": false,
+          "description": "large JSON document holding the whole batch",
+          "category": "input/output"
+        }
+      },
+      "mappings": {
+        "qaReview": {
+          "inputs": {
+            "documentIndex": {
+              "type": "value",
+              "value": "${index}"
+            },
+            "batchState": {
+              "type": "variable",
+              "value": "batchState"
+            }
+          },
+          "outputs": {
+            "batchState": {
+              "type": "jsonPatch",
+              "value": [
+                {
+                  "op": "add",
+                  "path": "/documents/${index}",
+                  "value": "${document}"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "constants": {}
+    },
+    "miSubprocessLargeVariableNarrow": {
+      "properties": {
+        "c2c0f3b7-0000-4000-8000-000000000003": {
+          "id": "c2c0f3b7-0000-4000-8000-000000000003",
+          "name": "batchState",
+          "type": "json",
+          "required": false,
+          "ephemeral": false,
+          "description": "large JSON document holding the whole batch",
+          "category": "input/output"
+        }
+      },
+      "mappings": {
+        "qaReview": {
+          "inputs": {
+            "documentIndex": {
+              "type": "value",
+              "value": "${index}"
+            },
+            "document": {
+              "type": "value",
+              "value": "${batchState.documents[index]}"
+            }
+          },
+          "outputs": {
+            "batchState": {
+              "type": "jsonPatch",
+              "value": [
+                {
+                  "op": "add",
+                  "path": "/documents/${index}",
+                  "value": "${document}"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "constants": {}
+    }
+  }
+}
