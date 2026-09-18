@@ -18,8 +18,6 @@ package org.activiti.cloud.connectors.starter.channels;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,18 +37,10 @@ public class IntegrationErrorDestinationBuilderTest {
     @Test
     public void shouldResolveDestination() {
         // given
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        integrationRequest.setServiceFullName("myServiceName");
-        integrationRequest.setAppName("myAppName");
-        integrationRequest.setAppVersion("1.0");
-        integrationRequest.setServiceType("RUNTIME_BUNDLE");
-        integrationRequest.setServiceVersion("1.0");
-
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
 
         // when
-        String result = subject.buildDestination(integrationRequest);
+        String result = subject.buildDestination(null, "myServiceName");
 
         // then
         assertThat(result).isEqualTo("integrationError.myServiceName");
@@ -58,18 +48,8 @@ public class IntegrationErrorDestinationBuilderTest {
 
     @Test
     public void shouldResolveIntegrationEventDestination() {
-        // given
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        integrationRequest.setServiceFullName("myServiceName");
-        integrationRequest.setAppName("myAppName");
-        integrationRequest.setAppVersion("1.0");
-        integrationRequest.setServiceType("RUNTIME_BUNDLE");
-        integrationRequest.setServiceVersion("1.0");
-        integrationRequest.setErrorDestination("integrationError.myErrorDestination");
-
         // when
-        String result = subject.buildDestination(integrationRequest);
+        String result = subject.buildDestination("integrationError.myErrorDestination", "myServiceName");
 
         // then
         assertThat(result).isEqualTo("integrationError.myErrorDestination");

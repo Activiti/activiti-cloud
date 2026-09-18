@@ -33,7 +33,7 @@ public class IntegrationResultSender {
     }
 
     public void send(IntegrationRequest integrationRequest, IntegrationContext integrationContext) {
-        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationContext);
         Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
 
         String destination = integrationRequest.getResultDestination();

@@ -22,8 +22,6 @@ import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 public interface IntegrationError extends CloudRuntimeEntity {
     IntegrationContext getIntegrationContext();
 
-    IntegrationRequest getIntegrationRequest();
-
     public String getErrorCode();
 
     public List<StackTraceElement> getStackTraceElements();

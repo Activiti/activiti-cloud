@@ -25,7 +25,6 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ public class PropagateCloudBpmnErrorCmdTest {
         //given
         IntegrationContext integrationContext = mock(IntegrationContext.class);
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
-            new IntegrationRequestImpl(integrationContext),
+            integrationContext,
             new CloudBpmnError("Error 51", "An error occurred")
         );
 
