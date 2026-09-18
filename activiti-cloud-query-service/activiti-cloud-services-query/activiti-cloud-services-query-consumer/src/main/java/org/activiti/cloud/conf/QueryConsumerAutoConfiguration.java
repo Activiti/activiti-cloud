@@ -25,6 +25,7 @@ import org.activiti.cloud.common.messaging.config.PartitionedChannelGracefulShut
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
+import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.slf4j.Logger;
@@ -101,13 +102,15 @@ public class QueryConsumerAutoConfiguration {
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        IntegrationFlow queryEventsQueueIntegrationFlow
+        IntegrationFlow queryEventsQueueIntegrationFlow,
+        RecomputeEventCapturer recomputeEventCapturer
     ) {
         return new QueryConsumerMessageHandler(
             eventHandlerContext,
             optimizer,
             entityManager,
-            queryEventsQueueIntegrationFlow.getInputChannel()
+            queryEventsQueueIntegrationFlow.getInputChannel(),
+            recomputeEventCapturer
         );
     }
 
