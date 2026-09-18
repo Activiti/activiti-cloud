@@ -96,14 +96,16 @@ public class FunctionRouterGatewayAutoConfiguration {
         FunctionRouterGateway functionRouterGateway,
         FunctionRouterMessageDestinationResolver functionRouterMessageDestinationResolver,
         FunctionRouterDestinationsProvider functionRouterDestinationsProvider,
-        RecoveryCallback<Object> functionRouterRecoveryCallback
+        RecoveryCallback<Object> functionRouterRecoveryCallback,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new FunctionRouterConsumer(
             functionRouterGateway,
             functionRouterMessageDestinationResolver,
             functionRouterDestinationsProvider,
             functionRouterRecoveryCallback,
-            () -> FUNCTION_ROUTER_ANONYMOUS_INPUT
+            () -> FUNCTION_ROUTER_ANONYMOUS_INPUT,
+            messagingProperties.getFunctionRouter()
         );
     }
 
@@ -112,14 +114,16 @@ public class FunctionRouterGatewayAutoConfiguration {
         FunctionRouterGateway functionRouterGateway,
         FunctionRouterMessageDestinationResolver functionRouterMessageDestinationResolver,
         FunctionRouterDestinationsProvider functionRouterDestinationsProvider,
-        RecoveryCallback<Object> functionRouterRecoveryCallback
+        RecoveryCallback<Object> functionRouterRecoveryCallback,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new FunctionRouterConsumer(
             functionRouterGateway,
             functionRouterMessageDestinationResolver,
             functionRouterDestinationsProvider,
             functionRouterRecoveryCallback,
-            () -> FUNCTION_ROUTER_INPUT
+            () -> FUNCTION_ROUTER_INPUT,
+            messagingProperties.getFunctionRouter()
         );
     }
 

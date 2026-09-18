@@ -15,11 +15,14 @@
  */
 package org.activiti.cloud.common.messaging.function.router;
 
+import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.FUNCTION_DESTINATION;
 import static org.activiti.cloud.common.messaging.function.router.FunctionRouterMessageHeaders.ROUTING_CONTEXT;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.core.RecoveryCallback;
@@ -41,16 +44,19 @@ public class FunctionRouterConsumer implements Function<Flux<Message<?>>, Mono<V
     private final List<String> destinations;
     private final RecoveryCallback<Object> recoveryCallback;
     private final Supplier<String> routingContextProvider;
+    private final ActivitiCloudMessagingProperties.FunctionRouterProperties functionRouterProperties;
 
     public FunctionRouterConsumer(
         FunctionRouterGateway functionRouterGateway,
         Function<Message<?>, String> destinationResolver,
         Function<String, List<String>> destinationsProvider,
         RecoveryCallback<Object> recoveryCallback,
-        Supplier<String> routingContextProvider
+        Supplier<String> routingContextProvider,
+        ActivitiCloudMessagingProperties.FunctionRouterProperties functionRouterProperties
     ) {
         this.functionRouterGateway = functionRouterGateway;
         this.destinationResolver = destinationResolver;
+        this.functionRouterProperties = functionRouterProperties;
         this.destinations = destinationsProvider.apply(routingContextProvider.get());
         this.recoveryCallback = recoveryCallback;
         this.routingContextProvider = routingContextProvider;
@@ -61,7 +67,22 @@ public class FunctionRouterConsumer implements Function<Flux<Message<?>>, Mono<V
         return messageFlux
             .map(message -> Tuples.of(destinationResolver.apply(message), message))
             .onErrorContinue((throwable, item) -> {
-                log.error("Dropping message {} due to resolver exception", item, throwable);
+                if (item instanceof Message<?> message) {
+                    final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
+
+                    final var registrations = Optional.ofNullable(destination)
+                        .map(it -> functionRouterProperties.registrations(routingContextProvider.get()).get(it))
+                        .orElse(List.of());
+
+                    log.warn(
+                        "Unable to route message {} to destination '{}' for function registrations '{}'",
+                        message,
+                        destination,
+                        registrations
+                    );
+                } else {
+                    log.error("Dropping item {} due to resolver exception", item, throwable);
+                }
             })
             .groupBy(Tuple2::getT1, Tuple2::getT2)
             .flatMap(

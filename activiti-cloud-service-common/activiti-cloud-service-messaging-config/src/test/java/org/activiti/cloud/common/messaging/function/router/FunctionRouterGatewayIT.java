@@ -196,7 +196,7 @@ class FunctionRouterGatewayIT {
         @FunctionBinding(input = COMMAND_CONSUMER, output = TestBindingsChannels.COMMAND_RESULTS)
         public Function<Message<?>, Message<?>> commandProcessorHandler(TestBindingsChannels channels) {
             return message -> {
-                AssertionsForClassTypes.assertThat(message).isNotNull();
+                assertThat(message).isNotNull();
                 Message<?> outMessage = MessageBuilder.withPayload(message.getPayload())
                     .setHeader("type", "Test Send")
                     .build();
@@ -291,10 +291,8 @@ class FunctionRouterGatewayIT {
                 1000,
                 bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
             );
-            AssertionsForClassTypes.assertThat(outputMessage).isNotNull();
-            AssertionsForClassTypes.assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo(
-                "Test Reply"
-            );
+            assertThat(outputMessage).isNotNull();
+            assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
         });
 
         // then
@@ -304,10 +302,8 @@ class FunctionRouterGatewayIT {
                 bindingResolver.getBindingDestination(TestBindingsChannels.AUDIT_PRODUCER)
             );
 
-            AssertionsForClassTypes.assertThat(outputMessage).isNotNull();
-            AssertionsForClassTypes.assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo(
-                "Test Send"
-            );
+            assertThat(outputMessage).isNotNull();
+            assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
         });
     }
 
@@ -390,8 +386,8 @@ class FunctionRouterGatewayIT {
 
         // then
         await().untilAsserted(() -> {
-            AssertionsForClassTypes.assertThat(getPayload.get()).isNotNull().isEqualTo("GET http://localhost:8080");
-            AssertionsForClassTypes.assertThat(postPayload.get()).isNull();
+            assertThat(getPayload.get()).isNotNull().isEqualTo("GET http://localhost:8080");
+            assertThat(postPayload.get()).isNull();
         });
     }
 
@@ -451,7 +447,7 @@ class FunctionRouterGatewayIT {
     }
 
     @Test
-    void testOnMissingDestinationErrorContinue(CapturedOutput output) {
+    void testMissingDestinationErrorContinue(CapturedOutput output) {
         // given
         Message<String> message = MessageBuilder.withPayload("run_test();")
             .setHeader(AmqpHeaders.MESSAGE_ID, UUID.randomUUID().toString())
@@ -464,7 +460,26 @@ class FunctionRouterGatewayIT {
         await()
             .atMost(Duration.ofSeconds(1))
             .untilAsserted(() -> {
-                assertThat(output.getAll()).contains("Dropping message");
+                assertThat(output.getAll()).contains("Unable to route message");
+            });
+    }
+
+    @Test
+    void testWrongDestinationErrorContinue(CapturedOutput output) {
+        // given
+        Message<String> message = MessageBuilder.withPayload("run_test();")
+            .setHeader(AmqpHeaders.MESSAGE_ID, UUID.randomUUID().toString())
+            .setHeader(FUNCTION_DESTINATION, "script.FOOBAR")
+            .build();
+
+        // when
+        inputDestination.send(message, "script.EXECUTE");
+
+        // then
+        await()
+            .atMost(Duration.ofSeconds(1))
+            .untilAsserted(() -> {
+                assertThat(output.getAll()).contains("Unable to route message");
             });
     }
 
