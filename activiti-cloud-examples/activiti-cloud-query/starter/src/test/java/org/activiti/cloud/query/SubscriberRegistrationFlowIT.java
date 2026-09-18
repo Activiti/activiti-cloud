@@ -53,7 +53,6 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
     properties = {
         "identity.test.token-interceptor.enabled=false",
         "spring.sql.init.mode=always",
-        "activiti.cloud.messaging.function-router.enabled=true",
         "activiti.cloud.query.pushed-counts.enabled=true",
         "spring.cloud.stream.default-binder=rabbit",
     },
