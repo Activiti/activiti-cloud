@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -26,11 +25,16 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import org.springframework.context.SmartLifecycle;
 
-public class FunctionRouterExecutorFactory implements Function<String, ExecutorService> {
+public class FunctionRouterExecutorFactory implements Function<String, ExecutorService>, SmartLifecycle {
+
+    private static final int SHUTDOWN_PHASE = Integer.MIN_VALUE + 2000;
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
+    private final AtomicBoolean running = new AtomicBoolean(false);
     private Duration timeout = Duration.ofSeconds(300);
     private static final int SINGLE_THREAD_POOL_SIZE = 1;
 
@@ -42,7 +46,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
         if (executor.isShutdown() || executor.isTerminating()) {
-            throw new RejectedExecutionException("Executor has been shutdown");
+            throw new RequeueDeliveryException("Executor is shutting down; requeueing for redelivery");
         }
 
         try {
@@ -56,7 +60,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
 
-            throw new RejectedExecutionException("Interrupted while waiting for queue capacity", e);
+            throw new RequeueDeliveryException(
+                "Interrupted while waiting for queue capacity; requeueing for redelivery",
+                e
+            );
         }
     };
 
@@ -76,7 +83,27 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         return executors.computeIfAbsent(key, executorServiceFactory);
     }
 
-    @PreDestroy
+    @Override
+    public void start() {
+        running.set(true);
+    }
+
+    @Override
+    public void stop() {
+        running.set(false);
+        destroy();
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running.get();
+    }
+
+    @Override
+    public int getPhase() {
+        return SHUTDOWN_PHASE;
+    }
+
     public void destroy() {
         try {
             shutdown();
