@@ -50,6 +50,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.engine.RepositoryService;
@@ -84,6 +85,8 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     private final ProcessVariablesPayloadConverter variablesPayloadConverter;
 
+    private final VariableValueSizeValidator variableValueSizeValidator;
+
     @Autowired
     public ProcessInstanceControllerImpl(
         RepositoryService repositoryService,
@@ -92,7 +95,8 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
         ProcessRuntime processRuntime,
         SpringPageConverter pageConverter,
-        ProcessVariablesPayloadConverter variablesPayloadConverter
+        ProcessVariablesPayloadConverter variablesPayloadConverter,
+        VariableValueSizeValidator variableValueSizeValidator
     ) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
@@ -101,6 +105,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         this.processRuntime = processRuntime;
         this.pageConverter = pageConverter;
         this.variablesPayloadConverter = variablesPayloadConverter;
+        this.variableValueSizeValidator = variableValueSizeValidator;
     }
 
     @Override
@@ -117,6 +122,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
+        variableValueSizeValidator.validate(startProcessPayload);
         startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
 
         return representationModelAssembler.toModel(processRuntime.start(startProcessPayload));
@@ -127,6 +133,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         @PathVariable String processInstanceId,
         @RequestBody(required = false) StartProcessPayload startProcessPayload
     ) {
+        variableValueSizeValidator.validate(startProcessPayload);
         StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(
             Optional.ofNullable(startProcessPayload).orElse(ProcessPayloadBuilder.start().build())
         );

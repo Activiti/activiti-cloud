@@ -36,6 +36,8 @@ import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.core.validation.VariableProperties;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -55,6 +57,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -66,15 +69,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(ProcessInstanceVariableAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
+@EnableConfigurationProperties(VariableProperties.class)
 @Import(
     {
         RuntimeBundleProperties.class,
+        VariableValueSizeValidator.class,
         CloudEventsAutoConfiguration.class,
         ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
@@ -107,6 +111,9 @@ class ProcessInstanceVariableAdminControllerImplIT {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private VariableProperties variableProperties;
+
     @MockitoBean
     private CollectionModelAssembler resourcesAssembler;
 
@@ -136,20 +143,11 @@ class ProcessInstanceVariableAdminControllerImplIT {
 
     @BeforeEach
     void setUp() {
+        variableProperties.setMaxValueSize(VariableProperties.DEFAULT_MAX_VALUE_SIZE);
         ProcessInstanceImpl processInstance;
         processInstance = new ProcessInstanceImpl();
         processInstance.setId("1");
         processInstance.setProcessDefinitionKey("1");
-
-        this.mockMvc = MockMvcBuilders.standaloneSetup(
-            new ProcessInstanceVariableAdminControllerImpl(
-                variableRepresentationModelAssembler,
-                processAdminRuntime,
-                resourcesAssembler
-            )
-        )
-            .setControllerAdvice(new RuntimeBundleExceptionHandler())
-            .build();
 
         given(processAdminRuntime.processInstance(any())).willReturn(processInstance);
     }
@@ -208,6 +206,33 @@ class ProcessInstanceVariableAdminControllerImplIT {
 
         assertThat(expectedResponseBody).isEqualTo(actualResponseBody);
         verify(processAdminRuntime).setVariables(any());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenVariableValueExceedsConfiguredSize() throws Exception {
+        variableProperties.setMaxValueSize(5);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("oversized", "abcd");
+
+        MvcResult result = mockMvc
+            .perform(
+                put("/admin/v1/process-instances/1/variables", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder.setVariables()
+                                .withProcessInstanceId("1")
+                                .withVariables(variables)
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).contains(
+            "Variable 'oversized' value exceeds maximum allowed size of 5 bytes"
+        );
     }
 
     @Test
