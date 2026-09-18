@@ -24,8 +24,6 @@ import java.util.List;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -37,10 +35,9 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 /**
  * Verifies the liveness backstop over a real broker: an instance that stops heart-beating has its users
@@ -61,16 +58,13 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
     },
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
-)
-@TestExecutionListeners(
-    value = RabbitMQQueuesCleanupTestExecutionListener.class,
-    mergeMode = MergeMode.MERGE_WITH_DEFAULTS
-)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @EnableCleanupLiquibaseAfterTest
 @ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 class SubscriberInstanceExpiryIT {
+
+    @ServiceConnection
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
     @ServiceConnection
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
