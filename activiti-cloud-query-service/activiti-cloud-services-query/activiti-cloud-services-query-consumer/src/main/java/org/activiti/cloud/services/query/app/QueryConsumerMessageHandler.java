@@ -34,21 +34,27 @@ public class QueryConsumerMessageHandler
 {
 
     private final MessageChannel queryEventsChannel;
+    private final RecomputeEventCapturer recomputeEventCapturer;
 
     public QueryConsumerMessageHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        MessageChannel queryEventsChannel
+        MessageChannel queryEventsChannel,
+        RecomputeEventCapturer recomputeEventCapturer
     ) {
         super(eventHandlerContext, optimizer, entityManager);
         this.queryEventsChannel = queryEventsChannel;
+        this.recomputeEventCapturer = recomputeEventCapturer;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
         beforeCommit(() -> queryEventsChannel.send(message));
+        // afterCommit, not beforeCommit: a rolled-back batch must not pollute the recompute buffer
+        // with touches that never actually happened.
+        afterCommit(() -> recomputeEventCapturer.capture(message.getPayload()));
         receive(message.getPayload(), message.getHeaders());
     }
 
@@ -57,6 +63,17 @@ public class QueryConsumerMessageHandler
             new TransactionSynchronization() {
                 @Override
                 public void beforeCommit(boolean readOnly) {
+                    action.run();
+                }
+            }
+        );
+    }
+
+    private static void afterCommit(Runnable action) {
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
                     action.run();
                 }
             }

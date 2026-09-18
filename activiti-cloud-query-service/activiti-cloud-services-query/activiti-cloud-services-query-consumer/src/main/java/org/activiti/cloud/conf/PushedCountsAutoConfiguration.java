@@ -17,16 +17,27 @@ package org.activiti.cloud.conf;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.services.query.app.ConsumerRecomputeBuffer;
+import org.activiti.cloud.services.query.app.ConsumerRecomputeScheduler;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
+import org.activiti.cloud.services.query.app.RecomputeAudienceResolver;
+import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
+import org.activiti.cloud.services.query.app.RecomputePipeline;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemovalScheduler;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemover;
 import org.activiti.cloud.services.query.app.SubscriberRegistryConsumer;
 import org.activiti.cloud.services.query.app.SubscriberRegistryMessageHandler;
 import org.activiti.cloud.services.query.app.SubscriberRegistryResyncRequester;
+import org.activiti.cloud.services.query.app.count.PushedCounter;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,10 +50,11 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Wires the consumer-side subscriber registry to the broker. The registry channel is a fan-out
- * (no consumer group) so every consumer instance builds the full picture of subscribers; the actual
- * broker destinations are configured through {@code spring.cloud.stream.bindings.*} so they can be
- * agreed and changed without code changes.
+ * Wires the consumer-side subscriber registry to the broker, and the recompute pipeline that turns
+ * committed event batches into pushed counts. The registry channel is a fan-out (no consumer group)
+ * so every consumer instance builds the full picture of subscribers; the actual broker destinations
+ * are configured through {@code spring.cloud.stream.bindings.*} so they can be agreed and changed
+ * without code changes.
  *
  * <p>Gated at startup by {@code activiti.cloud.query.pushed-counts.enabled} (off by default here,
  * turned on in hxp-process-services): when off, none of these beans are wired. Registry upkeep is
@@ -98,5 +110,61 @@ public class PushedCountsAutoConfiguration {
         @Qualifier(QueryConsumerChannels.SUBSCRIBER_REGISTRY_PRODUCER) MessageChannel registryProducer
     ) {
         return new SubscriberRegistryResyncRequester(registryProducer, UUID.randomUUID().toString(), Clock.systemUTC());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ConsumerRecomputeBuffer consumerRecomputeBuffer() {
+        return new ConsumerRecomputeBuffer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    RecomputeEventCapturer recomputeEventCapturer(ConsumerRecomputeBuffer buffer, FeatureToggle featureToggle) {
+        return new RecomputeEventCapturer(buffer, featureToggle, Clock.systemUTC());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    RecomputeAudienceResolver recomputeAudienceResolver(
+        ConsumerSubscriberRegistry registry,
+        TaskCandidateUserRepository taskCandidateUserRepository,
+        TaskCandidateGroupRepository taskCandidateGroupRepository,
+        TaskRepository taskRepository
+    ) {
+        return new RecomputeAudienceResolver(
+            registry,
+            taskCandidateUserRepository,
+            taskCandidateGroupRepository,
+            taskRepository
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    RecomputePipeline recomputePipeline(
+        RecomputeAudienceResolver audienceResolver,
+        Set<PushedCounter> counters,
+        @Qualifier(QueryConsumerChannels.COUNT_PRODUCER) MessageChannel countProducer
+    ) {
+        return new RecomputePipeline(audienceResolver, counters, countProducer, Clock.systemUTC());
+    }
+
+    @Bean
+    ConsumerRecomputeScheduler consumerRecomputeScheduler(
+        ConsumerRecomputeBuffer buffer,
+        RecomputePipeline pipeline,
+        FeatureToggle featureToggle,
+        @Value("${activiti.cloud.query.pushed-counts.flush-max-window:PT2S}") Duration maxWindow,
+        @Value("${activiti.cloud.query.pushed-counts.flush-max-size:2000}") int maxBatchSize
+    ) {
+        return new ConsumerRecomputeScheduler(
+            buffer,
+            pipeline,
+            featureToggle,
+            Clock.systemUTC(),
+            maxWindow,
+            maxBatchSize
+        );
     }
 }
