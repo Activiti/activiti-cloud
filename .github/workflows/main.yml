@@ -488,7 +488,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         env:
           ACTIVITI_CLOUD_VERSION: ${{ needs.create-tag.outputs.version }}
-          BUILD_RUN_ID: ${{ github.run_id }}
+          BUILD_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         with:
           version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "false"
