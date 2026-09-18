@@ -28,6 +28,8 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 public class FunctionRouterConsumer implements Function<Flux<Message<?>>, Mono<Void>> {
 
@@ -57,7 +59,11 @@ public class FunctionRouterConsumer implements Function<Flux<Message<?>>, Mono<V
     @Override
     public Mono<Void> apply(Flux<Message<?>> messageFlux) {
         return messageFlux
-            .groupBy(destinationResolver)
+            .map(message -> Tuples.of(destinationResolver.apply(message), message))
+            .onErrorContinue((throwable, item) -> {
+                log.error("Dropping message {} due to resolver exception", item, throwable);
+            })
+            .groupBy(Tuple2::getT1, Tuple2::getT2)
             .flatMap(
                 destination ->
                     destination.concatMap(message ->
@@ -68,7 +74,6 @@ public class FunctionRouterConsumer implements Function<Flux<Message<?>>, Mono<V
                 destinations.size(),
                 PREFETCH_ONE
             )
-            .onErrorContinue((error, _) -> log.error("onErrorContinue", error))
             .then();
     }
 

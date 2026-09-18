@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -56,6 +57,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
@@ -64,6 +66,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
@@ -80,6 +84,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
+@ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest(
     properties = {
         "activiti.cloud.application.name=foo",
@@ -443,6 +448,24 @@ class FunctionRouterGatewayIT {
                 assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
             });
         });
+    }
+
+    @Test
+    void testOnMissingDestinationErrorContinue(CapturedOutput output) {
+        // given
+        Message<String> message = MessageBuilder.withPayload("run_test();")
+            .setHeader(AmqpHeaders.MESSAGE_ID, UUID.randomUUID().toString())
+            .build();
+
+        // when
+        inputDestination.send(message, "script.EXECUTE");
+
+        // then
+        await()
+            .atMost(Duration.ofSeconds(1))
+            .untilAsserted(() -> {
+                assertThat(output.getAll()).contains("Dropping message");
+            });
     }
 
     @Test

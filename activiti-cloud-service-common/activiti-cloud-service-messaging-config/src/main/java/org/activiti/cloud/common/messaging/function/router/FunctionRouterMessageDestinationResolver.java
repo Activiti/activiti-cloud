@@ -17,13 +17,14 @@ package org.activiti.cloud.common.messaging.function.router;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.CONNECTOR_TYPE;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageDeliveryException;
 
 public class FunctionRouterMessageDestinationResolver implements Function<Message<?>, String> {
 
@@ -52,6 +53,11 @@ public class FunctionRouterMessageDestinationResolver implements Function<Messag
                             .or(() -> Optional.ofNullable(headers.get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
                     )
             )
-            .orElseThrow(() -> new MessageDeliveryException("Missing route destination"));
+            .filter(it ->
+                Optional.ofNullable(messagingProperties.getFunctionRouter().registrations().get(it))
+                    .filter(Predicate.not(Collection::isEmpty))
+                    .isPresent()
+            )
+            .orElseThrow(() -> new MessageDispatchingException(message, "Missing route destination"));
     }
 }
