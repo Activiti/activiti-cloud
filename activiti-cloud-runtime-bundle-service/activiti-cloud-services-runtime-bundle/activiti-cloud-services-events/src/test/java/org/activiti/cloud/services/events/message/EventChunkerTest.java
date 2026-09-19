@@ -143,7 +143,7 @@ class EventChunkerTest {
     }
 
     @Test
-    void shouldThrowUncheckedIOExceptionWhenCountingStreamFails() throws IOException {
+    void shouldThrowUncheckedIOExceptionWhenCountingStreamFails() {
         ObjectMapper mockMapper = mock(ObjectMapper.class);
         EventChunker chunkerWithMockMapper = new EventChunker(mockMapper, null);
 
@@ -162,7 +162,7 @@ class EventChunkerTest {
     }
 
     @Test
-    void shouldUseStreamedSerializedSizeAtChunkLimitBoundary() throws Exception {
+    void shouldUseStreamedSerializedSizeAtChunkLimitBoundary() {
         CloudRuntimeEventImpl<?, ?> event = createSmallEvents(1).get(0);
         int exactSerializedSize = objectMapper.writeValueAsBytes(event).length;
 
@@ -177,7 +177,9 @@ class EventChunkerTest {
         EventChunker belowLimitChunker = new EventChunker(objectMapper, belowLimitProperties);
 
         assertThat(exactLimitChunker.chunk(List.of(event))).singleElement().isEqualTo(List.of(event));
-        assertThatThrownBy(() -> belowLimitChunker.chunk(List.of(event)))
+
+        final List<CloudRuntimeEventImpl<?, ?>> events = List.of(event);
+        assertThatThrownBy(() -> belowLimitChunker.chunk(events))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Chunk size limit exceeded");
     }
