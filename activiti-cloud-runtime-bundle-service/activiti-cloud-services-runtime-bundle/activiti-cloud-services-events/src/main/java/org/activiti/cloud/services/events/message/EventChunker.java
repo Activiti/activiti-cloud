@@ -38,7 +38,7 @@ public class EventChunker {
     public Collection<List<CloudRuntimeEventImpl<?, ?>>> chunk(List<CloudRuntimeEventImpl<?, ?>> events) {
         List<List<CloudRuntimeEventImpl<?, ?>>> chunks = new ArrayList<>();
         List<CloudRuntimeEventImpl<?, ?>> currentChunk = new ArrayList<>();
-        var currentChunkSize = 0;
+        var currentChunkSize = 0L;
 
         for (CloudRuntimeEventImpl<?, ?> event : events) {
             var eventSizeInBytes = getEventSizeInBytes(event);
@@ -63,13 +63,13 @@ public class EventChunker {
         return chunks;
     }
 
-    private boolean isSingleEventExceedingMaxLimit(int eventSizeInBytes) {
+    private boolean isSingleEventExceedingMaxLimit(long eventSizeInBytes) {
         return eventSizeInBytes > this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener();
     }
 
     private boolean wouldChunkExceedMaxLimit(
-        int currentChunkSize,
-        int eventSizeInBytes,
+        long currentChunkSize,
+        long eventSizeInBytes,
         List<CloudRuntimeEventImpl<?, ?>> currentChunk
     ) {
         return (
@@ -79,7 +79,7 @@ public class EventChunker {
         );
     }
 
-    private int getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {
+    private long getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {
         try (var counter = new CountingOutputStream()) {
             this.objectMapper.writeValue(counter, event);
             return counter.getCount();
@@ -104,8 +104,8 @@ public class EventChunker {
             count += len;
         }
 
-        public int getCount() {
-            return Long.valueOf(count).intValue();
+        public long getCount() {
+            return count;
         }
     }
 }
