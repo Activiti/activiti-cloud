@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.events.message;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -78,10 +80,32 @@ public class EventChunker {
     }
 
     private int getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {
-        try {
-            return this.objectMapper.writeValueAsBytes(event).length;
+        try (var counter = new CountingOutputStream()) {
+            this.objectMapper.writeValue(counter, event);
+            return counter.getCount();
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to serialize event to JSON", e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static class CountingOutputStream extends OutputStream {
+
+        private long count = 0;
+
+        @Override
+        public void write(int b) {
+            count++;
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            count += len;
+        }
+
+        public int getCount() {
+            return Long.valueOf(count).intValue();
         }
     }
 }
