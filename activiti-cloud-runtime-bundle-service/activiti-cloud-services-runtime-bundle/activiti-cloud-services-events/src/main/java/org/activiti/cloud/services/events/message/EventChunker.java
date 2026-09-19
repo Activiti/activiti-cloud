@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.message;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -86,7 +87,7 @@ public class EventChunker {
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to serialize event to JSON", e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException("Unexpected I/O error while counting event JSON size", e);
         }
     }
 
