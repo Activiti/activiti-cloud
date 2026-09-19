@@ -19,9 +19,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -130,7 +131,7 @@ class EventChunkerTest {
         ObjectMapper mockMapper = mock(ObjectMapper.class);
         EventChunker chunkerWithMockMapper = new EventChunker(mockMapper, null);
 
-        when(mockMapper.writeValueAsBytes(any())).thenThrow(JacksonException.class);
+        doThrow(JacksonException.class).when(mockMapper).writeValue(any(OutputStream.class), any());
 
         List<CloudRuntimeEventImpl<?, ?>> events = createSmallEvents(1);
 
