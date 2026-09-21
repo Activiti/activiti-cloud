@@ -104,9 +104,7 @@ public class RecomputeEventCapturer {
         }
         LOGGER.debug("Capturing {} committed events for the recompute buffer", events.size());
         Instant at = clock.instant();
-        for (CloudRuntimeEvent<?, ?> event : events) {
-            captureOne(event, at);
-        }
+        events.forEach(event -> captureOne(event, at));
     }
 
     private void captureOne(CloudRuntimeEvent<?, ?> event, Instant at) {
