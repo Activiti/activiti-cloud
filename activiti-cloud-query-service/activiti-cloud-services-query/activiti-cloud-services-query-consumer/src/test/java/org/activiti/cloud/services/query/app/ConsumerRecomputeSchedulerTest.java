@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.query.app;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -85,7 +87,7 @@ class ConsumerRecomputeSchedulerTest {
         scheduler.flushIfDue();
 
         verify(pipeline).process(any());
-        org.assertj.core.api.Assertions.assertThat(buffer.isEmpty()).isTrue();
+        assertThat(buffer.isEmpty()).isTrue();
     }
 
     @Test
@@ -99,6 +101,18 @@ class ConsumerRecomputeSchedulerTest {
         scheduler.flushIfDue();
 
         verify(pipeline).process(any());
+    }
+
+    @Test
+    void mergesTheWindowBackIntoTheBuffer_whenProcessingFails() {
+        ConsumerRecomputeBuffer buffer = new ConsumerRecomputeBuffer();
+        buffer.captureTask("task-1", T0);
+        doThrow(new RuntimeException("boom")).when(pipeline).process(any());
+        ConsumerRecomputeScheduler scheduler = schedulerAt(buffer, T0.plus(MAX_WINDOW));
+
+        scheduler.flushIfDue();
+
+        assertThat(buffer.drainAndReset().taskIds()).containsExactly("task-1");
     }
 
     private ConsumerRecomputeScheduler schedulerAt(ConsumerRecomputeBuffer buffer, Instant now) {

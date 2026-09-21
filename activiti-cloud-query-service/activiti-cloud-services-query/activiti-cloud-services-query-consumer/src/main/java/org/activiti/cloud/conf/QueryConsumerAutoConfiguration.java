@@ -103,7 +103,7 @@ public class QueryConsumerAutoConfiguration {
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
         IntegrationFlow queryEventsQueueIntegrationFlow,
-        RecomputeEventCapturer recomputeEventCapturer
+        Optional<RecomputeEventCapturer> recomputeEventCapturer
     ) {
         return new QueryConsumerMessageHandler(
             eventHandlerContext,

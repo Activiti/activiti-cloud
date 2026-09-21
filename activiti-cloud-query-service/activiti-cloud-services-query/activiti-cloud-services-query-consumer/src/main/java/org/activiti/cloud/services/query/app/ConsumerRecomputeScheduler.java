@@ -19,6 +19,8 @@ import java.time.Clock;
 import java.time.Duration;
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
@@ -26,6 +28,8 @@ import org.springframework.scheduling.annotation.Scheduled;
  * or size bound. Frequent polling lets a burst flush early instead of waiting out the window.
  */
 public class ConsumerRecomputeScheduler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerRecomputeScheduler.class);
 
     private final ConsumerRecomputeBuffer buffer;
     private final RecomputePipeline pipeline;
@@ -59,7 +63,13 @@ public class ConsumerRecomputeScheduler {
             return;
         }
         if (buffer.age(clock).compareTo(maxWindow) >= 0 || buffer.size() >= maxBatchSize) {
-            pipeline.process(buffer.drainAndReset());
+            ConsumerRecomputeWindow window = buffer.drainAndReset();
+            try {
+                pipeline.process(window);
+            } catch (RuntimeException e) {
+                buffer.mergeBack(window, clock.instant());
+                LOGGER.warn("Failed to process a recompute window; retrying on the next flush", e);
+            }
         }
     }
 }

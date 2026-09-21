@@ -52,6 +52,7 @@ import org.springframework.messaging.support.MessageBuilder;
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = {
         "activiti.cloud.services.oauth2.iam-name=test",
+        "activiti.cloud.query.pushed-counts.enabled=true",
         "activiti.features.query.pushed-counts.enabled=true",
         "activiti.cloud.query.pushed-counts.flush-interval=PT0.1S",
         "activiti.cloud.query.pushed-counts.flush-max-window=PT0.2S",

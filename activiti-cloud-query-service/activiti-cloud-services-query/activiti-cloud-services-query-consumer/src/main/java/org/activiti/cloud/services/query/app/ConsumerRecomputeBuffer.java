@@ -99,6 +99,19 @@ public final class ConsumerRecomputeBuffer {
         return snapshot;
     }
 
+    /** Re-adds a drained window's identities after a failed flush, so a transient failure loses nothing. */
+    public synchronized void mergeBack(ConsumerRecomputeWindow window, Instant at) {
+        if (window.isEmpty()) {
+            return;
+        }
+        markTouch(at);
+        taskIds.addAll(window.taskIds());
+        touchedGroupIds.addAll(window.touchedGroupIds());
+        namedUserIds.addAll(window.namedUserIds());
+        processInstanceIds.addAll(window.processInstanceIds());
+        namedInitiatorIds.addAll(window.namedInitiatorIds());
+    }
+
     private void markTouch(Instant at) {
         if (windowStartedAt == null) {
             windowStartedAt = at;

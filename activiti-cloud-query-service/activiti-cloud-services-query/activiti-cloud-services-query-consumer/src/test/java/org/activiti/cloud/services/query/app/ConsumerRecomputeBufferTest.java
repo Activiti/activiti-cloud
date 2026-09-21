@@ -123,6 +123,25 @@ class ConsumerRecomputeBufferTest {
     }
 
     @Test
+    void mergeBack_restoresADrainedWindow() {
+        buffer.captureTask("task-1", T0, "alice");
+        ConsumerRecomputeWindow window = buffer.drainAndReset();
+
+        buffer.mergeBack(window, T0.plusSeconds(1));
+
+        ConsumerRecomputeWindow restored = buffer.drainAndReset();
+        assertThat(restored.taskIds()).containsExactly("task-1");
+        assertThat(restored.namedUserIds()).containsExactly("alice");
+    }
+
+    @Test
+    void mergeBack_ofAnEmptyWindow_doesNothing() {
+        buffer.mergeBack(new ConsumerRecomputeWindow(Set.of(), Set.of(), Set.of(), Set.of(), Set.of()), T0);
+
+        assertThat(buffer.isEmpty()).isTrue();
+    }
+
+    @Test
     void drainAndReset_clearsTheBuffer_andStartsAFreshWindow() {
         buffer.captureTask("task-1", T0, "alice");
         buffer.drainAndReset();
