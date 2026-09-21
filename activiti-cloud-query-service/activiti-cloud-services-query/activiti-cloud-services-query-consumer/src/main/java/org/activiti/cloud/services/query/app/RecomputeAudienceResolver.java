@@ -27,6 +27,8 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Turns one flush window's touched identities into who needs which badge recomputed. Named users
@@ -36,6 +38,8 @@ import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
  * Results are filtered to users {@link ConsumerSubscriberRegistry} says are watching.
  */
 public class RecomputeAudienceResolver {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecomputeAudienceResolver.class);
 
     private final ConsumerSubscriberRegistry registry;
     private final TaskCandidateUserRepository taskCandidateUserRepository;
@@ -67,6 +71,12 @@ public class RecomputeAudienceResolver {
         audience.put(PushedCountType.ASSIGNED, Set.copyOf(taskDomainAudience));
         audience.put(PushedCountType.QUEUED, Set.copyOf(taskDomainAudience));
         audience.put(PushedCountType.PROCESSES, Set.copyOf(processesAudience));
+        LOGGER.debug(
+            "Resolved recompute audience: assigned={}, queued={}, processes={}",
+            taskDomainAudience.size(),
+            taskDomainAudience.size(),
+            processesAudience.size()
+        );
         return audience;
     }
 

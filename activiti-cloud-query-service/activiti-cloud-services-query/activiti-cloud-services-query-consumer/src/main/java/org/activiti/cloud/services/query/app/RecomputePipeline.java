@@ -23,6 +23,8 @@ import org.activiti.cloud.services.query.app.count.PushedCounter;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -32,6 +34,8 @@ import org.springframework.messaging.support.MessageBuilder;
  * registered, this does nothing.
  */
 public class RecomputePipeline {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecomputePipeline.class);
 
     private final RecomputeAudienceResolver audienceResolver;
     private final Set<PushedCounter> counters;
@@ -66,6 +70,7 @@ public class RecomputePipeline {
             return;
         }
         Map<String, Long> counts = counter.compute(affectedUserIds);
+        LOGGER.debug("Publishing {} for {} affected users", counter.type(), affectedUserIds.size());
         for (String userId : affectedUserIds) {
             long count = counts.getOrDefault(userId, 0L);
             String scopeKey = ScopeKeys.of(counter.type(), userId);

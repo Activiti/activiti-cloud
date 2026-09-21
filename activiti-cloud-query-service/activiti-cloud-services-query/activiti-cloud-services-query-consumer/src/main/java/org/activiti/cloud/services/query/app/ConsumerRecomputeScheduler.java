@@ -64,6 +64,11 @@ public class ConsumerRecomputeScheduler {
         }
         if (buffer.age(clock).compareTo(maxWindow) >= 0 || buffer.size() >= maxBatchSize) {
             ConsumerRecomputeWindow window = buffer.drainAndReset();
+            LOGGER.debug(
+                "Flushing a recompute window: {} tasks, {} processes touched",
+                window.taskIds().size(),
+                window.processInstanceIds().size()
+            );
             try {
                 pipeline.process(window);
             } catch (RuntimeException e) {

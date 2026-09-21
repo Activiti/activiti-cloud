@@ -105,6 +105,10 @@ public class QueryConsumerAutoConfiguration {
         IntegrationFlow queryEventsQueueIntegrationFlow,
         Optional<RecomputeEventCapturer> recomputeEventCapturer
     ) {
+        LOGGER.debug(
+            "Pushed-counts recompute capture is {}",
+            recomputeEventCapturer.isPresent() ? "enabled" : "disabled"
+        );
         return new QueryConsumerMessageHandler(
             eventHandlerContext,
             optimizer,
@@ -121,8 +125,8 @@ public class QueryConsumerAutoConfiguration {
                 if (message instanceof ErrorMessage errorMessage) {
                     final var exception = errorMessage.getPayload();
                     final var failedMessage =
-                        exception instanceof MessageHandlingException
-                            ? ((MessageHandlingException) exception).getFailedMessage()
+                        exception instanceof MessageHandlingException messageHandlingException
+                            ? messageHandlingException.getFailedMessage()
                             : errorMessage.getOriginalMessage();
 
                     LOGGER.error(

@@ -35,6 +35,8 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maps each event a committed batch carries onto {@link ConsumerRecomputeBuffer} captures, reading
@@ -43,6 +45,8 @@ import org.activiti.cloud.services.query.QueryFeatureToggles;
  * ignored.
  */
 public class RecomputeEventCapturer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecomputeEventCapturer.class);
 
     private static final Set<String> CANDIDATE_USER_EVENT_TYPES = Set.of(
         TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name(),
@@ -98,6 +102,7 @@ public class RecomputeEventCapturer {
         if (events == null || !featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS)) {
             return;
         }
+        LOGGER.debug("Capturing {} committed events for the recompute buffer", events.size());
         Instant at = clock.instant();
         for (CloudRuntimeEvent<?, ?> event : events) {
             captureOne(event, at);
