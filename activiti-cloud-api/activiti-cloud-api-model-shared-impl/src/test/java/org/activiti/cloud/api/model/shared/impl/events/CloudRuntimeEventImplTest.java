@@ -17,6 +17,8 @@ package org.activiti.cloud.api.model.shared.impl.events;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.stream.IntStream;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.junit.jupiter.api.Test;
 
@@ -72,5 +74,23 @@ class CloudRuntimeEventImplTest {
         event.setCommandId("cmd-123");
 
         assertThat(event.toString()).contains("commandId=cmd-123");
+    }
+
+    @Test
+    void should_boundNestedVariableValue_when_toStringIsCalled() {
+        var nestedValue = IntStream.range(0, 100)
+            .mapToObj(index -> List.of("leaf-" + index, List.of("deep-" + index, "tail-" + index)))
+            .toList();
+
+        var variableInstance = new VariableInstanceImpl<>("variable", "json", nestedValue, "process-1", null);
+        var event = new CloudVariableCreatedEventImpl("event-id", 0L, variableInstance);
+
+        var rendered = event.toString();
+
+        assertThat(rendered).contains("name='variable'");
+        assertThat(rendered).contains("ArrayList(size=100");
+        assertThat(rendered).contains("leaf-0");
+        assertThat(rendered).doesNotContain("leaf-99");
+        assertThat(rendered.length()).isLessThan(2500);
     }
 }
