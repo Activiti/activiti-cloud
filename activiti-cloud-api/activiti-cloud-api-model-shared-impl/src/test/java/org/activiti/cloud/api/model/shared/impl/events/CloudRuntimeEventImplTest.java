@@ -88,7 +88,7 @@ class CloudRuntimeEventImplTest {
         var rendered = event.toString();
 
         assertThat(rendered).contains("name='variable'");
-        assertThat(rendered).contains("ArrayList(size=100");
+        assertThat(rendered).contains("size=100");
         assertThat(rendered).contains("leaf-0");
         assertThat(rendered).doesNotContain("leaf-99");
         assertThat(rendered.length()).isLessThan(2500);

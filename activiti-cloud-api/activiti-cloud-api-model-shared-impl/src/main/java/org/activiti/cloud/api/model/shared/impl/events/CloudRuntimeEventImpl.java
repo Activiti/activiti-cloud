@@ -304,11 +304,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
 
     private String renderMap(Map<?, ?> map, int depth) {
         StringBuilder builder = new StringBuilder();
-        builder
-            .append(map.getClass().getSimpleName())
-            .append("(size=")
-            .append(map.size())
-            .append(", entries=[");
+        builder.append(map.getClass().getSimpleName()).append("(size=").append(map.size()).append(", entries=[");
 
         Iterator<? extends Map.Entry<?, ?>> iterator = map.entrySet().iterator();
         int index = 0;
