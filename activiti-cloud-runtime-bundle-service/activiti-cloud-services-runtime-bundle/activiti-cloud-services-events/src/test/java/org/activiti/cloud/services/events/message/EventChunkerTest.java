@@ -19,9 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -130,13 +133,55 @@ class EventChunkerTest {
         ObjectMapper mockMapper = mock(ObjectMapper.class);
         EventChunker chunkerWithMockMapper = new EventChunker(mockMapper, null);
 
-        when(mockMapper.writeValueAsBytes(any())).thenThrow(JacksonException.class);
+        doThrow(JacksonException.class).when(mockMapper).writeValue(any(OutputStream.class), any());
 
         List<CloudRuntimeEventImpl<?, ?>> events = createSmallEvents(1);
 
         assertThatThrownBy(() -> chunkerWithMockMapper.chunk(events))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Failed to serialize event to JSON");
+    }
+
+    @Test
+    void shouldThrowUncheckedIOExceptionWhenCountingStreamFails() {
+        ObjectMapper mockMapper = mock(ObjectMapper.class);
+        EventChunker chunkerWithMockMapper = new EventChunker(mockMapper, null);
+
+        doAnswer(invocation -> {
+            throw new IOException("boom");
+        })
+            .when(mockMapper)
+            .writeValue(any(OutputStream.class), any());
+
+        List<CloudRuntimeEventImpl<?, ?>> events = createSmallEvents(1);
+
+        assertThatThrownBy(() -> chunkerWithMockMapper.chunk(events))
+            .isInstanceOf(java.io.UncheckedIOException.class)
+            .hasMessage("Unexpected I/O error while counting event JSON size")
+            .hasCauseInstanceOf(IOException.class);
+    }
+
+    @Test
+    void shouldUseStreamedSerializedSizeAtChunkLimitBoundary() {
+        CloudRuntimeEventImpl<?, ?> event = createSmallEvents(1).get(0);
+        int exactSerializedSize = objectMapper.writeValueAsBytes(event).length;
+
+        RuntimeBundleProperties exactLimitProperties = new RuntimeBundleProperties();
+        exactLimitProperties.setEventsProperties(new RuntimeBundleEventsProperties());
+        exactLimitProperties.getEventsProperties().setChunkSizeInBytesCloseListener(exactSerializedSize);
+        EventChunker exactLimitChunker = new EventChunker(objectMapper, exactLimitProperties);
+
+        RuntimeBundleProperties belowLimitProperties = new RuntimeBundleProperties();
+        belowLimitProperties.setEventsProperties(new RuntimeBundleEventsProperties());
+        belowLimitProperties.getEventsProperties().setChunkSizeInBytesCloseListener(exactSerializedSize - 1);
+        EventChunker belowLimitChunker = new EventChunker(objectMapper, belowLimitProperties);
+
+        assertThat(exactLimitChunker.chunk(List.of(event))).singleElement().isEqualTo(List.of(event));
+
+        final List<CloudRuntimeEventImpl<?, ?>> events = List.of(event);
+        assertThatThrownBy(() -> belowLimitChunker.chunk(events))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Chunk size limit exceeded");
     }
 
     @Test
