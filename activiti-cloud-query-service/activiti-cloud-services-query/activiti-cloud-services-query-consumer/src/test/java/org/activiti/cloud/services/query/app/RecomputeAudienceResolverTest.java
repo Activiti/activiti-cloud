@@ -92,7 +92,7 @@ class RecomputeAudienceResolverTest {
     @Test
     void namedUserDoor_readsBackCandidateUsersOfTouchedTasks() {
         registry.register("carol", Set.of(), "rest-1", java.time.Instant.EPOCH);
-        when(taskCandidateUserRepository.findByTaskIdIn(eq(Set.of("task-1")))).thenReturn(
+        when(taskCandidateUserRepository.findByTaskIdIn(Set.of("task-1"))).thenReturn(
             Set.of(new TaskCandidateUserEntity("task-1", "carol"))
         );
         ConsumerRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of(), Set.of());
@@ -117,7 +117,7 @@ class RecomputeAudienceResolverTest {
     @Test
     void groupDoor_alsoReadsBackCandidateGroupsOfTouchedTasks() {
         registry.register("frank", Set.of("ops"), "rest-1", java.time.Instant.EPOCH);
-        when(taskCandidateGroupRepository.findByTaskIdIn(eq(Set.of("task-1")))).thenReturn(
+        when(taskCandidateGroupRepository.findByTaskIdIn(Set.of("task-1"))).thenReturn(
             Set.of(new TaskCandidateGroupEntity("task-1", "ops"))
         );
         ConsumerRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of(), Set.of());
@@ -156,7 +156,7 @@ class RecomputeAudienceResolverTest {
         registry.register("iris", Set.of(), "rest-1", java.time.Instant.EPOCH);
         TaskEntity task = new TaskEntity();
         task.setAssignee("iris");
-        when(taskRepository.findByProcessInstanceIdIn(eq(Set.of("proc-1")))).thenReturn(List.of(task));
+        when(taskRepository.findByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(List.of(task));
         ConsumerRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
 
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
@@ -168,7 +168,7 @@ class RecomputeAudienceResolverTest {
     void processDomain_ignoresUnassignedTasksInTheTouchedProcess() {
         registry.register("iris", Set.of(), "rest-1", java.time.Instant.EPOCH);
         TaskEntity task = new TaskEntity();
-        when(taskRepository.findByProcessInstanceIdIn(eq(Set.of("proc-1")))).thenReturn(List.of(task));
+        when(taskRepository.findByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(List.of(task));
         ConsumerRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
 
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
@@ -179,7 +179,7 @@ class RecomputeAudienceResolverTest {
     @Test
     void processDomain_alsoIncludesCandidateUsersOfTasksInTheTouchedProcess() {
         registry.register("jack", Set.of(), "rest-1", java.time.Instant.EPOCH);
-        when(taskCandidateUserRepository.findByTask_ProcessInstanceIdIn(eq(Set.of("proc-1")))).thenReturn(
+        when(taskCandidateUserRepository.findByTask_ProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(
             Set.of(new TaskCandidateUserEntity("task-1", "jack"))
         );
         ConsumerRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
