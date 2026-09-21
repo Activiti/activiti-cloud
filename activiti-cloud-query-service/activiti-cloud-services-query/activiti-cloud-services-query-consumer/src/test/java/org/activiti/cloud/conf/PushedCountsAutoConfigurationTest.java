@@ -16,13 +16,16 @@
 package org.activiti.cloud.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
+import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemovalScheduler;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemover;
 import org.activiti.cloud.services.query.app.SubscriberRegistryConsumer;
 import org.activiti.cloud.services.query.app.SubscriberRegistryMessageHandler;
 import org.activiti.cloud.services.query.app.SubscriberRegistryResyncRequester;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.convert.ApplicationConversionService;
@@ -37,6 +40,7 @@ class PushedCountsAutoConfigurationTest {
             context.getBeanFactory().setConversionService(ApplicationConversionService.getSharedInstance())
         )
         .withBean("subscriberRegistryProducer", MessageChannel.class, NullChannel::new)
+        .withBean(TaskRepository.class, () -> mock(TaskRepository.class))
         .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
         .withConfiguration(AutoConfigurations.of(PushedCountsAutoConfiguration.class));
 
@@ -48,6 +52,7 @@ class PushedCountsAutoConfigurationTest {
             assertThat(context).hasSingleBean(SubscriberInstanceRemover.class);
             assertThat(context).hasSingleBean(SubscriberInstanceRemovalScheduler.class);
             assertThat(context).hasSingleBean(SubscriberRegistryResyncRequester.class);
+            assertThat(context).hasSingleBean(AssignedTaskCounter.class);
             assertThat(context).hasBean("subscriberRegistryConsumerFunction");
             assertThat(context.getBean("subscriberRegistryConsumerFunction")).isInstanceOf(
                 SubscriberRegistryConsumer.class
@@ -61,6 +66,7 @@ class PushedCountsAutoConfigurationTest {
             .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=false")
             .run(context -> {
                 assertThat(context).doesNotHaveBean(ConsumerSubscriberRegistry.class);
+                assertThat(context).doesNotHaveBean(AssignedTaskCounter.class);
                 assertThat(context).doesNotHaveBean("subscriberRegistryConsumerFunction");
             });
     }

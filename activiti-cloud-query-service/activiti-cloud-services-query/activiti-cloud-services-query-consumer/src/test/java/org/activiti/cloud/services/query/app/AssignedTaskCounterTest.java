@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +59,21 @@ class AssignedTaskCounterTest {
                 tuple(ScopeKeys.assigned("bob"), 1L, asOf),
                 tuple(ScopeKeys.assigned("carol"), 0L, asOf)
             );
+    }
+
+    @Test
+    void shouldDeduplicateAffectedUsersAndQueryOnlyByAssignedStatus() {
+        Instant asOf = Instant.parse("2026-09-16T10:15:30Z");
+        when(taskRepository.countGroupedByAssignee(any(), eq(Task.TaskStatus.ASSIGNED))).thenReturn(
+            List.of(assigneeCount("alice", 3L))
+        );
+
+        List<CountChangedMessage> messages = counter.countFor(List.of("alice", "alice"), asOf);
+
+        verify(taskRepository).countGroupedByAssignee(eq(Set.of("alice")), eq(Task.TaskStatus.ASSIGNED));
+        assertThat(messages)
+            .extracting(CountChangedMessage::scopeKey, CountChangedMessage::count, CountChangedMessage::asOf)
+            .containsExactly(tuple(ScopeKeys.assigned("alice"), 3L, asOf));
     }
 
     @Test

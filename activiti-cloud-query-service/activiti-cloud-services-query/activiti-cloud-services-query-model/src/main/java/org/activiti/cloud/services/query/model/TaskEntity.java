@@ -66,7 +66,6 @@ import org.springframework.format.annotation.DateTimeFormat;
         @Index(name = "task_status_idx", columnList = "status", unique = false),
         @Index(name = "task_processInstance_idx", columnList = "processInstanceId", unique = false),
         @Index(name = "task_processDefinitionName_idx", columnList = "processDefinitionName", unique = false),
-        @Index(name = "idx_task_assignee", columnList = "assignee", unique = false),
     }
 )
 @DynamicInsert

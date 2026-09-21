@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemovalScheduler;
@@ -27,6 +28,7 @@ import org.activiti.cloud.services.query.app.SubscriberInstanceRemover;
 import org.activiti.cloud.services.query.app.SubscriberRegistryConsumer;
 import org.activiti.cloud.services.query.app.SubscriberRegistryMessageHandler;
 import org.activiti.cloud.services.query.app.SubscriberRegistryResyncRequester;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -98,5 +100,12 @@ public class PushedCountsAutoConfiguration {
         @Qualifier(QueryConsumerChannels.SUBSCRIBER_REGISTRY_PRODUCER) MessageChannel registryProducer
     ) {
         return new SubscriberRegistryResyncRequester(registryProducer, UUID.randomUUID().toString(), Clock.systemUTC());
+    }
+
+    // Registered for injection now; the recompute that invokes countFor is wired in a later step.
+    @Bean
+    @ConditionalOnMissingBean
+    AssignedTaskCounter assignedTaskCounter(TaskRepository taskRepository) {
+        return new AssignedTaskCounter(taskRepository);
     }
 }
