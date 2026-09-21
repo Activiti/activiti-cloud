@@ -26,6 +26,8 @@ import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.rest.subscriber.SubscriberRegistry;
 import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -37,9 +39,10 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 /**
  * Exercises the subscriber presence flows across both halves of the all-in-one query service over a real
@@ -58,15 +61,18 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
     },
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
+@TestExecutionListeners(
+    value = RabbitMQQueuesCleanupTestExecutionListener.class,
+    mergeMode = MergeMode.MERGE_WITH_DEFAULTS
+)
 @EnableCleanupLiquibaseAfterTest
 @ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 class SubscriberRegistrationFlowIT {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
-
-    @ServiceConnection
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
     @ServiceConnection
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
