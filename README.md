@@ -32,6 +32,17 @@ Requires the following secrets to be set:
 | RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
 | SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
 
+## Preview Propagation
+
+This repository includes an automated **Preview Propagation** mechanism for testing cross-module integration with downstream repositories like hxp-common-libraries. When working on features that span multiple modules:
+
+1. Add labels `preview` + `preview-propagation` to your PR
+2. The system automatically builds a preview version and creates a test PR in hxp-common-libraries
+3. Test the integration in the downstream PR
+4. When your source PR closes/merges, the test PR automatically closes
+
+This eliminates manual version bumping and cleanup while ensuring integration changes are validated before merge.
+
 ## Formatting
 
 The local `.editorconfig` file is leveraged for automated formatting.

@@ -51,18 +51,18 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@michalfidor/playswag": "^1.10.4",
-    "@reportportal/agent-js-playwright": "^5.4.2",
+    "@reportportal/agent-js-playwright": "^5.4.3",
     "@playwright/test": "^1.63.0",
     "@types/node": "^22.0.0",
     "@types/ws": "^8.18.1",
     "tsx": "^4.23.13",
-    "typescript": "^5.5.4"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=22"
   },
   "dependencies": {
-    "chalk": "^5.6.2",
+    "chalk": "^6.0.0",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "jwt-decode": "^4.0.0",

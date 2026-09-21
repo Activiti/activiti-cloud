@@ -100,12 +100,17 @@ jobs:
       - name: Export build version
         id: export-version
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TAG_VERSION: ${{ steps.tag.outputs.version }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "version=${{ steps.tag.outputs.version }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "pull_request" ] \
-            && [[ ",${{ join(github.event.pull_request.labels.*.name, ',') }}," == *",preview,"* ]]; then
-            echo "version=0.0.1-PR-${{ github.event.pull_request.number }}-SNAPSHOT" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT_NAME" = "pull_request" ] \
+            && [[ ",${PR_LABELS}," == *",preview,"* ]]; then
+            echo "version=0.0.1-PR-${PR_NUMBER}-SNAPSHOT" >> "$GITHUB_OUTPUT"
           else
             echo "version=$(yq e '.project.version' pom.xml)" >> "$GITHUB_OUTPUT"
           fi
@@ -148,7 +153,7 @@ jobs:
               printf '%s\n' "${STANDALONE_MODULES[@]}"
             } | sort -u | tr '\n' ',' | sed 's/,$//'
           )
-          echo "modules=$MODULES" >> $GITHUB_OUTPUT
+          echo "modules=$MODULES" >> "$GITHUB_OUTPUT"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
         env:
@@ -366,11 +371,11 @@ jobs:
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
           VERSION: ${{ needs.create-tag.outputs.version }}
         run: |
-          if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
+          if [ "$IS_PREVIEW" = true ] || [ "$GITHUB_EVENT_NAME" = "push" ]
           then
               echo "Skipping delete Docker images"
           else
-              echo $VERSION > VERSION
+              echo "$VERSION" > VERSION
               echo "Delete Docker images"
               make docker-delete-all
           fi
@@ -457,6 +462,74 @@ jobs:
           gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
           gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
 
+  propagate-preview:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - create-tag
+      - publish-preview
+    if: >-
+      github.event_name == 'pull_request'
+      && contains(github.event.pull_request.labels.*.name, 'preview')
+      && contains(github.event.pull_request.labels.*.name, 'preview-propagation')
+      && needs.pre-checks.outputs.skip != 'true'
+      && needs.publish-preview.result == 'success'
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      VERSION: ${{ needs.create-tag.outputs.version }}
+      DEVELOPMENT_BRANCH: ${{ github.base_ref }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Use preview updatebot config
+        shell: bash
+        run: cp .jx/updatebot-preview.yaml .jx/updatebot.yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+        env:
+          ACTIVITI_CLOUD_VERSION: ${{ needs.create-tag.outputs.version }}
+          BUILD_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        with:
+          pull-request-title: "Preview snapshot PR: activiti-cloud ${{ needs.create-tag.outputs.version }} from ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+          version: ${{ needs.create-tag.outputs.version }}
+          auto-merge: "false"
+          labels: "do-not-merge,preview-source-pr-${{ github.event.pull_request.number }}"
+          base-branch-name: ${{ env.DEVELOPMENT_BRANCH }}
+          git-username: ${{ vars.HXPS_GIT_USERNAME }}
+          git-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          git-author-name: ${{ vars.HXPS_GIT_USERNAME }}
+          git-author-email: ${{ vars.HXPS_GIT_EMAIL }}
+          gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
+          commit-message: "Preview snapshot PR: activiti-cloud ${{ needs.create-tag.outputs.version }} from ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+
+      # This build can be queued by a push that lands before the source PR is
+      # merged/closed. If that happens, the on-close cleanup job may already
+      # have run and finished by the time jx-updatebot-pr creates the preview
+      # PR above, leaving a fresh orphaned preview PR behind. Re-check the
+      # source PR's state now (after creation, not before) and self-close
+      # anything just created if it's no longer open.
+      - name: Check source PR is still open
+        id: source-pr-state
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          SOURCE_PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_REPO: ${{ github.repository }}
+        run: |
+          STATE=$(gh pr view "$SOURCE_PR_NUMBER" \
+            --repo "$SOURCE_REPO" \
+            --json state --jq .state)
+          echo "state=$STATE" >> "$GITHUB_OUTPUT"
+
+      - name: Close preview PRs if source PR closed while propagating
+        if: ${{ steps.source-pr-state.outputs.state != 'OPEN' }}
+        uses: ./.github/actions/close-orphaned-preview-prs
+        with:
+          source-pr-number: ${{ github.event.pull_request.number }}
+          source-pr-state: ${{ steps.source-pr-state.outputs.state }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
   propagate-helm:
     runs-on: ubuntu-latest
     needs:
@@ -478,7 +551,7 @@ jobs:
       - name: Update image tags in Helm chart
         working-directory: ${{ env.FULL_CHART_DIR }}/charts/activiti-cloud-full-example
         run: |
-          git checkout -b $FULL_CHART_PR_BRANCH
+          git checkout -b "$FULL_CHART_PR_BRANCH"
           yq -i e '.runtime-bundle.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-consumer.image.tag = env(VERSION)' values.yaml
@@ -526,8 +599,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
-          git push origin $FULL_CHART_PR_BRANCH
-          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot --head $(git branch --show-current)
+          git push origin "$FULL_CHART_PR_BRANCH"
+          gh pr create --fill --base "$FULL_CHART_BASE_BRANCH" --label updatebot --head "$(git branch --show-current)"
 
   notify:
     runs-on: ubuntu-latest
