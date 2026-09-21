@@ -79,3 +79,17 @@ jobs:
         run: |
           echo "Delete Docker images for $(cat VERSION)"
           make docker-delete-all
+
+  cleanup-preview-prs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Close downstream preview PRs for this source PR only
+        uses: ./.github/actions/close-orphaned-preview-prs
+        with:
+          source-pr-number: ${{ github.event.pull_request.number }}
+          source-pr-state: ${{ github.event.pull_request.merged == true && 'MERGED' || 'CLOSED' }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
