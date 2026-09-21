@@ -21,6 +21,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -133,36 +135,39 @@ class ConsumerRecomputeBufferTest {
     void drainAndReset_underConcurrentCapture_neverLosesAnEntry() throws InterruptedException {
         int threads = 16;
         int perThread = 200;
-        ExecutorService pool = Executors.newFixedThreadPool(threads);
-        CountDownLatch ready = new CountDownLatch(threads);
-        CountDownLatch go = new CountDownLatch(1);
-        java.util.Set<String> allCaptured = java.util.concurrent.ConcurrentHashMap.newKeySet();
-        java.util.Set<String> drained = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        Set<String> allCaptured;
+        Set<String> drained;
+        try (ExecutorService pool = Executors.newFixedThreadPool(threads)) {
+            CountDownLatch ready = new CountDownLatch(threads);
+            CountDownLatch go = new CountDownLatch(1);
+            allCaptured = ConcurrentHashMap.newKeySet();
+            drained = ConcurrentHashMap.newKeySet();
 
-        for (int t = 0; t < threads; t++) {
-            int threadIndex = t;
-            pool.submit(() -> {
-                ready.countDown();
-                try {
-                    go.await();
-                } catch (InterruptedException _) {
-                    Thread.currentThread().interrupt();
-                }
-                for (int i = 0; i < perThread; i++) {
-                    String taskId = "task-" + threadIndex + "-" + i;
-                    allCaptured.add(taskId);
-                    buffer.captureTask(taskId, T0);
-                    if (i % 10 == 0) {
-                        drained.addAll(buffer.drainAndReset().taskIds());
+            for (int t = 0; t < threads; t++) {
+                int threadIndex = t;
+                pool.submit(() -> {
+                    ready.countDown();
+                    try {
+                        go.await();
+                    } catch (InterruptedException _) {
+                        Thread.currentThread().interrupt();
                     }
-                }
-            });
-        }
+                    for (int i = 0; i < perThread; i++) {
+                        String taskId = "task-" + threadIndex + "-" + i;
+                        allCaptured.add(taskId);
+                        buffer.captureTask(taskId, T0);
+                        if (i % 10 == 0) {
+                            drained.addAll(buffer.drainAndReset().taskIds());
+                        }
+                    }
+                });
+            }
 
-        ready.await();
-        go.countDown();
-        pool.shutdown();
-        assertThat(pool.awaitTermination(30, TimeUnit.SECONDS)).isTrue();
+            ready.await();
+            go.countDown();
+            pool.shutdown();
+            assertThat(pool.awaitTermination(30, TimeUnit.SECONDS)).isTrue();
+        }
         drained.addAll(buffer.drainAndReset().taskIds());
 
         assertThat(drained).isEqualTo(allCaptured);
