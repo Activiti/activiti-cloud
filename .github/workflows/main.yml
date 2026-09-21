@@ -490,6 +490,7 @@ jobs:
           ACTIVITI_CLOUD_VERSION: ${{ needs.create-tag.outputs.version }}
           BUILD_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         with:
+          pull-request-title: "Preview snapshot PR: activiti-cloud ${{ needs.create-tag.outputs.version }} from ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
           version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "false"
           labels: "do-not-merge,preview-source-pr-${{ github.event.pull_request.number }}"
