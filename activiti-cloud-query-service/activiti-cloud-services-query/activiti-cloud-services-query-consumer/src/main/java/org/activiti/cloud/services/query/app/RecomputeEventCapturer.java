@@ -69,7 +69,7 @@ public class RecomputeEventCapturer {
     /** One entry per task event type this pipeline cares about; everything else falls through as a no-op. */
     private static final Map<String, TaskCapture> TASK_CAPTURES = Map.ofEntries(
         Map.entry(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name(), (buffer, task, at) ->
-            buffer.captureTask(task.getId(), at)
+            buffer.captureTask(task.getId(), at, task.getAssignee(), task.getOwner())
         ),
         Map.entry(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name(), (buffer, task, at) ->
             buffer.captureTask(task.getId(), at, task.getAssignee(), task.getOwner())

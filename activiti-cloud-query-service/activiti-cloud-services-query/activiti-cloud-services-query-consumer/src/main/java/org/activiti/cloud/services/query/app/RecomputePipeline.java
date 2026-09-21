@@ -74,7 +74,12 @@ public class RecomputePipeline {
         for (String userId : affectedUserIds) {
             long count = counts.getOrDefault(userId, 0L);
             String scopeKey = ScopeKeys.of(counter.type(), userId);
-            countProducer.send(MessageBuilder.withPayload(new CountChangedMessage(scopeKey, count, asOf)).build());
+            boolean sent = countProducer.send(
+                MessageBuilder.withPayload(new CountChangedMessage(scopeKey, count, asOf)).build()
+            );
+            if (!sent) {
+                throw new IllegalStateException("countProducer rejected a pushed-count message for " + scopeKey);
+            }
         }
     }
 }

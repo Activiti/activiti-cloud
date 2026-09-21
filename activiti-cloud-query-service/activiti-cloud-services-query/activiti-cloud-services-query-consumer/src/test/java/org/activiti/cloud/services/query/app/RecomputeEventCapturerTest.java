@@ -84,6 +84,20 @@ class RecomputeEventCapturerTest {
     }
 
     @Test
+    void taskCreated_capturesTheAssigneeAndOwner_whenAlreadyPreAssignedOnCreation() {
+        TaskImpl task = new TaskImpl();
+        task.setId("task-1");
+        task.setAssignee("alice");
+        task.setOwner("bob");
+
+        capturer.capture(List.of(new CloudTaskCreatedEventImpl(task)));
+
+        ConsumerRecomputeWindow window = buffer.drainAndReset();
+        assertThat(window.taskIds()).containsExactly("task-1");
+        assertThat(window.namedUserIds()).containsExactlyInAnyOrder("alice", "bob");
+    }
+
+    @Test
     void taskAssigned_capturesTheTask_andTheAssigneeAndOwner() {
         TaskImpl task = new TaskImpl();
         task.setId("task-1");

@@ -60,12 +60,18 @@ public class RecomputeAudienceResolver {
 
     public Map<PushedCountType, Set<String>> resolve(ConsumerRecomputeWindow window) {
         Set<String> namedAndCandidateUserAudience = resolveNamedAndCandidateUserAudience(window);
+        Set<String> processTaskAudience = resolveProcessTaskAudience(window);
 
         Set<String> taskDomainAudience = new HashSet<>(namedAndCandidateUserAudience);
-        taskDomainAudience.addAll(resolveGroupDoorAudience(window));
+        taskDomainAudience.addAll(processTaskAudience);
+        taskDomainAudience.addAll(
+            resolveGroupDoorAudience(touchedGroupsForTasks(window.taskIds(), window.touchedGroupIds()))
+        );
+        taskDomainAudience.addAll(resolveGroupDoorAudience(touchedGroupsForProcesses(window.processInstanceIds())));
 
         Set<String> processesAudience = new HashSet<>(namedAndCandidateUserAudience);
-        processesAudience.addAll(resolveProcessDomain(window));
+        processesAudience.addAll(processTaskAudience);
+        addWatched(processesAudience, window.namedInitiatorIds());
 
         Map<PushedCountType, Set<String>> audience = new EnumMap<>(PushedCountType.class);
         audience.put(PushedCountType.ASSIGNED, Set.copyOf(taskDomainAudience));
@@ -92,29 +98,9 @@ public class RecomputeAudienceResolver {
         return audience;
     }
 
-    private Set<String> resolveGroupDoorAudience(ConsumerRecomputeWindow window) {
-        Set<String> touchedGroups = new HashSet<>(window.touchedGroupIds());
-        if (!window.taskIds().isEmpty()) {
-            for (TaskCandidateGroupEntity candidate : taskCandidateGroupRepository.findByTaskIdIn(window.taskIds())) {
-                touchedGroups.add(candidate.getGroupId());
-            }
-        }
-
+    /** Current assignee and candidate-users of every task still under a touched process. */
+    private Set<String> resolveProcessTaskAudience(ConsumerRecomputeWindow window) {
         Set<String> audience = new HashSet<>();
-        if (!touchedGroups.isEmpty()) {
-            for (String userId : registry.watchedUserIds()) {
-                if (!Collections.disjoint(registry.groupsOf(userId), touchedGroups)) {
-                    audience.add(userId);
-                }
-            }
-        }
-        return audience;
-    }
-
-    private Set<String> resolveProcessDomain(ConsumerRecomputeWindow window) {
-        Set<String> audience = new HashSet<>();
-        addWatched(audience, window.namedInitiatorIds());
-
         if (!window.processInstanceIds().isEmpty()) {
             for (TaskEntity task : taskRepository.findByProcessInstanceIdIn(window.processInstanceIds())) {
                 addIfWatched(audience, task.getAssignee());
@@ -123,6 +109,40 @@ public class RecomputeAudienceResolver {
                 window.processInstanceIds()
             )) {
                 addIfWatched(audience, candidate.getUserId());
+            }
+        }
+        return audience;
+    }
+
+    private Set<String> touchedGroupsForTasks(Set<String> taskIds, Set<String> explicitlyTouchedGroups) {
+        Set<String> touchedGroups = new HashSet<>(explicitlyTouchedGroups);
+        if (!taskIds.isEmpty()) {
+            for (TaskCandidateGroupEntity candidate : taskCandidateGroupRepository.findByTaskIdIn(taskIds)) {
+                touchedGroups.add(candidate.getGroupId());
+            }
+        }
+        return touchedGroups;
+    }
+
+    private Set<String> touchedGroupsForProcesses(Set<String> processInstanceIds) {
+        Set<String> touchedGroups = new HashSet<>();
+        if (!processInstanceIds.isEmpty()) {
+            for (TaskCandidateGroupEntity candidate : taskCandidateGroupRepository.findByTask_ProcessInstanceIdIn(
+                processInstanceIds
+            )) {
+                touchedGroups.add(candidate.getGroupId());
+            }
+        }
+        return touchedGroups;
+    }
+
+    private Set<String> resolveGroupDoorAudience(Set<String> touchedGroups) {
+        Set<String> audience = new HashSet<>();
+        if (!touchedGroups.isEmpty()) {
+            for (String userId : registry.watchedUserIds()) {
+                if (!Collections.disjoint(registry.groupsOf(userId), touchedGroups)) {
+                    audience.add(userId);
+                }
             }
         }
         return audience;

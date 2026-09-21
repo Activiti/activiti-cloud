@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -31,6 +32,7 @@ import java.util.Set;
 import org.activiti.cloud.services.query.app.count.PushedCounter;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -42,6 +44,11 @@ class RecomputePipelineTest {
     private final RecomputeAudienceResolver audienceResolver = mock(RecomputeAudienceResolver.class);
     private final MessageChannel countProducer = mock(MessageChannel.class);
     private final Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
+
+    @BeforeEach
+    void setUp() {
+        when(countProducer.send(any())).thenReturn(true);
+    }
 
     @Test
     void withNoCountersRegistered_doesNothing() {
@@ -81,6 +88,22 @@ class RecomputePipelineTest {
             new CountChangedMessage("assigned:alice", 3, NOW),
             new CountChangedMessage("assigned:bob", 0, NOW)
         );
+    }
+
+    @Test
+    void rejectedSend_isTreatedAsAProcessingFailure() {
+        when(audienceResolver.resolve(any())).thenReturn(Map.of(PushedCountType.ASSIGNED, Set.of("alice")));
+        when(countProducer.send(any())).thenReturn(false);
+        PushedCounter assignedCounter = counterFor(PushedCountType.ASSIGNED, Map.of("alice", 3L));
+        RecomputePipeline pipeline = new RecomputePipeline(
+            audienceResolver,
+            Set.of(assignedCounter),
+            countProducer,
+            clock
+        );
+
+        var window = nonEmptyWindow();
+        assertThatThrownBy(() -> pipeline.process(window)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

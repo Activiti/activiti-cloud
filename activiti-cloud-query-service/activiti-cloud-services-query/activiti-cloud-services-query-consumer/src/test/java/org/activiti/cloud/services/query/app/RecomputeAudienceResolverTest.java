@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -59,22 +60,11 @@ class RecomputeAudienceResolverTest {
             taskCandidateGroupRepository,
             taskRepository
         );
-        lenient()
-            .when(taskCandidateUserRepository.findByTaskIdIn(org.mockito.ArgumentMatchers.<Set<String>>any()))
-            .thenReturn(Set.of());
-        lenient()
-            .when(taskCandidateGroupRepository.findByTaskIdIn(org.mockito.ArgumentMatchers.<Set<String>>any()))
-            .thenReturn(Set.of());
-        lenient()
-            .when(
-                taskCandidateUserRepository.findByTask_ProcessInstanceIdIn(
-                    org.mockito.ArgumentMatchers.<Set<String>>any()
-                )
-            )
-            .thenReturn(Set.of());
-        lenient()
-            .when(taskRepository.findByProcessInstanceIdIn(org.mockito.ArgumentMatchers.<Set<String>>any()))
-            .thenReturn(List.of());
+        lenient().when(taskCandidateUserRepository.findByTaskIdIn(any())).thenReturn(Set.of());
+        lenient().when(taskCandidateGroupRepository.findByTaskIdIn(any())).thenReturn(Set.of());
+        lenient().when(taskCandidateUserRepository.findByTask_ProcessInstanceIdIn(any())).thenReturn(Set.of());
+        lenient().when(taskRepository.findByProcessInstanceIdIn(any())).thenReturn(List.of());
+        lenient().when(taskCandidateGroupRepository.findByTask_ProcessInstanceIdIn(any())).thenReturn(Set.of());
     }
 
     @Test
@@ -161,6 +151,8 @@ class RecomputeAudienceResolverTest {
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
 
         assertThat(audience.get(PushedCountType.PROCESSES)).containsExactly("iris");
+        assertThat(audience.get(PushedCountType.ASSIGNED)).containsExactly("iris");
+        assertThat(audience.get(PushedCountType.QUEUED)).containsExactly("iris");
     }
 
     @Test
@@ -186,6 +178,23 @@ class RecomputeAudienceResolverTest {
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
 
         assertThat(audience.get(PushedCountType.PROCESSES)).containsExactly("jack");
+        assertThat(audience.get(PushedCountType.ASSIGNED)).containsExactly("jack");
+        assertThat(audience.get(PushedCountType.QUEUED)).containsExactly("jack");
+    }
+
+    @Test
+    void processDomain_candidateGroupOfTasksInTheTouchedProcess_feedsAssignedAndQueued_butNotProcesses() {
+        registry.register("karl", Set.of("ops"), "rest-1", java.time.Instant.EPOCH);
+        when(taskCandidateGroupRepository.findByTask_ProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(
+            Set.of(new TaskCandidateGroupEntity("task-1", "ops"))
+        );
+        ConsumerRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
+
+        Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
+
+        assertThat(audience.get(PushedCountType.ASSIGNED)).containsExactly("karl");
+        assertThat(audience.get(PushedCountType.QUEUED)).containsExactly("karl");
+        assertThat(audience.get(PushedCountType.PROCESSES)).isEmpty();
     }
 
     @Test
