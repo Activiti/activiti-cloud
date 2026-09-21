@@ -28,12 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Consumer-side view of who is watching, merged from every query-rest instance's presence
- * broadcasts (who and which groups — never socket counts, which are the REST side's concern). A
- * user is kept while at least one instance still holds them and dropped only when their last holder
- * leaves — cleanly via {@link #unregister(String, String)} or, when an instance stops heartbeating,
- * via {@link #expireInstances(Instant, Duration)}. Holders are instances ({@code sourceId}), not
- * sockets. All mutating operations are synchronized.
+ * Consumer-side view of who is watching, merged from every query-rest instance's presence broadcasts
+ * (who and which groups, never socket counts). A user is kept while at least one instance still holds
+ * them. An instance's messages can arrive out of order, so its events are ordered per user by their
+ * {@code sentAt}: a stale resync snapshot can't re-add a user a later {@code UNREGISTERED} removed.
+ * All mutating operations are synchronized.
  */
 public class ConsumerSubscriberRegistry {
 
@@ -51,6 +50,8 @@ public class ConsumerSubscriberRegistry {
 
     private final Map<String, Subscriber> registry = new HashMap<>();
     private final Map<String, Instant> lastSeenBySource = new HashMap<>();
+    // Per source, each user's last membership-event time; kept briefly after drop to reject stale re-adds.
+    private final Map<String, Map<String, Instant>> lastEventBySourceUser = new HashMap<>();
 
     /**
      * Records a live subscription for {@code userId} on {@code sourceId}, refreshing groups and liveness.
@@ -59,6 +60,16 @@ public class ConsumerSubscriberRegistry {
      */
     public synchronized boolean register(String userId, Collection<String> groups, String sourceId, Instant at) {
         touchSource(sourceId, at);
+        if (isStale(sourceId, userId, at)) {
+            LOGGER.debug(
+                "register user={} source={} at={} ignored (a newer event was already applied)",
+                userId,
+                sourceId,
+                at
+            );
+            return false;
+        }
+        recordEvent(sourceId, userId, at);
         Subscriber subscriber = registry.get(userId);
         boolean firstAppearance = subscriber == null;
         if (subscriber == null) {
@@ -79,11 +90,21 @@ public class ConsumerSubscriberRegistry {
     }
 
     /**
-     * Removes {@code sourceId} from {@code userId}'s holders.
+     * Removes {@code sourceId} from {@code userId}'s holders, unless a newer event already superseded it.
      *
      * @return {@code true} if that emptied the holder set and the user was dropped
      */
-    public synchronized boolean unregister(String userId, String sourceId) {
+    public synchronized boolean unregister(String userId, String sourceId, Instant at) {
+        if (isStale(sourceId, userId, at)) {
+            LOGGER.debug(
+                "unregister user={} source={} at={} ignored (a newer event was already applied)",
+                userId,
+                sourceId,
+                at
+            );
+            return false;
+        }
+        recordEvent(sourceId, userId, at);
         Subscriber subscriber = registry.get(userId);
         if (subscriber == null) {
             LOGGER.debug("unregister user={} source={} (unknown user, ignored)", userId, sourceId);
@@ -126,28 +147,28 @@ public class ConsumerSubscriberRegistry {
             }
         }
         Set<String> removedUsers = new LinkedHashSet<>();
-        if (deadSources.isEmpty()) {
-            return removedUsers;
+        if (!deadSources.isEmpty()) {
+            lastSeenBySource.keySet().removeAll(deadSources);
+            lastEventBySourceUser.keySet().removeAll(deadSources);
+            registry
+                .entrySet()
+                .removeIf(user -> {
+                    user.getValue().sources.removeAll(deadSources);
+                    if (user.getValue().sources.isEmpty()) {
+                        removedUsers.add(user.getKey());
+                        return true;
+                    }
+                    return false;
+                });
         }
-        lastSeenBySource.keySet().removeAll(deadSources);
-        registry
-            .entrySet()
-            .removeIf(user -> {
-                user.getValue().sources.removeAll(deadSources);
-                if (user.getValue().sources.isEmpty()) {
-                    removedUsers.add(user.getKey());
-                    return true;
-                }
-                return false;
-            });
+        pruneEventHistory(deadline);
         LOGGER.debug("expireInstances deadSources={} droppedUsers={}", deadSources, removedUsers);
         return removedUsers;
     }
 
     /**
-     * Merges an instance's local registry (its reply to a RESYNC_REQUEST) into this one. Safe to
-     * interleave with normal registrations in either order: the result is always the union of
-     * holders per user.
+     * Reconciles this instance's holdings to its resync SNAPSHOT (adds listed users, drops the rest),
+     * ordered per-source by {@code at} so it never undoes a newer live REGISTERED / UNREGISTERED.
      */
     public synchronized void applySnapshot(
         String sourceId,
@@ -159,9 +180,16 @@ public class ConsumerSubscriberRegistry {
             LOGGER.debug("applySnapshot source={} entries=null (ignored)", sourceId);
             return;
         }
-        LOGGER.debug("applySnapshot source={} entries={}", sourceId, entries.size());
+        LOGGER.debug("applySnapshot source={} entries={} at={}", sourceId, entries.size(), at);
+        Set<String> usersInSnapshot = new HashSet<>();
         for (SubscriberRegistryMessage.Entry entry : entries) {
+            usersInSnapshot.add(entry.userId());
             register(entry.userId(), entry.groups(), sourceId, at);
+        }
+        for (String heldUser : usersHeldBy(sourceId)) {
+            if (!usersInSnapshot.contains(heldUser)) {
+                unregister(heldUser, sourceId, at);
+            }
         }
     }
 
@@ -189,6 +217,34 @@ public class ConsumerSubscriberRegistry {
 
     private void touchSource(String sourceId, Instant at) {
         lastSeenBySource.merge(sourceId, at, (current, candidate) -> candidate.isAfter(current) ? candidate : current);
+    }
+
+    /** Users currently held by {@code sourceId}, as a copy safe to iterate while mutating the registry. */
+    private Set<String> usersHeldBy(String sourceId) {
+        Set<String> held = new HashSet<>();
+        for (Map.Entry<String, Subscriber> entry : registry.entrySet()) {
+            if (entry.getValue().sources.contains(sourceId)) {
+                held.add(entry.getKey());
+            }
+        }
+        return held;
+    }
+
+    /** True when a newer event for the same instance and user has already been applied, making {@code at} stale. */
+    private boolean isStale(String sourceId, String userId, Instant at) {
+        Map<String, Instant> byUser = lastEventBySourceUser.get(sourceId);
+        Instant last = byUser == null ? null : byUser.get(userId);
+        return last != null && at.isBefore(last);
+    }
+
+    private void recordEvent(String sourceId, String userId, Instant at) {
+        lastEventBySourceUser.computeIfAbsent(sourceId, key -> new HashMap<>()).put(userId, at);
+    }
+
+    /** Drops per-user event timestamps older than {@code deadline} to bound the retained history. */
+    private void pruneEventHistory(Instant deadline) {
+        lastEventBySourceUser.values().forEach(byUser -> byUser.values().removeIf(at -> at.isBefore(deadline)));
+        lastEventBySourceUser.values().removeIf(Map::isEmpty);
     }
 
     private static Set<String> copyOf(Collection<String> groups) {

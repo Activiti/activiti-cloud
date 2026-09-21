@@ -17,9 +17,15 @@ package org.activiti.cloud.services.query.rest.subscriber;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
+import org.activiti.cloud.services.query.subscription.SubscriberRegistrySnapshot;
+import org.activiti.cloud.services.query.subscription.SubscriberWentLiveEvent;
+import org.activiti.cloud.services.query.subscription.SubscriberWentQuietEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,7 +40,7 @@ import org.springframework.context.ApplicationEventPublisher;
  * per key, so two sessions for the same user registering concurrently can never both observe
  * "was empty" and double-fire a transition.
  */
-public class SubscriberRegistry {
+public class SubscriberRegistry implements SubscriberRegistrySnapshot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubscriberRegistry.class);
 
@@ -111,5 +117,20 @@ public class SubscriberRegistry {
 
     public int size() {
         return registrations.size();
+    }
+
+    /**
+     * A view of every live user and their groups, used to build a SNAPSHOT. The scan runs without locking
+     * the registry, so the caller stamps the message time before it starts: a user who leaves mid-scan then
+     * loses to their UNREGISTERED on the consumer instead of being re-added. Read-only: never mutates the
+     * registry nor fires an event.
+     */
+    @Override
+    public List<SubscriberRegistryMessage.Entry> snapshotEntries() {
+        List<SubscriberRegistryMessage.Entry> entries = new ArrayList<>();
+        registrations.forEach((userId, registration) ->
+            entries.add(new SubscriberRegistryMessage.Entry(userId, List.copyOf(registration.getGroups())))
+        );
+        return List.copyOf(entries);
     }
 }
