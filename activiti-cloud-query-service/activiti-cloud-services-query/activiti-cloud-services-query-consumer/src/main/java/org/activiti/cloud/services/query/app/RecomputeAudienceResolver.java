@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.app;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -59,15 +60,35 @@ public class RecomputeAudienceResolver {
     }
 
     public Map<PushedCountType, Set<String>> resolve(ConsumerRecomputeWindow window) {
-        Set<String> namedAndCandidateUserAudience = resolveNamedAndCandidateUserAudience(window);
-        Set<String> processTaskAudience = resolveProcessTaskAudience(window);
+        Set<TaskCandidateUserEntity> taskCandidateUsers = window.taskIds().isEmpty()
+            ? Set.of()
+            : taskCandidateUserRepository.findByTaskIdIn(window.taskIds());
+        Set<TaskCandidateGroupEntity> taskCandidateGroups = window.taskIds().isEmpty()
+            ? Set.of()
+            : taskCandidateGroupRepository.findByTaskIdIn(window.taskIds());
+        List<TaskEntity> processTasks = window.processInstanceIds().isEmpty()
+            ? List.of()
+            : taskRepository.findByProcessInstanceIdIn(window.processInstanceIds());
+        Set<TaskCandidateUserEntity> processTaskCandidateUsers = window.processInstanceIds().isEmpty()
+            ? Set.of()
+            : taskCandidateUserRepository.findByTask_ProcessInstanceIdIn(window.processInstanceIds());
+        Set<TaskCandidateGroupEntity> processTaskCandidateGroups = window.processInstanceIds().isEmpty()
+            ? Set.of()
+            : taskCandidateGroupRepository.findByTask_ProcessInstanceIdIn(window.processInstanceIds());
+
+        Set<String> namedAndCandidateUserAudience = resolveNamedAndCandidateUserAudience(window, taskCandidateUsers);
+        Set<String> processTaskAudience = resolveProcessTaskAudience(processTasks, processTaskCandidateUsers);
 
         Set<String> taskDomainAudience = new HashSet<>(namedAndCandidateUserAudience);
         taskDomainAudience.addAll(processTaskAudience);
+        taskDomainAudience.addAll(resolveOpenTaskAudience(window.taskIds(), taskCandidateUsers, taskCandidateGroups));
         taskDomainAudience.addAll(
-            resolveGroupDoorAudience(touchedGroupsForTasks(window.taskIds(), window.touchedGroupIds()))
+            resolveOpenProcessTaskAudience(processTasks, processTaskCandidateUsers, processTaskCandidateGroups)
         );
-        taskDomainAudience.addAll(resolveGroupDoorAudience(touchedGroupsForProcesses(window.processInstanceIds())));
+        taskDomainAudience.addAll(
+            resolveGroupDoorAudience(touchedGroupsForTasks(taskCandidateGroups, window.touchedGroupIds()))
+        );
+        taskDomainAudience.addAll(resolveGroupDoorAudience(touchedGroupsForProcesses(processTaskCandidateGroups)));
 
         Set<String> processesAudience = new HashSet<>(namedAndCandidateUserAudience);
         processesAudience.addAll(processTaskAudience);
@@ -86,52 +107,105 @@ public class RecomputeAudienceResolver {
         return audience;
     }
 
-    private Set<String> resolveNamedAndCandidateUserAudience(ConsumerRecomputeWindow window) {
+    private Set<String> resolveNamedAndCandidateUserAudience(
+        ConsumerRecomputeWindow window,
+        Set<TaskCandidateUserEntity> taskCandidateUsers
+    ) {
         Set<String> audience = new HashSet<>();
         addWatched(audience, window.namedUserIds());
-
-        if (!window.taskIds().isEmpty()) {
-            for (TaskCandidateUserEntity candidate : taskCandidateUserRepository.findByTaskIdIn(window.taskIds())) {
-                addIfWatched(audience, candidate.getUserId());
-            }
+        for (TaskCandidateUserEntity candidate : taskCandidateUsers) {
+            addIfWatched(audience, candidate.getUserId());
         }
         return audience;
     }
 
     /** Current assignee and candidate-users of every task still under a touched process. */
-    private Set<String> resolveProcessTaskAudience(ConsumerRecomputeWindow window) {
+    private Set<String> resolveProcessTaskAudience(
+        List<TaskEntity> processTasks,
+        Set<TaskCandidateUserEntity> processTaskCandidateUsers
+    ) {
         Set<String> audience = new HashSet<>();
-        if (!window.processInstanceIds().isEmpty()) {
-            for (TaskEntity task : taskRepository.findByProcessInstanceIdIn(window.processInstanceIds())) {
-                addIfWatched(audience, task.getAssignee());
-            }
-            for (TaskCandidateUserEntity candidate : taskCandidateUserRepository.findByTask_ProcessInstanceIdIn(
-                window.processInstanceIds()
-            )) {
-                addIfWatched(audience, candidate.getUserId());
-            }
+        for (TaskEntity task : processTasks) {
+            addIfWatched(audience, task.getAssignee());
+        }
+        for (TaskCandidateUserEntity candidate : processTaskCandidateUsers) {
+            addIfWatched(audience, candidate.getUserId());
         }
         return audience;
     }
 
-    private Set<String> touchedGroupsForTasks(Set<String> taskIds, Set<String> explicitlyTouchedGroups) {
-        Set<String> touchedGroups = new HashSet<>(explicitlyTouchedGroups);
-        if (!taskIds.isEmpty()) {
-            for (TaskCandidateGroupEntity candidate : taskCandidateGroupRepository.findByTaskIdIn(taskIds)) {
-                touchedGroups.add(candidate.getGroupId());
+    /**
+     * Every watched user, if a touched task is unassigned and has no candidate user or group at
+     * all - {@code TaskSpecification}'s catch-all queued-visibility term, matching everybody.
+     */
+    private Set<String> resolveOpenTaskAudience(
+        Set<String> taskIds,
+        Set<TaskCandidateUserEntity> taskCandidateUsers,
+        Set<TaskCandidateGroupEntity> taskCandidateGroups
+    ) {
+        Set<String> candidateFreeTaskIds = candidateFreeTaskIds(taskIds, taskCandidateUsers, taskCandidateGroups);
+        if (candidateFreeTaskIds.isEmpty()) {
+            return Set.of();
+        }
+        for (TaskEntity task : taskRepository.findAllById(candidateFreeTaskIds)) {
+            if (task.getAssignee() == null) {
+                return Set.copyOf(registry.watchedUserIds());
             }
+        }
+        return Set.of();
+    }
+
+    /** Same rule, for tasks reached through a touched process - their state is already loaded, so no extra query. */
+    private Set<String> resolveOpenProcessTaskAudience(
+        List<TaskEntity> processTasks,
+        Set<TaskCandidateUserEntity> processTaskCandidateUsers,
+        Set<TaskCandidateGroupEntity> processTaskCandidateGroups
+    ) {
+        Set<String> tasksWithCandidates = new HashSet<>();
+        for (TaskCandidateUserEntity candidate : processTaskCandidateUsers) {
+            tasksWithCandidates.add(candidate.getTaskId());
+        }
+        for (TaskCandidateGroupEntity candidate : processTaskCandidateGroups) {
+            tasksWithCandidates.add(candidate.getTaskId());
+        }
+        for (TaskEntity task : processTasks) {
+            if (task.getAssignee() == null && !tasksWithCandidates.contains(task.getId())) {
+                return Set.copyOf(registry.watchedUserIds());
+            }
+        }
+        return Set.of();
+    }
+
+    private Set<String> candidateFreeTaskIds(
+        Set<String> taskIds,
+        Set<TaskCandidateUserEntity> taskCandidateUsers,
+        Set<TaskCandidateGroupEntity> taskCandidateGroups
+    ) {
+        Set<String> candidateFreeTaskIds = new HashSet<>(taskIds);
+        for (TaskCandidateUserEntity candidate : taskCandidateUsers) {
+            candidateFreeTaskIds.remove(candidate.getTaskId());
+        }
+        for (TaskCandidateGroupEntity candidate : taskCandidateGroups) {
+            candidateFreeTaskIds.remove(candidate.getTaskId());
+        }
+        return candidateFreeTaskIds;
+    }
+
+    private Set<String> touchedGroupsForTasks(
+        Set<TaskCandidateGroupEntity> taskCandidateGroups,
+        Set<String> explicitlyTouchedGroups
+    ) {
+        Set<String> touchedGroups = new HashSet<>(explicitlyTouchedGroups);
+        for (TaskCandidateGroupEntity candidate : taskCandidateGroups) {
+            touchedGroups.add(candidate.getGroupId());
         }
         return touchedGroups;
     }
 
-    private Set<String> touchedGroupsForProcesses(Set<String> processInstanceIds) {
+    private Set<String> touchedGroupsForProcesses(Set<TaskCandidateGroupEntity> processTaskCandidateGroups) {
         Set<String> touchedGroups = new HashSet<>();
-        if (!processInstanceIds.isEmpty()) {
-            for (TaskCandidateGroupEntity candidate : taskCandidateGroupRepository.findByTask_ProcessInstanceIdIn(
-                processInstanceIds
-            )) {
-                touchedGroups.add(candidate.getGroupId());
-            }
+        for (TaskCandidateGroupEntity candidate : processTaskCandidateGroups) {
+            touchedGroups.add(candidate.getGroupId());
         }
         return touchedGroups;
     }

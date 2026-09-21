@@ -16,8 +16,6 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -60,11 +58,6 @@ class RecomputeAudienceResolverTest {
             taskCandidateGroupRepository,
             taskRepository
         );
-        lenient().when(taskCandidateUserRepository.findByTaskIdIn(any())).thenReturn(Set.of());
-        lenient().when(taskCandidateGroupRepository.findByTaskIdIn(any())).thenReturn(Set.of());
-        lenient().when(taskCandidateUserRepository.findByTask_ProcessInstanceIdIn(any())).thenReturn(Set.of());
-        lenient().when(taskRepository.findByProcessInstanceIdIn(any())).thenReturn(List.of());
-        lenient().when(taskCandidateGroupRepository.findByTask_ProcessInstanceIdIn(any())).thenReturn(Set.of());
     }
 
     @Test
@@ -180,6 +173,65 @@ class RecomputeAudienceResolverTest {
         assertThat(audience.get(PushedCountType.PROCESSES)).containsExactly("jack");
         assertThat(audience.get(PushedCountType.ASSIGNED)).containsExactly("jack");
         assertThat(audience.get(PushedCountType.QUEUED)).containsExactly("jack");
+    }
+
+    @Test
+    void openTask_unassignedWithNoCandidates_feedsEveryWatchedUser_butNotProcesses() {
+        registry.register("liz", Set.of(), "rest-1", java.time.Instant.EPOCH);
+        registry.register("moe", Set.of("ops"), "rest-1", java.time.Instant.EPOCH);
+        TaskEntity task = new TaskEntity();
+        task.setId("task-1");
+        when(taskRepository.findAllById(Set.of("task-1"))).thenReturn(List.of(task));
+        ConsumerRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of(), Set.of());
+
+        Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
+
+        assertThat(audience.get(PushedCountType.ASSIGNED)).containsExactlyInAnyOrder("liz", "moe");
+        assertThat(audience.get(PushedCountType.QUEUED)).containsExactlyInAnyOrder("liz", "moe");
+        assertThat(audience.get(PushedCountType.PROCESSES)).isEmpty();
+    }
+
+    @Test
+    void openTask_thatIsAssigned_doesNotFeedEveryWatchedUser() {
+        registry.register("liz", Set.of(), "rest-1", java.time.Instant.EPOCH);
+        TaskEntity task = new TaskEntity();
+        task.setId("task-1");
+        task.setAssignee("someone-else");
+        when(taskRepository.findAllById(Set.of("task-1"))).thenReturn(List.of(task));
+        ConsumerRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of(), Set.of());
+
+        Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
+
+        assertThat(audience.get(PushedCountType.QUEUED)).isEmpty();
+    }
+
+    @Test
+    void openTask_thatHasACandidate_doesNotQueryOrFeedEveryWatchedUser() {
+        registry.register("liz", Set.of(), "rest-1", java.time.Instant.EPOCH);
+        when(taskCandidateUserRepository.findByTaskIdIn(Set.of("task-1"))).thenReturn(
+            Set.of(new TaskCandidateUserEntity("task-1", "someone-else"))
+        );
+        ConsumerRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of(), Set.of());
+
+        Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
+
+        assertThat(audience.get(PushedCountType.QUEUED)).isEmpty();
+    }
+
+    @Test
+    void openProcessTask_unassignedWithNoCandidates_feedsEveryWatchedUser_butNotProcesses() {
+        registry.register("liz", Set.of(), "rest-1", java.time.Instant.EPOCH);
+        registry.register("moe", Set.of("ops"), "rest-1", java.time.Instant.EPOCH);
+        TaskEntity task = new TaskEntity();
+        task.setId("task-1");
+        when(taskRepository.findByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(List.of(task));
+        ConsumerRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
+
+        Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
+
+        assertThat(audience.get(PushedCountType.ASSIGNED)).containsExactlyInAnyOrder("liz", "moe");
+        assertThat(audience.get(PushedCountType.QUEUED)).containsExactlyInAnyOrder("liz", "moe");
+        assertThat(audience.get(PushedCountType.PROCESSES)).isEmpty();
     }
 
     @Test
