@@ -19,18 +19,12 @@ import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 
-/**
- * One badge's recompute logic, plugged into the recompute pipeline. Each of the three badges
- * (assigned tasks, queued tasks, running processes) registers its own implementation as a Spring
- * bean; the pipeline collects them via {@code Set<PushedCounter>} the same way
- * {@code QueryEventHandlerContext} collects {@code QueryEventHandler}s, so it runs correctly with
- * zero, one, or all three registered.
- */
+/** One counter type's recompute logic. Implementations register as Spring beans, collected via {@code Set<PushedCounter>}. */
 public interface PushedCounter {
     ScopeKeys.PushedCountType type();
 
     /**
-     * @param affectedUserIds users the pipeline determined need this badge recomputed this window
+     * @param affectedUserIds users the pipeline determined need this counter recomputed this window
      * @return absolute count per user; a user absent from the result is treated as zero
      */
     Map<String, Long> compute(Set<String> affectedUserIds);

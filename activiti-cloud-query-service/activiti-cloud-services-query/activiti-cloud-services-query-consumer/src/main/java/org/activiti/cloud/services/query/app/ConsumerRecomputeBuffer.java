@@ -21,15 +21,7 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Phase 1 of the recompute pipeline: an in-memory, event-time capture of what a committed event
- * batch touched, held until the next flush. Captures identities only - no queries - so a task or
- * process id lands here the moment an event names it, and a flush (time- or size-bound) later reads
- * back whatever else is needed to resolve who actually watches it.
- *
- * <p>Every access is synchronized: capture is called concurrently by the partitioned event-consumer
- * threads, and {@link #drainAndReset()} must never lose a capture that lands mid-drain.
- */
+/** Every method is synchronized: capture runs concurrently, and {@link #drainAndReset()} must never lose a capture that lands mid-drain. */
 public final class ConsumerRecomputeBuffer {
 
     private final Set<String> taskIds = new HashSet<>();
@@ -39,7 +31,7 @@ public final class ConsumerRecomputeBuffer {
     private final Set<String> namedInitiatorIds = new HashSet<>();
     private Instant windowStartedAt;
 
-    /** Records a touched task, and any users the event names directly (assignee, owner, completedBy). */
+    /** Records a touched task and any directly-named users (assignee, owner, completedBy). */
     public synchronized void captureTask(String taskId, Instant at, String... namedUsers) {
         if (taskId == null) {
             return;
@@ -79,12 +71,12 @@ public final class ConsumerRecomputeBuffer {
         return taskIds.isEmpty() && processInstanceIds.isEmpty();
     }
 
-    /** Number of distinct touched tasks and processes - the size bound the scheduler checks. */
+    /** Count of distinct touched tasks and processes. */
     public synchronized int size() {
         return taskIds.size() + processInstanceIds.size();
     }
 
-    /** How long since the first capture of the current window - the time bound the scheduler checks. */
+    /** Time since the first capture of the current window. */
     public synchronized Duration age(Clock clock) {
         return windowStartedAt == null ? Duration.ZERO : Duration.between(windowStartedAt, clock.instant());
     }

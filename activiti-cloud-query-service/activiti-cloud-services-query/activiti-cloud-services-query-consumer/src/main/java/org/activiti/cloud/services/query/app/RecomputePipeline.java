@@ -27,10 +27,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
 /**
- * Phase 2's last step: resolves the audience, runs whatever {@link PushedCounter}s are registered,
- * and publishes one {@link CountChangedMessage} per user per badge onto {@code countProducer}. With
- * zero counters registered - this pipeline's own starting state - the loop below simply does
- * nothing; no counter, no special-casing.
+ * Resolves the audience, runs whatever {@link PushedCounter}s are registered, and publishes one
+ * {@link CountChangedMessage} per user per badge onto {@code countProducer}. With no counters
+ * registered, this does nothing.
  */
 public class RecomputePipeline {
 

@@ -52,8 +52,7 @@ public class QueryConsumerMessageHandler
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
         beforeCommit(() -> queryEventsChannel.send(message));
-        // afterCommit, not beforeCommit: a rolled-back batch must not pollute the recompute buffer
-        // with touches that never actually happened.
+        // afterCommit: a rolled-back batch must not reach the recompute buffer.
         afterCommit(() -> recomputeEventCapturer.capture(message.getPayload()));
         receive(message.getPayload(), message.getHeaders());
     }

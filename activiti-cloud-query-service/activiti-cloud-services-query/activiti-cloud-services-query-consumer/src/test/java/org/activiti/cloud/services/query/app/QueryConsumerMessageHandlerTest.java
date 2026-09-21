@@ -83,7 +83,6 @@ public class QueryConsumerMessageHandlerTest {
         verify(eventHandlerContext).handle(processStartedEvent);
         verify(entityManager).clear();
         verify(queryEventsChannel).send(message);
-        // afterCommit runs the raw batch through the capturer, not the optimizer's reduced view.
         verify(recomputeEventCapturer).capture(events);
     }
 
@@ -137,7 +136,6 @@ public class QueryConsumerMessageHandlerTest {
         verify(eventHandlerContext).handle(processCreatedEvent);
         verify(entityManager).clear();
         verify(queryEventsChannel, never()).send(any(Message.class));
-        // A rolled-back batch must not pollute the recompute buffer with touches that never happened.
         verify(recomputeEventCapturer, never()).capture(any());
     }
 }

@@ -37,10 +37,10 @@ import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
 
 /**
- * Phase 1's per-event extraction: maps each event a committed batch carries onto
- * {@link ConsumerRecomputeBuffer} captures, reading only what the event itself names - no queries.
- * Event types with nothing relevant to a pushed count (variables, BPMN activity, integration events,
- * {@code PROCESS_CREATED} - a guaranteed duplicate of {@code PROCESS_STARTED}, ...) are ignored.
+ * Maps each event a committed batch carries onto {@link ConsumerRecomputeBuffer} captures, reading
+ * only what the event itself names - no queries. Irrelevant event types (variables, BPMN activity,
+ * integration events, {@code PROCESS_CREATED} - a duplicate of {@code PROCESS_STARTED}, ...) are
+ * ignored.
  */
 public class RecomputeEventCapturer {
 

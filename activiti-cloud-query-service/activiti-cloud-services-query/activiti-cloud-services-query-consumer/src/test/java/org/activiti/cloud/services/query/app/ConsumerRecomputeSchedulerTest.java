@@ -85,7 +85,6 @@ class ConsumerRecomputeSchedulerTest {
         scheduler.flushIfDue();
 
         verify(pipeline).process(any());
-        // the flush drained the buffer
         org.assertj.core.api.Assertions.assertThat(buffer.isEmpty()).isTrue();
     }
 

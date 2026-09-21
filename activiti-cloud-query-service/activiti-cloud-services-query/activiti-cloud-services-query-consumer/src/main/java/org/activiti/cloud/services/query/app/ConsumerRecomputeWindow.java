@@ -18,10 +18,9 @@ package org.activiti.cloud.services.query.app;
 import java.util.Set;
 
 /**
- * Immutable snapshot of one flush window's captured identities, drained from a
- * {@link ConsumerRecomputeBuffer}. Task-domain identities ({@code taskIds}, {@code touchedGroupIds},
- * {@code namedUserIds}) feed the assigned/queued/running-processes audience; process-domain
- * identities ({@code processInstanceIds}, {@code namedInitiatorIds}) feed running-processes only.
+ * Immutable snapshot drained from a {@link ConsumerRecomputeBuffer}. {@code taskIds},
+ * {@code touchedGroupIds}, {@code namedUserIds} feed assigned/queued/running-processes;
+ * {@code processInstanceIds}, {@code namedInitiatorIds} feed running-processes only.
  */
 public record ConsumerRecomputeWindow(
     Set<String> taskIds,

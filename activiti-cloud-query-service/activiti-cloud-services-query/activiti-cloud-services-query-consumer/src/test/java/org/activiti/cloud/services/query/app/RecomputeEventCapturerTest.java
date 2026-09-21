@@ -28,6 +28,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
@@ -267,9 +268,11 @@ class RecomputeEventCapturerTest {
         CloudProcessInstanceImpl process = new CloudProcessInstanceImpl();
         process.setId("proc-1");
 
-        capturer.capture(List.of(taskCreated("task-1")));
-        // A batch mixing a captured and an ignored event still only records the captured one.
-        assertThat(buffer.drainAndReset().taskIds()).containsExactly("task-1");
+        capturer.capture(List.of(taskCreated("task-1"), new CloudProcessCreatedEventImpl(process)));
+
+        ConsumerRecomputeWindow window = buffer.drainAndReset();
+        assertThat(window.taskIds()).containsExactly("task-1");
+        assertThat(window.processInstanceIds()).isEmpty();
     }
 
     private static CloudRuntimeEvent<?, ?> taskCreated(String taskId) {

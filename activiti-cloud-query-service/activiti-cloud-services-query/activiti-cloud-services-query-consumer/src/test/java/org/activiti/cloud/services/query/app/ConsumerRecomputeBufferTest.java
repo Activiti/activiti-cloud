@@ -96,7 +96,7 @@ class ConsumerRecomputeBufferTest {
     @Test
     void size_countsDistinctTasksAndProcesses() {
         buffer.captureTask("task-1", T0);
-        buffer.captureTask("task-1", T0); // duplicate, distinct set
+        buffer.captureTask("task-1", T0);
         buffer.captureTask("task-2", T0);
         buffer.captureProcess("proc-1", null, T0);
 

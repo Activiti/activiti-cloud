@@ -81,7 +81,6 @@ class RecomputeAudienceResolverTest {
     @Test
     void namedUser_isIncluded_onlyWhenWatching() {
         registry.register("alice", Set.of(), "rest-1", java.time.Instant.EPOCH);
-        // bob is named but never registered.
         ConsumerRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of("alice", "bob"), Set.of(), Set.of());
 
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);

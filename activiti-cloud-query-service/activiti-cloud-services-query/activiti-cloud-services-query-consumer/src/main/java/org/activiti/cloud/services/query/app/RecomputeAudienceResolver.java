@@ -29,22 +29,11 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 
 /**
- * Phase 2's audience resolution: turns one flush window's touched identities into who actually
- * needs which badge recomputed, per the "two doors" the recompute pipeline is built on.
- *
- * <p>The <b>named-user door</b>: users a captured event named directly, plus a read-back of
- * candidate-user rows limited to this window's touched tasks - never a scan of the whole candidate
- * table. The <b>group door</b>: groups a captured event named directly, plus a read-back of
- * candidate-group rows for the same touched tasks, matched against every watched user whose group
- * set intersects them. Both doors are filtered to users {@link ConsumerSubscriberRegistry} says are
- * actually watching - a group member who isn't watching gets nothing, which is correct: nobody is
- * looking at their badge.
- *
- * <p>Assigned and queued use both doors. Running-processes uses the named-user door, named
- * initiators, and every current assignee/candidate-user of any task in a touched process instance -
- * matching {@code ProcessInstanceSpecification}'s own user-restriction predicate (initiator,
- * assignee, or candidate-user), never the group door: candidate-group membership alone grants no
- * process visibility.
+ * Turns one flush window's touched identities into who needs which badge recomputed. Named users
+ * and candidate-user rows of touched tasks feed assigned/queued/running-processes; candidate-group
+ * membership additionally feeds assigned/queued only, matching {@code ProcessInstanceSpecification}'s
+ * user-restriction predicate (initiator, assignee, or candidate-user - never candidate-group).
+ * Results are filtered to users {@link ConsumerSubscriberRegistry} says are watching.
  */
 public class RecomputeAudienceResolver {
 

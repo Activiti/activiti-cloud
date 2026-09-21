@@ -43,11 +43,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 /**
- * End-to-end proof of Step 6's recompute pipeline: a real committed event batch, captured after
- * commit, flushed by the real scheduler, resolved against a directly-seeded
- * {@link ConsumerSubscriberRegistry} (standing in for the not-yet-built presence bridge - this
- * pipeline has no dependency on how the registry gets populated, only that it exists), counted by a
- * test {@link PushedCounter}, and published onto the real {@code countProducer} binding.
+ * End-to-end: a real committed event batch, captured after commit, flushed by the real scheduler,
+ * resolved against a directly-seeded {@link ConsumerSubscriberRegistry}, counted by a test
+ * {@link PushedCounter}, and published onto the real {@code countProducer} binding.
  */
 @SpringBootTest(
     classes = QueryConsumerTestApplication.class,

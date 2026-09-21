@@ -22,10 +22,8 @@ import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * Drives the recompute pipeline's flush: a poll well under the window bound checks whether the
- * buffer has crossed its time bound or its size bound, and if so drains it and runs the pipeline.
- * Checking on every poll, not just at the time bound, is what makes a large burst flush early
- * rather than waiting out the rest of the window.
+ * Polls well under the window bound; drains and runs the pipeline once the buffer crosses its time
+ * or size bound. Frequent polling lets a burst flush early instead of waiting out the window.
  */
 public class ConsumerRecomputeScheduler {
 
