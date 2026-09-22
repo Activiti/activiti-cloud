@@ -20,6 +20,8 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -30,18 +32,23 @@ public class IntegrationRequestSender {
 
     public static final String CONNECTOR_TYPE = "connectorType";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationRequestSender.class);
+
     private final StreamBridge streamBridge;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
     private final FunctionBindingConfiguration.BindingResolver bindingResolver;
+    private final IntegrationRequestReloadService integrationRequestReloadService;
 
     public IntegrationRequestSender(
         StreamBridge streamBridge,
         IntegrationContextMessageBuilderFactory messageBuilderFactory,
-        FunctionBindingConfiguration.BindingResolver bindingResolver
+        FunctionBindingConfiguration.BindingResolver bindingResolver,
+        IntegrationRequestReloadService integrationRequestReloadService
     ) {
         this.streamBridge = streamBridge;
         this.messageBuilderFactory = messageBuilderFactory;
         this.bindingResolver = bindingResolver;
+        this.integrationRequestReloadService = integrationRequestReloadService;
     }
 
     public void sendIntegrationRequest(IntegrationRequest event) {
@@ -49,17 +56,38 @@ public class IntegrationRequestSender {
             throw new IllegalTransactionStateException("Transaction synchronization must be active.");
         }
 
+        PendingIntegrationDispatch pendingDispatch = new PendingIntegrationDispatch(
+            event.getIntegrationContext().getId(),
+            event.getIntegrationContext().getConnectorType()
+        );
+
         TransactionSynchronizationManager.registerSynchronization(
             new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    streamBridge.send(
-                        event.getIntegrationContext().getConnectorType(),
-                        buildIntegrationRequestMessage(event)
-                    );
+                    dispatchIntegrationRequest(pendingDispatch);
                 }
             }
         );
+    }
+
+    private void dispatchIntegrationRequest(PendingIntegrationDispatch pendingDispatch) {
+        try {
+            integrationRequestReloadService
+                .reload(pendingDispatch.integrationContextId())
+                .ifPresent(integrationRequest ->
+                    streamBridge.send(
+                        pendingDispatch.connectorType(),
+                        buildIntegrationRequestMessage(integrationRequest)
+                    )
+                );
+        } catch (RuntimeException exception) {
+            LOGGER.error(
+                "Unable to dispatch integration request for integration context '{}'",
+                pendingDispatch.integrationContextId(),
+                exception
+            );
+        }
     }
 
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
@@ -71,4 +99,6 @@ public class IntegrationRequestSender {
             .setHeader(FUNCTION_DESTINATION, bindingResolver.getBindingDestination(destination))
             .build();
     }
+
+    private record PendingIntegrationDispatch(String integrationContextId, String connectorType) {}
 }

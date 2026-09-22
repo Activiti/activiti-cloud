@@ -17,13 +17,18 @@ package org.activiti.services.connectors;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -106,6 +111,9 @@ public class IntegrationRequestSenderTest {
     @Mock
     private FunctionBindingConfiguration.BindingResolver bindingResolver;
 
+    @Mock
+    private IntegrationRequestReloadService integrationRequestReloadService;
+
     private DelegateExecution delegateExecution;
 
     @Captor
@@ -118,7 +126,12 @@ public class IntegrationRequestSenderTest {
         configureDeploymentManager();
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
-        integrationRequestSender = new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver);
+        integrationRequestSender = new IntegrationRequestSender(
+            streamBridge,
+            messageBuilderFactory,
+            bindingResolver,
+            integrationRequestReloadService
+        );
 
         configureProperties();
         configureExecution();
@@ -136,6 +149,10 @@ public class IntegrationRequestSenderTest {
 
         integrationRequest = new IntegrationRequestImpl(integrationContext);
         integrationRequest.setServiceFullName(APP_NAME);
+
+        when(integrationRequestReloadService.reload(INTEGRATION_CONTEXT_ID)).thenReturn(
+            Optional.of(integrationRequest)
+        );
     }
 
     private void configureDeploymentManager() {
@@ -180,6 +197,8 @@ public class IntegrationRequestSenderTest {
         //when
         integrationRequestSender.sendIntegrationRequest(integrationRequest);
 
+        verify(integrationRequestReloadService, never()).reload(anyString());
+
         TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
 
         //then
@@ -187,12 +206,47 @@ public class IntegrationRequestSenderTest {
         Message<IntegrationRequest> integrationRequestMessage = integrationRequestMessageCaptor.getValue();
 
         IntegrationRequest sentIntegrationRequestEvent = integrationRequestMessage.getPayload();
-        assertThat(sentIntegrationRequestEvent).isEqualTo(integrationRequest);
+        assertThat(sentIntegrationRequestEvent).isSameAs(integrationRequest);
         assertThat(integrationRequestMessage.getHeaders().get(IntegrationRequestSender.CONNECTOR_TYPE)).isEqualTo(
             CONNECTOR_TYPE
         );
         assertThat(integrationRequestMessage.getHeaders().get(FUNCTION_DESTINATION)).isEqualTo(CONNECTOR_TYPE);
 
         TransactionSynchronizationManager.clear();
+    }
+
+    @Test
+    public void shouldNotSendMessageWhenReloadReturnsEmpty() {
+        TransactionSynchronizationManager.initSynchronization();
+        when(integrationRequestReloadService.reload(INTEGRATION_CONTEXT_ID)).thenReturn(Optional.empty());
+
+        integrationRequestSender.sendIntegrationRequest(integrationRequest);
+
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+
+        verify(streamBridge, never()).send(anyString(), any(Message.class));
+
+        TransactionSynchronizationManager.clear();
+    }
+
+    @Test
+    public void shouldIgnoreReloadFailures() {
+        TransactionSynchronizationManager.initSynchronization();
+        doThrow(new RuntimeException("boom")).when(integrationRequestReloadService).reload(INTEGRATION_CONTEXT_ID);
+
+        integrationRequestSender.sendIntegrationRequest(integrationRequest);
+
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+
+        verify(streamBridge, never()).send(anyString(), any(Message.class));
+
+        TransactionSynchronizationManager.clear();
+    }
+
+    @Test
+    public void shouldRequireActiveTransactionSynchronization() {
+        assertThatThrownBy(() -> integrationRequestSender.sendIntegrationRequest(integrationRequest))
+            .isInstanceOf(org.springframework.transaction.IllegalTransactionStateException.class)
+            .hasMessage("Transaction synchronization must be active.");
     }
 }
