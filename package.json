@@ -64,7 +64,7 @@
   "dependencies": {
     "chalk": "^6.0.0",
     "date-fns": "^4.4.0",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.1",
     "jwt-decode": "^4.0.0",
     "winston": "^3.19.0",
     "ws": "^8.21.3"
