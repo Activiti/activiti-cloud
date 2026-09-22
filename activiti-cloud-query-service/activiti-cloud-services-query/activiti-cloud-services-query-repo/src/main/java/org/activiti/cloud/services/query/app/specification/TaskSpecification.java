@@ -107,25 +107,53 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         applyDueDateFilters(root, criteriaBuilder);
         applyCandidateUserFilter(root, query, criteriaBuilder);
         applyCandidateGroupFilter(root, query, criteriaBuilder);
-        if (!CollectionUtils.isEmpty(searchRequest.taskVariableFilters())) {
-            SetJoin<TaskEntity, TaskVariableEntity> tvRoot = root.join(TaskEntity_.variables, JoinType.LEFT);
-            filterConditions.addAll(
-                searchRequest
-                    .taskVariableFilters()
-                    .stream()
-                    .map(filter ->
-                        new VariableValueFilterConditionImpl<>(
-                            (SetJoin<TaskEntity, ? extends AbstractVariableEntity>) tvRoot,
-                            Map.of(tvRoot.get(TaskVariableEntity_.name), filter.name()),
-                            javaTypeMapping.get(filter.type()),
-                            filter,
-                            criteriaBuilder
+        applyTaskVariableFilters(root, query, criteriaBuilder);
+        return super.toPredicate(root, query, criteriaBuilder);
+    }
+
+    /**
+     * Adds the task variable filters either as correlated {@code EXISTS} subqueries (when
+     * {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is enabled) or, by default, as
+     * {@code group by} / {@code having} conditions over a {@code LEFT JOIN} on {@code task_variable}.
+     *
+     * @see SpecificationSupport#variableFilterExists
+     */
+    private void applyTaskVariableFilters(
+        Root<TaskEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        if (CollectionUtils.isEmpty(searchRequest.taskVariableFilters())) {
+            return;
+        }
+        if (useExistsSubqueries()) {
+            searchRequest
+                .taskVariableFilters()
+                .forEach(filter ->
+                    predicates.add(
+                        variableFilterExists(root, query, criteriaBuilder, TaskEntity_.variables, filter, tvJoin ->
+                            Map.of(tvJoin.get(TaskVariableEntity_.name), filter.name())
                         )
                     )
-                    .toList()
-            );
+                );
+            return;
         }
-        return super.toPredicate(root, query, criteriaBuilder);
+        SetJoin<TaskEntity, TaskVariableEntity> tvRoot = root.join(TaskEntity_.variables, JoinType.LEFT);
+        filterConditions.addAll(
+            searchRequest
+                .taskVariableFilters()
+                .stream()
+                .map(filter ->
+                    new VariableValueFilterConditionImpl<>(
+                        (SetJoin<TaskEntity, ? extends AbstractVariableEntity>) tvRoot,
+                        Map.of(tvRoot.get(TaskVariableEntity_.name), filter.name()),
+                        javaTypeMapping.get(filter.type()),
+                        filter,
+                        criteriaBuilder
+                    )
+                )
+                .toList()
+        );
     }
 
     @Override
