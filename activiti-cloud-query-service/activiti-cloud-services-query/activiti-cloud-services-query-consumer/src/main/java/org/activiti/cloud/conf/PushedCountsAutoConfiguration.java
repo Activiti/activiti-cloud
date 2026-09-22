@@ -102,7 +102,7 @@ public class PushedCountsAutoConfiguration {
         return new SubscriberRegistryResyncRequester(registryProducer, UUID.randomUUID().toString(), Clock.systemUTC());
     }
 
-    // Registered for injection now; the recompute that invokes countFor is wired in a later step.
+    // Registered now; the AAE-51058 recompute pipeline collects and invokes it once that lands.
     @Bean
     @ConditionalOnMissingBean
     AssignedTaskCounter assignedTaskCounter(TaskRepository taskRepository) {

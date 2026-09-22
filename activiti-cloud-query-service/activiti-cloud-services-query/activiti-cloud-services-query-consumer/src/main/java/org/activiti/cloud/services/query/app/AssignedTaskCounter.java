@@ -15,23 +15,17 @@
  */
 package org.activiti.cloud.services.query.app;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 
 /**
  * Pushed "assigned to me" badge: tasks where the user is the assignee and the task is
- * {@link Task.TaskStatus#ASSIGNED}. A single grouped query over the affected users covers the whole
- * window; a user with no assigned task is reported as zero rather than omitted.
+ * {@link Task.TaskStatus#ASSIGNED}. Returns the assigned-task count per affected user via a single
+ * grouped query; users with none are simply absent (treated as zero).
  */
 public class AssignedTaskCounter implements PushedCounter {
 
@@ -47,22 +41,15 @@ public class AssignedTaskCounter implements PushedCounter {
     }
 
     @Override
-    public List<CountChangedMessage> countFor(Collection<String> affectedUserIds, Instant asOf) {
-        Set<String> userIds = affectedUserIds == null ? Set.of() : new LinkedHashSet<>(affectedUserIds);
-        if (userIds.isEmpty()) {
-            return List.of();
+    public Map<String, Long> compute(Set<String> affectedUserIds) {
+        if (affectedUserIds.isEmpty()) {
+            return Map.of();
         }
-        Map<String, Long> countsByAssignee = taskRepository
-            .countGroupedByAssignee(userIds, Task.TaskStatus.ASSIGNED)
+        return taskRepository
+            .countGroupedByAssignee(affectedUserIds, Task.TaskStatus.ASSIGNED)
             .stream()
             .collect(
                 Collectors.toMap(TaskRepository.AssigneeCount::getAssignee, TaskRepository.AssigneeCount::getTaskCount)
             );
-        List<CountChangedMessage> messages = new ArrayList<>(userIds.size());
-        for (String userId : userIds) {
-            long count = countsByAssignee.getOrDefault(userId, 0L);
-            messages.add(new CountChangedMessage(ScopeKeys.assigned(userId), count, asOf));
-        }
-        return messages;
     }
 }

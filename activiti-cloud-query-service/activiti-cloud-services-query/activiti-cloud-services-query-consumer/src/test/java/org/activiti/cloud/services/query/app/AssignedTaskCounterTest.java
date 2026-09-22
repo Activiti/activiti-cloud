@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,12 +24,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 import org.junit.jupiter.api.Test;
 
@@ -44,42 +43,31 @@ class AssignedTaskCounterTest {
     }
 
     @Test
-    void shouldEmitOneAbsoluteCountPerAffectedUser_whenAUserIsAbsentFromTheResult() {
-        Instant asOf = Instant.parse("2026-09-16T10:15:30Z");
+    void shouldReturnAbsoluteCountPerAssignee_omittingUsersWithNone() {
         when(taskRepository.countGroupedByAssignee(any(), eq(Task.TaskStatus.ASSIGNED))).thenReturn(
             List.of(assigneeCount("alice", 2L), assigneeCount("bob", 1L))
         );
 
-        List<CountChangedMessage> messages = counter.countFor(List.of("alice", "bob", "carol"), asOf);
+        Map<String, Long> counts = counter.compute(Set.of("alice", "bob", "carol"));
 
-        assertThat(messages)
-            .extracting(CountChangedMessage::scopeKey, CountChangedMessage::count, CountChangedMessage::asOf)
-            .containsExactlyInAnyOrder(
-                tuple(ScopeKeys.assigned("alice"), 2L, asOf),
-                tuple(ScopeKeys.assigned("bob"), 1L, asOf),
-                tuple(ScopeKeys.assigned("carol"), 0L, asOf)
-            );
+        // carol has no assigned task -> absent from the map; the pipeline treats absence as zero.
+        assertThat(counts).containsOnly(entry("alice", 2L), entry("bob", 1L));
     }
 
     @Test
-    void shouldDeduplicateAffectedUsersAndQueryOnlyByAssignedStatus() {
-        Instant asOf = Instant.parse("2026-09-16T10:15:30Z");
+    void shouldQueryOnlyByAssignedStatus() {
         when(taskRepository.countGroupedByAssignee(any(), eq(Task.TaskStatus.ASSIGNED))).thenReturn(
             List.of(assigneeCount("alice", 3L))
         );
 
-        List<CountChangedMessage> messages = counter.countFor(List.of("alice", "alice"), asOf);
+        counter.compute(Set.of("alice"));
 
         verify(taskRepository).countGroupedByAssignee(eq(Set.of("alice")), eq(Task.TaskStatus.ASSIGNED));
-        assertThat(messages)
-            .extracting(CountChangedMessage::scopeKey, CountChangedMessage::count, CountChangedMessage::asOf)
-            .containsExactly(tuple(ScopeKeys.assigned("alice"), 3L, asOf));
     }
 
     @Test
     void shouldReturnEmptyAndNotQuery_whenThereAreNoAffectedUsers() {
-        assertThat(counter.countFor(Set.of(), Instant.now())).isEmpty();
-        assertThat(counter.countFor(null, Instant.now())).isEmpty();
+        assertThat(counter.compute(Set.of())).isEmpty();
         verifyNoInteractions(taskRepository);
     }
 

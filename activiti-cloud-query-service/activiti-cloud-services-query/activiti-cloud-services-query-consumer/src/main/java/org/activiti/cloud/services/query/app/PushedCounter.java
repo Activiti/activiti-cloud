@@ -15,19 +15,17 @@
  */
 package org.activiti.cloud.services.query.app;
 
-import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import org.activiti.cloud.services.query.subscription.CountChangedMessage;
+import java.util.Map;
+import java.util.Set;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 
 /**
- * Recomputes one pushed-count type for the users touched by an event window. Returns one absolute
- * {@link CountChangedMessage} per affected user, including zero for a user who now has none. There is
- * one implementation per {@link ScopeKeys.PushedCountType}; the recompute pipeline invokes them.
+ * Recomputes one pushed-count type for the given users: absolute count per user, a user absent from
+ * the result meaning zero. One implementation per {@link ScopeKeys.PushedCountType}. Contract mirrors
+ * the AAE-51058 recompute pipeline's counter SPI so wiring it in later is just an import change.
  */
 public interface PushedCounter {
     ScopeKeys.PushedCountType type();
 
-    List<CountChangedMessage> countFor(Collection<String> affectedUserIds, Instant asOf);
+    Map<String, Long> compute(Set<String> affectedUserIds);
 }
