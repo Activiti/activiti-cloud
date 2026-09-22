@@ -16,8 +16,8 @@
 package org.activiti.services.connectors;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,8 +28,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -248,5 +253,118 @@ public class IntegrationRequestSenderTest {
         assertThatThrownBy(() -> integrationRequestSender.sendIntegrationRequest(integrationRequest))
             .isInstanceOf(org.springframework.transaction.IllegalTransactionStateException.class)
             .hasMessage("Transaction synchronization must be active.");
+    }
+
+    @Test
+    public void shouldNotRetainOriginalIntegrationRequestBeforeAfterCommit() {
+        TransactionSynchronizationManager.initSynchronization();
+
+        try {
+            String heavyIntegrationContextId = "heavy-context-id";
+            IntegrationRequestImpl heavyIntegrationRequest = createHeavyIntegrationRequest(heavyIntegrationContextId);
+            IntegrationRequestImpl reloadedIntegrationRequest = createReloadedIntegrationRequest(
+                heavyIntegrationContextId
+            );
+            when(integrationRequestReloadService.reload(heavyIntegrationContextId)).thenReturn(
+                Optional.of(reloadedIntegrationRequest)
+            );
+
+            ReferenceQueue<IntegrationRequest> referenceQueue = new ReferenceQueue<>();
+            WeakReference<IntegrationRequest> reference = new WeakReference<>(heavyIntegrationRequest, referenceQueue);
+
+            integrationRequestSender.sendIntegrationRequest(heavyIntegrationRequest);
+
+            heavyIntegrationRequest = null;
+
+            assertThat(awaitCollection(reference, referenceQueue)).isTrue();
+            assertThat(reference.get()).isNull();
+
+            TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+
+            verify(streamBridge).send(eq(CONNECTOR_TYPE), integrationRequestMessageCaptor.capture());
+            Message<IntegrationRequest> integrationRequestMessage = integrationRequestMessageCaptor.getValue();
+
+            assertThat(integrationRequestMessage.getPayload()).isSameAs(reloadedIntegrationRequest);
+        } finally {
+            TransactionSynchronizationManager.clear();
+        }
+    }
+
+    private IntegrationRequestImpl createHeavyIntegrationRequest(String integrationContextId) {
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(integrationContextId);
+        integrationContext.setConnectorType(CONNECTOR_TYPE);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+        integrationContext.setRootProcessInstanceId(ROOT_PROC_INST_ID);
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        integrationContext.setBusinessKey(BUSINESS_KEY);
+        integrationContext.setParentProcessInstanceId(MY_PARENT_PROC_ID);
+        integrationContext.setClientId("clientId");
+        integrationContext.setClientName("clientName");
+        integrationContext.setClientType("ServiceTask");
+        integrationContext.setAppVersion("1");
+        integrationContext.addInBoundVariable("payload", createLargeNestedPayload());
+
+        IntegrationRequestImpl heavyIntegrationRequest = new IntegrationRequestImpl(integrationContext);
+        heavyIntegrationRequest.setServiceFullName(APP_NAME);
+        return heavyIntegrationRequest;
+    }
+
+    private IntegrationRequestImpl createReloadedIntegrationRequest(String integrationContextId) {
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(integrationContextId);
+        integrationContext.setConnectorType(CONNECTOR_TYPE);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+        integrationContext.setRootProcessInstanceId(ROOT_PROC_INST_ID);
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        integrationContext.setBusinessKey(BUSINESS_KEY);
+        integrationContext.setParentProcessInstanceId(MY_PARENT_PROC_ID);
+        integrationContext.setClientId("clientId");
+        integrationContext.setClientName("clientName");
+        integrationContext.setClientType("ServiceTask");
+        integrationContext.setAppVersion("1");
+        integrationContext.addInBoundVariable("payload", List.of("reloaded"));
+
+        IntegrationRequestImpl reloadedIntegrationRequest = new IntegrationRequestImpl(integrationContext);
+        reloadedIntegrationRequest.setServiceFullName(APP_NAME);
+        return reloadedIntegrationRequest;
+    }
+
+    private List<List<byte[]>> createLargeNestedPayload() {
+        List<List<byte[]>> outer = new ArrayList<>();
+
+        for (int outerIndex = 0; outerIndex < 16; outerIndex++) {
+            List<byte[]> inner = new ArrayList<>();
+            for (int innerIndex = 0; innerIndex < 16; innerIndex++) {
+                inner.add(new byte[64 * 1024]);
+            }
+            outer.add(inner);
+        }
+
+        return outer;
+    }
+
+    private boolean awaitCollection(
+        WeakReference<IntegrationRequest> reference,
+        ReferenceQueue<IntegrationRequest> referenceQueue
+    ) {
+        for (int attempt = 0; attempt < 20; attempt++) {
+            if (reference.get() == null || referenceQueue.poll() != null) {
+                return true;
+            }
+
+            createGarbagePressure();
+            System.gc();
+            System.runFinalization();
+        }
+
+        return reference.get() == null || referenceQueue.poll() != null;
+    }
+
+    private void createGarbagePressure() {
+        List<byte[]> pressure = new ArrayList<>();
+        for (int index = 0; index < 16; index++) {
+            pressure.add(new byte[64 * 1024]);
+        }
     }
 }
