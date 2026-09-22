@@ -75,7 +75,7 @@ class PushedCountsRecomputePipelineIT {
 
     @AfterEach
     void tearDown() {
-        registry.unregister("alice", "rest-1");
+        registry.unregister("alice", "rest-1", Instant.now());
     }
 
     @Test
