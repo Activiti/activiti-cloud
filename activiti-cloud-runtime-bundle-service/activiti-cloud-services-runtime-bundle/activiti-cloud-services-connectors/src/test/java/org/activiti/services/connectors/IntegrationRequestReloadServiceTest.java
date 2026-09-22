@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
@@ -67,7 +67,7 @@ class IntegrationRequestReloadServiceTest {
     private IntegrationContext integrationContext;
 
     @Mock
-    private IntegrationRequest integrationRequest;
+    private IntegrationRequestImpl integrationRequest;
 
     @Mock
     private ExecutionQuery executionQuery;
