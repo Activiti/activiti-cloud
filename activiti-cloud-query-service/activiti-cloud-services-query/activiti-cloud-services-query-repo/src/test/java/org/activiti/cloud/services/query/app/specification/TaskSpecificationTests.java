@@ -23,14 +23,19 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
 import java.util.List;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.activiti.cloud.services.query.app.filter.FilterOperator;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
 import org.activiti.cloud.services.query.app.filter.VariableType;
 import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
+import org.activiti.cloud.services.query.model.TaskVariableEntity_;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -105,6 +110,84 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
             verify(ctx.query(), atLeastOnce()).subquery(any(Class.class));
             verify(ctx.root(), never()).join(TaskEntity_.taskCandidateUsers);
+        }
+    }
+
+    @Nested
+    class ProcessVariableFilter {
+
+        private final VariableFilter filter = new VariableFilter(
+            "process-definition-key",
+            "variable-name",
+            VariableType.STRING,
+            "value",
+            FilterOperator.EQUALS
+        );
+
+        @Test
+        void shouldUseJoinAndGroupBy_whenExistsSubqueriesToggleIsOff() {
+            TaskSearchRequest request = new TaskSearchRequestBuilder().withProcessVariableFilters(filter).build();
+            TaskSpecification spec = TaskSpecification.unrestricted(request);
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+            verify(ctx.root()).join(TaskEntity_.processVariables, JoinType.LEFT);
+            verify(ctx.query()).groupBy(any(Expression.class));
+            verify(ctx.query(), never()).subquery(any(Class.class));
+        }
+
+        @Test
+        void shouldUseSubqueryWithoutJoinOrGroupBy_whenExistsSubqueriesToggleIsOn() {
+            enableExistsSubqueriesToggle();
+            TaskSearchRequest request = new TaskSearchRequestBuilder().withProcessVariableFilters(filter).build();
+            TaskSpecification spec = TaskSpecification.unrestricted(request);
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+            verify(ctx.query()).subquery(Integer.class);
+            verify(ctx.root(), never()).join(TaskEntity_.processVariables, JoinType.LEFT);
+            verify(ctx.query(), never()).groupBy(any(Expression.class));
+        }
+    }
+
+    @Nested
+    class TaskVariableFilter {
+
+        private final VariableFilter filter = new VariableFilter(
+            null,
+            "variable-name",
+            VariableType.STRING,
+            "value",
+            FilterOperator.EQUALS
+        );
+
+        @Test
+        void shouldUseJoinAndGroupBy_whenExistsSubqueriesToggleIsOff() {
+            TaskSearchRequest request = new TaskSearchRequestBuilder().withTaskVariableFilters(filter).build();
+            TaskSpecification spec = TaskSpecification.unrestricted(request);
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+            verify(ctx.root()).join(TaskEntity_.variables, JoinType.LEFT);
+            verify(ctx.query()).groupBy(any(Expression.class));
+            verify(ctx.query(), never()).subquery(any(Class.class));
+        }
+
+        @Test
+        void shouldUseSubqueryWithoutJoinOrGroupBy_whenExistsSubqueriesToggleIsOn() {
+            enableExistsSubqueriesToggle();
+            TaskSearchRequest request = new TaskSearchRequestBuilder().withTaskVariableFilters(filter).build();
+            TaskSpecification spec = TaskSpecification.unrestricted(request);
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+            verify(ctx.query()).subquery(Integer.class);
+            verify(ctx.root(), never()).join(TaskEntity_.variables, JoinType.LEFT);
+            verify(ctx.query(), never()).groupBy(any(Expression.class));
         }
     }
 

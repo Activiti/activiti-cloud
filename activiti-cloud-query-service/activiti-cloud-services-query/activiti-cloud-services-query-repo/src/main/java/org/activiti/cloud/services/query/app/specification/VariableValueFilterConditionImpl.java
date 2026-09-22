@@ -53,25 +53,35 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
 
     @Override
     public Predicate getPredicate() {
+        return getPredicate(true);
+    }
+
+    public Predicate getNonAggregatedPredicate() {
+        return getPredicate(false);
+    }
+
+    private Predicate getPredicate(boolean aggregate) {
         try {
-            return switch (filter.operator()) {
-                case EQUALS -> criteriaBuilder.equal(getSelectionExpression(), getConvertedFilterValue());
-                case NOT_EQUALS -> criteriaBuilder.notEqual(getSelectionExpression(), getConvertedFilterValue());
-                case GREATER_THAN -> criteriaBuilder.greaterThan(getSelectionExpression(), getConvertedFilterValue());
+            Expression valueExpression = aggregate ? getSelectionExpression() : getGuardedExtractionExpression();
+            Predicate valuePredicate = switch (filter.operator()) {
+                case EQUALS -> criteriaBuilder.equal(valueExpression, getConvertedFilterValue());
+                case NOT_EQUALS -> criteriaBuilder.notEqual(valueExpression, getConvertedFilterValue());
+                case GREATER_THAN -> criteriaBuilder.greaterThan(valueExpression, getConvertedFilterValue());
                 case GREATER_THAN_OR_EQUAL -> criteriaBuilder.greaterThanOrEqualTo(
-                    getSelectionExpression(),
+                    valueExpression,
                     getConvertedFilterValue()
                 );
-                case LESS_THAN -> criteriaBuilder.lessThan(getSelectionExpression(), getConvertedFilterValue());
+                case LESS_THAN -> criteriaBuilder.lessThan(valueExpression, getConvertedFilterValue());
                 case LESS_THAN_OR_EQUAL -> criteriaBuilder.lessThanOrEqualTo(
-                    getSelectionExpression(),
+                    valueExpression,
                     getConvertedFilterValue()
                 );
                 case LIKE -> criteriaBuilder.like(
-                    criteriaBuilder.lower((Expression<String>) getSelectionExpression()),
+                    criteriaBuilder.lower((Expression<String>) valueExpression),
                     "%" + filter.value().toLowerCase() + "%"
                 );
             };
+            return aggregate ? valuePredicate : criteriaBuilder.and(getSelectionPredicate(), valuePredicate);
         } catch (FunctionArgumentException | IllegalArgumentException e) {
             throw new IllegalFilterException(filter.type(), filter.operator(), filter.value(), e);
         }

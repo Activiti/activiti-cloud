@@ -22,7 +22,12 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
+import java.util.Set;
+import org.activiti.cloud.services.query.app.filter.FilterOperator;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
+import org.activiti.cloud.services.query.app.filter.VariableType;
 import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
@@ -68,5 +73,48 @@ class ProcessInstanceSpecificationTests extends SpecificationFeatureToggleTestSu
         // user-restriction adds two correlated EXISTS subqueries (assignee + candidate user)
         verify(ctx.query(), atLeast(2)).subquery(any(Class.class));
         verify(ctx.root(), never()).join(eq(ProcessInstanceEntity_.tasks), any(JoinType.class));
+    }
+
+    @Test
+    void shouldUseJoinAndGroupByForVariableFilter_whenExistsSubqueriesToggleIsOff() {
+        ProcessInstanceSearchRequest request = requestWithProcessVariableFilter();
+        ProcessInstanceSpecification spec = ProcessInstanceSpecification.unrestricted(request);
+        CriteriaContext<ProcessInstanceEntity> ctx = newCriteriaContext();
+
+        spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+        verify(ctx.root()).join(ProcessInstanceEntity_.variables, JoinType.LEFT);
+        verify(ctx.query()).groupBy(any(Expression.class));
+        verify(ctx.query(), never()).subquery(any(Class.class));
+    }
+
+    @Test
+    void shouldUseSubqueryWithoutJoinOrGroupByForVariableFilter_whenExistsSubqueriesToggleIsOn() {
+        enableExistsSubqueriesToggle();
+        ProcessInstanceSearchRequest request = requestWithProcessVariableFilter();
+        ProcessInstanceSpecification spec = ProcessInstanceSpecification.unrestricted(request);
+        CriteriaContext<ProcessInstanceEntity> ctx = newCriteriaContext();
+
+        spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+        verify(ctx.query()).subquery(Integer.class);
+        verify(ctx.root(), never()).join(ProcessInstanceEntity_.variables, JoinType.LEFT);
+        verify(ctx.query(), never()).groupBy(any(Expression.class));
+    }
+
+    private ProcessInstanceSearchRequest requestWithProcessVariableFilter() {
+        ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequest();
+        request.setProcessVariableFilters(
+            Set.of(
+                new VariableFilter(
+                    "process-definition-key",
+                    "variable-name",
+                    VariableType.STRING,
+                    "value",
+                    FilterOperator.EQUALS
+                )
+            )
+        );
+        return request;
     }
 }

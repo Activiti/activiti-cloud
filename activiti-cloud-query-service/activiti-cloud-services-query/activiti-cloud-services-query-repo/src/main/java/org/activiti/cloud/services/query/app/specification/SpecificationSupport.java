@@ -20,9 +20,11 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.math.BigDecimal;
@@ -33,9 +35,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
 import org.activiti.cloud.services.query.app.filter.VariableType;
 import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntityFilterRequest;
 import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
@@ -91,7 +95,7 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
 
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        applyProcessVariableFilters(joinProcessVariables(root), criteriaBuilder);
+        applyProcessVariableFilters(root, query, criteriaBuilder);
         if (!filterConditions.isEmpty()) {
             query.groupBy(root.get(getIdAttribute()));
             query.having(
@@ -117,33 +121,74 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
-    protected void applyProcessVariableFilters(
-        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
-            SetJoin<T, ProcessVariableEntity> pvRoot = joinSupplier.get();
-            filterConditions.addAll(
-                searchRequest
-                    .processVariableFilters()
-                    .stream()
-                    .map(filter ->
-                        new VariableValueFilterConditionImpl<>(
-                            (SetJoin<T, ? extends AbstractVariableEntity>) pvRoot,
+    protected void applyProcessVariableFilters(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        if (CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
+            return;
+        }
+        if (useExistsSubqueries()) {
+            searchRequest
+                .processVariableFilters()
+                .forEach(filter ->
+                    addVariableFilterExistsPredicate(
+                        root,
+                        query,
+                        criteriaBuilder,
+                        getProcessVariablesAttribute(),
+                        filter,
+                        pvRoot ->
                             Map.of(
                                 pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
                                 filter.processDefinitionKey(),
                                 pvRoot.get(ProcessVariableEntity_.name),
                                 filter.name()
-                            ),
-                            javaTypeMapping.get(filter.type()),
-                            filter,
-                            criteriaBuilder
-                        )
+                            )
                     )
-                    .toList()
-            );
+                );
+            return;
         }
+        SetJoin<T, ProcessVariableEntity> pvRoot = joinProcessVariables(root).get();
+        filterConditions.addAll(
+            searchRequest
+                .processVariableFilters()
+                .stream()
+                .map(filter ->
+                    new VariableValueFilterConditionImpl<>(
+                        (SetJoin<T, ? extends AbstractVariableEntity>) pvRoot,
+                        Map.of(
+                            pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                            filter.processDefinitionKey(),
+                            pvRoot.get(ProcessVariableEntity_.name),
+                            filter.name()
+                        ),
+                        javaTypeMapping.get(filter.type()),
+                        filter,
+                        criteriaBuilder
+                    )
+                )
+                .toList()
+        );
+    }
+
+    protected <V extends AbstractVariableEntity> void addVariableFilterExistsPredicate(
+        Root<T> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder,
+        SetAttribute<T, V> variablesAttribute,
+        VariableFilter filter,
+        Function<SetJoin<T, V>, Map<Path<String>, String>> selectionFilters
+    ) {
+        Subquery<Integer> subquery = query.subquery(Integer.class);
+        Root<T> correlatedRoot = subquery.correlate(root);
+        SetJoin<T, V> variableRoot = correlatedRoot.join(variablesAttribute);
+        VariableValueFilterConditionImpl<T, V> filterCondition = new VariableValueFilterConditionImpl<>(
+            variableRoot,
+            selectionFilters.apply(variableRoot),
+            javaTypeMapping.get(filter.type()),
+            filter,
+            criteriaBuilder
+        );
+        subquery.select(criteriaBuilder.literal(1)).where(filterCondition.getNonAggregatedPredicate());
+        predicates.add(criteriaBuilder.exists(subquery));
     }
 
     protected void applyIdFilter(Root<T> root) {
