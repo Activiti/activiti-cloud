@@ -137,11 +137,11 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
                             criteriaBuilder,
                             getProcessVariablesAttribute(),
                             filter,
-                            pvJoin ->
+                            processVariableJoin ->
                                 Map.of(
-                                    pvJoin.get(ProcessVariableEntity_.processDefinitionKey),
+                                    processVariableJoin.get(ProcessVariableEntity_.processDefinitionKey),
                                     filter.processDefinitionKey(),
-                                    pvJoin.get(AbstractVariableEntity_.name),
+                                    processVariableJoin.get(AbstractVariableEntity_.name),
                                     filter.name()
                                 )
                         )
