@@ -15,15 +15,7 @@
  */
 package org.activiti.cloud.api.model.shared.impl.events;
 
-import java.lang.reflect.Array;
-import java.time.temporal.TemporalAccessor;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
-import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.event.impl.RuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
@@ -31,10 +23,6 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     extends RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE>
     implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE>
 {
-
-    private static final int MAX_RENDER_DEPTH = 3;
-    private static final int MAX_COLLECTION_ITEMS = 10;
-    private static final int MAX_STRING_LENGTH = 256;
 
     private String appName;
     private String serviceFullName;
@@ -159,8 +147,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder
+        return new StringBuilder()
             .append("CloudRuntimeEventImpl [appName=")
             .append(appName)
             .append(", serviceFullName=")
@@ -184,178 +171,9 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
             .append(", actor=")
             .append(actor)
             .append(", toString()=")
-            .append(runtimeEventToString())
-            .append("]");
-        return builder.toString();
-    }
-
-    private String runtimeEventToString() {
-        return new StringBuilder()
-            .append("RuntimeEventImpl [id=")
-            .append(getId())
-            .append(", timestamp=")
-            .append(getTimestamp())
-            .append(", processInstanceId=")
-            .append(getProcessInstanceId())
-            .append(", processDefinitionId=")
-            .append(getProcessDefinitionId())
-            .append(", processDefinitionKey=")
-            .append(getProcessDefinitionKey())
-            .append(", processDefinitionVersion=")
-            .append(getProcessDefinitionVersion())
-            .append(", businessKey=")
-            .append(getBusinessKey())
-            .append(", parentProcessInstanceId=")
-            .append(getParentProcessInstanceId())
-            .append(", entity=")
-            .append(renderEntity(getEntity()))
+            .append(super.toString())
             .append("]")
             .toString();
-    }
-
-    private Object renderEntity(ENTITY_TYPE entity) {
-        if (entity instanceof VariableInstance variableInstance) {
-            return new StringBuilder()
-                .append("VariableInstanceImpl{")
-                .append("name='")
-                .append(variableInstance.getName())
-                .append('\'')
-                .append(", type='")
-                .append(variableInstance.getType())
-                .append('\'')
-                .append(", processInstanceId='")
-                .append(variableInstance.getProcessInstanceId())
-                .append('\'')
-                .append(", taskId='")
-                .append(variableInstance.getTaskId())
-                .append('\'')
-                .append(", value=")
-                .append(renderValue(variableInstance.getValue(), 0))
-                .append('}')
-                .toString();
-        }
-
-        return entity;
-    }
-
-    private String renderValue(Object value, int depth) {
-        if (value == null) {
-            return "null";
-        }
-
-        if (depth >= MAX_RENDER_DEPTH) {
-            return summarizeType(value);
-        }
-
-        if (value instanceof CharSequence sequence) {
-            return abbreviate(sequence.toString());
-        }
-
-        if (
-            value instanceof Number ||
-            value instanceof Boolean ||
-            value instanceof Character ||
-            value instanceof Enum<?> ||
-            value instanceof UUID ||
-            value instanceof TemporalAccessor ||
-            value instanceof Date
-        ) {
-            return Objects.toString(value);
-        }
-
-        if (value instanceof Map<?, ?> map) {
-            return renderMap(map, depth + 1);
-        }
-
-        if (value instanceof Collection<?> collection) {
-            return renderCollection(collection, depth + 1);
-        }
-
-        if (value.getClass().isArray()) {
-            return renderArray(value, depth + 1);
-        }
-
-        return summarizeType(value);
-    }
-
-    private String renderCollection(Collection<?> collection, int depth) {
-        StringBuilder builder = new StringBuilder();
-        builder
-            .append(collection.getClass().getSimpleName())
-            .append("(size=")
-            .append(collection.size())
-            .append(", items=[");
-
-        Iterator<?> iterator = collection.iterator();
-        int index = 0;
-        while (iterator.hasNext() && index < MAX_COLLECTION_ITEMS) {
-            if (index > 0) {
-                builder.append(", ");
-            }
-            builder.append(renderValue(iterator.next(), depth));
-            index++;
-        }
-        if (iterator.hasNext()) {
-            builder.append(", ...");
-        }
-
-        return builder.append("])").toString();
-    }
-
-    private String renderMap(Map<?, ?> map, int depth) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(map.getClass().getSimpleName()).append("(size=").append(map.size()).append(", entries=[");
-
-        Iterator<? extends Map.Entry<?, ?>> iterator = map.entrySet().iterator();
-        int index = 0;
-        while (iterator.hasNext() && index < MAX_COLLECTION_ITEMS) {
-            if (index > 0) {
-                builder.append(", ");
-            }
-            Map.Entry<?, ?> entry = iterator.next();
-            builder.append(renderValue(entry.getKey(), depth)).append('=').append(renderValue(entry.getValue(), depth));
-            index++;
-        }
-        if (iterator.hasNext()) {
-            builder.append(", ...");
-        }
-
-        return builder.append("])").toString();
-    }
-
-    private String renderArray(Object array, int depth) {
-        StringBuilder builder = new StringBuilder();
-        int length = Array.getLength(array);
-        builder
-            .append(array.getClass().getComponentType().getSimpleName())
-            .append("[](length=")
-            .append(length)
-            .append(", items=[");
-
-        int maxItems = Math.min(length, MAX_COLLECTION_ITEMS);
-        for (int i = 0; i < maxItems; i++) {
-            if (i > 0) {
-                builder.append(", ");
-            }
-            builder.append(renderValue(Array.get(array, i), depth));
-        }
-        if (length > MAX_COLLECTION_ITEMS) {
-            builder.append(", ...");
-        }
-
-        return builder.append("])").toString();
-    }
-
-    private String summarizeType(Object value) {
-        return value.getClass().getSimpleName();
-    }
-
-    private String abbreviate(String value) {
-        if (value.length() <= MAX_STRING_LENGTH) {
-            return value;
-        }
-
-        return value.substring(0, MAX_STRING_LENGTH) + "...(length=" + value.length() + ")";
     }
 
     @Override
