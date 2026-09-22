@@ -76,6 +76,8 @@ class PushedCountsRecomputePipelineIT {
     @AfterEach
     void tearDown() {
         registry.unregister("alice", "rest-1", Instant.now());
+        // Integrated context runs a 2nd ASSIGNED counter (real AssignedTaskCounter, 0 over the empty test DB); drop its extra message.
+        output.clear();
     }
 
     @Test
