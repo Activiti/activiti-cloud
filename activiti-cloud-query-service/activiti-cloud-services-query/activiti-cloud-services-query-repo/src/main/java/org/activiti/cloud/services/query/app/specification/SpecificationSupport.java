@@ -44,6 +44,7 @@ import org.activiti.cloud.services.query.app.filter.VariableType;
 import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntityFilterRequest;
 import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
+import org.activiti.cloud.services.query.model.AbstractVariableEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.springframework.data.jpa.domain.Specification;
@@ -140,7 +141,7 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
                                 Map.of(
                                     pvJoin.get(ProcessVariableEntity_.processDefinitionKey),
                                     filter.processDefinitionKey(),
-                                    pvJoin.get(ProcessVariableEntity_.name),
+                                    pvJoin.get(AbstractVariableEntity_.name),
                                     filter.name()
                                 )
                         )
@@ -159,7 +160,7 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
                         Map.of(
                             pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
                             filter.processDefinitionKey(),
-                            pvRoot.get(ProcessVariableEntity_.name),
+                            pvRoot.get(AbstractVariableEntity_.name),
                             filter.name()
                         ),
                         javaTypeMapping.get(filter.type()),

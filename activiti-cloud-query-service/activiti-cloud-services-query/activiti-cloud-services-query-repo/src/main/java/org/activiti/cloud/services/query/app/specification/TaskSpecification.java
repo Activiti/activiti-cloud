@@ -29,6 +29,7 @@ import java.util.Map;
 import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
+import org.activiti.cloud.services.query.model.AbstractVariableEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
@@ -37,7 +38,6 @@ import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.activiti.cloud.services.query.model.TaskVariableEntity_;
 import org.springframework.util.CollectionUtils;
 
 @CountOverFullWindow
@@ -132,7 +132,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
                 .forEach(filter ->
                     predicates.add(
                         variableFilterExists(root, query, criteriaBuilder, TaskEntity_.variables, filter, tvJoin ->
-                            Map.of(tvJoin.get(TaskVariableEntity_.name), filter.name())
+                            Map.of(tvJoin.get(AbstractVariableEntity_.name), filter.name())
                         )
                     )
                 );
@@ -146,7 +146,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
                 .map(filter ->
                     new VariableValueFilterConditionImpl<>(
                         (SetJoin<TaskEntity, ? extends AbstractVariableEntity>) tvRoot,
-                        Map.of(tvRoot.get(TaskVariableEntity_.name), filter.name()),
+                        Map.of(tvRoot.get(AbstractVariableEntity_.name), filter.name()),
                         javaTypeMapping.get(filter.type()),
                         filter,
                         criteriaBuilder

@@ -83,7 +83,7 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
                     getConvertedFilterValue()
                 );
                 case LIKE -> criteriaBuilder.like(
-                    criteriaBuilder.lower((Expression<String>) valueExpression),
+                    criteriaBuilder.lower(valueExpression),
                     "%" + filter.value().toLowerCase() + "%"
                 );
             };
