@@ -85,6 +85,7 @@ class ProcessInstanceSpecificationTests extends SpecificationFeatureToggleTestSu
 
         verify(ctx.root()).join(ProcessInstanceEntity_.variables, JoinType.LEFT);
         verify(ctx.query()).groupBy(any(Expression.class));
+        verify(ctx.cb()).greatest(any(Expression.class));
         verify(ctx.query(), never()).subquery(any(Class.class));
     }
 
@@ -100,6 +101,7 @@ class ProcessInstanceSpecificationTests extends SpecificationFeatureToggleTestSu
         verify(ctx.query()).subquery(Integer.class);
         verify(ctx.root(), never()).join(ProcessInstanceEntity_.variables, JoinType.LEFT);
         verify(ctx.query(), never()).groupBy(any(Expression.class));
+        verify(ctx.cb(), never()).greatest(any(Expression.class));
     }
 
     private ProcessInstanceSearchRequest requestWithProcessVariableFilter() {

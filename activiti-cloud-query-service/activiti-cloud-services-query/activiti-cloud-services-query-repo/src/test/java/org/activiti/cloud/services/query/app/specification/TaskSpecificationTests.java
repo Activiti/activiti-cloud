@@ -132,6 +132,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
             verify(ctx.root()).join(TaskEntity_.processVariables, JoinType.LEFT);
             verify(ctx.query()).groupBy(any(Expression.class));
+            verify(ctx.cb()).greatest(any(Expression.class));
             verify(ctx.query(), never()).subquery(any(Class.class));
         }
 
@@ -147,6 +148,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
             verify(ctx.query()).subquery(Integer.class);
             verify(ctx.root(), never()).join(TaskEntity_.processVariables, JoinType.LEFT);
             verify(ctx.query(), never()).groupBy(any(Expression.class));
+            verify(ctx.cb(), never()).greatest(any(Expression.class));
         }
     }
 
@@ -171,6 +173,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
             verify(ctx.root()).join(TaskEntity_.variables, JoinType.LEFT);
             verify(ctx.query()).groupBy(any(Expression.class));
+            verify(ctx.cb()).greatest(any(Expression.class));
             verify(ctx.query(), never()).subquery(any(Class.class));
         }
 
@@ -186,6 +189,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
             verify(ctx.query()).subquery(Integer.class);
             verify(ctx.root(), never()).join(TaskEntity_.variables, JoinType.LEFT);
             verify(ctx.query(), never()).groupBy(any(Expression.class));
+            verify(ctx.cb(), never()).greatest(any(Expression.class));
         }
     }
 
