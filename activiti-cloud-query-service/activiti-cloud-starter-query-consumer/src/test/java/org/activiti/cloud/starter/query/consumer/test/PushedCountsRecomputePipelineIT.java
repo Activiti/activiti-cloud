@@ -31,6 +31,7 @@ import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
 import org.activiti.cloud.services.query.app.count.PushedCounter;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,6 +73,12 @@ class PushedCountsRecomputePipelineIT {
 
     @Autowired
     private OutputDestination output;
+
+    @BeforeEach
+    void clearPublishedCounts() {
+        // Sibling pushed-counts ITs leave messages on the shared "pushedCounts" OutputDestination; clear them so this test reads only its own.
+        output.clear();
+    }
 
     @AfterEach
     void tearDown() {
