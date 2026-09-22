@@ -542,6 +542,67 @@ public abstract class AbstractTaskControllerIT {
             .body(equalTo("1"));
     }
 
+    @ParameterizedTest(name = "existsSubqueries={0}")
+    @ValueSource(booleans = { false, true })
+    void should_returnTask_filteredByProcessVariableWithRootFiltersAndSorting(boolean existsSubqueriesEnabled) {
+        if (existsSubqueriesEnabled) {
+            FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES::equals);
+        }
+        String processDefinitionName = "process-definition-name";
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withProcessDefinitionName(processDefinitionName)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 42),
+                new QueryTestUtils.VariableInput("string-variable", VariableType.STRING, "not-a-number")
+            )
+            .withTasks(
+                queryTestUtils
+                    .buildTask()
+                    .withId(TASK_ID_1)
+                    .withVariables(new QueryTestUtils.VariableInput("task-variable", VariableType.STRING, "task-value"))
+            )
+            .buildAndSave();
+
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
+            .withProcessDefinitionName(processDefinitionName)
+            .withTaskVariableFilters(
+                new VariableFilter(null, "task-variable", VariableType.STRING, "task-value", FilterOperator.EQUALS)
+            )
+            .withProcessVariableFilters(
+                new VariableFilter(
+                    PROCESS_DEFINITION_KEY,
+                    VAR_NAME,
+                    VariableType.INTEGER,
+                    "40",
+                    FilterOperator.GREATER_THAN
+                )
+            )
+            .withSort(new CloudRuntimeEntitySort("createdDate", Sort.Direction.DESC, false, null, null));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .param("maxItems", 1)
+            .param("skipCount", 0)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
     @Test
     void should_not_returnTask_filteredByProcessVariable_when_OneFilterDoesNotMatch() {
         queryTestUtils

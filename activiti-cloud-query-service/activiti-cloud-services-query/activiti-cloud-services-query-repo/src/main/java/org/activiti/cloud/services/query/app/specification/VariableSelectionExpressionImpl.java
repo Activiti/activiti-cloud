@@ -32,6 +32,7 @@ public class VariableSelectionExpressionImpl<
 
     protected final From<R, K> root;
     private final Predicate selectionPredicate;
+    private Expression<?> guardedExtractionExpression;
     private Expression<?> selectionExpression;
     protected final Class<?> variableJavaType;
     protected final CriteriaBuilder criteriaBuilder;
@@ -64,17 +65,26 @@ public class VariableSelectionExpressionImpl<
         );
     }
 
+    protected Predicate getSelectionPredicate() {
+        return selectionPredicate;
+    }
+
+    protected Expression getGuardedExtractionExpression() {
+        if (guardedExtractionExpression == null) {
+            guardedExtractionExpression = criteriaBuilder
+                .selectCase()
+                .when(selectionPredicate, getExtractedValue())
+                .otherwise(
+                    criteriaBuilder.nullLiteral(CustomPostgreSQLDialect.getExtractionReturnType(variableJavaType))
+                );
+        }
+        return guardedExtractionExpression;
+    }
+
     @Override
     public Expression getSelectionExpression() {
         if (selectionExpression == null) {
-            selectionExpression = criteriaBuilder.greatest(
-                (Expression) criteriaBuilder
-                    .selectCase()
-                    .when(selectionPredicate, getExtractedValue())
-                    .otherwise(
-                        criteriaBuilder.nullLiteral(CustomPostgreSQLDialect.getExtractionReturnType(variableJavaType))
-                    )
-            );
+            selectionExpression = criteriaBuilder.greatest((Expression) getGuardedExtractionExpression());
         }
         return selectionExpression;
     }
