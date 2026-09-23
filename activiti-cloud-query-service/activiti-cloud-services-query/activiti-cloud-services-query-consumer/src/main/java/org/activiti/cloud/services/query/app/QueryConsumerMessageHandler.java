@@ -42,9 +42,10 @@ public class QueryConsumerMessageHandler
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
         MessageChannel queryEventsChannel,
-        Optional<RecomputeEventCapturer> recomputeEventCapturer
+        Optional<RecomputeEventCapturer> recomputeEventCapturer,
+        int chunkSize
     ) {
-        super(eventHandlerContext, optimizer, entityManager);
+        super(eventHandlerContext, optimizer, entityManager, chunkSize);
         this.queryEventsChannel = queryEventsChannel;
         this.recomputeEventCapturer = recomputeEventCapturer;
     }

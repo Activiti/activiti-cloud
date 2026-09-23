@@ -103,7 +103,8 @@ public class QueryConsumerAutoConfiguration {
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
         IntegrationFlow queryEventsQueueIntegrationFlow,
-        Optional<RecomputeEventCapturer> recomputeEventCapturer
+        Optional<RecomputeEventCapturer> recomputeEventCapturer,
+        @Value("${activiti.cloud.query.consumer.message.handler.chunk-size:100}") Integer chunkSize
     ) {
         LOGGER.debug(
             "Pushed-counts recompute capture is {}",
@@ -114,7 +115,8 @@ public class QueryConsumerAutoConfiguration {
             optimizer,
             entityManager,
             queryEventsQueueIntegrationFlow.getInputChannel(),
-            recomputeEventCapturer
+            recomputeEventCapturer,
+            chunkSize
         );
     }
 

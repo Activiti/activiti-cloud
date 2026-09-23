@@ -19,6 +19,8 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Gatherers;
+import org.activiti.cloud.api.events.CloudRuntimeEventSorter;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
@@ -34,34 +36,60 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
     private final EntityManager entityManager;
+    private final int chunkSize;
 
     public QueryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager
     ) {
+        this(eventHandlerContext, optimizer, entityManager, Integer.MAX_VALUE);
+    }
+
+    public QueryConsumerChannelHandler(
+        QueryEventHandlerContext eventHandlerContext,
+        QueryEventHandlerContextOptimizer optimizer,
+        EntityManager entityManager,
+        int chunkSize
+    ) {
         this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
         this.entityManager = entityManager;
+        this.chunkSize = chunkSize;
     }
 
     public void receive(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
         afterCompletion(entityManager::clear);
-        var optimizedEvents = optimizer.optimize(events);
-        enrichWithMessageMetadata(optimizedEvents, headers);
-        eventHandlerContext.handle(optimizedEvents.toArray(new CloudRuntimeEvent[] {}));
+
+        final var counter = new AtomicInteger(0);
+
+        CloudRuntimeEventSorter.sort(events)
+            .stream()
+            .<CloudRuntimeEvent<?, ?>>map(it -> enrichWithMessageMetadata(counter.incrementAndGet(), it, headers))
+            .gather(Gatherers.windowFixed(chunkSize))
+            .map(optimizer::optimize)
+            .forEach(chunk -> {
+                eventHandlerContext.handle(chunk.toArray(new CloudRuntimeEvent[] {}));
+
+                entityManager.flush();
+                entityManager.clear();
+            });
     }
 
-    private static void enrichWithMessageMetadata(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
+    private CloudRuntimeEvent<?, ?> enrichWithMessageMetadata(
+        Integer sequenceNumber,
+        CloudRuntimeEvent<?, ?> event,
+        Map<String, Object> headers
+    ) {
         Object idHeader = headers.get("id");
         var messageId = idHeader != null ? idHeader.toString() : null;
-        var counter = new AtomicInteger(0);
-        for (CloudRuntimeEvent<?, ?> event : events) {
-            if (event instanceof CloudRuntimeEventImpl<?, ?> impl) {
-                impl.setMessageId(messageId);
-                impl.setSequenceNumber(counter.getAndIncrement());
-            }
+
+        if (event instanceof CloudRuntimeEventImpl<?, ?> impl) {
+            impl.setMessageId(messageId);
+            impl.setSequenceNumber(sequenceNumber);
         }
+
+        return event;
     }
 
     private static void afterCompletion(Runnable action) {
