@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import java.util.Optional;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -68,9 +67,8 @@ public class QueryConsumerMessageHandlerTest {
             eventHandlerContext,
             optimizer,
             entityManager,
-            queryEventsChannel,
-            Optional.of(recomputeEventCapturer)
-        );
+            queryEventsChannel
+        ).recomputeEventCapturer(recomputeEventCapturer);
     }
 
     @Test
@@ -155,13 +153,7 @@ public class QueryConsumerMessageHandlerTest {
 
     @Test
     void handleMessageShouldSucceed_whenRecomputeEventCapturerIsAbsent() {
-        consumer = new QueryConsumerMessageHandler(
-            eventHandlerContext,
-            optimizer,
-            entityManager,
-            queryEventsChannel,
-            Optional.empty()
-        );
+        consumer = new QueryConsumerMessageHandler(eventHandlerContext, optimizer, entityManager, queryEventsChannel);
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
         List<CloudRuntimeEvent<?, ?>> events = List.of(processStartedEvent);
         final var message = MessageBuilder.withPayload(events).build();

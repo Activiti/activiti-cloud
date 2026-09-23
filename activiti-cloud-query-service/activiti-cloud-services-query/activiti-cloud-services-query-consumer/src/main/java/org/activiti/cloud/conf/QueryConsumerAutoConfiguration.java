@@ -114,9 +114,10 @@ public class QueryConsumerAutoConfiguration {
             eventHandlerContext,
             optimizer,
             entityManager,
-            queryEventsQueueIntegrationFlow.getInputChannel(),
-            recomputeEventCapturer
-        ).chunkSize(chunkSize);
+            queryEventsQueueIntegrationFlow.getInputChannel()
+        )
+            .chunkSize(chunkSize)
+            .recomputeEventCapturer(recomputeEventCapturer.orElse(null));
     }
 
     @Bean

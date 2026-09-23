@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,9 +31,9 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.integration.transaction.PseudoTransactionManager;
@@ -43,6 +42,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ExtendWith(MockitoExtension.class)
 class QueryConsumerChannelHandlerTest {
 
+    @InjectMocks
     private QueryConsumerChannelHandler consumer;
 
     @Mock
@@ -53,11 +53,6 @@ class QueryConsumerChannelHandlerTest {
 
     @Mock
     private EntityManager entityManager;
-
-    @BeforeEach
-    void setUp() {
-        consumer = new QueryConsumerChannelHandler(eventHandlerContext, optimizer, entityManager);
-    }
 
     @Test
     void receiveShouldHandleReceivedEvent() {
@@ -79,8 +74,8 @@ class QueryConsumerChannelHandlerTest {
         //then
         verify(optimizer).optimize(events);
         verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
-        verify(entityManager, atLeastOnce()).flush();
-        verify(entityManager, atLeastOnce()).clear();
+        verify(entityManager).flush();
+        verify(entityManager).clear();
         assertThat(processCreatedEvent.getMessageId()).isEqualTo(messageId);
         assertThat(processCreatedEvent.getSequenceNumber()).isZero();
         assertThat(processStartedEvent.getMessageId()).isEqualTo(messageId);
@@ -117,7 +112,7 @@ class QueryConsumerChannelHandlerTest {
         List<CloudRuntimeEvent<?, ?>> events = List.of(taskCreatedEvent, processStartedEvent, processCreatedEvent);
         Map<String, Object> headers = Map.of("id", "message-id");
 
-        consumer = new QueryConsumerChannelHandler(eventHandlerContext, optimizer, entityManager).chunkSize(2);
+        consumer.chunkSize(2);
 
         when(optimizer.optimize(firstChunk)).thenReturn(firstChunk);
         when(optimizer.optimize(secondChunk)).thenReturn(secondChunk);
@@ -146,8 +141,6 @@ class QueryConsumerChannelHandlerTest {
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
         List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent, processStartedEvent);
         Map<String, Object> headers = Map.of("id", "message-id");
-
-        consumer = new QueryConsumerChannelHandler(eventHandlerContext, optimizer, entityManager);
 
         when(optimizer.optimize(events)).thenReturn(events);
 
