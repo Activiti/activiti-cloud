@@ -66,6 +66,10 @@ public class QueryConsumerChannelHandler {
     }
 
     public QueryConsumerChannelHandler chunkSize(int chunkSize) {
+        if (chunkSize <= 0) {
+            throw new IllegalArgumentException("chunkSize must be greater than zero");
+        }
+
         this.chunkSize = chunkSize;
 
         return this;
