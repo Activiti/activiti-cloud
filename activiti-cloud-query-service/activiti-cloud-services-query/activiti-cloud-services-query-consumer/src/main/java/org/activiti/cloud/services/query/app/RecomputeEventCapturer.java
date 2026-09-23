@@ -105,7 +105,10 @@ public class RecomputeEventCapturer {
         LOGGER.atDebug().log("Capturing {} committed events for the recompute buffer", events.size());
         LOGGER.atDebug().log(
             "Event types: {}",
-            events.stream().map(e -> e.getEventType().name()).toList()
+            events
+                .stream()
+                .map(e -> e.getEventType().name())
+                .toList()
         );
         Instant at = clock.instant();
         events.forEach(event -> captureOne(event, at));
