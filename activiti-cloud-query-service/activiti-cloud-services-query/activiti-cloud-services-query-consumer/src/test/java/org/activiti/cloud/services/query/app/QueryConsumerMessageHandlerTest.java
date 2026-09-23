@@ -69,8 +69,7 @@ public class QueryConsumerMessageHandlerTest {
             optimizer,
             entityManager,
             queryEventsChannel,
-            Optional.of(recomputeEventCapturer),
-            100
+            Optional.of(recomputeEventCapturer)
         );
     }
 
@@ -161,8 +160,7 @@ public class QueryConsumerMessageHandlerTest {
             optimizer,
             entityManager,
             queryEventsChannel,
-            Optional.empty(),
-            100
+            Optional.empty()
         );
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
         List<CloudRuntimeEvent<?, ?>> events = List.of(processStartedEvent);

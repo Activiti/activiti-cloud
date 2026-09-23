@@ -34,26 +34,16 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
     private final EntityManager entityManager;
-    private final int chunkSize;
+    private int chunkSize = 100;
 
     public QueryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager
     ) {
-        this(eventHandlerContext, optimizer, entityManager, 100);
-    }
-
-    public QueryConsumerChannelHandler(
-        QueryEventHandlerContext eventHandlerContext,
-        QueryEventHandlerContextOptimizer optimizer,
-        EntityManager entityManager,
-        int chunkSize
-    ) {
         this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
         this.entityManager = entityManager;
-        this.chunkSize = chunkSize;
     }
 
     public void receive(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
@@ -73,6 +63,12 @@ public class QueryConsumerChannelHandler {
                     entityManager.clear();
                 }
             });
+    }
+
+    public QueryConsumerChannelHandler chunkSize(int chunkSize) {
+        this.chunkSize = chunkSize;
+
+        return this;
     }
 
     private CloudRuntimeEvent<?, ?> enrichWithMessageMetadata(

@@ -56,7 +56,7 @@ class QueryConsumerChannelHandlerTest {
 
     @BeforeEach
     void setUp() {
-        consumer = new QueryConsumerChannelHandler(eventHandlerContext, optimizer, entityManager, 100);
+        consumer = new QueryConsumerChannelHandler(eventHandlerContext, optimizer, entityManager);
     }
 
     @Test
@@ -117,7 +117,7 @@ class QueryConsumerChannelHandlerTest {
         List<CloudRuntimeEvent<?, ?>> events = List.of(taskCreatedEvent, processStartedEvent, processCreatedEvent);
         Map<String, Object> headers = Map.of("id", "message-id");
 
-        consumer = new QueryConsumerChannelHandler(eventHandlerContext, optimizer, entityManager, 2);
+        consumer = new QueryConsumerChannelHandler(eventHandlerContext, optimizer, entityManager).chunkSize(2);
 
         when(optimizer.optimize(firstChunk)).thenReturn(firstChunk);
         when(optimizer.optimize(secondChunk)).thenReturn(secondChunk);
