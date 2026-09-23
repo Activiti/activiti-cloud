@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.app;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
@@ -34,21 +35,26 @@ public class QueryConsumerMessageHandler
 {
 
     private final MessageChannel queryEventsChannel;
+    private final Optional<RecomputeEventCapturer> recomputeEventCapturer;
 
     public QueryConsumerMessageHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        MessageChannel queryEventsChannel
+        MessageChannel queryEventsChannel,
+        Optional<RecomputeEventCapturer> recomputeEventCapturer
     ) {
         super(eventHandlerContext, optimizer, entityManager);
         this.queryEventsChannel = queryEventsChannel;
+        this.recomputeEventCapturer = recomputeEventCapturer;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
         beforeCommit(() -> queryEventsChannel.send(message));
+        // afterCommit: a rolled-back batch must not reach the recompute buffer.
+        afterCommit(() -> recomputeEventCapturer.ifPresent(capturer -> capturer.capture(message.getPayload())));
         receive(message.getPayload(), message.getHeaders());
     }
 
@@ -57,6 +63,17 @@ public class QueryConsumerMessageHandler
             new TransactionSynchronization() {
                 @Override
                 public void beforeCommit(boolean readOnly) {
+                    action.run();
+                }
+            }
+        );
+    }
+
+    private static void afterCommit(Runnable action) {
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
                     action.run();
                 }
             }
