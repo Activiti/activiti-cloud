@@ -153,7 +153,7 @@ public class QueryConsumerMessageHandlerTest {
 
     @Test
     void handleMessageShouldSucceed_whenRecomputeEventCapturerIsAbsent() {
-        consumer = new QueryConsumerMessageHandler(eventHandlerContext, optimizer, entityManager, queryEventsChannel);
+        consumer.recomputeEventCapturer(null);
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
         List<CloudRuntimeEvent<?, ?>> events = List.of(processStartedEvent);
         final var message = MessageBuilder.withPayload(events).build();
@@ -162,5 +162,6 @@ public class QueryConsumerMessageHandlerTest {
         new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx -> consumer.accept(message));
 
         verify(queryEventsChannel).send(message);
+        verify(recomputeEventCapturer, never()).capture(any());
     }
 }
