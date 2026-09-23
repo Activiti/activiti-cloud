@@ -17,15 +17,17 @@ package org.activiti.cloud.services.query.app;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.activiti.api.task.model.Task;
+import org.activiti.cloud.services.query.app.count.PushedCounter;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 
 /**
  * Pushed "assigned to me" badge: tasks where the user is the assignee and the task is
- * {@link Task.TaskStatus#ASSIGNED}. Returns the assigned-task count per affected user via a single
- * grouped query; users with none are simply absent (treated as zero).
+ * {@link Task.TaskStatus#ASSIGNED}. Returns an absolute assigned-task count for every affected user
+ * via a single grouped query, materializing zero for those with no assigned task.
  */
 public class AssignedTaskCounter implements PushedCounter {
 
@@ -45,11 +47,14 @@ public class AssignedTaskCounter implements PushedCounter {
         if (affectedUserIds.isEmpty()) {
             return Map.of();
         }
-        return taskRepository
+        Map<String, Long> assignedCounts = taskRepository
             .countGroupedByAssignee(affectedUserIds, Task.TaskStatus.ASSIGNED)
             .stream()
             .collect(
                 Collectors.toMap(TaskRepository.AssigneeCount::getAssignee, TaskRepository.AssigneeCount::getTaskCount)
             );
+        return affectedUserIds
+            .stream()
+            .collect(Collectors.toMap(Function.identity(), userId -> assignedCounts.getOrDefault(userId, 0L)));
     }
 }

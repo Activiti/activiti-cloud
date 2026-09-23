@@ -43,15 +43,15 @@ class AssignedTaskCounterTest {
     }
 
     @Test
-    void shouldReturnAbsoluteCountPerAssignee_omittingUsersWithNone() {
+    void shouldReturnAbsoluteCountPerAffectedUser_withZeroForThoseWithNone() {
         when(taskRepository.countGroupedByAssignee(any(), eq(Task.TaskStatus.ASSIGNED))).thenReturn(
             List.of(assigneeCount("alice", 2L), assigneeCount("bob", 1L))
         );
 
         Map<String, Long> counts = counter.compute(Set.of("alice", "bob", "carol"));
 
-        // carol has no assigned task -> absent from the map; the pipeline treats absence as zero.
-        assertThat(counts).containsOnly(entry("alice", 2L), entry("bob", 1L));
+        // carol has no assigned task -> explicit zero, so every affected user gets an absolute count.
+        assertThat(counts).containsOnly(entry("alice", 2L), entry("bob", 1L), entry("carol", 0L));
     }
 
     @Test

@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.activiti.cloud.common.feature.FeatureToggle;
+import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.ConsumerRecomputeBuffer;
 import org.activiti.cloud.services.query.app.ConsumerRecomputeScheduler;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;

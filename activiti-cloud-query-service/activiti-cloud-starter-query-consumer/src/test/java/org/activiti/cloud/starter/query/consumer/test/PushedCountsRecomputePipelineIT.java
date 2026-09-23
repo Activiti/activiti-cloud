@@ -26,10 +26,10 @@ import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
+import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
-import org.activiti.cloud.services.query.app.count.PushedCounter;
-import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +44,8 @@ import org.springframework.messaging.support.MessageBuilder;
 
 /**
  * End-to-end: a real committed event batch, captured after commit, flushed by the real scheduler,
- * resolved against a directly-seeded {@link ConsumerSubscriberRegistry}, counted by a test
- * {@link PushedCounter}, and published onto the real {@code countProducer} binding.
+ * resolved against a directly-seeded {@link ConsumerSubscriberRegistry}, counted by a fixed-result
+ * {@link AssignedTaskCounter} test double, and published onto the real {@code countProducer} binding.
  */
 @SpringBootTest(
     classes = QueryConsumerTestApplication.class,
@@ -75,6 +75,7 @@ class PushedCountsRecomputePipelineIT {
 
     @AfterEach
     void tearDown() {
+        // Tests share one context; drop alice's registration so the next test starts with no watchers.
         registry.unregister("alice", "rest-1", Instant.now());
     }
 
@@ -121,13 +122,9 @@ class PushedCountsRecomputePipelineIT {
     static class TestCounterConfig {
 
         @Bean
-        PushedCounter testAssignedCounter() {
-            return new PushedCounter() {
-                @Override
-                public PushedCountType type() {
-                    return PushedCountType.ASSIGNED;
-                }
-
+        AssignedTaskCounter testAssignedCounter(TaskRepository taskRepository) {
+            // Replaces the real ASSIGNED counter (via @ConditionalOnMissingBean) so the pipeline runs exactly one, with a fixed count.
+            return new AssignedTaskCounter(taskRepository) {
                 @Override
                 public Map<String, Long> compute(Set<String> affectedUserIds) {
                     return Map.of("alice", 5L);
