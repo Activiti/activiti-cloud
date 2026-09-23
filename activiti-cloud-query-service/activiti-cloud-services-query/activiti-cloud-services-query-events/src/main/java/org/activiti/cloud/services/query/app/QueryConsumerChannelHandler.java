@@ -49,9 +49,10 @@ public class QueryConsumerChannelHandler {
     public void receive(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
         final var counter = new AtomicInteger(0);
 
-        CloudRuntimeEventSorter.sort(events)
+        events
             .stream()
             .<CloudRuntimeEvent<?, ?>>map(it -> enrichWithMessageMetadata(counter.getAndIncrement(), it, headers))
+            .sorted(CloudRuntimeEventSorter.COMPARATOR)
             .gather(Gatherers.windowFixed(chunkSize))
             .map(optimizer::optimize)
             .map(list -> list.toArray(CloudRuntimeEvent[]::new))
