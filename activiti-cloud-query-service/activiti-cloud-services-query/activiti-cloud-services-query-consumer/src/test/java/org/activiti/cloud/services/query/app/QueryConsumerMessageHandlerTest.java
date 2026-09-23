@@ -69,7 +69,8 @@ public class QueryConsumerMessageHandlerTest {
             optimizer,
             entityManager,
             queryEventsChannel,
-            Optional.of(recomputeEventCapturer)
+            Optional.of(recomputeEventCapturer),
+            100
         );
     }
 
@@ -92,6 +93,7 @@ public class QueryConsumerMessageHandlerTest {
         //then
         verify(optimizer).optimize(events);
         verify(eventHandlerContext).handle(processStartedEvent);
+        verify(entityManager).flush();
         verify(entityManager).clear();
         verify(queryEventsChannel).send(message);
         verify(recomputeEventCapturer).capture(events);
@@ -116,6 +118,7 @@ public class QueryConsumerMessageHandlerTest {
 
         //then
         verify(eventHandlerContext).handle(processCreatedEvent);
+        verify(entityManager, never()).flush();
         verify(entityManager).clear();
         verify(queryEventsChannel, never()).send(any(Message.class));
         verify(recomputeEventCapturer, never()).capture(any());
@@ -145,6 +148,7 @@ public class QueryConsumerMessageHandlerTest {
 
         //then
         verify(eventHandlerContext).handle(processCreatedEvent);
+        verify(entityManager).flush();
         verify(entityManager).clear();
         verify(queryEventsChannel, never()).send(any(Message.class));
         verify(recomputeEventCapturer, never()).capture(any());

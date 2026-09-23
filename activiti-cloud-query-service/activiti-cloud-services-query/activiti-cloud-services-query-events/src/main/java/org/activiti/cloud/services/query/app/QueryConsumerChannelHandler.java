@@ -41,7 +41,7 @@ public class QueryConsumerChannelHandler {
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager
     ) {
-        this(eventHandlerContext, optimizer, entityManager, Integer.MAX_VALUE);
+        this(eventHandlerContext, optimizer, entityManager, 100);
     }
 
     public QueryConsumerChannelHandler(
@@ -65,10 +65,12 @@ public class QueryConsumerChannelHandler {
             .gather(Gatherers.windowFixed(chunkSize))
             .map(optimizer::optimize)
             .forEach(chunk -> {
-                eventHandlerContext.handle(chunk.toArray(new CloudRuntimeEvent[] {}));
-
-                entityManager.flush();
-                entityManager.clear();
+                try {
+                    eventHandlerContext.handle(chunk.toArray(new CloudRuntimeEvent[] {}));
+                    entityManager.flush();
+                } finally {
+                    entityManager.clear();
+                }
             });
     }
 
