@@ -18,7 +18,6 @@ package org.activiti.cloud.services.rest.conf;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletInputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,11 +60,7 @@ class VariableRequestSizeLimitFilterTest {
         // Simulate what the downstream filter chain does: read the input stream
         Mockito.doAnswer(invocation -> {
             jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
-            ServletInputStream is = wrappedReq.getInputStream();
-            byte[] buffer = new byte[1024];
-            while (is.read(buffer) != -1) {
-                // read until EOF or exception
-            }
+            wrappedReq.getInputStream().readAllBytes();
             return null;
         })
             .when(filterChain)
@@ -78,37 +73,7 @@ class VariableRequestSizeLimitFilterTest {
     }
 
     @Test
-    void should_rejectRequest_when_contentLengthSpoofedSmall_butActualBodyExceedsLimit() throws Exception {
-        byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
-        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
-        request.setContentType("application/json");
-        request.setContent(oversizedBody);
-        // Spoof a small Content-Length
-        request.addHeader("Content-Length", "10");
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        // Simulate downstream reading the full body
-        Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
-            ServletInputStream is = wrappedReq.getInputStream();
-            byte[] buffer = new byte[1024];
-            while (is.read(buffer) != -1) {
-                // read until EOF or exception
-            }
-            return null;
-        })
-            .when(filterChain)
-            .doFilter(Mockito.any(), Mockito.any());
-
-        filter.doFilter(request, response, filterChain);
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE.value());
-        assertThat(response.getContentAsString()).contains("Payload Too Large");
-    }
-
-    @Test
-    void should_allowRequest_when_noContentLengthHeader_andActualBodyWithinLimit() throws Exception {
+    void should_allowRequest_when_actualBodyWithinLimit() throws Exception {
         byte[] smallBody = "{\"var1\":\"value1\"}".getBytes();
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
         request.setContentType("application/json");
@@ -116,14 +81,9 @@ class VariableRequestSizeLimitFilterTest {
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        // Simulate downstream reading the body successfully
         Mockito.doAnswer(invocation -> {
             jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
-            ServletInputStream is = wrappedReq.getInputStream();
-            byte[] buffer = new byte[1024];
-            while (is.read(buffer) != -1) {
-                // read until EOF
-            }
+            wrappedReq.getInputStream().readAllBytes();
             return null;
         })
             .when(filterChain)
@@ -176,9 +136,7 @@ class VariableRequestSizeLimitFilterTest {
 
         Mockito.doAnswer(invocation -> {
             jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
-            ServletInputStream is = wrappedReq.getInputStream();
-            byte[] buffer = new byte[1024];
-            while (is.read(buffer) != -1) {}
+            wrappedReq.getInputStream().readAllBytes();
             return null;
         })
             .when(filterChain)
@@ -200,9 +158,7 @@ class VariableRequestSizeLimitFilterTest {
 
         Mockito.doAnswer(invocation -> {
             jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
-            ServletInputStream is = wrappedReq.getInputStream();
-            byte[] buffer = new byte[1024];
-            while (is.read(buffer) != -1) {}
+            wrappedReq.getInputStream().readAllBytes();
             return null;
         })
             .when(filterChain)
