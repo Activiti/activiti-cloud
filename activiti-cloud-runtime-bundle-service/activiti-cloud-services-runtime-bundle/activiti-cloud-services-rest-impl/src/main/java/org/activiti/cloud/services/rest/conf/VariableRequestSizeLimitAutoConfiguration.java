@@ -26,16 +26,16 @@ import org.springframework.context.annotation.Bean;
  * and task variable endpoints.
  * <p>
  * The maximum request body size can be configured via the property
- * {@code activiti.cloud.services.variables.max-request-size-bytes} (default: 256 KB).
+ * {@code activiti.cloud.services.variables.max-request-size-bytes} (default: 5 MB).
  */
 @AutoConfiguration
 @ConditionalOnWebApplication
 public class VariableRequestSizeLimitAutoConfiguration {
 
     /**
-     * Default maximum request body size: 256 KB.
+     * Default maximum request body size: 5 MB.
      */
-    private static final long DEFAULT_MAX_REQUEST_SIZE_BYTES = 256 * 1024;
+    private static final long DEFAULT_MAX_REQUEST_SIZE_BYTES = 5 * 1024 * 1024;
 
     @Bean
     public FilterRegistrationBean<VariableRequestSizeLimitFilter> variableRequestSizeLimitFilterRegistration(
