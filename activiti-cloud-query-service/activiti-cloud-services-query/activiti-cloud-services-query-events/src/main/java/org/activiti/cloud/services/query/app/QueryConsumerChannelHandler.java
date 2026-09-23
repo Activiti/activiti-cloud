@@ -63,10 +63,11 @@ public class QueryConsumerChannelHandler {
             .stream()
             .<CloudRuntimeEvent<?, ?>>map(it -> enrichWithMessageMetadata(counter.getAndIncrement(), it, headers))
             .gather(Gatherers.windowFixed(chunkSize))
-            .forEach(chunk -> {
+            .map(optimizer::optimize)
+            .map(list -> list.toArray(CloudRuntimeEvent[]::new))
+            .forEach(eventsChunk -> {
                 try {
-                    final var optimizedEvents = optimizer.optimize(chunk).toArray(new CloudRuntimeEvent[] {});
-                    eventHandlerContext.handle(optimizedEvents);
+                    eventHandlerContext.handle(eventsChunk);
                     entityManager.flush();
                 } finally {
                     entityManager.clear();
