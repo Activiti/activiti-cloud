@@ -17,7 +17,9 @@ package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -127,8 +129,8 @@ class RecomputePipelineTest {
     }
 
     private List<CountChangedMessage> capturePayloads() {
-        var captor = org.mockito.ArgumentCaptor.forClass(Message.class);
-        verify(countProducer, org.mockito.Mockito.atLeastOnce()).send(captor.capture());
+        var captor = forClass(Message.class);
+        verify(countProducer, atLeastOnce()).send(captor.capture());
         return captor
             .getAllValues()
             .stream()
