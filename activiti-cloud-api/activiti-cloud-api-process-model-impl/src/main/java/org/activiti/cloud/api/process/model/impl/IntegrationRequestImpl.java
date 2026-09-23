@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
+import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -28,6 +29,10 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
     private String errorDestination;
 
     private String incidentDestination;
+
+    private Date requestTimestamp;
+
+    private Integer ttlSeconds;
 
     public IntegrationRequestImpl() {}
 
@@ -68,5 +73,23 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
 
     public void setIncidentDestination(String incidentDestination) {
         this.incidentDestination = incidentDestination;
+    }
+
+    @Override
+    public Date getRequestTimestamp() {
+        return requestTimestamp;
+    }
+
+    public void setRequestTimestamp(Date requestTimestamp) {
+        this.requestTimestamp = requestTimestamp;
+    }
+
+    @Override
+    public Integer getTtlSeconds() {
+        return ttlSeconds;
+    }
+
+    public void setTtlSeconds(Integer ttlSeconds) {
+        this.ttlSeconds = ttlSeconds;
     }
 }

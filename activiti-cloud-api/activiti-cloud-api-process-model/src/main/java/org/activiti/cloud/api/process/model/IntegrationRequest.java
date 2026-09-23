@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.process.model;
 
+import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
@@ -26,6 +27,24 @@ public interface IntegrationRequest extends CloudRuntimeEntity {
     String getErrorDestination();
 
     default String getIncidentDestination() {
+        return null;
+    }
+
+    /**
+     * The point in time the Runtime Bundle created this request. Together with {@link #getTtlSeconds()},
+     * lets a connector detect and skip work whose result the Runtime Bundle will have already given up
+     * waiting for.
+     */
+    default Date getRequestTimestamp() {
+        return null;
+    }
+
+    /**
+     * The number of seconds after {@link #getRequestTimestamp()} after which this request is considered
+     * stale, mirroring the orphaned-integration-recovery threshold so the two mechanisms cannot drift
+     * apart.
+     */
+    default Integer getTtlSeconds() {
         return null;
     }
 }

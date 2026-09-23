@@ -18,6 +18,7 @@ package org.activiti.cloud.api.process.model.impl.events;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.junit.jupiter.api.Test;
@@ -51,5 +52,32 @@ class IntegrationRequestImplTest {
         given(integrationContext.getAppVersion()).willReturn("1");
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         assertThat(integrationRequest.getIncidentDestination()).isNull();
+    }
+
+    @Test
+    void should_setAndGetRequestTimestamp() {
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+        Date requestTimestamp = new Date();
+
+        integrationRequest.setRequestTimestamp(requestTimestamp);
+
+        assertThat(integrationRequest.getRequestTimestamp()).isEqualTo(requestTimestamp);
+    }
+
+    @Test
+    void should_setAndGetTtlSeconds() {
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+
+        integrationRequest.setTtlSeconds(10800);
+
+        assertThat(integrationRequest.getTtlSeconds()).isEqualTo(10800);
+    }
+
+    @Test
+    void should_returnNullTimestampAndTtl_whenNotSet() {
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+
+        assertThat(integrationRequest.getRequestTimestamp()).isNull();
+        assertThat(integrationRequest.getTtlSeconds()).isNull();
     }
 }

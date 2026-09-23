@@ -20,22 +20,31 @@ import static org.activiti.services.connectors.channel.ProcessEngineIntegrationC
 import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER;
 
 import java.io.Serializable;
+import java.time.Clock;
+import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
 
 public class IntegrationRequestBuilder implements Serializable {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private final FunctionBindingConfiguration.BindingResolver bindingResolver;
+    private final OrphanedIntegrationRecoveryProperties orphanedIntegrationRecoveryProperties;
+    private final Clock clock;
 
     public IntegrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        FunctionBindingConfiguration.BindingResolver bindingResolver
+        FunctionBindingConfiguration.BindingResolver bindingResolver,
+        OrphanedIntegrationRecoveryProperties orphanedIntegrationRecoveryProperties,
+        Clock clock
     ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.bindingResolver = bindingResolver;
+        this.orphanedIntegrationRecoveryProperties = orphanedIntegrationRecoveryProperties;
+        this.clock = clock;
     }
 
     public IntegrationRequestImpl build(IntegrationContext integrationContext) {
@@ -44,6 +53,8 @@ public class IntegrationRequestBuilder implements Serializable {
         integrationRequest.setErrorDestination(bindingResolver.getBindingDestination(INTEGRATION_ERRORS_CONSUMER));
         integrationRequest.setResultDestination(bindingResolver.getBindingDestination(INTEGRATION_RESULTS_CONSUMER));
         integrationRequest.setIncidentDestination(bindingResolver.getBindingDestination(CONNECTOR_INCIDENT_CONSUMER));
+        integrationRequest.setRequestTimestamp(Date.from(clock.instant()));
+        integrationRequest.setTtlSeconds(orphanedIntegrationRecoveryProperties.getThresholdSeconds());
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
         return integrationRequest;

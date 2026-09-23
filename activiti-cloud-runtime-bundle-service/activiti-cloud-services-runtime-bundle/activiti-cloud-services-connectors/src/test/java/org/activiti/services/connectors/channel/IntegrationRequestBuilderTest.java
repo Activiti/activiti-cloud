@@ -19,18 +19,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class IntegrationRequestBuilderTest {
+
+    private static final Instant FIXED_INSTANT = Instant.parse("2026-09-23T10:00:00.000Z");
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
@@ -41,8 +48,20 @@ class IntegrationRequestBuilderTest {
     @Mock
     private IntegrationContext integrationContext;
 
-    @InjectMocks
+    private OrphanedIntegrationRecoveryProperties orphanedIntegrationRecoveryProperties;
+
     private IntegrationRequestBuilder builder;
+
+    @BeforeEach
+    void setUp() {
+        orphanedIntegrationRecoveryProperties = new OrphanedIntegrationRecoveryProperties();
+        builder = new IntegrationRequestBuilder(
+            runtimeBundleInfoAppender,
+            bindingResolver,
+            orphanedIntegrationRecoveryProperties,
+            Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC)
+        );
+    }
 
     @Test
     void should_populateAllDestinations() {
@@ -82,5 +101,28 @@ class IntegrationRequestBuilderTest {
         assertThat(request.getErrorDestination()).isNull();
         assertThat(request.getResultDestination()).isNull();
         assertThat(request.getIncidentDestination()).isNull();
+    }
+
+    @Test
+    void should_setRequestTimestampFromClock() {
+        IntegrationRequestImpl request = builder.build(integrationContext);
+
+        assertThat(request.getRequestTimestamp()).isEqualTo(Date.from(FIXED_INSTANT));
+    }
+
+    @Test
+    void should_setTtlSecondsFromConfiguredThreshold() {
+        IntegrationRequestImpl request = builder.build(integrationContext);
+
+        assertThat(request.getTtlSeconds()).isEqualTo(orphanedIntegrationRecoveryProperties.getThresholdSeconds());
+    }
+
+    @Test
+    void should_setTtlSeconds_when_thresholdPropertyIsChanged() {
+        orphanedIntegrationRecoveryProperties.setThresholdSeconds(42);
+
+        IntegrationRequestImpl request = builder.build(integrationContext);
+
+        assertThat(request.getTtlSeconds()).isEqualTo(42);
     }
 }
