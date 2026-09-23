@@ -35,12 +35,12 @@ public interface IntegrationRequest extends CloudRuntimeEntity {
      * lets a connector detect and skip work whose result the Runtime Bundle will have already given up
      * waiting for.
      */
-    default Date getRequestTimestamp() {
+    default Date getRequestDate() {
         return null;
     }
 
     /**
-     * The number of seconds after {@link #getRequestTimestamp()} after which this request is considered
+     * The number of seconds after {@link #getRequestDate()} after which this request is considered
      * stale, mirroring the orphaned-integration-recovery threshold so the two mechanisms cannot drift
      * apart.
      */

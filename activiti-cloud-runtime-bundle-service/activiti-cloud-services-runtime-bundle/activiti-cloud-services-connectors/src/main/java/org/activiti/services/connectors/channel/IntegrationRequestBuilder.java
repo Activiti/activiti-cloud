@@ -53,7 +53,7 @@ public class IntegrationRequestBuilder implements Serializable {
         integrationRequest.setErrorDestination(bindingResolver.getBindingDestination(INTEGRATION_ERRORS_CONSUMER));
         integrationRequest.setResultDestination(bindingResolver.getBindingDestination(INTEGRATION_RESULTS_CONSUMER));
         integrationRequest.setIncidentDestination(bindingResolver.getBindingDestination(CONNECTOR_INCIDENT_CONSUMER));
-        integrationRequest.setRequestTimestamp(Date.from(clock.instant()));
+        integrationRequest.setRequestDate(Date.from(clock.instant()));
         integrationRequest.setTtlSeconds(orphanedIntegrationRecoveryProperties.getThresholdSeconds());
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);

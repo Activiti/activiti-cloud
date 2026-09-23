@@ -30,7 +30,7 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
 
     private String incidentDestination;
 
-    private Date requestTimestamp;
+    private Date requestDate;
 
     private Integer ttlSeconds;
 
@@ -76,12 +76,12 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
     }
 
     @Override
-    public Date getRequestTimestamp() {
-        return requestTimestamp;
+    public Date getRequestDate() {
+        return requestDate;
     }
 
-    public void setRequestTimestamp(Date requestTimestamp) {
-        this.requestTimestamp = requestTimestamp;
+    public void setRequestDate(Date requestDate) {
+        this.requestDate = requestDate;
     }
 
     @Override

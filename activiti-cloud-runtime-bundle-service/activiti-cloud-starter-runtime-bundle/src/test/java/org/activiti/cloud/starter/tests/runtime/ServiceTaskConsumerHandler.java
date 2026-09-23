@@ -100,7 +100,7 @@ public class ServiceTaskConsumerHandler {
     public Consumer<Message<IntegrationRequest>> receiveRequestConnector() {
         return message -> {
             assertIntegrationContextHeaders(message.getPayload(), message.getHeaders());
-            assertRequestTimestampAndTtl(message.getPayload());
+            assertRequestDateAndTtl(message.getPayload());
 
             IntegrationContext integrationContext = message.getPayload().getIntegrationContext();
 
@@ -260,11 +260,11 @@ public class ServiceTaskConsumerHandler {
         }
     }
 
-    // Asserts that requestTimestamp/ttlSeconds actually survive JSON serialization over the binder,
+    // Asserts that requestDate/ttlSeconds actually survive JSON serialization over the binder,
     // not just construction in IntegrationRequestBuilder.
-    private void assertRequestTimestampAndTtl(IntegrationRequest integrationRequest) {
-        Assertions.assertThat(integrationRequest.getRequestTimestamp()).isNotNull();
-        Assertions.assertThat(integrationRequest.getRequestTimestamp().toInstant()).isCloseTo(
+    private void assertRequestDateAndTtl(IntegrationRequest integrationRequest) {
+        Assertions.assertThat(integrationRequest.getRequestDate()).isNotNull();
+        Assertions.assertThat(integrationRequest.getRequestDate().toInstant()).isCloseTo(
             Instant.now(),
             within(Duration.ofMinutes(1))
         );

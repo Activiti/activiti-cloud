@@ -104,10 +104,10 @@ class IntegrationRequestBuilderTest {
     }
 
     @Test
-    void should_setRequestTimestampFromClock() {
+    void should_setRequestDateFromClock() {
         IntegrationRequestImpl request = builder.build(integrationContext);
 
-        assertThat(request.getRequestTimestamp()).isEqualTo(Date.from(FIXED_INSTANT));
+        assertThat(request.getRequestDate()).isEqualTo(Date.from(FIXED_INSTANT));
     }
 
     @Test

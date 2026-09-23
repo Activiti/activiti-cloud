@@ -55,13 +55,13 @@ class IntegrationRequestImplTest {
     }
 
     @Test
-    void should_setAndGetRequestTimestamp() {
+    void should_setAndGetRequestDate() {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        Date requestTimestamp = new Date();
+        Date requestDate = new Date();
 
-        integrationRequest.setRequestTimestamp(requestTimestamp);
+        integrationRequest.setRequestDate(requestDate);
 
-        assertThat(integrationRequest.getRequestTimestamp()).isEqualTo(requestTimestamp);
+        assertThat(integrationRequest.getRequestDate()).isEqualTo(requestDate);
     }
 
     @Test
@@ -74,10 +74,10 @@ class IntegrationRequestImplTest {
     }
 
     @Test
-    void should_returnNullTimestampAndTtl_whenNotSet() {
+    void should_returnNullRequestDateAndTtl_whenNotSet() {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
 
-        assertThat(integrationRequest.getRequestTimestamp()).isNull();
+        assertThat(integrationRequest.getRequestDate()).isNull();
         assertThat(integrationRequest.getTtlSeconds()).isNull();
     }
 }
