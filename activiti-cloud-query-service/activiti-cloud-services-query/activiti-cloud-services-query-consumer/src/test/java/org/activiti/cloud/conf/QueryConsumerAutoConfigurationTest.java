@@ -17,7 +17,14 @@ package org.activiti.cloud.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.mock;
 
+import jakarta.persistence.EntityManager;
+import java.util.Optional;
+import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
+import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +69,19 @@ class QueryConsumerAutoConfigurationTest {
         assertThat(output).contains(
             " Unexpected message type class org.springframework.messaging.support.GenericMessage"
         );
+    }
+
+    @Test
+    void queryConsumerMessageHandler_isConstructable_whenRecomputeEventCapturerIsAbsent() {
+        QueryConsumerMessageHandler handler = new QueryConsumerAutoConfiguration().queryConsumerMessageHandler(
+            mock(QueryEventHandlerContext.class),
+            mock(QueryEventHandlerContextOptimizer.class),
+            mock(EntityManager.class),
+            mock(IntegrationFlow.class),
+            Optional.<RecomputeEventCapturer>empty()
+        );
+
+        assertThat(handler).isNotNull();
     }
 
     @Configuration

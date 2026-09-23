@@ -25,14 +25,15 @@ import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.integration.transaction.PseudoTransactionManager;
@@ -44,7 +45,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ExtendWith(MockitoExtension.class)
 public class QueryConsumerMessageHandlerTest {
 
-    @InjectMocks
     private QueryConsumerMessageHandler consumer;
 
     @Mock
@@ -58,6 +58,20 @@ public class QueryConsumerMessageHandlerTest {
 
     @Mock
     private MessageChannel queryEventsChannel;
+
+    @Mock
+    private RecomputeEventCapturer recomputeEventCapturer;
+
+    @BeforeEach
+    void setUp() {
+        consumer = new QueryConsumerMessageHandler(
+            eventHandlerContext,
+            optimizer,
+            entityManager,
+            queryEventsChannel,
+            Optional.of(recomputeEventCapturer)
+        );
+    }
 
     @Test
     void handleMessageShouldHandleReceivedEventsAndPublishQueryEventMessage() {
@@ -80,6 +94,7 @@ public class QueryConsumerMessageHandlerTest {
         verify(eventHandlerContext).handle(processStartedEvent);
         verify(entityManager).clear();
         verify(queryEventsChannel).send(message);
+        verify(recomputeEventCapturer).capture(events);
     }
 
     @Test
@@ -103,6 +118,7 @@ public class QueryConsumerMessageHandlerTest {
         verify(eventHandlerContext).handle(processCreatedEvent);
         verify(entityManager).clear();
         verify(queryEventsChannel, never()).send(any(Message.class));
+        verify(recomputeEventCapturer, never()).capture(any());
     }
 
     @Test
@@ -131,5 +147,25 @@ public class QueryConsumerMessageHandlerTest {
         verify(eventHandlerContext).handle(processCreatedEvent);
         verify(entityManager).clear();
         verify(queryEventsChannel, never()).send(any(Message.class));
+        verify(recomputeEventCapturer, never()).capture(any());
+    }
+
+    @Test
+    void handleMessageShouldSucceed_whenRecomputeEventCapturerIsAbsent() {
+        consumer = new QueryConsumerMessageHandler(
+            eventHandlerContext,
+            optimizer,
+            entityManager,
+            queryEventsChannel,
+            Optional.empty()
+        );
+        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
+        List<CloudRuntimeEvent<?, ?>> events = List.of(processStartedEvent);
+        final var message = MessageBuilder.withPayload(events).build();
+        when(optimizer.optimize(events)).thenReturn(events);
+
+        new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx -> consumer.accept(message));
+
+        verify(queryEventsChannel).send(message);
     }
 }
