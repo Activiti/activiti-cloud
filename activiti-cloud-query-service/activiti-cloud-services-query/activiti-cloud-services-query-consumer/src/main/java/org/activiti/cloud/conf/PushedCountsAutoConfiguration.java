@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.ConsumerRecomputeBuffer;
 import org.activiti.cloud.services.query.app.ConsumerRecomputeScheduler;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
@@ -166,5 +167,11 @@ public class PushedCountsAutoConfiguration {
             maxWindow,
             maxBatchSize
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    AssignedTaskCounter assignedTaskCounter(TaskRepository taskRepository) {
+        return new AssignedTaskCounter(taskRepository);
     }
 }
