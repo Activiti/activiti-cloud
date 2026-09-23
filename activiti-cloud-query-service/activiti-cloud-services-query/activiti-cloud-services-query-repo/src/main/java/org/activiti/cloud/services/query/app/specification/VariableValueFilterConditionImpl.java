@@ -53,22 +53,37 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
 
     @Override
     public Predicate getPredicate() {
+        return buildValuePredicate(getSelectionExpression());
+    }
+
+    /**
+     * Same value comparison as {@link #getPredicate()}, but applied to the plain extracted value
+     * instead of the {@code max(case when ... end)} aggregate and combined with the selection
+     * predicate, so that the whole condition can live in the {@code WHERE} clause of a correlated
+     * {@code EXISTS} subquery where no {@code GROUP BY} is in place.
+     */
+    @Override
+    public Predicate getSubqueryPredicate() {
+        return criteriaBuilder.and(getSelectionPredicate(), buildValuePredicate(getExtractedValue()));
+    }
+
+    private Predicate buildValuePredicate(Expression valueExpression) {
         try {
             return switch (filter.operator()) {
-                case EQUALS -> criteriaBuilder.equal(getSelectionExpression(), getConvertedFilterValue());
-                case NOT_EQUALS -> criteriaBuilder.notEqual(getSelectionExpression(), getConvertedFilterValue());
-                case GREATER_THAN -> criteriaBuilder.greaterThan(getSelectionExpression(), getConvertedFilterValue());
+                case EQUALS -> criteriaBuilder.equal(valueExpression, getConvertedFilterValue());
+                case NOT_EQUALS -> criteriaBuilder.notEqual(valueExpression, getConvertedFilterValue());
+                case GREATER_THAN -> criteriaBuilder.greaterThan(valueExpression, getConvertedFilterValue());
                 case GREATER_THAN_OR_EQUAL -> criteriaBuilder.greaterThanOrEqualTo(
-                    getSelectionExpression(),
+                    valueExpression,
                     getConvertedFilterValue()
                 );
-                case LESS_THAN -> criteriaBuilder.lessThan(getSelectionExpression(), getConvertedFilterValue());
+                case LESS_THAN -> criteriaBuilder.lessThan(valueExpression, getConvertedFilterValue());
                 case LESS_THAN_OR_EQUAL -> criteriaBuilder.lessThanOrEqualTo(
-                    getSelectionExpression(),
+                    valueExpression,
                     getConvertedFilterValue()
                 );
                 case LIKE -> criteriaBuilder.like(
-                    criteriaBuilder.lower((Expression<String>) getSelectionExpression()),
+                    criteriaBuilder.lower(valueExpression),
                     "%" + filter.value().toLowerCase() + "%"
                 );
             };
