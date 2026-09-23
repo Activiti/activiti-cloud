@@ -51,10 +51,6 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @Transactional
 class TaskQueuedCountIT {
 
-    // Matches no assignee, owner or candidate user, so the restricted specification yields the group-only
-    // (shared) visibility: assignee is null and (a candidate group is in the set or the task has none).
-    private static final String GROUP_VISIBILITY_PROBE = "__queued_shared_visibility_probe__";
-
     @Container
     @ServiceConnection
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
@@ -227,7 +223,7 @@ class TaskQueuedCountIT {
     }
 
     private long sharedGroupVisibleCount(Set<String> groups) {
-        return taskRepository.count(TaskSpecification.restricted(queuedRequest(), GROUP_VISIBILITY_PROBE, groups));
+        return taskRepository.count(TaskSpecification.groupVisible(queuedRequest(), groups));
     }
 
     private long restrictedQueuedCount(String userId, Set<String> groups) {

@@ -31,30 +31,14 @@ import org.activiti.cloud.services.query.app.specification.TaskSpecification;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 
 /**
- * Pushed "queued for me" badge: unassigned {@link Task.TaskStatus#CREATED} tasks a user may claim, i.e.
- * ones they are a candidate for through one of their groups, personally as a candidate user, or that
- * have no candidates at all (open to everyone). Owning a task does not make it claimable, so ownership
- * is deliberately not counted.
- *
- * <p>Affected users are bucketed by their group set (users sharing a group set share a bucket), so each
- * bucket costs exactly two queries regardless of its size:
- * <pre>
- *   my count = what everyone in my group set can see        (shared, one query per bucket)
- *            + what only I am named on that my groups cannot (personal remainder, one query per bucket)
- * </pre>
- * The two terms are disjoint by construction, so summing them cannot double-count.
+ * Pushed "queued for me" badge: unassigned {@link Task.TaskStatus#CREATED} tasks a user may claim —
+ * through one of their groups, personally as a candidate user, or open to everyone (no candidates).
+ * Ownership does not make a task claimable, so it is not counted. Returns an absolute count for every
+ * affected user, materializing zero for those with none.
  */
 public class QueuedTaskCounter implements PushedCounter {
 
     private static final Task.TaskStatus QUEUED_STATUS = Task.TaskStatus.CREATED;
-
-    /**
-     * Synthetic user id that matches no assignee, owner or candidate user. Feeding it to the restricted
-     * specification collapses the visibility predicate to "assignee is null and (a candidate group is in
-     * the set or the task has no candidates)" — precisely the group-visible count shared by every member
-     * of the bucket, while still reusing the specification's no-candidates branch and distinct semantics.
-     */
-    private static final String GROUP_VISIBILITY_PROBE_USER_ID = "__queued_shared_visibility_probe__";
 
     private final TaskRepository taskRepository;
     private final ConsumerSubscriberRegistry subscriberRegistry;
@@ -91,9 +75,7 @@ public class QueuedTaskCounter implements PushedCounter {
     }
 
     private long sharedGroupVisibleCount(Collection<String> groups) {
-        return taskRepository.count(
-            TaskSpecification.restricted(queuedSearchRequest(), GROUP_VISIBILITY_PROBE_USER_ID, groups)
-        );
+        return taskRepository.count(TaskSpecification.groupVisible(queuedSearchRequest(), groups));
     }
 
     private Map<String, Long> personalRemainder(Collection<String> members, Collection<String> groups) {

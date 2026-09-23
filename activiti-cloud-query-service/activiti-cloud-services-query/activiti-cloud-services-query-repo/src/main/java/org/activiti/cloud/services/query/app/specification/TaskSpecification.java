@@ -43,6 +43,12 @@ import org.springframework.util.CollectionUtils;
 @CountOverFullWindow
 public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSearchRequest> {
 
+    /**
+     * Synthetic user id that matches no assignee, owner or candidate user, so {@link #restricted}
+     * collapses to "assignee is null and (a candidate group is in the set or the task has no candidates)".
+     */
+    private static final String GROUP_VISIBILITY_PROBE_USER_ID = "__queued_shared_visibility_probe__";
+
     private final String userId;
     private final Collection<String> userGroups;
 
@@ -82,6 +88,15 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         Collection<String> userGroups
     ) {
         return new TaskSpecification(taskSearchRequest, userId, userGroups);
+    }
+
+    /**
+     * Restricts to the group-visible slice of {@link #restricted}: unassigned tasks that have a candidate
+     * group in {@code userGroups} or no candidates at all. Reuses the {@code restricted} predicate via a
+     * synthetic user matching nobody, so this shared count cannot drift from it.
+     */
+    public static TaskSpecification groupVisible(TaskSearchRequest taskSearchRequest, Collection<String> userGroups) {
+        return new TaskSpecification(taskSearchRequest, GROUP_VISIBILITY_PROBE_USER_ID, userGroups);
     }
 
     @Override
