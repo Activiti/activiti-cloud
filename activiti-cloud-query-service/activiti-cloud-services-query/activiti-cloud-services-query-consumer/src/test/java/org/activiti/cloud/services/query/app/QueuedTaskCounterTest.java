@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -24,13 +24,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.specification.TaskSpecification;
-import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 import org.junit.jupiter.api.Test;
 
@@ -47,14 +47,12 @@ class QueuedTaskCounterTest {
 
     @Test
     void shouldReturnEmptyAndNotQuery_whenThereAreNoAffectedUsers() {
-        assertThat(counter.countFor(Set.of(), Instant.now())).isEmpty();
-        assertThat(counter.countFor(null, Instant.now())).isEmpty();
+        assertThat(counter.compute(Set.of())).isEmpty();
         verifyNoInteractions(taskRepository, subscriberRegistry);
     }
 
     @Test
     void shouldSumSharedGroupVisibleCountAndPersonalRemainder_whenAUserHasNoRemainder() {
-        Instant asOf = Instant.parse("2026-09-16T10:15:30Z");
         when(subscriberRegistry.groupsOf("alice")).thenReturn(Set.of("g1"));
         when(subscriberRegistry.groupsOf("bob")).thenReturn(Set.of("g1"));
         when(taskRepository.count(any(TaskSpecification.class))).thenReturn(10L);
@@ -66,19 +64,13 @@ class QueuedTaskCounterTest {
             )
         ).thenReturn(List.of(userCount("alice", 3L)));
 
-        List<CountChangedMessage> messages = counter.countFor(List.of("alice", "bob"), asOf);
+        Map<String, Long> counts = counter.compute(new LinkedHashSet<>(List.of("alice", "bob")));
 
-        assertThat(messages)
-            .extracting(CountChangedMessage::scopeKey, CountChangedMessage::count, CountChangedMessage::asOf)
-            .containsExactlyInAnyOrder(
-                tuple(ScopeKeys.queued("alice"), 13L, asOf),
-                tuple(ScopeKeys.queued("bob"), 10L, asOf)
-            );
+        assertThat(counts).containsOnly(entry("alice", 13L), entry("bob", 10L));
     }
 
     @Test
     void shouldComputeTheSharedCountOncePerGroupSetBucket_whenMultipleUsersShareAGroupSet() {
-        Instant asOf = Instant.parse("2026-09-16T10:15:30Z");
         when(subscriberRegistry.groupsOf("alice")).thenReturn(Set.of("g1"));
         when(subscriberRegistry.groupsOf("bob")).thenReturn(Set.of("g1"));
         when(subscriberRegistry.groupsOf("carol")).thenReturn(Set.of("g2"));
@@ -99,16 +91,28 @@ class QueuedTaskCounterTest {
             )
         ).thenReturn(List.of(userCount("carol", 1L)));
 
-        List<CountChangedMessage> messages = counter.countFor(List.of("alice", "bob", "carol"), asOf);
+        Map<String, Long> counts = counter.compute(new LinkedHashSet<>(List.of("alice", "bob", "carol")));
 
-        assertThat(messages)
-            .extracting(CountChangedMessage::scopeKey, CountChangedMessage::count, CountChangedMessage::asOf)
-            .containsExactlyInAnyOrder(
-                tuple(ScopeKeys.queued("alice"), 13L, asOf),
-                tuple(ScopeKeys.queued("bob"), 10L, asOf),
-                tuple(ScopeKeys.queued("carol"), 5L, asOf)
-            );
+        assertThat(counts).containsOnly(entry("alice", 13L), entry("bob", 10L), entry("carol", 5L));
         verify(taskRepository, times(2)).count(any(TaskSpecification.class));
+    }
+
+    @Test
+    void shouldReturnZeroForAnAffectedUserWithNoVisibleQueuedTasks() {
+        when(subscriberRegistry.groupsOf("dave")).thenReturn(Set.of("g9"));
+        when(taskRepository.count(any(TaskSpecification.class))).thenReturn(0L);
+        when(
+            taskRepository.countQueuedPersonalRemainderGroupedByUser(
+                List.of("dave"),
+                Task.TaskStatus.CREATED,
+                Set.of("g9")
+            )
+        ).thenReturn(List.of());
+
+        Map<String, Long> counts = counter.compute(Set.of("dave"));
+
+        // No shared visibility and no personal candidacy still yields an explicit zero, never an omission.
+        assertThat(counts).containsOnly(entry("dave", 0L));
     }
 
     private static TaskRepository.UserCount userCount(String userId, long count) {

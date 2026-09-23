@@ -15,21 +15,19 @@
  */
 package org.activiti.cloud.services.query.app;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.api.task.model.Task;
+import org.activiti.cloud.services.query.app.count.PushedCounter;
 import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.specification.TaskSpecification;
-import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 
 /**
@@ -72,13 +70,12 @@ public class QueuedTaskCounter implements PushedCounter {
     }
 
     @Override
-    public List<CountChangedMessage> countFor(Collection<String> affectedUserIds, Instant asOf) {
-        Set<String> userIds = affectedUserIds == null ? Set.of() : new LinkedHashSet<>(affectedUserIds);
-        if (userIds.isEmpty()) {
-            return List.of();
+    public Map<String, Long> compute(Set<String> affectedUserIds) {
+        if (affectedUserIds.isEmpty()) {
+            return Map.of();
         }
         Map<Set<String>, List<String>> membersByGroupSet = new LinkedHashMap<>();
-        for (String userId : userIds) {
+        for (String userId : affectedUserIds) {
             Set<String> groups = Set.copyOf(subscriberRegistry.groupsOf(userId));
             membersByGroupSet.computeIfAbsent(groups, unused -> new ArrayList<>()).add(userId);
         }
@@ -90,11 +87,7 @@ public class QueuedTaskCounter implements PushedCounter {
                 countByUser.put(userId, shared + remainderByUser.getOrDefault(userId, 0L));
             }
         });
-        List<CountChangedMessage> messages = new ArrayList<>(userIds.size());
-        for (String userId : userIds) {
-            messages.add(new CountChangedMessage(ScopeKeys.queued(userId), countByUser.get(userId), asOf));
-        }
-        return messages;
+        return countByUser;
     }
 
     private long sharedGroupVisibleCount(Collection<String> groups) {
