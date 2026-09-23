@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,9 +30,9 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.integration.transaction.PseudoTransactionManager;
@@ -40,7 +41,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ExtendWith(MockitoExtension.class)
 class QueryConsumerChannelHandlerTest {
 
-    @InjectMocks
     private QueryConsumerChannelHandler consumer;
 
     @Mock
@@ -51,6 +51,11 @@ class QueryConsumerChannelHandlerTest {
 
     @Mock
     private EntityManager entityManager;
+
+    @BeforeEach
+    void setUp() {
+        consumer = new QueryConsumerChannelHandler(eventHandlerContext, optimizer, entityManager, 100);
+    }
 
     @Test
     void receiveShouldHandleReceivedEvent() {
@@ -72,7 +77,8 @@ class QueryConsumerChannelHandlerTest {
         //then
         verify(optimizer).optimize(events);
         verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
-        verify(entityManager).clear();
+        verify(entityManager, atLeastOnce()).flush();
+        verify(entityManager, atLeastOnce()).clear();
         assertThat(processCreatedEvent.getMessageId()).isEqualTo(messageId);
         assertThat(processCreatedEvent.getSequenceNumber()).isZero();
         assertThat(processStartedEvent.getMessageId()).isEqualTo(messageId);

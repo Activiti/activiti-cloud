@@ -27,8 +27,6 @@ import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContex
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class QueryConsumerChannelHandler {
@@ -59,13 +57,11 @@ public class QueryConsumerChannelHandler {
     }
 
     public void receive(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
-        afterCompletion(entityManager::clear);
-
         final var counter = new AtomicInteger(0);
 
         CloudRuntimeEventSorter.sort(events)
             .stream()
-            .<CloudRuntimeEvent<?, ?>>map(it -> enrichWithMessageMetadata(counter.incrementAndGet(), it, headers))
+            .<CloudRuntimeEvent<?, ?>>map(it -> enrichWithMessageMetadata(counter.getAndIncrement(), it, headers))
             .gather(Gatherers.windowFixed(chunkSize))
             .map(optimizer::optimize)
             .forEach(chunk -> {
@@ -90,16 +86,5 @@ public class QueryConsumerChannelHandler {
         }
 
         return event;
-    }
-
-    private static void afterCompletion(Runnable action) {
-        TransactionSynchronizationManager.registerSynchronization(
-            new TransactionSynchronization() {
-                @Override
-                public void afterCompletion(int status) {
-                    action.run();
-                }
-            }
-        );
     }
 }
