@@ -35,7 +35,7 @@ public class VariableRequestSizeLimitAutoConfiguration {
     /**
      * Default maximum request body size: 5 MB.
      */
-    private static final long DEFAULT_MAX_REQUEST_SIZE_BYTES = 5 * 1024 * 1024;
+    private static final long DEFAULT_MAX_REQUEST_SIZE_BYTES = 5L * 1024 * 1024;
 
     @Bean
     public FilterRegistrationBean<VariableRequestSizeLimitFilter> variableRequestSizeLimitFilterRegistration(
