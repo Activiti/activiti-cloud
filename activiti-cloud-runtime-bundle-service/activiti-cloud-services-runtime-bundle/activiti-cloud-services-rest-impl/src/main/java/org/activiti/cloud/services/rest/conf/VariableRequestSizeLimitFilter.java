@@ -16,11 +16,8 @@
 package org.activiti.cloud.services.rest.conf;
 
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -34,9 +31,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * <p>
  * This filter acts as an application-level replacement for the AWS WAF rules that were
  * previously blocking oversized requests to process and task variable endpoints. The request's
- * {@link ServletInputStream} is wrapped in a byte-counting stream that tracks actual bytes
- * read. If the cumulative bytes exceed the configured limit during deserialization, a
- * {@link RequestBodyTooLargeException} is thrown and converted to an HTTP 413 response.
+ * input stream is wrapped in a {@link ByteCountingInputStream} via {@link SizeLimitedRequestWrapper}
+ * that tracks actual bytes read. If the cumulative bytes exceed the configured limit during
+ * deserialization, a {@link RequestBodyTooLargeException} is thrown and converted to an HTTP 413 response.
  * <p>
  * Because actual bytes are counted rather than relying on the {@code Content-Length} header,
  * this filter is effective even when the header is missing, inaccurate, or spoofed.
@@ -44,6 +41,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(VariableRequestSizeLimitFilter.class);
+
+    private static final int ERROR_STATUS = HttpStatus.PAYLOAD_TOO_LARGE.value();
+    private static final String ERROR_NAME = "Payload Too Large";
+    private static final String ERROR_MESSAGE_TEMPLATE =
+        "Request body size exceeds the maximum allowed size of %d bytes";
 
     private final long maxContentLengthBytes;
 
@@ -54,8 +56,6 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
-        // Wrap the request with a byte-counting input stream that tracks actual bytes
-        // read and throws RequestBodyTooLargeException if the limit is exceeded
         HttpServletRequest wrappedRequest = new SizeLimitedRequestWrapper(request, maxContentLengthBytes);
 
         try {
@@ -75,127 +75,25 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
             maxContentLengthBytes
         );
 
-        response.setStatus(HttpStatus.PAYLOAD_TOO_LARGE.value());
+        String errorMessage = String.format(ERROR_MESSAGE_TEMPLATE, maxContentLengthBytes);
+
+        response.setStatus(ERROR_STATUS);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response
             .getWriter()
             .write(
-                "{\"status\":413,\"error\":\"Payload Too Large\"," +
-                    "\"message\":\"Request body size exceeds the maximum allowed size of " +
-                    maxContentLengthBytes +
-                    " bytes\"}"
+                String.format(
+                    "{\"status\":%d,\"error\":\"%s\",\"message\":\"%s\"}",
+                    ERROR_STATUS,
+                    ERROR_NAME,
+                    errorMessage
+                )
             );
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String method = request.getMethod();
-        // Only filter write operations (PUT, POST) — GETs and DELETEs with small/no bodies are fine
         return !"PUT".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method);
-    }
-
-    /**
-     * Exception thrown when the actual bytes read from the request body exceed the allowed limit.
-     */
-    static class RequestBodyTooLargeException extends RuntimeException {
-
-        private final long bytesRead;
-
-        RequestBodyTooLargeException(long bytesRead, long maxAllowed) {
-            super(
-                "Request body of " + bytesRead + " bytes exceeds the maximum allowed size of " + maxAllowed + " bytes"
-            );
-            this.bytesRead = bytesRead;
-        }
-
-        long getBytesRead() {
-            return bytesRead;
-        }
-    }
-
-    /**
-     * An {@link HttpServletRequestWrapper} that replaces the input stream with a
-     * byte-counting wrapper. When the cumulative bytes read exceed the configured
-     * limit, a {@link RequestBodyTooLargeException} is thrown.
-     */
-    private static class SizeLimitedRequestWrapper extends HttpServletRequestWrapper {
-
-        private final long maxBytes;
-        private ServletInputStream wrappedStream;
-
-        SizeLimitedRequestWrapper(HttpServletRequest request, long maxBytes) {
-            super(request);
-            this.maxBytes = maxBytes;
-        }
-
-        @Override
-        public ServletInputStream getInputStream() throws IOException {
-            if (wrappedStream == null) {
-                wrappedStream = new ByteCountingInputStream(super.getInputStream(), maxBytes);
-            }
-            return wrappedStream;
-        }
-    }
-
-    /**
-     * A {@link ServletInputStream} decorator that counts every byte read and throws
-     * {@link RequestBodyTooLargeException} if the total exceeds the allowed maximum.
-     */
-    private static class ByteCountingInputStream extends ServletInputStream {
-
-        private final ServletInputStream delegate;
-        private final long maxBytes;
-        private long bytesRead = 0;
-
-        ByteCountingInputStream(ServletInputStream delegate, long maxBytes) {
-            this.delegate = delegate;
-            this.maxBytes = maxBytes;
-        }
-
-        @Override
-        public int read() throws IOException {
-            int b = delegate.read();
-            if (b != -1) {
-                bytesRead++;
-                checkLimit();
-            }
-            return b;
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            int count = delegate.read(b, off, len);
-            if (count > 0) {
-                bytesRead += count;
-                checkLimit();
-            }
-            return count;
-        }
-
-        private void checkLimit() {
-            if (bytesRead > maxBytes) {
-                throw new RequestBodyTooLargeException(bytesRead, maxBytes);
-            }
-        }
-
-        @Override
-        public boolean isFinished() {
-            return delegate.isFinished();
-        }
-
-        @Override
-        public boolean isReady() {
-            return delegate.isReady();
-        }
-
-        @Override
-        public void setReadListener(ReadListener readListener) {
-            delegate.setReadListener(readListener);
-        }
-
-        @Override
-        public void close() throws IOException {
-            delegate.close();
-        }
     }
 }
