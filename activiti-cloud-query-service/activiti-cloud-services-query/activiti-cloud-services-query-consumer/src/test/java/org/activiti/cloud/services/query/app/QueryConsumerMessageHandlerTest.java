@@ -161,7 +161,8 @@ public class QueryConsumerMessageHandlerTest {
             optimizer,
             entityManager,
             queryEventsChannel,
-            Optional.empty()
+            Optional.empty(),
+            100
         );
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
         List<CloudRuntimeEvent<?, ?>> events = List.of(processStartedEvent);
