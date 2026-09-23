@@ -37,7 +37,7 @@ public class SubscriberRegistryMessageHandler {
                 message.sourceId(),
                 message.sentAt()
             );
-            case UNREGISTERED -> registry.unregister(message.userId(), message.sourceId());
+            case UNREGISTERED -> registry.unregister(message.userId(), message.sourceId(), message.sentAt());
             case HEARTBEAT -> registry.heartbeat(message.sourceId(), message.sentAt());
             case SNAPSHOT -> registry.applySnapshot(message.sourceId(), message.entries(), message.sentAt());
             case RESYNC_REQUEST -> {
