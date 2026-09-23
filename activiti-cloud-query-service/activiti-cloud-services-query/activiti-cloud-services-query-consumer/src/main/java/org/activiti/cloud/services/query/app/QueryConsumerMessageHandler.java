@@ -47,6 +47,7 @@ public class QueryConsumerMessageHandler
         this.queryEventsChannel = queryEventsChannel;
     }
 
+    @Override
     public QueryConsumerMessageHandler chunkSize(int chunkSize) {
         super.chunkSize(chunkSize);
 
