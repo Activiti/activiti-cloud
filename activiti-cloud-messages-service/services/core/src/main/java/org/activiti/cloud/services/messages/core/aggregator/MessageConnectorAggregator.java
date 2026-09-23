@@ -103,7 +103,11 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
         }
 
         if (this.completeGroupsWhenEmpty) {
-            if (messageStore.messageGroupSize(groupId) == 0) {
+            Boolean isEmpty = messageGroupSizeOrInterrupted(messageStore, groupId);
+            if (isEmpty == null) {
+                return;
+            }
+            if (isEmpty) {
                 messageStore.completeGroup(groupId);
                 isCompleted = true;
             }
@@ -112,5 +116,28 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
         if (this.expireGroupsUponCompletion && isCompleted) {
             remove(messageGroup);
         }
+    }
+
+    private @Nullable Boolean messageGroupSizeOrInterrupted(MessageGroupStore messageStore, Object groupId) {
+        try {
+            return messageStore.messageGroupSize(groupId) == 0;
+        } catch (RuntimeException ex) {
+            if (hasInterruptedCause(ex)) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+            throw ex;
+        }
+    }
+
+    private boolean hasInterruptedCause(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof InterruptedException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }
