@@ -109,7 +109,7 @@ class QueryConsumerChannelHandlerTest {
         CloudTaskCreatedEventImpl taskCreatedEvent = new CloudTaskCreatedEventImpl();
         List<CloudRuntimeEvent<?, ?>> firstChunk = List.of(processCreatedEvent, processStartedEvent);
         List<CloudRuntimeEvent<?, ?>> secondChunk = List.of(taskCreatedEvent);
-        List<CloudRuntimeEvent<?, ?>> events = List.of(taskCreatedEvent, processStartedEvent, processCreatedEvent);
+        List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent, processStartedEvent, taskCreatedEvent);
         Map<String, Object> headers = Map.of("id", "message-id");
 
         consumer.chunkSize(2);
