@@ -85,7 +85,7 @@ class MessageConnectorAggregatorTest {
             super(processor, store);
         }
 
-        private void invokeAfterRelease(MessageGroup messageGroup, List<Message<?>> completedMessages) {
+        void invokeAfterRelease(MessageGroup messageGroup, List<Message<?>> completedMessages) {
             afterRelease(messageGroup, completedMessages);
         }
     }
