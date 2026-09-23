@@ -260,8 +260,6 @@ public class ServiceTaskConsumerHandler {
         }
     }
 
-    // Asserts that requestDate/ttlSeconds actually survive JSON serialization over the binder,
-    // not just construction in IntegrationRequestBuilder.
     private void assertRequestDateAndTtl(IntegrationRequest integrationRequest) {
         Assertions.assertThat(integrationRequest.getRequestDate()).isNotNull();
         Assertions.assertThat(integrationRequest.getRequestDate().toInstant()).isCloseTo(

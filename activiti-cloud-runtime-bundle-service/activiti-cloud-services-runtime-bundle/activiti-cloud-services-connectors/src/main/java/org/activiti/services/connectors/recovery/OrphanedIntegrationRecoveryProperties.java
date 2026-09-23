@@ -17,12 +17,6 @@ package org.activiti.services.connectors.recovery;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/**
- * Single source of truth for the orphaned-integration-recovery threshold, so it can be shared
- * between {@link OrphanedIntegrationRecoveryScheduler} (which uses it to decide when an integration
- * is orphaned) and {@code IntegrationRequestBuilder} (which copies it into every outgoing
- * {@code IntegrationRequest} as {@code ttlSeconds}) without duplicating the default value.
- */
 @ConfigurationProperties("activiti.orphaned-integration-recovery")
 public class OrphanedIntegrationRecoveryProperties {
 

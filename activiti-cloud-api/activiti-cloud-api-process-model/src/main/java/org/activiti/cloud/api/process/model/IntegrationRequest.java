@@ -30,20 +30,10 @@ public interface IntegrationRequest extends CloudRuntimeEntity {
         return null;
     }
 
-    /**
-     * The point in time the Runtime Bundle created this request. Together with {@link #getTtlSeconds()},
-     * lets a connector detect and skip work whose result the Runtime Bundle will have already given up
-     * waiting for.
-     */
     default Date getRequestDate() {
         return null;
     }
 
-    /**
-     * The number of seconds after {@link #getRequestDate()} after which this request is considered
-     * stale, mirroring the orphaned-integration-recovery threshold so the two mechanisms cannot drift
-     * apart.
-     */
     default Integer getTtlSeconds() {
         return null;
     }
