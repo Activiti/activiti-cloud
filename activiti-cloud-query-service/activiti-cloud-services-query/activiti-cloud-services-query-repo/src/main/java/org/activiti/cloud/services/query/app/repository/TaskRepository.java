@@ -21,13 +21,16 @@ import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface TaskRepository
     extends
@@ -39,6 +42,33 @@ public interface TaskRepository
         CrudRepository<TaskEntity, String>
 {
     List<TaskEntity> findByProcessInstanceIdIn(Collection<String> processInstanceIds);
+
+    // Per user, the number of unassigned tasks in the given status they are personally a candidate on that
+    // none of the given groups can already see (NOT EXISTS a candidate group in :groups). Excluding the
+    // group-visible tasks keeps this "personal remainder" disjoint from the shared group-visible count so
+    // the two can be summed without double-counting. Users with none are absent from the result (zero).
+    @Query(
+        "select cu.userId as userId, count(distinct t.id) as taskCount " +
+            "from TaskCandidateUser cu join cu.task t " +
+            "where cu.userId in :userIds " +
+            "and t.status = :status " +
+            "and t.assignee is null " +
+            "and not exists (" +
+            "select cg.taskId from TaskCandidateGroup cg " +
+            "where cg.taskId = t.id and cg.groupId in :groups" +
+            ") " +
+            "group by cu.userId"
+    )
+    List<UserCount> countQueuedPersonalRemainderGroupedByUser(
+        @Param("userIds") Collection<String> userIds,
+        @Param("status") Task.TaskStatus status,
+        @Param("groups") Collection<String> groups
+    );
+
+    interface UserCount {
+        String getUserId();
+        long getTaskCount();
+    }
 
     @Override
     default void customize(QuerydslBindings bindings, QTaskEntity root) {
