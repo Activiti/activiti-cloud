@@ -20,6 +20,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,15 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
     private static final String ERROR_NAME = "Payload Too Large";
     private static final String ERROR_MESSAGE_TEMPLATE =
         "Request body size exceeds the maximum allowed size of %d bytes";
+
+    /**
+     * Matches variable endpoint paths regardless of any gateway/proxy prefix.
+     * Covers: /v1/process-instances/{id}/variables, /v1/tasks/{id}/variables,
+     * and their /admin/ variants, with optional trailing path segments.
+     */
+    private static final Pattern VARIABLE_ENDPOINT_PATTERN = Pattern.compile(
+        ".*/(?:admin/)?v1/(?:process-instances|tasks)/[^/]+/variables(?:/.*)?$"
+    );
 
     private final long maxContentLengthBytes;
 
@@ -94,6 +104,10 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String method = request.getMethod();
-        return !"PUT".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method);
+        if (!"PUT".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
+            return true;
+        }
+        String uri = request.getRequestURI();
+        return !VARIABLE_ENDPOINT_PATTERN.matcher(uri).matches();
     }
 }

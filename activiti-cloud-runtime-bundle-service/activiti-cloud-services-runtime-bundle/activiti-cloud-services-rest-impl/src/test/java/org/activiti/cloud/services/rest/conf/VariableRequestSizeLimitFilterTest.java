@@ -123,6 +123,32 @@ class VariableRequestSizeLimitFilterTest {
         assertThat(filter.shouldNotFilter(request)).isFalse();
     }
 
+    // --- URL pattern matching (with gateway prefixes) ---
+
+    @Test
+    void should_applyFilter_forPrefixedVariableEndpoint() {
+        MockHttpServletRequest request = new MockHttpServletRequest(
+            "PUT",
+            "/any-prefix/rb/v1/process-instances/123/variables"
+        );
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
+    @Test
+    void should_applyFilter_forPrefixedAdminEndpoint() {
+        MockHttpServletRequest request = new MockHttpServletRequest(
+            "PUT",
+            "/some-prefix/rb/admin/v1/process-instances/123/variables"
+        );
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
+    @Test
+    void should_skipFilter_forNonVariableEndpoint() {
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/status");
+        assertThat(filter.shouldNotFilter(request)).isTrue();
+    }
+
     // --- Endpoint coverage ---
 
     @Test
