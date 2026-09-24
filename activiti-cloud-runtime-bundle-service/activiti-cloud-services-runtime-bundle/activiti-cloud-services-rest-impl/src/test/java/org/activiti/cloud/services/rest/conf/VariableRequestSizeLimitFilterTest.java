@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,7 @@ class VariableRequestSizeLimitFilterTest {
 
         // Simulate what the downstream filter chain does: read the input stream
         Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
+            HttpServletRequest wrappedReq = invocation.getArgument(0);
             wrappedReq.getInputStream().readAllBytes();
             return null;
         })
@@ -81,7 +82,7 @@ class VariableRequestSizeLimitFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
+            HttpServletRequest wrappedReq = invocation.getArgument(0);
             wrappedReq.getInputStream().readAllBytes();
             return null;
         })
@@ -160,7 +161,7 @@ class VariableRequestSizeLimitFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
+            HttpServletRequest wrappedReq = invocation.getArgument(0);
             wrappedReq.getInputStream().readAllBytes();
             return null;
         })
@@ -200,7 +201,7 @@ class VariableRequestSizeLimitFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
+            HttpServletRequest wrappedReq = invocation.getArgument(0);
             wrappedReq.getInputStream().readAllBytes();
             return null;
         })
@@ -222,7 +223,7 @@ class VariableRequestSizeLimitFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         Mockito.doAnswer(invocation -> {
-            jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
+            HttpServletRequest wrappedReq = invocation.getArgument(0);
             wrappedReq.getInputStream().readAllBytes();
             return null;
         })
