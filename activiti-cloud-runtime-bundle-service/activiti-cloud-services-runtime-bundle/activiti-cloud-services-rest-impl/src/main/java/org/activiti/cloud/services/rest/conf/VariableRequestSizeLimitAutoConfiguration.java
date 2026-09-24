@@ -45,16 +45,7 @@ public class VariableRequestSizeLimitAutoConfiguration {
     ) {
         FilterRegistrationBean<VariableRequestSizeLimitFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new VariableRequestSizeLimitFilter(maxRequestSizeBytes));
-        registration.addUrlPatterns(
-            "/v1/process-instances/*/variables",
-            "/v1/process-instances/*/variables/*",
-            "/admin/v1/process-instances/*/variables",
-            "/admin/v1/process-instances/*/variables/*",
-            "/v1/tasks/*/variables",
-            "/v1/tasks/*/variables/*",
-            "/admin/v1/tasks/*/variables",
-            "/admin/v1/tasks/*/variables/*"
-        );
+        registration.addUrlPatterns("/*");
         registration.setOrder(1);
         registration.setName("variableRequestSizeLimitFilter");
         return registration;
