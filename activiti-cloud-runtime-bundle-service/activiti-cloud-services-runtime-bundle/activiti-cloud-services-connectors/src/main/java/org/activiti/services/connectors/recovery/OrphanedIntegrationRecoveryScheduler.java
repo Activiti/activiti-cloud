@@ -57,7 +57,11 @@ public class OrphanedIntegrationRecoveryScheduler {
         this.featureToggle = featureToggle;
     }
 
-    @Scheduled(cron = "${activiti.orphaned-integration-recovery.cron:0 */5 * * * *}")
+    @Scheduled(
+        cron = "${activiti.orphaned-integration-recovery.cron:" +
+            OrphanedIntegrationRecoveryProperties.DEFAULT_CRON +
+            "}"
+    )
     @SchedulerLock(name = "orphanedIntegrationRecovery")
     public void recoverOrphanedIntegrations() {
         LOGGER.debug("Orphaned integration recovery job started.");

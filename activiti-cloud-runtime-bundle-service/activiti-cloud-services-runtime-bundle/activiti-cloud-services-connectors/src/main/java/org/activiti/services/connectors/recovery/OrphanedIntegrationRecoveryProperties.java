@@ -21,9 +21,11 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 @ConfigurationProperties("activiti.orphaned-integration-recovery")
 public class OrphanedIntegrationRecoveryProperties {
 
+    public static final String DEFAULT_CRON = "0 */5 * * * *";
+
     private int thresholdSeconds = 10800; // 3 hours
 
-    private String cron = "0 */5 * * * *";
+    private String cron = DEFAULT_CRON;
 
     public int getThresholdSeconds() {
         return thresholdSeconds;
