@@ -20,7 +20,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -48,14 +47,9 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
     private static final String ERROR_MESSAGE_TEMPLATE =
         "Request body size exceeds the maximum allowed size of %d bytes";
 
-    /**
-     * Matches variable endpoint paths regardless of any gateway/proxy prefix.
-     * Covers: /v1/process-instances/{id}/variables, /v1/tasks/{id}/variables,
-     * and their /admin/ variants, with optional trailing path segments.
-     */
-    private static final Pattern VARIABLE_ENDPOINT_PATTERN = Pattern.compile(
-        ".*/(?:admin/)?v1/(?:process-instances|tasks)/[^/]+/variables(?:/.*)?$"
-    );
+    private static final String PROCESS_VARIABLES_PATH = "/v1/process-instances/";
+    private static final String TASK_VARIABLES_PATH = "/v1/tasks/";
+    private static final String VARIABLES_SEGMENT = "/variables";
 
     private final long maxContentLengthBytes;
 
@@ -107,7 +101,20 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
         if (!"PUT".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
             return true;
         }
-        String uri = request.getRequestURI();
-        return !VARIABLE_ENDPOINT_PATTERN.matcher(uri).matches();
+        return !isVariableEndpoint(request.getRequestURI());
+    }
+
+    /**
+     * Checks whether the URI targets a variable endpoint, regardless of any gateway prefix.
+     * Matches paths containing /v1/process-instances/{id}/variables or /v1/tasks/{id}/variables,
+     * including /admin/ variants.
+     */
+    private static boolean isVariableEndpoint(String uri) {
+        int variablesIdx = uri.indexOf(VARIABLES_SEGMENT);
+        if (variablesIdx < 0) {
+            return false;
+        }
+        String beforeVariables = uri.substring(0, variablesIdx);
+        return beforeVariables.contains(PROCESS_VARIABLES_PATH) || beforeVariables.contains(TASK_VARIABLES_PATH);
     }
 }
