@@ -173,6 +173,46 @@ class VariableRequestSizeLimitFilterTest {
     }
 
     @Test
+    void should_applyFilter_forStartProcessEndpoint() {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/process-instances");
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
+    @Test
+    void should_applyFilter_forAdminStartProcessEndpoint() {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/v1/process-instances");
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
+    @Test
+    void should_applyFilter_forPrefixedStartProcessEndpoint() {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/gateway-prefix/rb/v1/process-instances");
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
+    @Test
+    void should_throwException_forStartProcessEndpoint() throws ServletException, IOException {
+        byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/process-instances");
+        request.setContentType("application/json");
+        request.setContent(oversizedBody);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        Mockito.doAnswer(invocation -> {
+            jakarta.servlet.http.HttpServletRequest wrappedReq = invocation.getArgument(0);
+            wrappedReq.getInputStream().readAllBytes();
+            return null;
+        })
+            .when(filterChain)
+            .doFilter(Mockito.any(), Mockito.any());
+
+        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain)).isInstanceOf(
+            RequestBodyTooLargeException.class
+        );
+    }
+
+    @Test
     void should_throwException_forAdminVariableEndpoint() throws ServletException, IOException {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/admin/v1/process-instances/789/variables");
