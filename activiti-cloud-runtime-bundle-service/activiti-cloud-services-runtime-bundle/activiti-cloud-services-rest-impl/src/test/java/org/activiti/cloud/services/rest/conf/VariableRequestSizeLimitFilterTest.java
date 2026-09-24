@@ -16,8 +16,11 @@
 package org.activiti.cloud.services.rest.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,14 +49,11 @@ class VariableRequestSizeLimitFilterTest {
     // --- Byte-counting: actual body size checks ---
 
     @Test
-    void should_rejectRequest_when_actualBodyExceedsLimit_withNoContentLengthHeader() throws Exception {
+    void should_throwException_when_actualBodyExceedsLimit() throws ServletException, IOException {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
         request.setContentType("application/json");
         request.setContent(oversizedBody);
-        // MockHttpServletRequest auto-sets Content-Length from setContent,
-        // so we remove it to simulate a missing header
-        request.removeHeader("Content-Length");
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -66,10 +66,9 @@ class VariableRequestSizeLimitFilterTest {
             .when(filterChain)
             .doFilter(Mockito.any(), Mockito.any());
 
-        filter.doFilter(request, response, filterChain);
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE.value());
-        assertThat(response.getContentAsString()).contains("Payload Too Large");
+        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain))
+            .isInstanceOf(RequestBodyTooLargeException.class)
+            .hasMessageContaining("exceeds the maximum allowed size of " + MAX_SIZE_BYTES + " bytes");
     }
 
     @Test
@@ -152,7 +151,7 @@ class VariableRequestSizeLimitFilterTest {
     // --- Endpoint coverage ---
 
     @Test
-    void should_rejectRequest_forTaskVariableEndpoint() throws Exception {
+    void should_throwException_forTaskVariableEndpoint() throws ServletException, IOException {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/tasks/456/variables");
         request.setContentType("application/json");
@@ -168,13 +167,13 @@ class VariableRequestSizeLimitFilterTest {
             .when(filterChain)
             .doFilter(Mockito.any(), Mockito.any());
 
-        filter.doFilter(request, response, filterChain);
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE.value());
+        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain)).isInstanceOf(
+            RequestBodyTooLargeException.class
+        );
     }
 
     @Test
-    void should_rejectRequest_forAdminVariableEndpoint() throws Exception {
+    void should_throwException_forAdminVariableEndpoint() throws ServletException, IOException {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/admin/v1/process-instances/789/variables");
         request.setContentType("application/json");
@@ -190,8 +189,8 @@ class VariableRequestSizeLimitFilterTest {
             .when(filterChain)
             .doFilter(Mockito.any(), Mockito.any());
 
-        filter.doFilter(request, response, filterChain);
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE.value());
+        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain)).isInstanceOf(
+            RequestBodyTooLargeException.class
+        );
     }
 }
