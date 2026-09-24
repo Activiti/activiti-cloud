@@ -17,6 +17,8 @@ package org.activiti.services.connectors;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 
+import java.util.Optional;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
@@ -48,7 +50,9 @@ public class IntegrationRequestSender {
             throw new IllegalTransactionStateException("Transaction synchronization must be active.");
         }
 
-        streamBridge.send(event.getIntegrationContext().getConnectorType(), buildIntegrationRequestMessage(event));
+        Optional.ofNullable(event.getIntegrationContext())
+            .map(IntegrationContext::getConnectorType)
+            .ifPresent(bindingName -> streamBridge.send(bindingName, buildIntegrationRequestMessage(event)));
     }
 
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
