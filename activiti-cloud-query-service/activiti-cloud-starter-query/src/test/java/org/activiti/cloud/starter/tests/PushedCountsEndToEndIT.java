@@ -34,6 +34,7 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
@@ -131,6 +132,143 @@ class PushedCountsEndToEndIT {
                     return Map.of(ALICE, 5L);
                 }
             };
+        }
+    }
+
+    /**
+     * A separate context (own properties): {@code buffer-hard-cap=1}, so the second of two tasks
+     * captured in the same batch is dropped rather than counted.
+     */
+    @Nested
+    @SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+            "activiti.cloud.query.pushed-counts.enabled=true",
+            "activiti.features.query.pushed-counts.enabled=true",
+            "activiti.cloud.query.pushed-counts.flush-interval=PT0.1S",
+            "activiti.cloud.query.pushed-counts.flush-max-window=PT0.2S",
+            "activiti.cloud.query.pushed-counts.buffer-hard-cap=1",
+        }
+    )
+    @TestPropertySource("classpath:application-test.properties")
+    @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+    @Import({ TestChannelBinderConfiguration.class, PushedCountsEndToEndIT.TestCounterConfig.class })
+    class HardCapScenario {
+
+        private static final String FRANK = "pushed-counts-e2e-frank";
+        private static final String GRACE = "pushed-counts-e2e-grace";
+
+        @Autowired
+        private MyProducer producer;
+
+        @Autowired
+        private SubscriberRegistry subscriberRegistry;
+
+        @Autowired
+        private Flux<CountChangedMessage> pushedCountsFlux;
+
+        private final CopyOnWriteArrayList<CountChangedMessage> received = new CopyOnWriteArrayList<>();
+        private Disposable subscription;
+
+        @BeforeEach
+        void subscribe() {
+            subscription = pushedCountsFlux.subscribe(received::add);
+        }
+
+        @AfterEach
+        void tearDown() {
+            subscription.dispose();
+            subscriberRegistry.unregister(FRANK, "test-session");
+            subscriberRegistry.unregister(GRACE, "test-session");
+        }
+
+        @Test
+        void touchingMoreTasksThanTheHardCap_dropsTheOverflow_soOnlyTheFirstIsCounted() {
+            subscriberRegistry.register(FRANK, Set.of(), "test-session", Instant.now());
+            subscriberRegistry.register(GRACE, Set.of(), "test-session", Instant.now());
+
+            TaskImpl frankTask = new TaskImpl();
+            frankTask.setId("pushed-counts-e2e-hardcap-task-1");
+            frankTask.setAssignee(FRANK);
+            TaskImpl graceTask = new TaskImpl();
+            graceTask.setId("pushed-counts-e2e-hardcap-task-2");
+            graceTask.setAssignee(GRACE);
+
+            producer.send(new CloudTaskCreatedEventImpl(frankTask), new CloudTaskCreatedEventImpl(graceTask));
+
+            await()
+                .atMost(Duration.ofSeconds(10))
+                .untilAsserted(() ->
+                    assertThat(received).anyMatch(message -> message.scopeKey().equals("assigned:" + FRANK))
+                );
+            assertThat(received).noneMatch(message -> message.scopeKey().equals("assigned:" + GRACE));
+        }
+    }
+
+    /**
+     * A long {@code flush-max-window} (10s) with a tiny {@code flush-max-size} (2), so a flush
+     * arriving within a few seconds can only be explained by the size trigger, not the window.
+     */
+    @Nested
+    @SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+            "activiti.cloud.query.pushed-counts.enabled=true",
+            "activiti.features.query.pushed-counts.enabled=true",
+            "activiti.cloud.query.pushed-counts.flush-interval=PT0.1S",
+            "activiti.cloud.query.pushed-counts.flush-max-window=PT10S",
+            "activiti.cloud.query.pushed-counts.flush-max-size=2",
+            "activiti.cloud.query.pushed-counts.buffer-hard-cap=100",
+        }
+    )
+    @TestPropertySource("classpath:application-test.properties")
+    @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+    @Import({ TestChannelBinderConfiguration.class, PushedCountsEndToEndIT.TestCounterConfig.class })
+    class SoftCapScenario {
+
+        private static final String ERIN = "pushed-counts-e2e-erin";
+
+        @Autowired
+        private MyProducer producer;
+
+        @Autowired
+        private SubscriberRegistry subscriberRegistry;
+
+        @Autowired
+        private Flux<CountChangedMessage> pushedCountsFlux;
+
+        private final CopyOnWriteArrayList<CountChangedMessage> received = new CopyOnWriteArrayList<>();
+        private Disposable subscription;
+
+        @BeforeEach
+        void subscribe() {
+            subscription = pushedCountsFlux.subscribe(received::add);
+        }
+
+        @AfterEach
+        void tearDown() {
+            subscription.dispose();
+            subscriberRegistry.unregister(ERIN, "test-session");
+        }
+
+        @Test
+        void touchingAsManyTasksAsTheSoftCap_flushesEarly_withoutWaitingOutTheMuchLongerWindow() {
+            subscriberRegistry.register(ERIN, Set.of(), "test-session", Instant.now());
+
+            TaskImpl task1 = new TaskImpl();
+            task1.setId("pushed-counts-e2e-softcap-task-1");
+            task1.setAssignee(ERIN);
+            TaskImpl task2 = new TaskImpl();
+            task2.setId("pushed-counts-e2e-softcap-task-2");
+            task2.setAssignee(ERIN);
+
+            producer.send(new CloudTaskCreatedEventImpl(task1), new CloudTaskCreatedEventImpl(task2));
+
+            await()
+                .atMost(Duration.ofSeconds(3))
+                .untilAsserted(() ->
+                    assertThat(received).anyMatch(message -> message.scopeKey().equals("assigned:" + ERIN))
+                );
         }
     }
 }

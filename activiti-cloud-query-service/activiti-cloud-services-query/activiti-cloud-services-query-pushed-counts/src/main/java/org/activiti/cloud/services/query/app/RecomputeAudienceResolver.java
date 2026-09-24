@@ -61,6 +61,16 @@ public class RecomputeAudienceResolver {
     }
 
     public Map<PushedCountType, Set<String>> resolve(PushedCountsRecomputeWindow window) {
+        if (registry.size() == 0) {
+            return Map.of(
+                PushedCountType.ASSIGNED,
+                Set.of(),
+                PushedCountType.QUEUED,
+                Set.of(),
+                PushedCountType.PROCESSES,
+                Set.of()
+            );
+        }
         Set<TaskCandidateUserEntity> taskCandidateUsers = window.taskIds().isEmpty()
             ? Set.of()
             : taskCandidateUserRepository.findByTaskIdIn(window.taskIds());

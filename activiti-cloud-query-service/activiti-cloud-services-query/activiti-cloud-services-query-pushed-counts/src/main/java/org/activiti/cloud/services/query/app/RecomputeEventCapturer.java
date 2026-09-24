@@ -35,6 +35,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.activiti.cloud.services.query.subscription.SubscriberDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,8 @@ import org.slf4j.LoggerFactory;
  * Maps each event a committed batch carries onto {@link PushedCountsRecomputeBuffer} captures, reading
  * only what the event itself names - no queries. Irrelevant event types (variables, BPMN activity,
  * integration events, {@code PROCESS_CREATED} - a duplicate of {@code PROCESS_STARTED}, ...) are
- * ignored.
+ * ignored. Skipped entirely while nobody is watching: a future subscriber's first value always
+ * comes from a fresh read, never from anything buffered while the registry was empty.
  */
 public class RecomputeEventCapturer {
 
@@ -89,17 +91,28 @@ public class RecomputeEventCapturer {
     );
 
     private final PushedCountsRecomputeBuffer buffer;
+    private final SubscriberDirectory registry;
     private final FeatureToggle featureToggle;
     private final Clock clock;
 
-    public RecomputeEventCapturer(PushedCountsRecomputeBuffer buffer, FeatureToggle featureToggle, Clock clock) {
+    public RecomputeEventCapturer(
+        PushedCountsRecomputeBuffer buffer,
+        SubscriberDirectory registry,
+        FeatureToggle featureToggle,
+        Clock clock
+    ) {
         this.buffer = buffer;
+        this.registry = registry;
         this.featureToggle = featureToggle;
         this.clock = clock;
     }
 
     public void capture(List<CloudRuntimeEvent<?, ?>> events) {
-        if (events == null || !featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS)) {
+        if (
+            events == null ||
+            !featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS) ||
+            registry.size() == 0
+        ) {
             return;
         }
         LOGGER.atDebug().log("Capturing {} committed events for the recompute buffer", events.size());

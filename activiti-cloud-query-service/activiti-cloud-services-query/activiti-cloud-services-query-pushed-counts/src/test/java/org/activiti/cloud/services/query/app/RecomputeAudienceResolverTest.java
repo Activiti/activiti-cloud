@@ -16,9 +16,9 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +29,6 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
-import org.activiti.cloud.services.query.subscription.SubscriberDirectory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -258,6 +257,18 @@ class RecomputeAudienceResolverTest {
     }
 
     @Test
+    void noSubscribers_skipsResolutionEntirely() {
+        PushedCountsRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
+
+        Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
+
+        assertThat(audience.get(PushedCountType.ASSIGNED)).isEmpty();
+        assertThat(audience.get(PushedCountType.QUEUED)).isEmpty();
+        assertThat(audience.get(PushedCountType.PROCESSES)).isEmpty();
+        verifyNoInteractions(taskCandidateUserRepository, taskCandidateGroupRepository, taskRepository);
+    }
+
+    @Test
     void emptyWindow_resolvesToNoAudience() {
         PushedCountsRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of(), Set.of());
 
@@ -282,29 +293,5 @@ class RecomputeAudienceResolverTest {
             processInstanceIds,
             namedInitiatorIds
         );
-    }
-
-    private static final class FakeSubscriberDirectory implements SubscriberDirectory {
-
-        private final Map<String, Set<String>> watching = new HashMap<>();
-
-        void register(String userId, Set<String> groups) {
-            watching.put(userId, groups);
-        }
-
-        @Override
-        public boolean isWatching(String userId) {
-            return watching.containsKey(userId);
-        }
-
-        @Override
-        public Set<String> groupsOf(String userId) {
-            return watching.getOrDefault(userId, Set.of());
-        }
-
-        @Override
-        public Set<String> watchedUserIds() {
-            return Set.copyOf(watching.keySet());
-        }
     }
 }
