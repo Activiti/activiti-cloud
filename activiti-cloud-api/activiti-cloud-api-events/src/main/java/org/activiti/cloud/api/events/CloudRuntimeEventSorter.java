@@ -101,7 +101,7 @@ public final class CloudRuntimeEventSorter {
         CloudRuntimeEvent::getTimestamp
     );
 
-    private static final Comparator<CloudRuntimeEvent<?, ?>> COMPARATOR = BY_EVENT_CLASS.thenComparing(BY_TIMESTAMP);
+    public static final Comparator<CloudRuntimeEvent<?, ?>> COMPARATOR = BY_EVENT_CLASS.thenComparing(BY_TIMESTAMP);
 
     private CloudRuntimeEventSorter() {}
 

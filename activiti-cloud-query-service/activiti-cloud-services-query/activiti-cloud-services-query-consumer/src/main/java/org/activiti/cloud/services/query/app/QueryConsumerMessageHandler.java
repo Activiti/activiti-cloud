@@ -35,26 +35,38 @@ public class QueryConsumerMessageHandler
 {
 
     private final MessageChannel queryEventsChannel;
-    private final Optional<RecomputeEventCapturer> recomputeEventCapturer;
+    private RecomputeEventCapturer recomputeEventCapturer;
 
     public QueryConsumerMessageHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        MessageChannel queryEventsChannel,
-        Optional<RecomputeEventCapturer> recomputeEventCapturer
+        MessageChannel queryEventsChannel
     ) {
         super(eventHandlerContext, optimizer, entityManager);
         this.queryEventsChannel = queryEventsChannel;
+    }
+
+    @Override
+    public QueryConsumerMessageHandler chunkSize(int chunkSize) {
+        super.chunkSize(chunkSize);
+
+        return this;
+    }
+
+    public QueryConsumerMessageHandler recomputeEventCapturer(RecomputeEventCapturer recomputeEventCapturer) {
         this.recomputeEventCapturer = recomputeEventCapturer;
+
+        return this;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
         beforeCommit(() -> queryEventsChannel.send(message));
-        // afterCommit: a rolled-back batch must not reach the recompute buffer.
-        afterCommit(() -> recomputeEventCapturer.ifPresent(capturer -> capturer.capture(message.getPayload())));
+        Optional.ofNullable(recomputeEventCapturer).ifPresent(capturer ->
+            afterCommit(() -> capturer.capture(message.getPayload()))
+        );
         receive(message.getPayload(), message.getHeaders());
     }
 
