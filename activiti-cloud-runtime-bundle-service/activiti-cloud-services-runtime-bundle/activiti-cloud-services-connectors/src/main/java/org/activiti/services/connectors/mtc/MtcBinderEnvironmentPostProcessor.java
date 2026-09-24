@@ -38,10 +38,10 @@ public class MtcBinderEnvironmentPostProcessor implements EnvironmentPostProcess
 
         Map<String, Object> props = new LinkedHashMap<>();
 
-        props.put("spring.cloud.stream.default-binder", "default");
-        props.put("spring.cloud.stream.binders.default.type", "rabbit");
-        props.put("spring.cloud.stream.binders.default.inherit-environment", "true");
-        props.put("spring.cloud.stream.binders.default.default-candidate", "true");
+        props.put("spring.cloud.stream.default-binder", "rabbit");
+        props.put("spring.cloud.stream.binders.rabbit.type", "rabbit");
+        props.put("spring.cloud.stream.binders.rabbit.inherit-environment", "true");
+        props.put("spring.cloud.stream.binders.rabbit.default-candidate", "true");
 
         String binderPrefix = "spring.cloud.stream.binders." + MTC_BINDER_NAME;
         props.put(binderPrefix + ".type", "rabbit");

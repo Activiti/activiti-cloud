@@ -32,10 +32,10 @@ class MtcBinderEnvironmentPostProcessorTest {
 
         postProcessor.postProcessEnvironment(env, new SpringApplication());
 
-        assertThat(env.getProperty("spring.cloud.stream.default-binder")).isEqualTo("default");
-        assertThat(env.getProperty("spring.cloud.stream.binders.default.type")).isEqualTo("rabbit");
-        assertThat(env.getProperty("spring.cloud.stream.binders.default.inherit-environment")).isEqualTo("true");
-        assertThat(env.getProperty("spring.cloud.stream.binders.default.default-candidate")).isEqualTo("true");
+        assertThat(env.getProperty("spring.cloud.stream.default-binder")).isEqualTo("rabbit");
+        assertThat(env.getProperty("spring.cloud.stream.binders.rabbit.type")).isEqualTo("rabbit");
+        assertThat(env.getProperty("spring.cloud.stream.binders.rabbit.inherit-environment")).isEqualTo("true");
+        assertThat(env.getProperty("spring.cloud.stream.binders.rabbit.default-candidate")).isEqualTo("true");
         assertThat(env.getProperty("spring.cloud.stream.binders.mtc.type")).isEqualTo("rabbit");
         assertThat(env.getProperty("spring.cloud.stream.binders.mtc.inherit-environment")).isEqualTo("true");
         assertThat(env.getProperty("spring.cloud.stream.binders.mtc.default-candidate")).isEqualTo("false");
