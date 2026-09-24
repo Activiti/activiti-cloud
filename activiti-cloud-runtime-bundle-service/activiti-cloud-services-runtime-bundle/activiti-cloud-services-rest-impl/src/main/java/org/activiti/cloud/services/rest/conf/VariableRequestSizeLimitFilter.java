@@ -38,14 +38,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * URL matching uses {@link AntPathMatcher} with {@code /**} prefixed patterns so that the
  * filter works regardless of any gateway or proxy path prefix.
  * <p>
- * Because actual bytes are counted rather than relying on the {@code Content-Length} header,
- * this filter is effective even when the header is missing, inaccurate, or spoofed.
  */
 public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
 
     private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private static final List<String> VARIABLE_ENDPOINT_PATTERNS = List.of(
+        "/**/v1/process-instances",
         "/**/v1/process-instances/*/variables",
         "/**/v1/process-instances/*/variables/**",
         "/**/v1/tasks/*/variables",
