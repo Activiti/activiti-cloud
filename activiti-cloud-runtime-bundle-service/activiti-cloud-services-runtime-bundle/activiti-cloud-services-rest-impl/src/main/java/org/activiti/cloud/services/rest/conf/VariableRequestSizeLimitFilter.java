@@ -20,10 +20,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import java.util.List;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -33,23 +32,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * previously blocking oversized requests to process and task variable endpoints. The request's
  * input stream is wrapped in a {@link ByteCountingInputStream} via {@link SizeLimitedRequestWrapper}
  * that tracks actual bytes read. If the cumulative bytes exceed the configured limit during
- * deserialization, a {@link RequestBodyTooLargeException} is thrown and converted to an HTTP 413 response.
+ * deserialization, a {@link RequestBodyTooLargeException} is thrown, which Spring translates
+ * into an HTTP 400 (Bad Request) response.
+ * <p>
+ * URL matching uses {@link AntPathMatcher} with {@code /**} prefixed patterns so that the
+ * filter works regardless of any gateway or proxy path prefix.
  * <p>
  * Because actual bytes are counted rather than relying on the {@code Content-Length} header,
  * this filter is effective even when the header is missing, inaccurate, or spoofed.
  */
 public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(VariableRequestSizeLimitFilter.class);
+    private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
-    private static final int ERROR_STATUS = HttpStatus.PAYLOAD_TOO_LARGE.value();
-    private static final String ERROR_NAME = "Payload Too Large";
-    private static final String ERROR_MESSAGE_TEMPLATE =
-        "Request body size exceeds the maximum allowed size of %d bytes";
-
-    private static final String PROCESS_VARIABLES_PATH = "/v1/process-instances/";
-    private static final String TASK_VARIABLES_PATH = "/v1/tasks/";
-    private static final String VARIABLES_SEGMENT = "/variables";
+    private static final List<String> VARIABLE_ENDPOINT_PATTERNS = List.of(
+        "/**/v1/process-instances/*/variables",
+        "/**/v1/process-instances/*/variables/**",
+        "/**/v1/tasks/*/variables",
+        "/**/v1/tasks/*/variables/**"
+    );
 
     private final long maxContentLengthBytes;
 
@@ -62,37 +63,7 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
         throws ServletException, IOException {
         HttpServletRequest wrappedRequest = new SizeLimitedRequestWrapper(request, maxContentLengthBytes);
 
-        try {
-            filterChain.doFilter(wrappedRequest, response);
-        } catch (RequestBodyTooLargeException e) {
-            if (!response.isCommitted()) {
-                rejectRequest(request, response, e.getBytesRead());
-            }
-        }
-    }
-
-    private void rejectRequest(HttpServletRequest request, HttpServletResponse response, long size) throws IOException {
-        log.warn(
-            "Rejected request to {}: body size {} exceeds maximum allowed size of {} bytes",
-            request.getRequestURI(),
-            size,
-            maxContentLengthBytes
-        );
-
-        String errorMessage = String.format(ERROR_MESSAGE_TEMPLATE, maxContentLengthBytes);
-
-        response.setStatus(ERROR_STATUS);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response
-            .getWriter()
-            .write(
-                String.format(
-                    "{\"status\":%d,\"error\":\"%s\",\"message\":\"%s\"}",
-                    ERROR_STATUS,
-                    ERROR_NAME,
-                    errorMessage
-                )
-            );
+        filterChain.doFilter(wrappedRequest, response);
     }
 
     @Override
@@ -101,20 +72,7 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
         if (!"PUT".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
             return true;
         }
-        return !isVariableEndpoint(request.getRequestURI());
-    }
-
-    /**
-     * Checks whether the URI targets a variable endpoint, regardless of any gateway prefix.
-     * Matches paths containing /v1/process-instances/{id}/variables or /v1/tasks/{id}/variables,
-     * including /admin/ variants.
-     */
-    private static boolean isVariableEndpoint(String uri) {
-        int variablesIdx = uri.indexOf(VARIABLES_SEGMENT);
-        if (variablesIdx < 0) {
-            return false;
-        }
-        String beforeVariables = uri.substring(0, variablesIdx);
-        return beforeVariables.contains(PROCESS_VARIABLES_PATH) || beforeVariables.contains(TASK_VARIABLES_PATH);
+        String uri = request.getRequestURI();
+        return VARIABLE_ENDPOINT_PATTERNS.stream().noneMatch(pattern -> PATH_MATCHER.match(pattern, uri));
     }
 }
