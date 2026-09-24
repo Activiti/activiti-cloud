@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -247,6 +248,18 @@ class RecomputeAudienceResolverTest {
         assertThat(audience.get(PushedCountType.ASSIGNED)).containsExactly("karl");
         assertThat(audience.get(PushedCountType.QUEUED)).containsExactly("karl");
         assertThat(audience.get(PushedCountType.PROCESSES)).isEmpty();
+    }
+
+    @Test
+    void noSubscribers_skipsResolutionEntirely() {
+        ConsumerRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
+
+        Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
+
+        assertThat(audience.get(PushedCountType.ASSIGNED)).isEmpty();
+        assertThat(audience.get(PushedCountType.QUEUED)).isEmpty();
+        assertThat(audience.get(PushedCountType.PROCESSES)).isEmpty();
+        verifyNoInteractions(taskCandidateUserRepository, taskCandidateGroupRepository, taskRepository);
     }
 
     @Test

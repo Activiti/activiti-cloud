@@ -42,7 +42,8 @@ import org.slf4j.LoggerFactory;
  * Maps each event a committed batch carries onto {@link ConsumerRecomputeBuffer} captures, reading
  * only what the event itself names - no queries. Irrelevant event types (variables, BPMN activity,
  * integration events, {@code PROCESS_CREATED} - a duplicate of {@code PROCESS_STARTED}, ...) are
- * ignored.
+ * ignored. Skipped entirely while nobody is watching: a future subscriber's first value always
+ * comes from a fresh read, never from anything buffered while the registry was empty.
  */
 public class RecomputeEventCapturer {
 
@@ -89,17 +90,28 @@ public class RecomputeEventCapturer {
     );
 
     private final ConsumerRecomputeBuffer buffer;
+    private final ConsumerSubscriberRegistry registry;
     private final FeatureToggle featureToggle;
     private final Clock clock;
 
-    public RecomputeEventCapturer(ConsumerRecomputeBuffer buffer, FeatureToggle featureToggle, Clock clock) {
+    public RecomputeEventCapturer(
+        ConsumerRecomputeBuffer buffer,
+        ConsumerSubscriberRegistry registry,
+        FeatureToggle featureToggle,
+        Clock clock
+    ) {
         this.buffer = buffer;
+        this.registry = registry;
         this.featureToggle = featureToggle;
         this.clock = clock;
     }
 
     public void capture(List<CloudRuntimeEvent<?, ?>> events) {
-        if (events == null || !featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS)) {
+        if (
+            events == null ||
+            !featureToggle.isEnabled(QueryFeatureToggles.FEATURE_PUSHED_COUNTS) ||
+            registry.size() == 0
+        ) {
             return;
         }
         LOGGER.atDebug().log("Capturing {} committed events for the recompute buffer", events.size());
