@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @ExtendWith(MockitoExtension.class)
 class IntegrationRequestBuilderTest {
@@ -126,6 +127,15 @@ class IntegrationRequestBuilderTest {
         IntegrationRequestImpl request = builder.build(integrationContext);
 
         assertThat(request.getTtlSeconds()).isEqualTo(42);
+    }
+
+    @Test
+    void should_leaveTtlSecondsNull_when_recoveryCronIsDisabled() {
+        orphanedIntegrationRecoveryProperties.setCron(ScheduledTaskRegistrar.CRON_DISABLED);
+
+        IntegrationRequestImpl request = builder.build(integrationContext);
+
+        assertThat(request.getTtlSeconds()).isNull();
     }
 
     @Test

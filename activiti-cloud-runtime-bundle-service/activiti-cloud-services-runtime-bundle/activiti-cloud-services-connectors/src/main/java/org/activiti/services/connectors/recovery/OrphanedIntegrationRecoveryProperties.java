@@ -22,11 +22,21 @@ public class OrphanedIntegrationRecoveryProperties {
 
     private int thresholdSeconds = 10800; // 3 hours
 
+    private String cron = "0 */5 * * * *";
+
     public int getThresholdSeconds() {
         return thresholdSeconds;
     }
 
     public void setThresholdSeconds(int thresholdSeconds) {
         this.thresholdSeconds = thresholdSeconds;
+    }
+
+    public String getCron() {
+        return cron;
+    }
+
+    public void setCron(String cron) {
+        this.cron = cron;
     }
 }
