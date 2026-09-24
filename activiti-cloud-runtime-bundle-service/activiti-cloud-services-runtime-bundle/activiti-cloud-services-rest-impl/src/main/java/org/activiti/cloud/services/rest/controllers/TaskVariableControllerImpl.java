@@ -35,6 +35,7 @@ import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.services.core.validation.VariableValueSizeValidator;
 import org.activiti.cloud.services.rest.api.TaskVariableController;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceRepresentationModelAssembler;
@@ -57,16 +58,19 @@ public class TaskVariableControllerImpl implements TaskVariableController {
     private final TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler;
     private final CollectionModelAssembler resourcesAssembler;
     private final TaskRuntime taskRuntime;
+    private final VariableValueSizeValidator variableValueSizeValidator;
 
     @Autowired
     public TaskVariableControllerImpl(
         TaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
         CollectionModelAssembler resourcesAssembler,
-        TaskRuntime taskRuntime
+        TaskRuntime taskRuntime,
+        VariableValueSizeValidator variableValueSizeValidator
     ) {
         this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.resourcesAssembler = resourcesAssembler;
         this.taskRuntime = taskRuntime;
+        this.variableValueSizeValidator = variableValueSizeValidator;
     }
 
     @Override
@@ -83,6 +87,7 @@ public class TaskVariableControllerImpl implements TaskVariableController {
         @RequestBody CreateTaskVariablePayload createTaskVariablePayload
     ) {
         createTaskVariablePayload.setTaskId(taskId);
+        variableValueSizeValidator.validate(createTaskVariablePayload);
         taskRuntime.createVariable(createTaskVariablePayload);
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -96,6 +101,7 @@ public class TaskVariableControllerImpl implements TaskVariableController {
     ) {
         updateTaskVariablePayload.setTaskId(taskId);
         updateTaskVariablePayload.setName(variableName);
+        variableValueSizeValidator.validate(updateTaskVariablePayload);
         taskRuntime.updateVariable(updateTaskVariablePayload);
 
         return new ResponseEntity<>(HttpStatus.OK);
