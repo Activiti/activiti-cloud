@@ -624,13 +624,13 @@ public class ConnectorConfigurationIT {
         //Check delay execution = (retries -1) * delay time. It is a bit greater because some operation overload
         await().untilAsserted(() -> {
             // then
-            verify(streamBridge, times(2)).send(eq("script.EXECUTE"), retryMessageCaptor.capture());
+            verify(streamBridge, times(3)).send(eq("script.EXECUTE"), retryMessageCaptor.capture());
             List<GenericMessage> retryMessages = retryMessageCaptor.getAllValues();
-            Assertions.assertThat(retryMessages).extracting("payload").containsExactly(payload, payload);
+            Assertions.assertThat(retryMessages).extracting("payload").containsExactly(payload, payload, payload);
             Assertions.assertThat(retryMessages)
                 .extracting("headers")
                 .extracting("x-retry-count")
-                .containsExactly(1, 2);
+                .containsExactly(1, 2, 3);
 
             Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
             assertThat(reply).isNull();
