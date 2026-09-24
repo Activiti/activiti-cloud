@@ -2,3 +2,4 @@ org.activiti.services.connectors.conf.CloudConnectorsAutoConfiguration
 org.activiti.services.connectors.conf.CloudConnectorsMessagingAutoConfiguration
 org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryConfiguration
 org.activiti.services.connectors.mtc.MtcAutoConfiguration
+org.activiti.services.connectors.mtc.MtcReplyConsumerConfiguration

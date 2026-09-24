@@ -15,14 +15,13 @@
  */
 package org.activiti.services.connectors.mtc;
 
-import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.messaging.Message;
 
 @Configuration
@@ -30,11 +29,13 @@ import org.springframework.messaging.Message;
 @PropertySource("classpath:config/mtc-reply-stream.properties")
 public class MtcReplyConsumerConfiguration implements MtcIntegrationChannels {
 
-    @FunctionBinding(input = MtcIntegrationChannels.MTC_RESULTS_CONSUMER)
     @Bean
-    public Consumer<Message<IntegrationResult>> mtcResultEventConsumer(
-        ServiceTaskIntegrationResultEventHandler handler
-    ) {
-        return message -> handler.receive(message.getPayload());
+    public IntegrationFlow mtcResultConsumerFlow(ServiceTaskIntegrationResultEventHandler handler) {
+        return IntegrationFlow.from(MtcIntegrationChannels.MTC_RESULTS_CONSUMER)
+            .handle(Message.class, (message, headers) -> {
+                handler.receive((IntegrationResult) message.getPayload());
+                return null;
+            })
+            .get();
     }
 }
