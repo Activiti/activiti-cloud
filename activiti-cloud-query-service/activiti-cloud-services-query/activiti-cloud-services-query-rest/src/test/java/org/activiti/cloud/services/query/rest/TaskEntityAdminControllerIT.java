@@ -64,9 +64,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(TaskAdminController.class)
-@Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
-)
+@Import({
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+})
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -182,9 +184,8 @@ public class TaskEntityAdminControllerIT {
         given(taskRepository.findAll(restrictionPredicate)).willReturn(Collections.singletonList(taskEntity));
 
         //when
-        this.mockMvc.perform(
-                get("/admin/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE)
-            )
+        this.mockMvc
+            .perform(get("/admin/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
             //then
             .andExpect(status().isOk());
     }

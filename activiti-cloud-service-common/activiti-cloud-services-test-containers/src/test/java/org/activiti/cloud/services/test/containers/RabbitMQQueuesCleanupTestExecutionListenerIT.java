@@ -111,7 +111,9 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
             "name=" + TEST_QUEUE,
             "durable=false"
         );
-        assertThat(result.getExitCode()).as("rabbitmqadmin declare queue stderr: " + result.getStderr()).isZero();
+        assertThat(result.getExitCode())
+            .as("rabbitmqadmin declare queue stderr: " + result.getStderr())
+            .isZero();
     }
 
     private static void publishMessage(RabbitMQContainer container, String vhost, String payload)
@@ -124,7 +126,9 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
             "routing_key=" + TEST_QUEUE,
             "payload=" + payload
         );
-        assertThat(result.getExitCode()).as("rabbitmqadmin publish stderr: " + result.getStderr()).isZero();
+        assertThat(result.getExitCode())
+            .as("rabbitmqadmin publish stderr: " + result.getStderr())
+            .isZero();
     }
 
     private static int getMessageCount(RabbitMQContainer container, String vhost)
@@ -138,7 +142,9 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
             "-p",
             vhost
         );
-        assertThat(result.getExitCode()).as("rabbitmqctl list_queues stderr: " + result.getStderr()).isZero();
+        assertThat(result.getExitCode())
+            .as("rabbitmqctl list_queues stderr: " + result.getStderr())
+            .isZero();
 
         return result
             .getStdout()

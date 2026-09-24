@@ -76,9 +76,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @TestPropertySource("classpath:application-test.properties")
 @WebMvcTest(ProcessInstanceDeleteController.class)
-@Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
-)
+@Import({
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+})
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser("admin")

@@ -111,11 +111,9 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
         functionRegistration.setBeanName(beanName);
 
-        GenericApplicationContext.class.cast(applicationContext).registerBean(
-            beanName,
-            FunctionRegistration.class,
-            () -> functionRegistration
-        );
+        GenericApplicationContext.class
+            .cast(applicationContext)
+            .registerBean(beanName, FunctionRegistration.class, () -> functionRegistration);
 
         return beanName;
     }

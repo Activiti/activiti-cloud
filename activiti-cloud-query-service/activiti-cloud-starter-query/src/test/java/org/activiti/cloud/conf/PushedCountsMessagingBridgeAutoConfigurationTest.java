@@ -71,14 +71,12 @@ class PushedCountsMessagingBridgeAutoConfigurationTest {
 
     @Test
     void should_wireTheCountConsumerBean_when_thePropertyIsExplicitlyEnabled() {
-        contextRunner
-            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
-            .run(context -> {
-                assertThat(context).hasNotFailed();
-                assertThat(context).hasSingleBean(Sinks.Many.class);
-                assertThat(context.getBean("countConsumerFunction")).isInstanceOf(CountConsumer.class);
-                assertThat(context.getBean("countConsumer")).isInstanceOf(SubscribableChannel.class);
-            });
+        contextRunner.withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true").run(context -> {
+            assertThat(context).hasNotFailed();
+            assertThat(context).hasSingleBean(Sinks.Many.class);
+            assertThat(context.getBean("countConsumerFunction")).isInstanceOf(CountConsumer.class);
+            assertThat(context.getBean("countConsumer")).isInstanceOf(SubscribableChannel.class);
+        });
     }
 
     @Test
@@ -93,28 +91,24 @@ class PushedCountsMessagingBridgeAutoConfigurationTest {
 
     @Test
     void should_notRegisterASecondClock_when_theWebSocketAutoConfigurationAlreadyProvidesOne() {
-        contextRunner
-            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
-            .run(context -> {
-                assertThat(context).hasNotFailed();
-                // Relay's pushedCountsClock is @ConditionalOnMissingBean; the WS auto-config already provides one.
-                assertThat(context).hasSingleBean(Clock.class);
-            });
+        contextRunner.withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true").run(context -> {
+            assertThat(context).hasNotFailed();
+            // Relay's pushedCountsClock is @ConditionalOnMissingBean; the WS auto-config already provides one.
+            assertThat(context).hasSingleBean(Clock.class);
+        });
     }
 
     @Test
     void should_wireTheSubscriberRegistryRelayBeans_when_thePropertyIsExplicitlyEnabled() {
-        contextRunner
-            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
-            .run(context -> {
-                assertThat(context).hasNotFailed();
-                assertThat(context).hasSingleBean(SubscriberRegistryBroadcaster.class);
-                assertThat(context.getBean("subscriberRegistryResyncResponder")).isInstanceOf(
-                    SubscriberResyncResponder.class
-                );
-                assertThat(context.getBean("pushedCountsRegistryProducer")).isInstanceOf(MessageChannel.class);
-                assertThat(context.getBean("subscriberRegistryResyncConsumer")).isInstanceOf(SubscribableChannel.class);
-            });
+        contextRunner.withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true").run(context -> {
+            assertThat(context).hasNotFailed();
+            assertThat(context).hasSingleBean(SubscriberRegistryBroadcaster.class);
+            assertThat(context.getBean("subscriberRegistryResyncResponder")).isInstanceOf(
+                SubscriberResyncResponder.class
+            );
+            assertThat(context.getBean("pushedCountsRegistryProducer")).isInstanceOf(MessageChannel.class);
+            assertThat(context.getBean("subscriberRegistryResyncConsumer")).isInstanceOf(SubscribableChannel.class);
+        });
     }
 
     @Test

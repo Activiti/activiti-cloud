@@ -314,11 +314,9 @@ class QueryBPMNActivityIT {
         //when
         eventsAggregator.sendAll();
 
-        final var startedSuccess = withSupplyAsyncEventsSendResult(() ->
-            new CloudRuntimeEvent[] {
-                new CloudBPMNActivityStartedEventImpl(serviceTaskActivity, processDefinitionId, process.getId()),
-            }
-        );
+        final var startedSuccess = withSupplyAsyncEventsSendResult(() -> new CloudRuntimeEvent[] {
+            new CloudBPMNActivityStartedEventImpl(serviceTaskActivity, processDefinitionId, process.getId()),
+        });
 
         assertThat(startedSuccess).isTrue();
 
@@ -346,11 +344,9 @@ class QueryBPMNActivityIT {
                 );
         });
 
-        final var completedSuccess = withSupplyAsyncEventsSendResult(() ->
-            new CloudRuntimeEvent[] {
-                new CloudBPMNActivityCompletedEventImpl(serviceTaskActivity, processDefinitionId, process.getId()),
-            }
-        );
+        final var completedSuccess = withSupplyAsyncEventsSendResult(() -> new CloudRuntimeEvent[] {
+            new CloudBPMNActivityCompletedEventImpl(serviceTaskActivity, processDefinitionId, process.getId()),
+        });
 
         assertThat(completedSuccess).isTrue();
 

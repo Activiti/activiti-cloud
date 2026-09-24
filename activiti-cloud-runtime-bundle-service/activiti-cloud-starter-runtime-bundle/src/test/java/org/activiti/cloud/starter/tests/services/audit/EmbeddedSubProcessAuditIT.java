@@ -224,9 +224,9 @@ public class EmbeddedSubProcessAuditIT {
                     tuple(TASK_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS)
                 );
 
-            String entityProcessInstanceId = (
-                (CloudTaskAssignedEvent) receivedEvents.getFirst()
-            ).getEntity().getProcessInstanceId();
+            String entityProcessInstanceId = ((CloudTaskAssignedEvent) receivedEvents.getFirst())
+                .getEntity()
+                .getProcessInstanceId();
             assertThat(entityProcessInstanceId).isNotNull();
             assertThat(entityProcessInstanceId).isEqualTo(processInstanceId);
         });

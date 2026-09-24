@@ -49,7 +49,8 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 @SpringBootTest(
     classes = {
-        RuntimeBundleApplication.class, RuntimeBundleTransactedConnectorBindingIT.TestScriptExecuteConsumer.class,
+        RuntimeBundleApplication.class,
+        RuntimeBundleTransactedConnectorBindingIT.TestScriptExecuteConsumer.class,
     },
     properties = { "activiti.cloud.application.name=default-app", "activiti.cloud.messaging.rabbitmq.compress=false" }
 )

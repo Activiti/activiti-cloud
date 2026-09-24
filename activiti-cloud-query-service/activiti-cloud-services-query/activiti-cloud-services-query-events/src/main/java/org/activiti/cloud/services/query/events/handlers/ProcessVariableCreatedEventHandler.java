@@ -39,28 +39,20 @@ public class ProcessVariableCreatedEventHandler {
         String processInstanceId = variableCreatedEvent.getEntity().getProcessInstanceId();
         String variableName = variableCreatedEvent.getEntity().getName();
 
-        entityManagerFinder
-            .findProcessInstanceWithVariables(processInstanceId)
-            .ifPresent(processInstanceEntity ->
-                processInstanceEntity
-                    .getVariable(variableName)
-                    .ifPresentOrElse(
-                        variableEntity ->
-                            LOGGER.warn(
-                                "Variable {} already exists in the process {}!",
-                                variableName,
-                                processInstanceId
-                            ),
-                        () -> {
-                            ProcessVariableEntity variableEntity = createProcessVariableEntity(
-                                variableCreatedEvent,
-                                processInstanceEntity
-                            );
-                            processInstanceEntity.getVariables().add(variableEntity);
-                            assignToTasks(processInstanceId, variableName, variableEntity);
-                        }
-                    )
-            );
+        entityManagerFinder.findProcessInstanceWithVariables(processInstanceId).ifPresent(processInstanceEntity ->
+            processInstanceEntity.getVariable(variableName).ifPresentOrElse(
+                variableEntity ->
+                    LOGGER.warn("Variable {} already exists in the process {}!", variableName, processInstanceId),
+                () -> {
+                    ProcessVariableEntity variableEntity = createProcessVariableEntity(
+                        variableCreatedEvent,
+                        processInstanceEntity
+                    );
+                    processInstanceEntity.getVariables().add(variableEntity);
+                    assignToTasks(processInstanceId, variableName, variableEntity);
+                }
+            )
+        );
     }
 
     private ProcessVariableEntity createProcessVariableEntity(
@@ -77,15 +69,13 @@ public class ProcessVariableCreatedEventHandler {
     }
 
     private void assignToTasks(String processInstanceId, String variableName, ProcessVariableEntity variableEntity) {
-        entityManagerFinder
-            .findTasksWithProcessVariables(processInstanceId)
-            .forEach(taskEntity -> {
-                Set<ProcessVariableEntity> processVariables = taskEntity.getProcessVariables();
-                if (processVariables.stream().map(ProcessVariableEntity::getName).anyMatch(variableName::equals)) {
-                    LOGGER.warn("Process variable {} already exists in the task {}!", variableName, taskEntity.getId());
-                } else {
-                    taskEntity.getProcessVariables().add(variableEntity);
-                }
-            });
+        entityManagerFinder.findTasksWithProcessVariables(processInstanceId).forEach(taskEntity -> {
+            Set<ProcessVariableEntity> processVariables = taskEntity.getProcessVariables();
+            if (processVariables.stream().map(ProcessVariableEntity::getName).anyMatch(variableName::equals)) {
+                LOGGER.warn("Process variable {} already exists in the task {}!", variableName, taskEntity.getId());
+            } else {
+                taskEntity.getProcessVariables().add(variableEntity);
+            }
+        });
     }
 }

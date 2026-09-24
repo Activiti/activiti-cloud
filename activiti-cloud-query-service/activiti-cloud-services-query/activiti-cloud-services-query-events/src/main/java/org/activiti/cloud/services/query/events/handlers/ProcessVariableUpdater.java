@@ -35,19 +35,17 @@ public class ProcessVariableUpdater {
         ProcessInstanceEntity processInstanceEntity = entityManagerFinder
             .findProcessInstanceWithVariables(processInstanceId)
             .orElseThrow(() -> new QueryException("Process instance id " + processInstanceId + " not found!"));
-        processInstanceEntity
-            .getVariable(updatedVariableEntity.getName())
-            .ifPresentOrElse(
-                variableEntity -> {
-                    variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
-                    variableEntity.setType(updatedVariableEntity.getType());
-                    variableEntity.setValue(updatedVariableEntity.getValue());
+        processInstanceEntity.getVariable(updatedVariableEntity.getName()).ifPresentOrElse(
+            variableEntity -> {
+                variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
+                variableEntity.setType(updatedVariableEntity.getType());
+                variableEntity.setValue(updatedVariableEntity.getValue());
 
-                    entityManager.persist(variableEntity);
-                },
-                () -> {
-                    throw new QueryException(notFoundMessage);
-                }
-            );
+                entityManager.persist(variableEntity);
+            },
+            () -> {
+                throw new QueryException(notFoundMessage);
+            }
+        );
     }
 }

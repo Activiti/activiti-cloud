@@ -107,15 +107,15 @@ public abstract class AbstractTaskControllerIT {
     void should_return400_whenInvalidSearchParameterIsProvided(boolean taskCountCacheEnabled) {
         setTaskCountCacheEnabled(taskCountCacheEnabled);
         String missingSortField = """
-            {
-                "sort": {
-                    "direction": "ASC",
-                    "isProcessVariable": false,
-                    "processDefinitionKey": null,
-                    "type": "bigdecimal",
-                    "processVariable": false
-                }
-            }""";
+        {
+            "sort": {
+                "direction": "ASC",
+                "isProcessVariable": false,
+                "processDefinitionKey": null,
+                "type": "bigdecimal",
+                "processVariable": false
+            }
+        }""";
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -322,7 +322,11 @@ public abstract class AbstractTaskControllerIT {
     @Test
     void should_returnTasks_filteredById() {
         IntStream.range(0, 3).forEach(i ->
-            queryTestUtils.buildTask().withId("id" + i).withAssignee(CURRENT_USER).buildAndSave()
+            queryTestUtils
+                .buildTask()
+                .withId("id" + i)
+                .withAssignee(CURRENT_USER)
+                .buildAndSave()
         );
 
         TaskSearchRequest request = new TaskSearchRequestBuilder().withId("id0", "id2").build();

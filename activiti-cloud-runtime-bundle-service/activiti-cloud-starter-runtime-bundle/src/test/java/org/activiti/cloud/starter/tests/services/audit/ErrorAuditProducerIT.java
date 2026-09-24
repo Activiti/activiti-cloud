@@ -92,8 +92,9 @@ public class ErrorAuditProducerIT {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
             assertThat(receivedEvents)
-                .filteredOn(event ->
-                    (event.getEventType().equals(ACTIVITY_STARTED) || event.getEventType().equals(ACTIVITY_COMPLETED))
+                .filteredOn(
+                    event ->
+                        event.getEventType().equals(ACTIVITY_STARTED) || event.getEventType().equals(ACTIVITY_COMPLETED)
                 )
                 .extracting(
                     CloudRuntimeEvent::getEventType,

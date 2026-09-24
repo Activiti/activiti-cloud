@@ -123,23 +123,16 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumns(
-        {
-            @JoinColumn(
-                name = "processInstanceId",
-                referencedColumnName = "processInstanceId",
-                insertable = false,
-                updatable = false
-            ),
-            @JoinColumn(name = "clientId", referencedColumnName = "elementId", insertable = false, updatable = false),
-            @JoinColumn(
-                name = "executionId",
-                referencedColumnName = "executionId",
-                insertable = false,
-                updatable = false
-            ),
-        }
-    )
+    @JoinColumns({
+        @JoinColumn(
+            name = "processInstanceId",
+            referencedColumnName = "processInstanceId",
+            insertable = false,
+            updatable = false
+        ),
+        @JoinColumn(name = "clientId", referencedColumnName = "elementId", insertable = false, updatable = false),
+        @JoinColumn(name = "executionId", referencedColumnName = "executionId", insertable = false, updatable = false),
+    })
     private ServiceTaskEntity serviceTask;
 
     @Transient

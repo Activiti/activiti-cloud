@@ -65,16 +65,14 @@ public class JobMessageHandler implements MessageHandler {
     }
 
     public JobEntity findJobById(String jobId) {
-        return processEngineConfiguration
-            .getCommandExecutor()
-            .execute(
-                new Command<JobEntity>() {
-                    @Override
-                    public JobEntity execute(CommandContext commandContext) {
-                        return commandContext.getJobEntityManager().findById(jobId);
-                    }
+        return processEngineConfiguration.getCommandExecutor().execute(
+            new Command<JobEntity>() {
+                @Override
+                public JobEntity execute(CommandContext commandContext) {
+                    return commandContext.getJobEntityManager().findById(jobId);
                 }
-            );
+            }
+        );
     }
 
     public void executeJob(JobEntity job) {

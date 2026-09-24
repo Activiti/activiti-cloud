@@ -77,13 +77,11 @@ import reactor.test.StepVerifier;
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Import(
-    {
-        PushedCountsWebSocketIT.WentLiveEventCaptor.class,
-        PushedCountsWebSocketIT.WentQuietEventCaptor.class,
-        PushedCountsWebSocketIT.AdjustableClockConfiguration.class,
-    }
-)
+@Import({
+    PushedCountsWebSocketIT.WentLiveEventCaptor.class,
+    PushedCountsWebSocketIT.WentQuietEventCaptor.class,
+    PushedCountsWebSocketIT.AdjustableClockConfiguration.class,
+})
 class PushedCountsWebSocketIT {
 
     private static final String WS_GRAPHQL_URI = "/v2/ws/graphql";

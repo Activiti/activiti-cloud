@@ -59,8 +59,7 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
             entityManager.find(
                 TaskCandidateUserEntity.class,
                 new TaskCandidateUserId(entity.getTaskId(), entity.getUserId())
-            ) !=
-            null
+            ) != null
         );
     }
 }

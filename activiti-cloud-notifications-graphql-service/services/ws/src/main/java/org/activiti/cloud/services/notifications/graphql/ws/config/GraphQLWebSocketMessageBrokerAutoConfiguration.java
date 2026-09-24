@@ -28,10 +28,8 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 @ConditionalOnWebApplication
 @ConditionalOnClass({ GraphQL.class, EnableWebSocketMessageBroker.class })
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.ws.enabled", matchIfMissing = true)
-@PropertySources(
-    {
-        @PropertySource("classpath:META-INF/graphql-ws.properties"),
-        @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true),
-    }
-)
+@PropertySources({
+    @PropertySource("classpath:META-INF/graphql-ws.properties"),
+    @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true),
+})
 public class GraphQLWebSocketMessageBrokerAutoConfiguration {}

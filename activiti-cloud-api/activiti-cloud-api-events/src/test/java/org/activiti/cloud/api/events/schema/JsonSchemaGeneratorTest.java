@@ -83,17 +83,13 @@ public class JsonSchemaGeneratorTest {
         JsonSchemaGenerator schemaGen = new JsonSchemaGenerator(objectMapper);
         File outputDir = new File("target/schema/");
         outputDir.mkdirs();
-        cloudEventRegistry
-            .buildRegistry()
-            .forEach((k, v) -> {
-                try {
-                    JsonSchema jsonSchema = schemaGen.generateSchema(v);
-                    objectMapper
-                        .writerWithDefaultPrettyPrinter()
-                        .writeValue(new File(outputDir, k + ".json"), jsonSchema);
-                } catch (Exception e) {
-                    LOGGER.error("unable to generate schema for " + k, e);
-                }
-            });
+        cloudEventRegistry.buildRegistry().forEach((k, v) -> {
+            try {
+                JsonSchema jsonSchema = schemaGen.generateSchema(v);
+                objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(outputDir, k + ".json"), jsonSchema);
+            } catch (Exception e) {
+                LOGGER.error("unable to generate schema for " + k, e);
+            }
+        });
     }
 }

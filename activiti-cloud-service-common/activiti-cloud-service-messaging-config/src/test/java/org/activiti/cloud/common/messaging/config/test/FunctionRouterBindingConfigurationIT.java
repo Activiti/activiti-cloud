@@ -879,13 +879,10 @@ public class FunctionRouterBindingConfigurationIT {
         final var executions = IntStream.range(0, 100)
             .mapToObj(i -> MessageBuilder.withPayload(i).setHeader(FUNCTION_DEFINITION, "foo_registration").build())
             .map(m ->
-                CompletableFuture.runAsync(
-                    () -> {
-                        executionThreadMap.put(m.getPayload(), Thread.currentThread().getName());
-                        executionOrder.add(m.getPayload());
-                    },
-                    functionExecutorSelector.apply(m)
-                )
+                CompletableFuture.runAsync(() -> {
+                    executionThreadMap.put(m.getPayload(), Thread.currentThread().getName());
+                    executionOrder.add(m.getPayload());
+                }, functionExecutorSelector.apply(m))
             )
             .toArray(CompletableFuture[]::new);
 
@@ -906,18 +903,15 @@ public class FunctionRouterBindingConfigurationIT {
         final var functionExecutor = functionExecutorSelector.apply(message);
         final var countDownLatch = new CountDownLatch(1);
 
-        final var futureResult = CompletableFuture.supplyAsync(
-            () -> {
-                try {
-                    countDownLatch.await();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+        final var futureResult = CompletableFuture.supplyAsync(() -> {
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
-                return null;
-            },
-            functionExecutor
-        );
+            return null;
+        }, functionExecutor);
 
         //when
         functionRouterExecutorFactory.destroy();

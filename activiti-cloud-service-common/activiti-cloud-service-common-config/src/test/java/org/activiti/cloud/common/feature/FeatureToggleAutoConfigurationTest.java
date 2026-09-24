@@ -46,36 +46,30 @@ class FeatureToggleAutoConfigurationTest {
 
     @Test
     void should_evaluate_property_through_auto_configured_bean() {
-        contextRunner
-            .withPropertyValues("activiti.features.sample.enabled=true")
-            .run(context -> {
-                FeatureToggle toggle = context.getBean(FeatureToggle.class);
-                assertThat(toggle.isEnabled("sample")).isTrue();
-                assertThat(toggle.isEnabled("missing")).isFalse();
-            });
+        contextRunner.withPropertyValues("activiti.features.sample.enabled=true").run(context -> {
+            FeatureToggle toggle = context.getBean(FeatureToggle.class);
+            assertThat(toggle.isEnabled("sample")).isTrue();
+            assertThat(toggle.isEnabled("missing")).isFalse();
+        });
     }
 
     @Test
     void should_back_off_when_primary_override_is_provided() {
-        contextRunner
-            .withUserConfiguration(PrimaryOverrideConfiguration.class)
-            .run(context -> {
-                assertThat(context).getBeans(FeatureToggle.class).hasSize(1);
-                FeatureToggle toggle = context.getBean(FeatureToggle.class);
-                assertThat(toggle).isNotInstanceOf(EnvironmentFeatureToggle.class);
-                assertThat(toggle.isEnabled("anything")).isTrue();
-            });
+        contextRunner.withUserConfiguration(PrimaryOverrideConfiguration.class).run(context -> {
+            assertThat(context).getBeans(FeatureToggle.class).hasSize(1);
+            FeatureToggle toggle = context.getBean(FeatureToggle.class);
+            assertThat(toggle).isNotInstanceOf(EnvironmentFeatureToggle.class);
+            assertThat(toggle.isEnabled("anything")).isTrue();
+        });
     }
 
     @Test
     void should_initialize_static_holder_with_application_feature_toggle() {
-        contextRunner
-            .withPropertyValues("activiti.features.holder-sample.enabled=true")
-            .run(context -> {
-                assertThat(context).hasSingleBean(FeatureToggleHolderInitializer.class);
-                assertThat(FeatureToggleHolder.isEnabled("holder-sample")).isTrue();
-                assertThat(FeatureToggleHolder.isEnabled("missing")).isFalse();
-            });
+        contextRunner.withPropertyValues("activiti.features.holder-sample.enabled=true").run(context -> {
+            assertThat(context).hasSingleBean(FeatureToggleHolderInitializer.class);
+            assertThat(FeatureToggleHolder.isEnabled("holder-sample")).isTrue();
+            assertThat(FeatureToggleHolder.isEnabled("missing")).isFalse();
+        });
     }
 
     @Test
