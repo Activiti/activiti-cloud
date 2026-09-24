@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,9 @@ class CompletableFutureRetry {
 
     private static final Logger log = LoggerFactory.getLogger(CompletableFutureRetry.class);
 
-    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(
+        Runtime.getRuntime().availableProcessors()
+    );
 
     public static <T> CompletableFuture<T> supplyAsyncWithRetry(
         Supplier<CompletableFuture<T>> supplier,
@@ -50,16 +53,42 @@ class CompletableFutureRetry {
         Duration delay,
         int currentAttempt
     ) {
-        return supplier.get().exceptionallyCompose(exception -> {
-            if (currentAttempt < maxRetries) {
-                log.debug("Attempt {} of {} failed. Retrying in {}", currentAttempt + 1, maxRetries, delay);
-                return java.util.concurrent.CompletableFuture.supplyAsync(() -> null, scheduler).thenCompose(ignored ->
-                    supplyAsyncWithRetry(supplier, maxRetries, delay, currentAttempt + 1)
-                );
-            } else {
-                log.debug("Maximum of {} retries reached. Failing operation.", maxRetries, exception);
-                return CompletableFuture.failedFuture(exception);
-            }
-        });
+        return supplier
+            .get()
+            .exceptionallyCompose(exception -> {
+                if (currentAttempt < maxRetries) {
+                    log.error(
+                        "Attempt {} of {} failed. Retrying in {}",
+                        currentAttempt + 1,
+                        maxRetries,
+                        delay,
+                        exception
+                    );
+                    // Schedule the retry on the scheduler thread (after the delay) instead of
+                    // composing it inline. The previous attempt completes on the per-registration
+                    // executor's own worker thread, and re-invoking the supplier there would
+                    // resubmit to that same single-thread executor - whose backpressure handler
+                    // blocks waiting for the queue to drain, deadlocking the worker against itself.
+                    var retry = new CompletableFuture<T>();
+                    scheduler.schedule(
+                        () ->
+                            supplyAsyncWithRetry(supplier, maxRetries, delay, currentAttempt + 1).whenComplete(
+                                (result, error) -> {
+                                    if (error != null) {
+                                        retry.completeExceptionally(error);
+                                    } else {
+                                        retry.complete(result);
+                                    }
+                                }
+                            ),
+                        delay.toMillis(),
+                        TimeUnit.MILLISECONDS
+                    );
+                    return retry;
+                } else {
+                    log.warn("Maximum of {} retries reached. Failing operation.", maxRetries, exception);
+                    return CompletableFuture.failedFuture(exception);
+                }
+            });
     }
 }
