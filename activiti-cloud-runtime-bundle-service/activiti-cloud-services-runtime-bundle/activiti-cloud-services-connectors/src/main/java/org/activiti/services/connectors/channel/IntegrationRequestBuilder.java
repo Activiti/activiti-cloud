@@ -32,8 +32,8 @@ public class IntegrationRequestBuilder implements Serializable {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private final FunctionBindingConfiguration.BindingResolver bindingResolver;
-    private final OrphanedIntegrationRecoveryProperties orphanedIntegrationRecoveryProperties;
-    private final Clock clock;
+    private final transient OrphanedIntegrationRecoveryProperties orphanedIntegrationRecoveryProperties;
+    private final transient Clock clock;
 
     public IntegrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
