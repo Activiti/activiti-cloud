@@ -16,10 +16,12 @@
 package org.activiti.services.connectors.channel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -124,5 +126,20 @@ class IntegrationRequestBuilderTest {
         IntegrationRequestImpl request = builder.build(integrationContext);
 
         assertThat(request.getTtlSeconds()).isEqualTo(42);
+    }
+
+    @Test
+    void should_useDefaultPropertiesAndSystemClock_when_usingTwoArgConstructor() {
+        IntegrationRequestBuilder twoArgBuilder = new IntegrationRequestBuilder(
+            runtimeBundleInfoAppender,
+            bindingResolver
+        );
+
+        IntegrationRequestImpl request = twoArgBuilder.build(integrationContext);
+
+        assertThat(request.getRequestDate().toInstant()).isCloseTo(Instant.now(), within(Duration.ofMinutes(1)));
+        assertThat(request.getTtlSeconds()).isEqualTo(
+            new OrphanedIntegrationRecoveryProperties().getThresholdSeconds()
+        );
     }
 }

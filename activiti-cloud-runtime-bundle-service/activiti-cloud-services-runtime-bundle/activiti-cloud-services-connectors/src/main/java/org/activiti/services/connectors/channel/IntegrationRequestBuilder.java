@@ -37,6 +37,18 @@ public class IntegrationRequestBuilder implements Serializable {
 
     public IntegrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
+    ) {
+        this(
+            runtimeBundleInfoAppender,
+            bindingResolver,
+            new OrphanedIntegrationRecoveryProperties(),
+            Clock.systemUTC()
+        );
+    }
+
+    public IntegrationRequestBuilder(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         FunctionBindingConfiguration.BindingResolver bindingResolver,
         OrphanedIntegrationRecoveryProperties orphanedIntegrationRecoveryProperties,
         Clock clock
