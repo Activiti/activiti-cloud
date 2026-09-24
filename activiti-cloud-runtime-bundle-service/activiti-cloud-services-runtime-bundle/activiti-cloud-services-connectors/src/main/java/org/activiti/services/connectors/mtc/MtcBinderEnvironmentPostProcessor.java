@@ -50,8 +50,7 @@ public class MtcBinderEnvironmentPostProcessor implements EnvironmentPostProcess
         props.put(binderPrefix + ".environment.spring.cloud.stream.rabbit.default.producer.prefix", "");
         props.put(binderPrefix + ".environment.spring.cloud.stream.rabbit.default.consumer.prefix", "");
 
-        props.put("spring.cloud.stream.bindings.mtcResultsConsumer.binder", MTC_BINDER_NAME);
-        props.put("spring.cloud.stream.function.bindings.mtcResultsConsumer-in-0", "mtcResultsConsumer");
+        props.put("spring.cloud.stream.bindings.mtcResultsConsumer-in-0.binder", MTC_BINDER_NAME);
         props.put("spring.cloud.function.definition", "mtcResultsConsumer");
 
         environment.getPropertySources().addLast(new MapPropertySource(PROPERTY_SOURCE_NAME, props));
