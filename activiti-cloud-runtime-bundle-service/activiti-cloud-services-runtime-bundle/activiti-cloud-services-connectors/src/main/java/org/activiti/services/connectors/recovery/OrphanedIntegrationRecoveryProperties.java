@@ -16,6 +16,7 @@
 package org.activiti.services.connectors.recovery;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @ConfigurationProperties("activiti.orphaned-integration-recovery")
 public class OrphanedIntegrationRecoveryProperties {
@@ -38,5 +39,9 @@ public class OrphanedIntegrationRecoveryProperties {
 
     public void setCron(String cron) {
         this.cron = cron;
+    }
+
+    public boolean isActive() {
+        return !ScheduledTaskRegistrar.CRON_DISABLED.equals(cron);
     }
 }

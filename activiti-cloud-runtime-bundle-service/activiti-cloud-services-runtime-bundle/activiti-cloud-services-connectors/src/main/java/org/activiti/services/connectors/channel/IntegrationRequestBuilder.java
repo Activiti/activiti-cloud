@@ -27,7 +27,6 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 public class IntegrationRequestBuilder implements Serializable {
 
@@ -67,7 +66,7 @@ public class IntegrationRequestBuilder implements Serializable {
         integrationRequest.setResultDestination(bindingResolver.getBindingDestination(INTEGRATION_RESULTS_CONSUMER));
         integrationRequest.setIncidentDestination(bindingResolver.getBindingDestination(CONNECTOR_INCIDENT_CONSUMER));
         integrationRequest.setRequestDate(Date.from(clock.instant()));
-        if (!ScheduledTaskRegistrar.CRON_DISABLED.equals(orphanedIntegrationRecoveryProperties.getCron())) {
+        if (orphanedIntegrationRecoveryProperties.isActive()) {
             integrationRequest.setTtlSeconds(orphanedIntegrationRecoveryProperties.getThresholdSeconds());
         }
 
