@@ -23,6 +23,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -54,11 +55,11 @@ class RecomputePipelineTest {
 
     @Test
     void withNoCountersRegistered_doesNothing() {
-        when(audienceResolver.resolve(any())).thenReturn(Map.of(PushedCountType.ASSIGNED, Set.of("alice")));
         RecomputePipeline pipeline = new RecomputePipeline(audienceResolver, Set.of(), countProducer, clock);
 
         pipeline.process(nonEmptyWindow());
 
+        verifyNoInteractions(audienceResolver);
         verify(countProducer, never()).send(any());
     }
 

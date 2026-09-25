@@ -55,7 +55,7 @@ public class RecomputePipeline {
     }
 
     public void process(ConsumerRecomputeWindow window) {
-        if (window.isEmpty()) {
+        if (window.isEmpty() || counters.isEmpty()) {
             return;
         }
         Map<PushedCountType, Set<String>> audience = audienceResolver.resolve(window);

@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -51,11 +52,13 @@ class RecomputeEventCapturerTest {
     private static final Instant T0 = Instant.parse("2026-01-01T00:00:00Z");
 
     private final ConsumerRecomputeBuffer buffer = new ConsumerRecomputeBuffer();
+    private final ConsumerSubscriberRegistry registry = registeredRegistry();
     private boolean featureEnabled = true;
     private final FeatureToggle featureToggle = name ->
         featureEnabled && QueryFeatureToggles.FEATURE_PUSHED_COUNTS.equals(name);
     private final RecomputeEventCapturer capturer = new RecomputeEventCapturer(
         buffer,
+        registry,
         featureToggle,
         Clock.fixed(T0, ZoneOffset.UTC)
     );
@@ -72,6 +75,20 @@ class RecomputeEventCapturerTest {
     @Test
     void doesNothing_whenEventsIsNull() {
         capturer.capture(null);
+
+        assertThat(buffer.isEmpty()).isTrue();
+    }
+
+    @Test
+    void doesNothing_whenNoSubscribers() {
+        RecomputeEventCapturer capturerWithNoWatchers = new RecomputeEventCapturer(
+            buffer,
+            new ConsumerSubscriberRegistry(),
+            featureToggle,
+            Clock.fixed(T0, ZoneOffset.UTC)
+        );
+
+        capturerWithNoWatchers.capture(List.of(taskCreated("task-1")));
 
         assertThat(buffer.isEmpty()).isTrue();
     }
@@ -293,5 +310,11 @@ class RecomputeEventCapturerTest {
         TaskImpl task = new TaskImpl();
         task.setId(taskId);
         return new CloudTaskCreatedEventImpl(task);
+    }
+
+    private static ConsumerSubscriberRegistry registeredRegistry() {
+        ConsumerSubscriberRegistry registry = new ConsumerSubscriberRegistry();
+        registry.register("watcher", Set.of(), "rest-1", T0);
+        return registry;
     }
 }

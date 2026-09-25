@@ -20,20 +20,40 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Every method is synchronized: capture runs concurrently, and {@link #drainAndReset()} must never lose a capture that lands mid-drain. */
 public final class ConsumerRecomputeBuffer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerRecomputeBuffer.class);
+
+    private static final int DEFAULT_HARD_CAP = 10_000;
 
     private final Set<String> taskIds = new HashSet<>();
     private final Set<String> touchedGroupIds = new HashSet<>();
     private final Set<String> namedUserIds = new HashSet<>();
     private final Set<String> processInstanceIds = new HashSet<>();
     private final Set<String> namedInitiatorIds = new HashSet<>();
+    private final int hardCap;
     private Instant windowStartedAt;
+
+    public ConsumerRecomputeBuffer() {
+        this(DEFAULT_HARD_CAP);
+    }
+
+    /** @param hardCap total touched tasks + processes above which further captures are dropped. */
+    public ConsumerRecomputeBuffer(int hardCap) {
+        this.hardCap = hardCap;
+    }
 
     /** Records a touched task and any directly-named users (assignee, owner, completedBy). */
     public synchronized void captureTask(String taskId, Instant at, String... namedUsers) {
         if (taskId == null) {
+            return;
+        }
+        if (!taskIds.contains(taskId) && atCapacity()) {
+            LOGGER.warn("Recompute buffer at hard cap ({}); dropping capture for task {}", hardCap, taskId);
             return;
         }
         markTouch(at);
@@ -50,6 +70,14 @@ public final class ConsumerRecomputeBuffer {
         if (taskId == null || groupId == null) {
             return;
         }
+        if (!taskIds.contains(taskId) && atCapacity()) {
+            LOGGER.warn(
+                "Recompute buffer at hard cap ({}); dropping candidate-group capture for task {}",
+                hardCap,
+                taskId
+            );
+            return;
+        }
         markTouch(at);
         taskIds.add(taskId);
         touchedGroupIds.add(groupId);
@@ -58,6 +86,14 @@ public final class ConsumerRecomputeBuffer {
     /** Records a touched process instance, and its initiator if named on the event. */
     public synchronized void captureProcess(String processInstanceId, String initiator, Instant at) {
         if (processInstanceId == null) {
+            return;
+        }
+        if (!processInstanceIds.contains(processInstanceId) && atCapacity()) {
+            LOGGER.warn(
+                "Recompute buffer at hard cap ({}); dropping capture for process {}",
+                hardCap,
+                processInstanceId
+            );
             return;
         }
         markTouch(at);
@@ -99,9 +135,17 @@ public final class ConsumerRecomputeBuffer {
         return snapshot;
     }
 
-    /** Re-adds a drained window's identities after a failed flush, so a transient failure loses nothing. */
+    /**
+     * Re-adds a drained window's identities after a failed flush, so a transient failure loses
+     * nothing - unless the buffer is already at capacity, in which case the whole window is
+     * dropped rather than pushing further past the hard cap.
+     */
     public synchronized void mergeBack(ConsumerRecomputeWindow window, Instant at) {
         if (window.isEmpty()) {
+            return;
+        }
+        if (atCapacity()) {
+            LOGGER.warn("Recompute buffer at hard cap ({}); dropping a failed window on merge-back", hardCap);
             return;
         }
         markTouch(at);
@@ -110,6 +154,10 @@ public final class ConsumerRecomputeBuffer {
         namedUserIds.addAll(window.namedUserIds());
         processInstanceIds.addAll(window.processInstanceIds());
         namedInitiatorIds.addAll(window.namedInitiatorIds());
+    }
+
+    private boolean atCapacity() {
+        return size() >= hardCap;
     }
 
     private void markTouch(Instant at) {

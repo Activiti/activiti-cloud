@@ -106,6 +106,86 @@ class ConsumerRecomputeBufferTest {
     }
 
     @Test
+    void captureTask_pastTheHardCap_isDropped() {
+        ConsumerRecomputeBuffer capped = new ConsumerRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureTask("task-2", T0);
+
+        assertThat(capped.drainAndReset().taskIds()).containsExactly("task-1");
+    }
+
+    @Test
+    void captureTask_reTouchingAnAlreadyCapturedTask_isAllowed_evenAtTheHardCap() {
+        ConsumerRecomputeBuffer capped = new ConsumerRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureTask("task-1", T0, "alice");
+
+        assertThat(capped.drainAndReset().namedUserIds()).containsExactly("alice");
+    }
+
+    @Test
+    void captureTaskCandidateGroup_pastTheHardCap_isDropped() {
+        ConsumerRecomputeBuffer capped = new ConsumerRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureTaskCandidateGroup("task-2", "eng", T0);
+
+        assertThat(capped.drainAndReset().taskIds()).containsExactly("task-1");
+    }
+
+    @Test
+    void captureProcess_pastTheHardCap_isDropped() {
+        ConsumerRecomputeBuffer capped = new ConsumerRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureProcess("proc-1", "alice", T0);
+
+        ConsumerRecomputeWindow window = capped.drainAndReset();
+        assertThat(window.processInstanceIds()).isEmpty();
+        assertThat(window.namedInitiatorIds()).isEmpty();
+    }
+
+    @Test
+    void captureProcess_reTouchingAnAlreadyCapturedProcess_isAllowed_evenAtTheHardCap() {
+        ConsumerRecomputeBuffer capped = new ConsumerRecomputeBuffer(1);
+        capped.captureProcess("proc-1", null, T0);
+
+        capped.captureProcess("proc-1", "alice", T0);
+
+        assertThat(capped.drainAndReset().namedInitiatorIds()).containsExactly("alice");
+    }
+
+    @Test
+    void mergeBack_pastTheHardCap_dropsTheWholeWindow() {
+        ConsumerRecomputeBuffer capped = new ConsumerRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+        ConsumerRecomputeWindow failedWindow = new ConsumerRecomputeWindow(
+            Set.of("task-2"),
+            Set.of(),
+            Set.of("alice"),
+            Set.of(),
+            Set.of()
+        );
+
+        capped.mergeBack(failedWindow, T0);
+
+        assertThat(capped.drainAndReset().taskIds()).containsExactly("task-1");
+    }
+
+    @Test
+    void captureTask_succeedsAgain_afterDrainAndResetFreesCapacity() {
+        ConsumerRecomputeBuffer capped = new ConsumerRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+        capped.drainAndReset();
+
+        capped.captureTask("task-2", T0);
+
+        assertThat(capped.drainAndReset().taskIds()).containsExactly("task-2");
+    }
+
+    @Test
     void age_isZero_whenNothingCapturedYet() {
         Clock clock = Clock.fixed(T0, ZoneOffset.UTC);
 
