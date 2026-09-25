@@ -70,26 +70,24 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(AuditEventsAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        EventRepresentationModelAssemblerConfiguration.class,
-        AuditAPIAutoConfiguration.class,
-        AuditJPAAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        AuditJPAControllersAutoConfiguration.class,
-        AuditJPASecurityAutoConfiguration.class,
-    }
-)
+@Import({
+    EventRepresentationModelAssemblerConfiguration.class,
+    AuditAPIAutoConfiguration.class,
+    AuditJPAAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    AuditJPAControllersAutoConfiguration.class,
+    AuditJPASecurityAutoConfiguration.class,
+})
 class EventsEngineEventsAdminControllerIT {
 
     private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";
     private static final String CSV_FILENAME = "20220710_testApp_audit.csv";
 
     private static String CSV_CONTENT = """
-        "ACTOR","APPNAME","APPVERSION","BUSINESSKEY","ENTITY","ENTITYID","EVENTTYPE","ID","MESSAGEID","PARENTPROCESSINSTANCEID","PROCESSDEFINITIONID","PROCESSDEFINITIONKEY","PROCESSDEFINITIONVERSION","PROCESSINSTANCEID","SEQUENCENUMBER","SERVICEFULLNAME","SERVICENAME","SERVICETYPE","SERVICEVERSION","TIME"
-        "service_user","testApp","","","{""appVersion"":null,""businessKey"":null,""completedDate"":null,""id"":""10"",""initiator"":null,""name"":null,""parentId"":null,""processDefinitionId"":""1"",""processDefinitionKey"":null,""processDefinitionName"":null,""processDefinitionVersion"":null,""rootProcessInstanceId"":null,""startDate"":null,""status"":null}","","PROCESS_STARTED","processEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
-        "service_user","testApp","","","{""name"":""var"",""type"":null,""value"":null,""processInstanceId"":""processId"",""taskId"":""taskId"",""taskVariable"":true}","var","VARIABLE_CREATED","variableEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
-        """;
+    "ACTOR","APPNAME","APPVERSION","BUSINESSKEY","ENTITY","ENTITYID","EVENTTYPE","ID","MESSAGEID","PARENTPROCESSINSTANCEID","PROCESSDEFINITIONID","PROCESSDEFINITIONKEY","PROCESSDEFINITIONVERSION","PROCESSINSTANCEID","SEQUENCENUMBER","SERVICEFULLNAME","SERVICENAME","SERVICETYPE","SERVICEVERSION","TIME"
+    "service_user","testApp","","","{""appVersion"":null,""businessKey"":null,""completedDate"":null,""id"":""10"",""initiator"":null,""name"":null,""parentId"":null,""processDefinitionId"":""1"",""processDefinitionKey"":null,""processDefinitionName"":null,""processDefinitionVersion"":null,""rootProcessInstanceId"":null,""startDate"":null,""status"":null}","","PROCESS_STARTED","processEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
+    "service_user","testApp","","","{""name"":""var"",""type"":null,""value"":null,""processInstanceId"":""processId"",""taskId"":""taskId"",""taskVariable"":true}","var","VARIABLE_CREATED","variableEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
+    """;
 
     @MockitoBean
     private EventsRepository eventsRepository;

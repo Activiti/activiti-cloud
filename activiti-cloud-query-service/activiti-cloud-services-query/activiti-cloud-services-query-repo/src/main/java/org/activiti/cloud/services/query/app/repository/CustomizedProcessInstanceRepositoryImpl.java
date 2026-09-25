@@ -106,15 +106,13 @@ public class CustomizedProcessInstanceRepositoryImpl
         Page<ProcessInstanceEntity> processInstances,
         Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap
     ) {
-        processInstances
-            .getContent()
-            .forEach(processInstance -> {
-                Set<QueryCloudSubprocessInstance> subprocessSet = subprocessMap.getOrDefault(
-                    processInstance.getId(),
-                    Set.of()
-                );
-                processInstance.setSubprocesses(subprocessSet);
-            });
+        processInstances.getContent().forEach(processInstance -> {
+            Set<QueryCloudSubprocessInstance> subprocessSet = subprocessMap.getOrDefault(
+                processInstance.getId(),
+                Set.of()
+            );
+            processInstance.setSubprocesses(subprocessSet);
+        });
     }
 
     public Page<ProcessInstanceEntity> findSubprocessesByParentIds(List<String> parentIds, Pageable pageable) {

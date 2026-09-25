@@ -40,12 +40,10 @@ import org.springframework.context.annotation.PropertySources;
 @ConditionalOnClass({ GraphQL.class })
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(ActivitiGraphQLWebProperties.class)
-@PropertySources(
-    {
-        @PropertySource(value = "classpath:META-INF/graphql.properties"),
-        @PropertySource(value = "classpath:graphql.properties", ignoreResourceNotFound = true),
-    }
-)
+@PropertySources({
+    @PropertySource(value = "classpath:META-INF/graphql.properties"),
+    @PropertySource(value = "classpath:graphql.properties", ignoreResourceNotFound = true),
+})
 public class ActivitiGraphQLAutoConfiguration {
 
     /**

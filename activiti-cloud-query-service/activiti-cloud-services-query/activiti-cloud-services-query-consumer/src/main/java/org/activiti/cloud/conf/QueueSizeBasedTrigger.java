@@ -41,7 +41,7 @@ public class QueueSizeBasedTrigger implements Trigger {
             return Instant.now(); // First execution
         }
 
-        Duration delay = (this.queueChannel.getQueueSize() > 0) ? fastRate : slowRate;
+        Duration delay = this.queueChannel.getQueueSize() > 0 ? fastRate : slowRate;
 
         return lastExecution.plus(delay);
     }

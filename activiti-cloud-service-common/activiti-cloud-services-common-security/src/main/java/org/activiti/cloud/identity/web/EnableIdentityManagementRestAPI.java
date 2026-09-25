@@ -32,11 +32,9 @@ import org.springframework.context.annotation.Import;
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@Import(
-    {
-        IdentityManagementController.class,
-        IdentityManagementRestExceptionHandler.class,
-        IdentitySearchCacheConfiguration.class,
-    }
-)
+@Import({
+    IdentityManagementController.class,
+    IdentityManagementRestExceptionHandler.class,
+    IdentitySearchCacheConfiguration.class,
+})
 public @interface EnableIdentityManagementRestAPI {}

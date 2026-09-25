@@ -1205,7 +1205,7 @@ class QueryTasksIT {
         );
 
         complete2 = new Date(now.getTime() - 86400000);
-        start2 = new Date(now.getTime() - (2 * 86400000));
+        start2 = new Date(now.getTime() - 2 * 86400000);
         taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate(
             "Completed task 2",
             runningProcessInstance,
@@ -1213,8 +1213,8 @@ class QueryTasksIT {
             complete2
         );
 
-        complete3 = new Date(now.getTime() - (3 * 86400000));
-        start3 = new Date(now.getTime() - (4 * 86400000));
+        complete3 = new Date(now.getTime() - 3 * 86400000);
+        start3 = new Date(now.getTime() - 4 * 86400000);
         taskEventContainedBuilder.aCompletedTaskWithCreationDateAndCompletionDate(
             "Completed task 3",
             runningProcessInstance,
@@ -2409,7 +2409,7 @@ class QueryTasksIT {
             //then
             assertThat(retrievedTasks)
                 .extracting(Task::getName, queryCloudTask ->
-                    CollectionUtils.isEmpty((queryCloudTask.getProcessVariables()))
+                    CollectionUtils.isEmpty(queryCloudTask.getProcessVariables())
                 )
                 .containsExactly(
                     tuple("Created task", true),
@@ -2604,7 +2604,7 @@ class QueryTasksIT {
             //then
             assertThat(retrievedTasks)
                 .extracting(Task::getName, queryCloudTask ->
-                    CollectionUtils.isEmpty((queryCloudTask.getProcessVariables()))
+                    CollectionUtils.isEmpty(queryCloudTask.getProcessVariables())
                 )
                 .containsOnly(tuple("Created task", true), tuple("Completed task", true));
         });

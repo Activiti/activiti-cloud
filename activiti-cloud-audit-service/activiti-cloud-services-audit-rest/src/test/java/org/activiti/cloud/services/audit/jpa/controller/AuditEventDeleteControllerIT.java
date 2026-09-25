@@ -53,14 +53,12 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(AuditEventsDeleteController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        EventRepresentationModelAssemblerConfiguration.class,
-        AuditAPIAutoConfiguration.class,
-        AuditJPAAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-    }
-)
+@Import({
+    EventRepresentationModelAssemblerConfiguration.class,
+    AuditAPIAutoConfiguration.class,
+    AuditJPAAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+})
 public class AuditEventDeleteControllerIT {
 
     private static final String DOCUMENTATION_ALFRESCO_IDENTIFIER = "events-alfresco";

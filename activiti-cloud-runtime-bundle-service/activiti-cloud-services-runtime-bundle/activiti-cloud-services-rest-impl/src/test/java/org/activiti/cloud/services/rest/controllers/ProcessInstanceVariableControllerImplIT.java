@@ -69,18 +69,16 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        RuntimeBundleProperties.class,
-        CloudEventsAutoConfiguration.class,
-        ProcessEngineChannelsConfiguration.class,
-        VariableValidationService.class,
-        ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class,
-        CacheAutoConfiguration.class,
-    }
-)
+@Import({
+    RuntimeBundleProperties.class,
+    CloudEventsAutoConfiguration.class,
+    ProcessEngineChannelsConfiguration.class,
+    VariableValidationService.class,
+    ServicesRestWebMvcAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    StreamConfig.class,
+    CacheAutoConfiguration.class,
+})
 class ProcessInstanceVariableControllerImplIT {
 
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
@@ -163,11 +161,13 @@ class ProcessInstanceVariableControllerImplIT {
         );
         given(processRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
-        this.mockMvc.perform(
-            get("/v1/process-instances/{processInstanceId}/variables", 1, 1)
-                .accept(MediaTypes.HAL_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk());
+        this.mockMvc
+            .perform(
+                get("/v1/process-instances/{processInstanceId}/variables", 1, 1)
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -181,15 +181,20 @@ class ProcessInstanceVariableControllerImplIT {
 
         given(processRuntime.processInstance(any())).willReturn(processInstance);
 
-        this.mockMvc.perform(
-            put("/v1/process-instances/{processInstanceId}/variables", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    mapper.writeValueAsString(
-                        ProcessPayloadBuilder.setVariables().withProcessInstanceId("1").withVariables(variables).build()
+        this.mockMvc
+            .perform(
+                put("/v1/process-instances/{processInstanceId}/variables", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder.setVariables()
+                                .withProcessInstanceId("1")
+                                .withVariables(variables)
+                                .build()
+                        )
                     )
-                )
-        ).andExpect(status().isOk());
+            )
+            .andExpect(status().isOk());
 
         verify(processRuntime).setVariables(any());
     }

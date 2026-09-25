@@ -42,16 +42,14 @@ public class ProcessDefinitionVariablesDecorator implements ProcessDefinitionDec
         Map<String, VariableDefinition> variables = processExtensionService
             .getExtensionsForId(processDefinition.getId())
             .getProperties();
-        processDefinition
-            .getVariableDefinitions()
-            .addAll(
-                variables
-                    .values()
-                    .stream()
-                    .filter(variableDefinition -> Boolean.TRUE.equals(variableDefinition.getDisplay()))
-                    .map(this::convert)
-                    .collect(Collectors.toList())
-            );
+        processDefinition.getVariableDefinitions().addAll(
+            variables
+                .values()
+                .stream()
+                .filter(variableDefinition -> Boolean.TRUE.equals(variableDefinition.getDisplay()))
+                .map(this::convert)
+                .collect(Collectors.toList())
+        );
         return processDefinition;
     }
 

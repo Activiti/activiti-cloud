@@ -150,16 +150,14 @@ public class ConsumerSubscriberRegistry {
         if (!deadSources.isEmpty()) {
             lastSeenBySource.keySet().removeAll(deadSources);
             lastEventBySourceUser.keySet().removeAll(deadSources);
-            registry
-                .entrySet()
-                .removeIf(user -> {
-                    user.getValue().sources.removeAll(deadSources);
-                    if (user.getValue().sources.isEmpty()) {
-                        removedUsers.add(user.getKey());
-                        return true;
-                    }
-                    return false;
-                });
+            registry.entrySet().removeIf(user -> {
+                user.getValue().sources.removeAll(deadSources);
+                if (user.getValue().sources.isEmpty()) {
+                    removedUsers.add(user.getKey());
+                    return true;
+                }
+                return false;
+            });
         }
         pruneEventHistory(deadline);
         LOGGER.debug("expireInstances deadSources={} droppedUsers={}", deadSources, removedUsers);

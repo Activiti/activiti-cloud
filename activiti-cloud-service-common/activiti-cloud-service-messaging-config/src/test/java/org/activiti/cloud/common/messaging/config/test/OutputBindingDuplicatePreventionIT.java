@@ -39,13 +39,11 @@ import org.springframework.messaging.MessageChannel;
         "activiti.cloud.messaging.connectors.rest-conn.required-groups=queue_group_name",
     }
 )
-@Import(
-    {
-        TestChannelBinderConfiguration.class,
-        OutputBindingDuplicatePreventionIT.TestConfig.class,
-        OutputBindingConfiguration.class,
-    }
-)
+@Import({
+    TestChannelBinderConfiguration.class,
+    OutputBindingDuplicatePreventionIT.TestConfig.class,
+    OutputBindingConfiguration.class,
+})
 class OutputBindingDuplicatePreventionIT {
 
     @Autowired
@@ -62,7 +60,9 @@ class OutputBindingDuplicatePreventionIT {
 
         String[] bindings = outputBindings.split(";");
         long uniqueCount = Arrays.stream(bindings).distinct().count();
-        assertThat(bindings).as("output-bindings should not contain any duplicates").hasSize((int) uniqueCount);
+        assertThat(bindings)
+            .as("output-bindings should not contain any duplicates")
+            .hasSize((int) uniqueCount);
     }
 
     @TestConfiguration

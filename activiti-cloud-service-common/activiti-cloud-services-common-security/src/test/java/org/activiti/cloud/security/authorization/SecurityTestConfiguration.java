@@ -44,14 +44,12 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @EnableWebSecurity
 @SpringBootConfiguration
-@Import(
-    {
-        CommonSecurityAutoConfiguration.class,
-        CommonJwtAuthenticationConverterConfiguration.class,
-        ActivitiSpringCacheManagerAutoConfiguration.class,
-        CacheAutoConfiguration.class,
-    }
-)
+@Import({
+    CommonSecurityAutoConfiguration.class,
+    CommonJwtAuthenticationConverterConfiguration.class,
+    ActivitiSpringCacheManagerAutoConfiguration.class,
+    CacheAutoConfiguration.class,
+})
 @EnableConfigurationProperties(value = AuthorizationProperties.class)
 public class SecurityTestConfiguration {
 

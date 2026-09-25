@@ -67,9 +67,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceController.class)
-@Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
-)
+@Import({
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+})
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -222,7 +224,8 @@ class ProcessInstanceEntityControllerIT {
         );
 
         //when
-        this.mockMvc.perform(
+        this.mockMvc
+            .perform(
                 get("/v1/process-instances/{processInstanceId}", processInstanceEntity.getId()).accept(
                     MediaType.APPLICATION_JSON_VALUE
                 )

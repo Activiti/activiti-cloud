@@ -37,16 +37,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class IdentityManagementRestExceptionHandler {
 
-    @ExceptionHandler(
-        {
-            IdentityInvalidUserRoleException.class,
-            IdentityInvalidUserException.class,
-            IdentityInvalidRoleException.class,
-            IdentityInvalidGroupException.class,
-            IdentityInvalidGroupRoleException.class,
-            IdentityInvalidUserTypeException.class,
-        }
-    )
+    @ExceptionHandler({
+        IdentityInvalidUserRoleException.class,
+        IdentityInvalidUserException.class,
+        IdentityInvalidRoleException.class,
+        IdentityInvalidGroupException.class,
+        IdentityInvalidGroupRoleException.class,
+        IdentityInvalidUserTypeException.class,
+    })
     @ResponseStatus(BAD_REQUEST)
     public void handleAppException(Exception ex, HttpServletResponse response) throws IOException {
         response.sendError(BAD_REQUEST.value(), ex.getMessage());

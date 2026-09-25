@@ -32,8 +32,7 @@ public class ExtendedPageMetadataConverter {
                     basePageMetadata.getSize(),
                     basePageMetadata.getNumber(),
                     totalElementsNotInTheFirstPage
-                ).getTotalPages() +
-                1;
+                ).getTotalPages() + 1;
         }
         return new ExtendedPageMetadata(
             skipCount,

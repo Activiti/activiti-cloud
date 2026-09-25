@@ -68,12 +68,12 @@ public class GraphQLMessage {
             return false;
         }
         GraphQLMessage otherMsg = (GraphQLMessage) other;
-        return (Objects.equals(this.payload, otherMsg.getPayload()));
+        return Objects.equals(this.payload, otherMsg.getPayload());
     }
 
     @Override
     public int hashCode() {
-        return (Objects.hashCode(this.payload) * 23);
+        return Objects.hashCode(this.payload) * 23;
     }
 
     @Override

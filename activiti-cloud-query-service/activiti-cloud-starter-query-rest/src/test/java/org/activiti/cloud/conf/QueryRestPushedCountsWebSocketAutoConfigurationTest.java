@@ -79,27 +79,25 @@ class QueryRestPushedCountsWebSocketAutoConfigurationTest {
 
     @Test
     void should_activateTheWebsocketTransport_and_wireExactlyOnePushedCountsInterceptor_when_thePropertyIsExplicitlyEnabled() {
-        contextRunner
-            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
-            .run(context -> {
-                assertThat(context).hasNotFailed();
-                assertThat(context).hasSingleBean(WebGraphQlHandler.class);
-                assertThat(context).hasSingleBean(ConnectionContextWebSocketInterceptor.class);
-                assertThat(context.getBeansOfType(WebSocketGraphQlInterceptor.class)).hasSize(1);
-                assertThat(context).hasSingleBean(SubscriberRegistry.class);
+        contextRunner.withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true").run(context -> {
+            assertThat(context).hasNotFailed();
+            assertThat(context).hasSingleBean(WebGraphQlHandler.class);
+            assertThat(context).hasSingleBean(ConnectionContextWebSocketInterceptor.class);
+            assertThat(context.getBeansOfType(WebSocketGraphQlInterceptor.class)).hasSize(1);
+            assertThat(context).hasSingleBean(SubscriberRegistry.class);
 
-                // Confirms the handler resolved this bean as its interceptor, not merely that it exists.
-                WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
-                assertThat(handler.getWebSocketInterceptor()).isInstanceOf(ConnectionContextWebSocketInterceptor.class);
+            // Confirms the handler resolved this bean as its interceptor, not merely that it exists.
+            WebGraphQlHandler handler = context.getBean(WebGraphQlHandler.class);
+            assertThat(handler.getWebSocketInterceptor()).isInstanceOf(ConnectionContextWebSocketInterceptor.class);
 
-                GraphQLSchema schema = context.getBean(GraphQlSource.class).schema();
-                assertThat(schema.getSubscriptionType())
-                    .isNotNull()
-                    .extracting(GraphQLObjectType::getFieldDefinitions)
-                    .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
-                    .extracting(GraphQLFieldDefinition::getName)
-                    .containsExactlyInAnyOrder("assignedTasks", "queuedTasks", "runningProcesses");
-            });
+            GraphQLSchema schema = context.getBean(GraphQlSource.class).schema();
+            assertThat(schema.getSubscriptionType())
+                .isNotNull()
+                .extracting(GraphQLObjectType::getFieldDefinitions)
+                .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
+                .extracting(GraphQLFieldDefinition::getName)
+                .containsExactlyInAnyOrder("assignedTasks", "queuedTasks", "runningProcesses");
+        });
     }
 
     @Test

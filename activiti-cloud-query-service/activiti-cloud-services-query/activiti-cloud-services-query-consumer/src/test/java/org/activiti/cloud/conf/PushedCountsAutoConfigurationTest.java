@@ -79,13 +79,11 @@ class PushedCountsAutoConfigurationTest {
 
     @Test
     void backsOffEntirely_whenStartupPropertyIsDisabled() {
-        contextRunner
-            .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=false")
-            .run(context -> {
-                assertThat(context).doesNotHaveBean(ConsumerSubscriberRegistry.class);
-                assertThat(context).doesNotHaveBean(AssignedTaskCounter.class);
-                assertThat(context).doesNotHaveBean("subscriberRegistryConsumerFunction");
-            });
+        contextRunner.withPropertyValues("activiti.cloud.query.pushed-counts.enabled=false").run(context -> {
+            assertThat(context).doesNotHaveBean(ConsumerSubscriberRegistry.class);
+            assertThat(context).doesNotHaveBean(AssignedTaskCounter.class);
+            assertThat(context).doesNotHaveBean("subscriberRegistryConsumerFunction");
+        });
     }
 
     @Test

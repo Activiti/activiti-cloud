@@ -43,24 +43,22 @@ public class TaskVariableDeletedEventHandler {
             try {
                 TaskEntity taskEntity = findResult.get();
 
-                taskEntity
-                    .getVariable(variableName)
-                    .ifPresentOrElse(
-                        variableEntity -> {
-                            // Persist into database
-                            taskEntity.getVariables().remove(variableEntity);
-                            entityManager.remove(variableEntity);
-                        },
-                        () -> {
-                            LOGGER.debug(
-                                "Unable to find variableEntity with name '" +
-                                    variableName +
-                                    "' for task instance '" +
-                                    taskId +
-                                    "'"
-                            );
-                        }
-                    );
+                taskEntity.getVariable(variableName).ifPresentOrElse(
+                    variableEntity -> {
+                        // Persist into database
+                        taskEntity.getVariables().remove(variableEntity);
+                        entityManager.remove(variableEntity);
+                    },
+                    () -> {
+                        LOGGER.debug(
+                            "Unable to find variableEntity with name '" +
+                                variableName +
+                                "' for task instance '" +
+                                taskId +
+                                "'"
+                        );
+                    }
+                );
             } catch (Exception cause) {
                 LOGGER.debug("Error handling TaskVariableDeletedEvent[" + event + "]", cause);
             }

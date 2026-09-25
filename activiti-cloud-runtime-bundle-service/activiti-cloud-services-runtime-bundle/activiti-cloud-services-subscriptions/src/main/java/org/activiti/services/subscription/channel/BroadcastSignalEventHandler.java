@@ -36,7 +36,7 @@ public class BroadcastSignalEventHandler implements Consumer<SignalPayload> {
     )
     @Override
     public void accept(SignalPayload signalPayload) {
-        if ((signalPayload.getVariables() == null) || (signalPayload.getVariables().isEmpty())) {
+        if (signalPayload.getVariables() == null || signalPayload.getVariables().isEmpty()) {
             runtimeService.signalEventReceived(signalPayload.getName());
         } else {
             runtimeService.signalEventReceived(signalPayload.getName(), signalPayload.getVariables());

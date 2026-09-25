@@ -141,21 +141,19 @@ class EngineEventsFluxPublisherIT {
     void shouldNotCancelWhenSubscriberThrowsException() {
         final var secondClientCount = new AtomicInteger();
 
-        engineEventsFlux
-            .log()
-            .subscribe(
-                new BaseSubscriber<>() {
-                    @Override
-                    protected void hookOnNext(Message<List<EngineEvent>> value) {
-                        throw new IllegalStateException("I'm failing");
-                    }
-
-                    @Override
-                    public void dispose() {
-                        super.dispose();
-                    }
+        engineEventsFlux.log().subscribe(
+            new BaseSubscriber<>() {
+                @Override
+                protected void hookOnNext(Message<List<EngineEvent>> value) {
+                    throw new IllegalStateException("I'm failing");
                 }
-            );
+
+                @Override
+                public void dispose() {
+                    super.dispose();
+                }
+            }
+        );
 
         final var secondClient = engineEventsFlux
             .log()
@@ -183,68 +181,64 @@ class EngineEventsFluxPublisherIT {
         final AtomicInteger firstCount = new AtomicInteger();
         final AtomicInteger secondCount = new AtomicInteger();
 
-        engineEventsFlux
-            .log()
-            .subscribe(
-                new BaseSubscriber<>() {
-                    @Override
-                    protected void hookOnSubscribe(Subscription subscription) {
-                        LOGGER.warn("I'm subscribed {}", subscription);
+        engineEventsFlux.log().subscribe(
+            new BaseSubscriber<>() {
+                @Override
+                protected void hookOnSubscribe(Subscription subscription) {
+                    LOGGER.warn("I'm subscribed {}", subscription);
 
-                        subscription.request(1);
-                    }
+                    subscription.request(1);
+                }
 
-                    @Override
-                    protected void hookOnNext(Message<List<EngineEvent>> value) {
-                        LOGGER.info("Received message count: {}", firstCount.incrementAndGet());
+                @Override
+                protected void hookOnNext(Message<List<EngineEvent>> value) {
+                    LOGGER.info("Received message count: {}", firstCount.incrementAndGet());
 
-                        if (firstCount.get() > 256) {
-                            LOGGER.warn("I'm not feeling good: {}", value);
+                    if (firstCount.get() > 256) {
+                        LOGGER.warn("I'm not feeling good: {}", value);
 
-                            throw new IllegalStateException("Throwing up!!!");
-                        } else {
-                            request(1);
-                            try {
-                                Thread.sleep(10);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
+                        throw new IllegalStateException("Throwing up!!!");
+                    } else {
+                        request(1);
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
                         }
                     }
-
-                    @Override
-                    protected void hookOnError(Throwable throwable) {
-                        LOGGER.error("Error: ", throwable);
-
-                        cancel();
-
-                        countDownLatch.countDown();
-                    }
-
-                    @Override
-                    public void dispose() {
-                        LOGGER.warn("I'm disposed");
-                        super.dispose();
-                    }
-
-                    @Override
-                    protected void hookOnCancel() {
-                        LOGGER.warn("I'm cancelled");
-                    }
                 }
-            );
 
-        final var secondClient = engineEventsFlux
-            .log()
-            .subscribe(o -> {
-                LOGGER.info("Second client count: {}", secondCount.incrementAndGet());
+                @Override
+                protected void hookOnError(Throwable throwable) {
+                    LOGGER.error("Error: ", throwable);
 
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                    cancel();
+
+                    countDownLatch.countDown();
                 }
-            });
+
+                @Override
+                public void dispose() {
+                    LOGGER.warn("I'm disposed");
+                    super.dispose();
+                }
+
+                @Override
+                protected void hookOnCancel() {
+                    LOGGER.warn("I'm cancelled");
+                }
+            }
+        );
+
+        final var secondClient = engineEventsFlux.log().subscribe(o -> {
+            LOGGER.info("Second client count: {}", secondCount.incrementAndGet());
+
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
 
         StepVerifier.create(engineEventsFlux)
             .then(() -> IntStream.range(0, 300).forEach(i -> sendEngineEvent(event1).run()))

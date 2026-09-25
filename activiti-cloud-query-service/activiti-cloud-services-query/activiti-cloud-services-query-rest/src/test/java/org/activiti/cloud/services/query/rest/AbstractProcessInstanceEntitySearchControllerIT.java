@@ -89,7 +89,11 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     @Test
     void should_returnProcessInstances_filteredById() {
         IntStream.range(0, 3).forEach(i ->
-            queryTestUtils.buildProcessInstance().withId("id" + i).withInitiator(USER).buildAndSave()
+            queryTestUtils
+                .buildProcessInstance()
+                .withId("id" + i)
+                .withInitiator(USER)
+                .buildAndSave()
         );
 
         ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequestBuilder().withIds("id0", "id2").build();

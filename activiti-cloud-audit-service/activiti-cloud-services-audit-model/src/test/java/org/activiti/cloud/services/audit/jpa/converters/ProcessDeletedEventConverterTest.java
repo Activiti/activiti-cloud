@@ -54,7 +54,7 @@ public class ProcessDeletedEventConverterTest {
 
     @Test
     public void getSupportedEventShouldReturnProcessDeleted() {
-        assert (converter.getSupportedEvent()).equals(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name());
+        assert converter.getSupportedEvent().equals(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name());
     }
 
     @Test

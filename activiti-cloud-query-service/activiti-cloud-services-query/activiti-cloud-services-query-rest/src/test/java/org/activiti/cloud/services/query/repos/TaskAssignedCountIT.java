@@ -44,7 +44,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @SpringBootTest(
     classes = { QueryRestTestApplication.class },
     properties = {
-        "spring.main.banner-mode=off", "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
+        "spring.main.banner-mode=off",
+        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
     }
 )
 @TestPropertySource("classpath:application-test.properties")

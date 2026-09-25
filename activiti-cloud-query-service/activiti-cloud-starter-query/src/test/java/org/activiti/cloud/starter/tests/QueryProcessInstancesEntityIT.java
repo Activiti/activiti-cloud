@@ -541,14 +541,12 @@ public class QueryProcessInstancesEntityIT {
     }
 
     @ParameterizedTest
-    @CsvSource(
-        {
-            "status=COMPLETED, 1",
-            "status=RUNNING, 2",
-            "status=COMPLETED&status=RUNNING, 1;2",
-            "status=CREATED&status=RUNNING, 2",
-        }
-    )
+    @CsvSource({
+        "status=COMPLETED, 1",
+        "status=RUNNING, 2",
+        "status=COMPLETED&status=RUNNING, 1;2",
+        "status=CREATED&status=RUNNING, 2",
+    })
     public void shouldGetProcessInstancesAppVersionsAsAdmin(String queryParameters, String expectedResult) {
         //given
         processInstanceBuilder.aCompletedProcessInstanceWithAppVersion("Process for filter", "1");

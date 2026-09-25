@@ -120,9 +120,10 @@ class VariableUpdatedEventConverterTest {
         variableUpdatedEventEntity.setTimestamp(System.currentTimeMillis());
         variableUpdatedEventEntity.setVariableInstance(buildVariableInstance());
 
-        CloudVariableUpdatedEventImpl<String> event = (CloudVariableUpdatedEventImpl<
-            String
-        >) variableUpdatedEventConverter.createAPIEvent(variableUpdatedEventEntity);
+        CloudVariableUpdatedEventImpl<String> event =
+            (CloudVariableUpdatedEventImpl<String>) variableUpdatedEventConverter.createAPIEvent(
+                variableUpdatedEventEntity
+            );
 
         assertThat(event).isNotNull();
         assertThat(event.getId()).isEqualTo(variableUpdatedEventEntity.getEventId());

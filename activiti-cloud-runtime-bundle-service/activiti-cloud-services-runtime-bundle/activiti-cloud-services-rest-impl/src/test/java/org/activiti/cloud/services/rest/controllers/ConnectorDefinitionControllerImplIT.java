@@ -57,20 +57,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @WebMvcTest(ConnectorDefinitionControllerImpl.class)
-@Import(
-    {
-        ConnectorsAutoConfiguration.class,
-        ConnectorAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class,
-        ActivitiCoreCommonUtilAutoConfiguration.class,
-        CloudEventsAutoConfiguration.class,
-        ProcessEngineChannelsConfiguration.class,
-        RuntimeBundleProperties.class,
-        ProcessExtensionsAutoConfiguration.class,
-        StreamConfig.class,
-        CacheAutoConfiguration.class,
-    }
-)
+@Import({
+    ConnectorsAutoConfiguration.class,
+    ConnectorAutoConfiguration.class,
+    ServicesRestWebMvcAutoConfiguration.class,
+    ActivitiCoreCommonUtilAutoConfiguration.class,
+    CloudEventsAutoConfiguration.class,
+    ProcessEngineChannelsConfiguration.class,
+    RuntimeBundleProperties.class,
+    ProcessExtensionsAutoConfiguration.class,
+    StreamConfig.class,
+    CacheAutoConfiguration.class,
+})
 class ConnectorDefinitionControllerImplIT {
 
     private MockMvc mockMvc;
@@ -127,7 +125,8 @@ class ConnectorDefinitionControllerImplIT {
 
     @Test
     void getAllConnectorDefinitions() throws Exception {
-        this.mockMvc.perform(get("/v1/connector-definitions").accept(MediaTypes.HAL_JSON_VALUE))
+        this.mockMvc
+            .perform(get("/v1/connector-definitions").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("content[0].links[0].rel", is("self")))
             .andExpect(jsonPath("content[0].id", is("id1")))
@@ -136,7 +135,8 @@ class ConnectorDefinitionControllerImplIT {
 
     @Test
     void getOneSpecificConnectorDefinition() throws Exception {
-        this.mockMvc.perform(get("/v1/connector-definitions/id1").accept(MediaTypes.HAL_JSON_VALUE))
+        this.mockMvc
+            .perform(get("/v1/connector-definitions/id1").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("links[0].rel", is("self")))
             .andExpect(jsonPath("links[0].href", containsString("v1/connector-definitions/id1")))
@@ -145,8 +145,8 @@ class ConnectorDefinitionControllerImplIT {
 
     @Test
     void getConnectorDefinitionNotFound() throws Exception {
-        this.mockMvc.perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(
-            status().isNotFound()
-        );
+        this.mockMvc
+            .perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isNotFound());
     }
 }

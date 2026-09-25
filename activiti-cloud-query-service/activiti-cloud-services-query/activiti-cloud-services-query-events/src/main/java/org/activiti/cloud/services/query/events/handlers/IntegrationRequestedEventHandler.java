@@ -45,7 +45,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
 
         // Activity can be cyclical, so try to find existing before creating a new one
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, entityId);
-        boolean isNewEntity = (entity == null);
+        boolean isNewEntity = entity == null;
 
         if (entity == null) {
             entity = new IntegrationContextEntity(

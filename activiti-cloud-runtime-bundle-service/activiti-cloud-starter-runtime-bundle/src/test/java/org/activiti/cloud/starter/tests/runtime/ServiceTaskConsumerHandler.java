@@ -111,9 +111,9 @@ public class ServiceTaskConsumerHandler {
             String variableToUpdate = "age";
 
             HashMap<String, Object> resultVariables = new HashMap<>();
-            resultVariables.put(variableToUpdate, ((Integer) requestVariables.get(variableToUpdate)) + 1);
+            resultVariables.put(variableToUpdate, (Integer) requestVariables.get(variableToUpdate) + 1);
             //invert value of boolean
-            resultVariables.put("boolVar", !(Boolean) requestVariables.get("boolVar"));
+            resultVariables.put("boolVar", !((Boolean) requestVariables.get("boolVar")));
 
             resultVariables.put(
                 "customPojoTypeInConnector",

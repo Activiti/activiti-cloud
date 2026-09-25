@@ -43,20 +43,18 @@ public class CloudProcessCandidateStarterGroupAddedProducer {
 
     @EventListener
     public void sendProcessCandidateStarterUserAddedEvents(ProcessCandidateStarterUserAddedEvents events) {
-        producer
-            .auditProducer()
-            .send(
-                runtimeBundleMessageBuilderFactory
-                    .create()
-                    .withPayload(
-                        events
-                            .getEvents()
-                            .stream()
-                            .map(event -> toCloudEvent(event))
-                            .toArray(CloudRuntimeEvent<?, ?>[]::new)
-                    )
-                    .build()
-            );
+        producer.auditProducer().send(
+            runtimeBundleMessageBuilderFactory
+                .create()
+                .withPayload(
+                    events
+                        .getEvents()
+                        .stream()
+                        .map(event -> toCloudEvent(event))
+                        .toArray(CloudRuntimeEvent<?, ?>[]::new)
+                )
+                .build()
+        );
     }
 
     private CloudProcessCandidateStarterUserAddedEvent toCloudEvent(ProcessCandidateStarterUserAddedEvent event) {

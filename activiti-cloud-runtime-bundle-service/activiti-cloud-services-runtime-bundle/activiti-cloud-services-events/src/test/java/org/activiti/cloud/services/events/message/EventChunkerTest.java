@@ -176,7 +176,9 @@ class EventChunkerTest {
         belowLimitProperties.getEventsProperties().setChunkSizeInBytesCloseListener(exactSerializedSize - 1);
         EventChunker belowLimitChunker = new EventChunker(objectMapper, belowLimitProperties);
 
-        assertThat(exactLimitChunker.chunk(List.of(event))).singleElement().isEqualTo(List.of(event));
+        assertThat(exactLimitChunker.chunk(List.of(event)))
+            .singleElement()
+            .isEqualTo(List.of(event));
 
         final List<CloudRuntimeEventImpl<?, ?>> events = List.of(event);
         assertThatThrownBy(() -> belowLimitChunker.chunk(events))

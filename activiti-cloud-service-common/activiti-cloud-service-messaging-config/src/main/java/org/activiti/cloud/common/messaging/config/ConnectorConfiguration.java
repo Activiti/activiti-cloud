@@ -202,24 +202,22 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                     throw new RuntimeException(cause.getMessage(), cause);
                                 }
                             } catch (Exception connectorError) {
-                                connectorErrorHandlerDefinitionResolver
-                                    .apply(connectorBinding)
-                                    .ifPresentOrElse(
-                                        errorHandlerDefinition -> {
-                                            final var errorMessage = (connectorError instanceof
-                                                    MessagingException messagingException)
+                                connectorErrorHandlerDefinitionResolver.apply(connectorBinding).ifPresentOrElse(
+                                    errorHandlerDefinition -> {
+                                        final var errorMessage =
+                                            connectorError instanceof MessagingException messagingException
                                                 ? new ErrorMessage(messagingException, message)
                                                 : new ErrorMessage(
                                                       new MessagingException(message, connectorError),
                                                       message
                                                   );
 
-                                            errorHandlerDefinition.accept(errorMessage);
-                                        },
-                                        () -> {
-                                            throw connectorError;
-                                        }
-                                    );
+                                        errorHandlerDefinition.accept(errorMessage);
+                                    },
+                                    () -> {
+                                        throw connectorError;
+                                    }
+                                );
                             }
 
                             return response;
@@ -325,7 +323,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
         return (message, connectorBinding) ->
             Optional.ofNullable(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT))
-                .map(it -> (it instanceof Duration) ? (Duration) it : toDuration.apply(it.toString()))
+                .map(it -> it instanceof Duration ? (Duration) it : toDuration.apply(it.toString()))
                 .or(() -> Optional.of(connectorBinding.integrationResultTimeout()).map(toDuration))
                 .filter(it -> it.compareTo(defaultResultTimeout) <= 0)
                 .orElse(defaultResultTimeout);
