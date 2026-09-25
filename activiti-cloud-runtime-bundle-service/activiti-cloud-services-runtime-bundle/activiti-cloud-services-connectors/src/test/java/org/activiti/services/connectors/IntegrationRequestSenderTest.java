@@ -20,10 +20,14 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -42,6 +46,8 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.activiti.services.connectors.mtc.MtcIntegrationRequestInterceptor;
+import org.activiti.services.connectors.mtc.MtcProperties;
 import org.activiti.services.test.DelegateExecutionBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -118,12 +124,17 @@ public class IntegrationRequestSenderTest {
         configureDeploymentManager();
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
-        integrationRequestSender = new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver);
+        integrationRequestSender = new IntegrationRequestSender(
+            streamBridge,
+            messageBuilderFactory,
+            bindingResolver,
+            Optional.empty()
+        );
 
         configureProperties();
         configureExecution();
 
-        when(bindingResolver.getBindingDestination(CONNECTOR_TYPE)).thenReturn(CONNECTOR_TYPE);
+        lenient().when(bindingResolver.getBindingDestination(CONNECTOR_TYPE)).thenReturn(CONNECTOR_TYPE);
         when(runtimeBundleProperties.getServiceFullName()).thenReturn(APP_NAME);
 
         IntegrationContextEntity contextEntity = mock(IntegrationContextEntity.class);
@@ -192,6 +203,39 @@ public class IntegrationRequestSenderTest {
             CONNECTOR_TYPE
         );
         assertThat(integrationRequestMessage.getHeaders().get(FUNCTION_DESTINATION)).isEqualTo(CONNECTOR_TYPE);
+
+        TransactionSynchronizationManager.clear();
+    }
+
+    @Test
+    public void shouldRouteThroughMtcWhenTypeMappingConfigured() {
+        MtcProperties mtcProperties = new MtcProperties();
+        mtcProperties.setEnabled(true);
+        mtcProperties.setConnectorTypes(Set.of("rest-connector"));
+        mtcProperties.setTypeMappings(Map.of("payment", "rest-connector"));
+
+        MtcIntegrationRequestInterceptor interceptor = new MtcIntegrationRequestInterceptor(mtcProperties);
+
+        when(bindingResolver.getBindingDestination("mtc-rest-connector")).thenReturn("mtc-rest-connector");
+
+        IntegrationRequestSender mtcSender = new IntegrationRequestSender(
+            streamBridge,
+            messageBuilderFactory,
+            bindingResolver,
+            Optional.of(interceptor)
+        );
+
+        TransactionSynchronizationManager.initSynchronization();
+
+        mtcSender.sendIntegrationRequest(integrationRequest);
+
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+
+        verify(streamBridge).send(eq("mtc-rest-connector"), eq("mtc"), integrationRequestMessageCaptor.capture());
+        Message<IntegrationRequest> message = integrationRequestMessageCaptor.getValue();
+
+        assertThat(message.getPayload()).isEqualTo(integrationRequest);
+        assertThat(message.getHeaders().get(IntegrationRequestSender.CONNECTOR_TYPE)).isEqualTo("rest-connector");
 
         TransactionSynchronizationManager.clear();
     }
