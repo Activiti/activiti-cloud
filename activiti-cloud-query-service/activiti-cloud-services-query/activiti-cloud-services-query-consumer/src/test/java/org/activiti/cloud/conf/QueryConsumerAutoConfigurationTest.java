@@ -20,9 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.mock;
 
 import jakarta.persistence.EntityManager;
-import java.util.Optional;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
-import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.junit.jupiter.api.Test;
@@ -72,13 +70,12 @@ class QueryConsumerAutoConfigurationTest {
     }
 
     @Test
-    void queryConsumerMessageHandler_isConstructable_whenRecomputeEventCapturerIsAbsent() {
+    void queryConsumerMessageHandler_isConstructable() {
         QueryConsumerMessageHandler handler = new QueryConsumerAutoConfiguration().queryConsumerMessageHandler(
             mock(QueryEventHandlerContext.class),
             mock(QueryEventHandlerContextOptimizer.class),
             mock(EntityManager.class),
             mock(IntegrationFlow.class),
-            Optional.<RecomputeEventCapturer>empty(),
             100
         );
 

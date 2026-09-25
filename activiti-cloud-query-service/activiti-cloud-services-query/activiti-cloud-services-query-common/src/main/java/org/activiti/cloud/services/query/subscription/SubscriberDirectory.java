@@ -15,18 +15,16 @@
  */
 package org.activiti.cloud.services.query.subscription;
 
-import java.time.Instant;
-import java.util.Objects;
+import java.util.Set;
 
 /**
- * Published by the recompute pipeline directly into this instance's own {@code pushedCountsSink}.
- * The {@code scopeKey} (see {@link ScopeKeys}) says who the number is for and which count type it
- * belongs to; {@code count} is absolute (never a delta); {@code asOf} is when the count was
- * computed, not when the triggering event happened.
+ * What the recompute pipeline needs to know about who is watching, without a compile-time
+ * dependency on the query-rest module that actually holds the registry.
  */
-public record CountChangedMessage(String scopeKey, long count, Instant asOf) {
-    public CountChangedMessage {
-        Objects.requireNonNull(scopeKey, "scopeKey");
-        Objects.requireNonNull(asOf, "asOf");
-    }
+public interface SubscriberDirectory {
+    boolean isWatching(String userId);
+
+    Set<String> groupsOf(String userId);
+
+    Set<String> watchedUserIds();
 }

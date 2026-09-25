@@ -17,39 +17,30 @@ package org.activiti.cloud.services.query.rest.subscriber;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
-import org.activiti.cloud.services.query.subscription.SubscriberRegistrySnapshot;
-import org.activiti.cloud.services.query.subscription.SubscriberWentLiveEvent;
-import org.activiti.cloud.services.query.subscription.SubscriberWentQuietEvent;
+import org.activiti.cloud.services.query.subscription.SubscriberDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 
 /**
- * The local, per-instance {@code userId -> SubscriberRegistration} registry. Publishes a
- * {@link SubscriberWentLiveEvent} / {@link SubscriberWentQuietEvent} only on the empty/non-empty
- * transition, never on every session add/remove; a clean disconnect and the expiry sweep both go
- * through {@link #unregister(String, String, Instant)}.
+ * The local, per-instance {@code userId -> SubscriberRegistration} registry, and this instance's
+ * {@link SubscriberDirectory} for the recompute pipeline. A clean disconnect and the expiry sweep
+ * both go through {@link #unregister(String, String, Instant)}.
  *
  * <p>Concurrency: {@link ConcurrentHashMap#compute}/{@code computeIfPresent} serialize remapping
  * per key, so two sessions for the same user registering concurrently can never both observe
  * "was empty" and double-fire a transition.
  */
-public class SubscriberRegistry implements SubscriberRegistrySnapshot {
+public class SubscriberRegistry implements SubscriberDirectory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubscriberRegistry.class);
 
     private final ConcurrentHashMap<String, SubscriberRegistration> registrations = new ConcurrentHashMap<>();
-    private final ApplicationEventPublisher eventPublisher;
     private final long maxSize;
 
-    public SubscriberRegistry(ApplicationEventPublisher eventPublisher, long maxSize) {
-        this.eventPublisher = eventPublisher;
+    public SubscriberRegistry(long maxSize) {
         this.maxSize = maxSize;
     }
 
@@ -73,7 +64,6 @@ public class SubscriberRegistry implements SubscriberRegistrySnapshot {
         });
         if (wentLive.get()) {
             LOGGER.debug("User {} went live (session {}, {} groups)", userId, sessionId, groups.size());
-            eventPublisher.publishEvent(new SubscriberWentLiveEvent(userId, groups, now));
         } else {
             LOGGER.debug("User {} registered an additional session {}", userId, sessionId);
         }
@@ -90,7 +80,6 @@ public class SubscriberRegistry implements SubscriberRegistrySnapshot {
         });
         if (wentQuiet.get()) {
             LOGGER.debug("User {} went quiet (last session {} removed)", userId, sessionId);
-            eventPublisher.publishEvent(new SubscriberWentQuietEvent(userId, now));
         } else if (existed.get()) {
             LOGGER.debug("User {} removed session {}, other sessions remain live", userId, sessionId);
         } else {
@@ -119,18 +108,19 @@ public class SubscriberRegistry implements SubscriberRegistrySnapshot {
         return registrations.size();
     }
 
-    /**
-     * A view of every live user and their groups, used to build a SNAPSHOT. The scan runs without locking
-     * the registry, so the caller stamps the message time before it starts: a user who leaves mid-scan then
-     * loses to their UNREGISTERED on the consumer instead of being re-added. Read-only: never mutates the
-     * registry nor fires an event.
-     */
     @Override
-    public List<SubscriberRegistryMessage.Entry> snapshotEntries() {
-        List<SubscriberRegistryMessage.Entry> entries = new ArrayList<>();
-        registrations.forEach((userId, registration) ->
-            entries.add(new SubscriberRegistryMessage.Entry(userId, List.copyOf(registration.getGroups())))
-        );
-        return List.copyOf(entries);
+    public boolean isWatching(String userId) {
+        return registrations.containsKey(userId);
+    }
+
+    @Override
+    public Set<String> groupsOf(String userId) {
+        SubscriberRegistration registration = registrations.get(userId);
+        return registration == null ? Set.of() : registration.getGroups();
+    }
+
+    @Override
+    public Set<String> watchedUserIds() {
+        return Set.copyOf(registrations.keySet());
     }
 }
