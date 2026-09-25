@@ -16,23 +16,19 @@
 package org.activiti.cloud.services.query.app;
 
 import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
-public interface QueryConsumerChannels {
-    String QUERY_CONSUMER = "queryConsumer";
+/**
+ * This instance's own subscription to {@code queryEvents} (query-consumer's post-persistence
+ * re-publish), independent of any other consumer of that topic. No consumer group: every instance
+ * gets its own queue and a full copy of every batch.
+ */
+public interface PushedCountsRecomputeChannels {
+    String QUERY_EVENTS_CONSUMER = "pushedCountsQueryEventsConsumer";
 
-    String QUERY_EVENTS_PRODUCER = "queryEventsProducer";
-
-    @InputBinding(QUERY_CONSUMER)
-    default SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QUERY_CONSUMER).getObject();
-    }
-
-    @OutputBinding(QUERY_EVENTS_PRODUCER)
-    default MessageChannel queryEventsProducer() {
-        return MessageChannels.direct(QUERY_EVENTS_PRODUCER).getObject();
+    @InputBinding(QUERY_EVENTS_CONSUMER)
+    default SubscribableChannel pushedCountsQueryEventsConsumer() {
+        return MessageChannels.publishSubscribe(QUERY_EVENTS_CONSUMER).getObject();
     }
 }

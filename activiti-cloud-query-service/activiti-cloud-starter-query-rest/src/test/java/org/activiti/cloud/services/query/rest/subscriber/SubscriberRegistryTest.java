@@ -16,87 +16,63 @@
 package org.activiti.cloud.services.query.rest.subscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.activiti.cloud.services.query.subscription.SubscriberRegistryMessage;
-import org.activiti.cloud.services.query.subscription.SubscriberWentLiveEvent;
-import org.activiti.cloud.services.query.subscription.SubscriberWentQuietEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
-@ExtendWith(MockitoExtension.class)
 class SubscriberRegistryTest {
 
     private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
-
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
 
     private SubscriberRegistry registry;
 
     @BeforeEach
     void setUp() {
-        registry = new SubscriberRegistry(eventPublisher, 50_000);
+        registry = new SubscriberRegistry(50_000);
     }
 
     @Test
-    void should_publishWentLiveEvent_when_firstSessionForAUserIsRegistered() {
+    void should_beWatching_when_theFirstSessionForAUserIsRegistered() {
         registry.register("alice", Set.of("eng"), "session-1", NOW);
 
-        ArgumentCaptor<Object> event = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publishEvent(event.capture());
-        assertThat(event.getValue()).isInstanceOf(SubscriberWentLiveEvent.class);
-        assertThat(((SubscriberWentLiveEvent) event.getValue()).userId()).isEqualTo("alice");
+        assertThat(registry.isWatching("alice")).isTrue();
+        assertThat(registry.groupsOf("alice")).containsExactly("eng");
     }
 
     @Test
-    void should_notPublishWentLiveEvent_when_secondSessionForTheSameUserIsRegistered() {
+    void should_stillBeWatching_when_aSecondSessionForTheSameUserIsRegistered() {
         registry.register("alice", Set.of("eng"), "session-1", NOW);
-        clearInvocations(eventPublisher);
 
         registry.register("alice", Set.of("eng"), "session-2", NOW);
 
-        verifyNoInteractions(eventPublisher);
+        assertThat(registry.isWatching("alice")).isTrue();
+        assertThat(registry.size()).isEqualTo(1);
     }
 
     @Test
-    void should_publishWentQuietEvent_when_theLastSessionForAUserIsUnregistered() {
+    void should_stopWatching_when_theLastSessionForAUserIsUnregistered() {
         registry.register("alice", Set.of("eng"), "session-1", NOW);
-        clearInvocations(eventPublisher);
 
         registry.unregister("alice", "session-1", NOW);
 
-        ArgumentCaptor<Object> event = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publishEvent(event.capture());
-        assertThat(event.getValue()).isInstanceOf(SubscriberWentQuietEvent.class);
+        assertThat(registry.isWatching("alice")).isFalse();
         assertThat(registry.size()).isZero();
     }
 
     @Test
-    void should_notPublishWentQuietEvent_when_oneOfTwoSessionsIsUnregistered() {
+    void should_stillBeWatching_when_oneOfTwoSessionsIsUnregistered() {
         registry.register("alice", Set.of("eng"), "session-1", NOW);
         registry.register("alice", Set.of("eng"), "session-2", NOW);
-        clearInvocations(eventPublisher);
 
         registry.unregister("alice", "session-1", NOW);
 
-        verifyNoInteractions(eventPublisher);
+        assertThat(registry.isWatching("alice")).isTrue();
         assertThat(registry.size()).isEqualTo(1);
     }
 
@@ -104,45 +80,39 @@ class SubscriberRegistryTest {
     void should_beANoOp_when_unregisteringAUserWithNoRegistration() {
         registry.unregister("nobody", "session-1", NOW);
 
-        verifyNoInteractions(eventPublisher);
+        assertThat(registry.size()).isZero();
     }
 
     @Test
-    void should_returnAnEntryPerLiveUserWithTheirGroups_when_snapshotEntriesIsCalled() {
+    void should_returnEveryWatchedUserWithTheirGroups_when_watchedUserIdsAndGroupsOfAreCalled() {
         registry.register("alice", Set.of("eng"), "session-1", NOW);
         registry.register("bob", Set.of("sales", "ops"), "session-2", NOW);
 
-        List<SubscriberRegistryMessage.Entry> entries = registry.snapshotEntries();
-
-        assertThat(entries)
-            .extracting(SubscriberRegistryMessage.Entry::userId)
-            .containsExactlyInAnyOrder("alice", "bob");
-        assertThat(entries)
-            .filteredOn(entry -> entry.userId().equals("bob"))
-            .singleElement()
-            .satisfies(entry -> assertThat(entry.groups()).containsExactlyInAnyOrder("sales", "ops"));
+        assertThat(registry.watchedUserIds()).containsExactlyInAnyOrder("alice", "bob");
+        assertThat(registry.groupsOf("bob")).containsExactlyInAnyOrder("sales", "ops");
     }
 
     @Test
-    void should_returnAnEmptyList_when_snapshotEntriesIsCalledOnAnEmptyRegistry() {
-        assertThat(registry.snapshotEntries()).isEmpty();
+    void should_returnEmpty_when_queriedOnAnEmptyRegistry() {
+        assertThat(registry.watchedUserIds()).isEmpty();
+        assertThat(registry.isWatching("alice")).isFalse();
+        assertThat(registry.groupsOf("alice")).isEmpty();
     }
 
     @Test
     void should_notRegister_when_registryIsAtItsConfiguredMaximumSize() {
-        SubscriberRegistry smallRegistry = new SubscriberRegistry(eventPublisher, 1);
+        SubscriberRegistry smallRegistry = new SubscriberRegistry(1);
         smallRegistry.register("alice", Set.of(), "session-1", NOW);
-        clearInvocations(eventPublisher);
 
         smallRegistry.register("bob", Set.of(), "session-1", NOW);
 
-        verify(eventPublisher, never()).publishEvent(any());
+        assertThat(smallRegistry.isWatching("bob")).isFalse();
         assertThat(smallRegistry.size()).isEqualTo(1);
     }
 
     @Test
     void should_stillAllowAnAdditionalSession_when_userIsAlreadyRegisteredAtMaximumSize() {
-        SubscriberRegistry smallRegistry = new SubscriberRegistry(eventPublisher, 1);
+        SubscriberRegistry smallRegistry = new SubscriberRegistry(1);
         smallRegistry.register("alice", Set.of(), "session-1", NOW);
 
         smallRegistry.register("alice", Set.of(), "session-2", NOW);
@@ -151,7 +121,7 @@ class SubscriberRegistryTest {
     }
 
     @Test
-    void should_produceExactlyOneWentLiveEvent_when_manyThreadsRegisterSessionsForTheSameUserConcurrently()
+    void should_recordExactlyOneUser_when_manyThreadsRegisterSessionsForTheSameUserConcurrently()
         throws InterruptedException {
         int threadCount = 32;
         try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
@@ -180,9 +150,7 @@ class SubscriberRegistryTest {
             executor.shutdown();
         }
 
-        ArgumentCaptor<Object> events = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publishEvent(events.capture());
-        assertThat(events.getAllValues()).hasSize(1).first().isInstanceOf(SubscriberWentLiveEvent.class);
         assertThat(registry.size()).isEqualTo(1);
+        assertThat(registry.isWatching("alice")).isTrue();
     }
 }
