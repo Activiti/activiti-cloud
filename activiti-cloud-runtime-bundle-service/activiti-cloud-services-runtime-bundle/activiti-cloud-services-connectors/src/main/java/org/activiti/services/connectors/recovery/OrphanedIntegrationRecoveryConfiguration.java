@@ -17,7 +17,6 @@ package org.activiti.services.connectors.recovery;
 
 import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.engine.integration.IntegrationContextService;
-import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.conf.RuntimeBundleShedLockConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -35,14 +34,12 @@ public class OrphanedIntegrationRecoveryConfiguration {
     @Bean
     OrphanedIntegrationRecoveryScheduler orphanedIntegrationRecoveryScheduler(
         IntegrationContextService integrationContextService,
-        IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
         OrphanedIntegrationRecoveryProperties properties,
         FeatureToggle featureToggle
     ) {
         return new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
-            integrationRequestBuilder,
             errorEventHandler,
             properties.getThresholdSeconds(),
             featureToggle

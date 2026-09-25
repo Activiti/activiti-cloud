@@ -17,28 +17,20 @@ package org.activiti.cloud.api.process.model.impl;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 
 public class IntegrationResultImpl extends CloudRuntimeEntityImpl implements IntegrationResult {
 
-    private IntegrationRequest integrationRequest;
     private IntegrationContext integrationContext;
 
     public IntegrationResultImpl() {}
 
-    public IntegrationResultImpl(IntegrationRequest integrationRequest, IntegrationContext integrationContext) {
-        this.integrationRequest = integrationRequest;
+    public IntegrationResultImpl(IntegrationContext integrationContext) {
         this.integrationContext = integrationContext;
     }
 
     @Override
     public IntegrationContext getIntegrationContext() {
         return integrationContext;
-    }
-
-    @Override
-    public IntegrationRequest getIntegrationRequest() {
-        return integrationRequest;
     }
 }
