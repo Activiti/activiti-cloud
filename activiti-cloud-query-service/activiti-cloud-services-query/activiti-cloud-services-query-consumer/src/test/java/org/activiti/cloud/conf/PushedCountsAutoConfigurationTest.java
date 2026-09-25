@@ -26,11 +26,13 @@ import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.RecomputeAudienceResolver;
 import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.app.RecomputePipeline;
+import org.activiti.cloud.services.query.app.RunningProcessesCounter;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemovalScheduler;
 import org.activiti.cloud.services.query.app.SubscriberInstanceRemover;
 import org.activiti.cloud.services.query.app.SubscriberRegistryConsumer;
 import org.activiti.cloud.services.query.app.SubscriberRegistryMessageHandler;
 import org.activiti.cloud.services.query.app.SubscriberRegistryResyncRequester;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -52,6 +54,7 @@ class PushedCountsAutoConfigurationTest {
         .withBean(TaskCandidateUserRepository.class, () -> mock(TaskCandidateUserRepository.class))
         .withBean(TaskCandidateGroupRepository.class, () -> mock(TaskCandidateGroupRepository.class))
         .withBean(TaskRepository.class, () -> mock(TaskRepository.class))
+        .withBean(ProcessInstanceRepository.class, () -> mock(ProcessInstanceRepository.class))
         .withBean(FeatureToggle.class, () -> name -> false)
         .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
         .withConfiguration(AutoConfigurations.of(PushedCountsAutoConfiguration.class));
@@ -65,6 +68,7 @@ class PushedCountsAutoConfigurationTest {
             assertThat(context).hasSingleBean(SubscriberInstanceRemovalScheduler.class);
             assertThat(context).hasSingleBean(SubscriberRegistryResyncRequester.class);
             assertThat(context).hasSingleBean(AssignedTaskCounter.class);
+            assertThat(context).hasSingleBean(RunningProcessesCounter.class);
             assertThat(context).hasBean("subscriberRegistryConsumerFunction");
             assertThat(context.getBean("subscriberRegistryConsumerFunction")).isInstanceOf(
                 SubscriberRegistryConsumer.class
@@ -84,6 +88,7 @@ class PushedCountsAutoConfigurationTest {
             .run(context -> {
                 assertThat(context).doesNotHaveBean(ConsumerSubscriberRegistry.class);
                 assertThat(context).doesNotHaveBean(AssignedTaskCounter.class);
+                assertThat(context).doesNotHaveBean(RunningProcessesCounter.class);
                 assertThat(context).doesNotHaveBean("subscriberRegistryConsumerFunction");
             });
     }

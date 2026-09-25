@@ -24,11 +24,17 @@ import java.util.Map;
 import java.util.Set;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
+import org.activiti.cloud.services.query.app.RunningProcessesCounter;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
@@ -81,6 +87,7 @@ class PushedCountsRecomputePipelineIT {
         registry.unregister("alice", "rest-1", Instant.now());
         registry.unregister("frank", "rest-1", Instant.now());
         registry.unregister("grace", "rest-1", Instant.now());
+        registry.unregister("henry", "rest-1", Instant.now());
     }
 
     @Test
@@ -97,10 +104,12 @@ class PushedCountsRecomputePipelineIT {
 
         messageHandler.accept(message);
 
-        Message<byte[]> received = output.receive(5000, COUNT_DESTINATION);
-        assertThat(received).isNotNull();
-        String payload = new String(received.getPayload(), StandardCharsets.UTF_8);
-        assertThat(payload).contains("assigned:alice").contains("\"count\":5");
+        Message<byte[]> assignedMessage = receiveContaining(output, "assigned:alice", 5000);
+        assertThat(assignedMessage).isNotNull();
+        assertThat(new String(assignedMessage.getPayload(), StandardCharsets.UTF_8))
+            .contains("assigned:alice")
+            .contains("\"count\":5");
+        assertThat(receiveContaining(output, "processes:alice", 2000)).isNotNull();
     }
 
     @Test
@@ -128,10 +137,31 @@ class PushedCountsRecomputePipelineIT {
         );
         messageHandler.accept(MessageBuilder.withPayload(events).build());
 
-        Message<byte[]> received = output.receive(5000, COUNT_DESTINATION);
+        Message<byte[]> received = receiveContaining(output, "assigned:frank", 5000);
         assertThat(received).isNotNull();
         assertThat(new String(received.getPayload(), StandardCharsets.UTF_8)).contains("assigned:frank");
-        assertThat(output.receive(500, COUNT_DESTINATION)).isNull();
+        assertThat(receiveContaining(output, "processes:frank", 2000)).isNotNull();
+        assertThat(receiveContaining(output, "grace", 500)).isNull();
+    }
+
+    @Test
+    void committedProcessStartedEvent_flowsThroughToACountChangedMessage_forAWatchingInitiator() {
+        registry.register("henry", Set.of(), "rest-1", Instant.now());
+
+        CloudProcessInstanceImpl process = new CloudProcessInstanceImpl();
+        process.setId("proc-1");
+        process.setInitiator("henry");
+        // ProcessStartedEventHandler requires the row to already exist.
+        List<CloudRuntimeEvent<?, ?>> events = List.of(
+            new CloudProcessCreatedEventImpl(process),
+            new CloudProcessStartedEventImpl(process)
+        );
+        messageHandler.accept(MessageBuilder.withPayload(events).build());
+
+        Message<byte[]> received = receiveContaining(output, "processes:henry", 5000);
+        assertThat(received).isNotNull();
+        String payload = new String(received.getPayload(), StandardCharsets.UTF_8);
+        assertThat(payload).contains("processes:henry").contains("\"count\":7");
     }
 
     private static TaskImpl assignedTask() {
@@ -151,6 +181,20 @@ class PushedCountsRecomputePipelineIT {
                 @Override
                 public Map<String, Long> compute(Set<String> affectedUserIds) {
                     return Map.of("alice", 5L);
+                }
+            };
+        }
+
+        @Bean
+        RunningProcessesCounter testRunningProcessesCounter(
+            ProcessInstanceRepository processInstanceRepository,
+            TaskRepository taskRepository,
+            TaskCandidateUserRepository taskCandidateUserRepository
+        ) {
+            return new RunningProcessesCounter(processInstanceRepository, taskRepository, taskCandidateUserRepository) {
+                @Override
+                public Map<String, Long> compute(Set<String> affectedUserIds) {
+                    return Map.of("henry", 7L);
                 }
             };
         }
@@ -203,10 +247,25 @@ class PushedCountsRecomputePipelineIT {
             );
             messageHandler.accept(MessageBuilder.withPayload(events).build());
 
-            Message<byte[]> received = output.receive(3000, COUNT_DESTINATION);
+            Message<byte[]> received = receiveContaining(output, "assigned:erin", 3000);
             assertThat(received).isNotNull();
             assertThat(new String(received.getPayload(), StandardCharsets.UTF_8)).contains("assigned:erin");
+            assertThat(receiveContaining(output, "processes:erin", 2000)).isNotNull();
         }
+    }
+
+    /** Skips messages that don't match. */
+    private static Message<byte[]> receiveContaining(OutputDestination output, String needle, long timeoutMillis) {
+        long deadline = System.currentTimeMillis() + timeoutMillis;
+        Message<byte[]> received;
+        do {
+            long remaining = deadline - System.currentTimeMillis();
+            if (remaining <= 0) {
+                return null;
+            }
+            received = output.receive(remaining, COUNT_DESTINATION);
+        } while (received != null && !new String(received.getPayload(), StandardCharsets.UTF_8).contains(needle));
+        return received;
     }
 
     private static TaskImpl assignedTask(String id, String assignee) {

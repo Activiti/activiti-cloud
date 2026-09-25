@@ -21,6 +21,7 @@ import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -59,6 +60,20 @@ public interface TaskRepository
     interface AssigneeCount {
         String getAssignee();
         long getTaskCount();
+    }
+
+    @Query(
+        "select t.assignee as userId, t.processInstanceId as processInstanceId from Task t " +
+            "where t.assignee in :userIds and t.processInstance.status = :status"
+    )
+    List<AssigneeProcess> findRunningProcessesByAssigneeIn(
+        @Param("userIds") Collection<String> userIds,
+        @Param("status") ProcessInstance.ProcessInstanceStatus status
+    );
+
+    interface AssigneeProcess {
+        String getUserId();
+        String getProcessInstanceId();
     }
 
     @Override
