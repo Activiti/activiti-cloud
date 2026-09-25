@@ -18,7 +18,10 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.activiti.cloud.starter.tests.runtime.ConnectorIntegrationChannels.SCRIPT_RUNTIME_CONSUMER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.within;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +34,7 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
 import org.assertj.core.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +74,9 @@ public class ServiceTaskConsumerHandler {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private OrphanedIntegrationRecoveryProperties orphanedIntegrationRecoveryProperties;
+
     private final AtomicInteger currentMealIndex = new AtomicInteger(0);
     private List<String> meals = Arrays.asList("pizza", "pasta");
     private List<String> sizes = Arrays.asList("small", "medium");
@@ -93,6 +100,7 @@ public class ServiceTaskConsumerHandler {
     public Consumer<Message<IntegrationRequest>> receiveRequestConnector() {
         return message -> {
             assertIntegrationContextHeaders(message.getPayload(), message.getHeaders());
+            assertRequestDateAndTtl(message.getPayload());
 
             IntegrationContext integrationContext = message.getPayload().getIntegrationContext();
 
@@ -250,6 +258,17 @@ public class ServiceTaskConsumerHandler {
                 integrationContext.getParentProcessInstanceId()
             );
         }
+    }
+
+    private void assertRequestDateAndTtl(IntegrationRequest integrationRequest) {
+        Assertions.assertThat(integrationRequest.getRequestDate()).isNotNull();
+        Assertions.assertThat(integrationRequest.getRequestDate().toInstant()).isCloseTo(
+            Instant.now(),
+            within(Duration.ofMinutes(1))
+        );
+        Assertions.assertThat(integrationRequest.getTtlSeconds()).isEqualTo(
+            orphanedIntegrationRecoveryProperties.getThresholdSeconds()
+        );
     }
 
     @FunctionBinding(input = ConnectorIntegrationChannels.MEALS_CONNECTOR_CONSUMER)

@@ -78,7 +78,8 @@ class QueryConsumerAutoConfigurationTest {
             mock(QueryEventHandlerContextOptimizer.class),
             mock(EntityManager.class),
             mock(IntegrationFlow.class),
-            Optional.<RecomputeEventCapturer>empty()
+            Optional.<RecomputeEventCapturer>empty(),
+            100
         );
 
         assertThat(handler).isNotNull();
