@@ -59,7 +59,7 @@ class SubscriberRegistryTest {
     void should_stopWatching_when_theLastSessionForAUserIsUnregistered() {
         registry.register("alice", Set.of("eng"), "session-1", NOW);
 
-        registry.unregister("alice", "session-1", NOW);
+        registry.unregister("alice", "session-1");
 
         assertThat(registry.isWatching("alice")).isFalse();
         assertThat(registry.size()).isZero();
@@ -70,7 +70,7 @@ class SubscriberRegistryTest {
         registry.register("alice", Set.of("eng"), "session-1", NOW);
         registry.register("alice", Set.of("eng"), "session-2", NOW);
 
-        registry.unregister("alice", "session-1", NOW);
+        registry.unregister("alice", "session-1");
 
         assertThat(registry.isWatching("alice")).isTrue();
         assertThat(registry.size()).isEqualTo(1);
@@ -78,7 +78,7 @@ class SubscriberRegistryTest {
 
     @Test
     void should_beANoOp_when_unregisteringAUserWithNoRegistration() {
-        registry.unregister("nobody", "session-1", NOW);
+        registry.unregister("nobody", "session-1");
 
         assertThat(registry.size()).isZero();
     }

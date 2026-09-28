@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The local, per-instance {@code userId -> SubscriberRegistration} registry, and this instance's
  * {@link SubscriberDirectory} for the recompute pipeline. A clean disconnect and the expiry sweep
- * both go through {@link #unregister(String, String, Instant)}.
+ * both go through {@link #unregister(String, String)}.
  *
  * <p>Concurrency: {@link ConcurrentHashMap#compute}/{@code computeIfPresent} serialize remapping
  * per key, so two sessions for the same user registering concurrently can never both observe
@@ -69,7 +69,7 @@ public class SubscriberRegistry implements SubscriberDirectory {
         }
     }
 
-    public void unregister(String userId, String sessionId, Instant now) {
+    public void unregister(String userId, String sessionId) {
         AtomicBoolean existed = new AtomicBoolean(false);
         AtomicBoolean wentQuiet = new AtomicBoolean(false);
         registrations.computeIfPresent(userId, (id, registration) -> {
@@ -99,7 +99,7 @@ public class SubscriberRegistry implements SubscriberDirectory {
         registrations.forEach((userId, registration) -> {
             for (String sessionId : registration.expiredSessionIds(now, expiry)) {
                 LOGGER.debug("Expiring session {} for user {}: no activity for at least {}", sessionId, userId, expiry);
-                unregister(userId, sessionId, now);
+                unregister(userId, sessionId);
             }
         });
     }

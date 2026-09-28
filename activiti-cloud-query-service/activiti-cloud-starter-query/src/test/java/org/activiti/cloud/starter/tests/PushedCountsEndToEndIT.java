@@ -95,7 +95,7 @@ class PushedCountsEndToEndIT {
     @AfterEach
     void tearDown() {
         subscription.dispose();
-        subscriberRegistry.unregister(ALICE, "test-session", Instant.now());
+        subscriberRegistry.unregister(ALICE, "test-session");
     }
 
     @Test
