@@ -199,9 +199,10 @@ public class TimerAuditProducerIT {
 
             List<CloudBPMNTimerEvent> timerEvents = receivedEvents
                 .stream()
-                .filter(event ->
-                    (CloudBPMNTimerFiredEvent.class.isInstance(event) ||
-                        CloudBPMNTimerExecutedEvent.class.isInstance(event))
+                .filter(
+                    event ->
+                        CloudBPMNTimerFiredEvent.class.isInstance(event) ||
+                        CloudBPMNTimerExecutedEvent.class.isInstance(event)
                 )
                 .map(CloudBPMNTimerEvent.class::cast)
                 .collect(Collectors.toList());

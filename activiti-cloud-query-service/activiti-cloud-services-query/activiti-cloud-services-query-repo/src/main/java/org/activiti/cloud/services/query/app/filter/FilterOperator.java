@@ -20,16 +20,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public enum FilterOperator {
     @JsonProperty("eq")
     EQUALS,
+
     @JsonProperty("ne")
     NOT_EQUALS,
+
     @JsonProperty("like")
     LIKE,
+
     @JsonProperty("gt")
     GREATER_THAN,
+
     @JsonProperty("gte")
     GREATER_THAN_OR_EQUAL,
+
     @JsonProperty("lt")
     LESS_THAN,
+
     @JsonProperty("lte")
     LESS_THAN_OR_EQUAL,
 }

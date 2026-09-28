@@ -33,32 +33,32 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check dependabot build
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "Fork PRs cannot be validated in this repository."
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: "dependabot[bot]"
           label: github_actions
       - name: Check skip tests
         id: check-skip-tests
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           label: skip-tests
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
       - name: Ensure all actions are covered by Dependabot
-        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
 
   create-tag:
     runs-on: ubuntu-latest
@@ -75,7 +75,7 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         if: github.event_name == 'push'
         id: tag
         env:
@@ -155,7 +155,7 @@ jobs:
           )
           echo "modules=$MODULES" >> "$GITHUB_OUTPUT"
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -183,7 +183,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - id: scan
-        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
 
       - id: transform
         name: Transform docker image matrix
@@ -221,7 +221,7 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -273,7 +273,7 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -449,7 +449,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         with:
           version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "true"
@@ -461,6 +461,74 @@ jobs:
           git-author-email: ${{ vars.HXPS_GIT_EMAIL }}
           gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
           gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
+
+  propagate-preview:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - create-tag
+      - publish-preview
+    if: >-
+      github.event_name == 'pull_request'
+      && contains(github.event.pull_request.labels.*.name, 'preview')
+      && contains(github.event.pull_request.labels.*.name, 'preview-propagation')
+      && needs.pre-checks.outputs.skip != 'true'
+      && needs.publish-preview.result == 'success'
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      VERSION: ${{ needs.create-tag.outputs.version }}
+      DEVELOPMENT_BRANCH: ${{ github.base_ref }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Use preview updatebot config
+        shell: bash
+        run: cp .jx/updatebot-preview.yaml .jx/updatebot.yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+        env:
+          ACTIVITI_CLOUD_VERSION: ${{ needs.create-tag.outputs.version }}
+          BUILD_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        with:
+          pull-request-title: "Preview snapshot PR: activiti-cloud ${{ needs.create-tag.outputs.version }} from ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+          version: ${{ needs.create-tag.outputs.version }}
+          auto-merge: "false"
+          labels: "do-not-merge,preview-source-pr-${{ github.event.pull_request.number }}"
+          base-branch-name: ${{ env.DEVELOPMENT_BRANCH }}
+          git-username: ${{ vars.HXPS_GIT_USERNAME }}
+          git-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          git-author-name: ${{ vars.HXPS_GIT_USERNAME }}
+          git-author-email: ${{ vars.HXPS_GIT_EMAIL }}
+          gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
+          commit-message: "Preview snapshot PR: activiti-cloud ${{ needs.create-tag.outputs.version }} from ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+
+      # This build can be queued by a push that lands before the source PR is
+      # merged/closed. If that happens, the on-close cleanup job may already
+      # have run and finished by the time jx-updatebot-pr creates the preview
+      # PR above, leaving a fresh orphaned preview PR behind. Re-check the
+      # source PR's state now (after creation, not before) and self-close
+      # anything just created if it's no longer open.
+      - name: Check source PR is still open
+        id: source-pr-state
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          SOURCE_PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_REPO: ${{ github.repository }}
+        run: |
+          STATE=$(gh pr view "$SOURCE_PR_NUMBER" \
+            --repo "$SOURCE_REPO" \
+            --json state --jq .state)
+          echo "state=$STATE" >> "$GITHUB_OUTPUT"
+
+      - name: Close preview PRs if source PR closed while propagating
+        if: ${{ steps.source-pr-state.outputs.state != 'OPEN' }}
+        uses: ./.github/actions/close-orphaned-preview-prs
+        with:
+          source-pr-number: ${{ github.event.pull_request.number }}
+          source-pr-state: ${{ steps.source-pr-state.outputs.state }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
   propagate-helm:
     runs-on: ubuntu-latest
@@ -490,7 +558,7 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
@@ -542,6 +610,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@a297ff6c5bf20c667047db658dd23f60241b270a # v18.28.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}

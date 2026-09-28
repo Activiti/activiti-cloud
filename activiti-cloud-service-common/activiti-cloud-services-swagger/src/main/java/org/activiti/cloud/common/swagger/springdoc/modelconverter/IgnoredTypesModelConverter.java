@@ -62,6 +62,6 @@ public class IgnoredTypesModelConverter implements ModelConverter {
         if (javaType != null && IGNORED_CLASSES.contains(javaType.getRawClass())) {
             return null;
         }
-        return (chain.hasNext()) ? chain.next().resolve(annotatedType, context, chain) : null;
+        return chain.hasNext() ? chain.next().resolve(annotatedType, context, chain) : null;
     }
 }

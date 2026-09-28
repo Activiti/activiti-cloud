@@ -41,19 +41,17 @@ public class ProcessStartedActorProviderEventListener implements ProcessEventLis
 
     @Override
     public void onEvent(ProcessCreatedEvent event) {
-        securityContextPrincipalProvider
-            .getCurrentPrincipal()
-            .ifPresent(principal ->
-                Optional.ofNullable(principal.getName())
-                    .map(String::getBytes)
-                    .ifPresent(details ->
-                        runtimeService.addUserIdentityLink(
-                            event.getEntity().getId(),
-                            principalIdentityProvider.getUserId(principal),
-                            ActorConstants.ACTOR_TYPE,
-                            details
-                        )
+        securityContextPrincipalProvider.getCurrentPrincipal().ifPresent(principal ->
+            Optional.ofNullable(principal.getName())
+                .map(String::getBytes)
+                .ifPresent(details ->
+                    runtimeService.addUserIdentityLink(
+                        event.getEntity().getId(),
+                        principalIdentityProvider.getUserId(principal),
+                        ActorConstants.ACTOR_TYPE,
+                        details
                     )
-            );
+                )
+        );
     }
 }

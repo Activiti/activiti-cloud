@@ -60,9 +60,11 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(ProcessInstanceTasksAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
-)
+@Import({
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+})
 @WithMockUser
 @TestPropertySource("classpath:application-test.properties")
 public class ProcessInstanceEntityTasksAdminControllerIT {

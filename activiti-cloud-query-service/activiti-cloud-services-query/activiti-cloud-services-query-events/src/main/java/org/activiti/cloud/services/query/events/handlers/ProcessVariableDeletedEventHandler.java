@@ -45,20 +45,18 @@ public class ProcessVariableDeletedEventHandler {
             try {
                 ProcessInstanceEntity processInstanceEntity = findResult.get();
 
-                processInstanceEntity
-                    .getVariable(variableName)
-                    .ifPresentOrElse(
-                        variableEntity -> {
-                            processInstanceEntity.getVariables().remove(variableEntity);
-                            entityManager.remove(variableEntity);
-                        },
-                        () ->
-                            LOGGER.warn(
-                                "Unable to find variableEntity with name '{}' for process instance '{}'",
-                                variableName,
-                                processInstanceId
-                            )
-                    );
+                processInstanceEntity.getVariable(variableName).ifPresentOrElse(
+                    variableEntity -> {
+                        processInstanceEntity.getVariables().remove(variableEntity);
+                        entityManager.remove(variableEntity);
+                    },
+                    () ->
+                        LOGGER.warn(
+                            "Unable to find variableEntity with name '{}' for process instance '{}'",
+                            variableName,
+                            processInstanceId
+                        )
+                );
             } catch (Exception cause) {
                 LOGGER.error("Error handling ProcessVariableDeletedEvent[{}]", event, cause);
             }

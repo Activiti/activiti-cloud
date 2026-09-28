@@ -42,30 +42,26 @@ public class TaskVariableCreatedEventHandler {
         String taskId = variableCreatedEvent.getEntity().getTaskId();
         String variableName = variableCreatedEvent.getEntity().getName();
 
-        entityManagerFinder
-            .findTaskWithVariables(taskId)
-            .ifPresentOrElse(
-                taskEntity -> {
-                    taskEntity
-                        .getVariable(variableName)
-                        .ifPresentOrElse(
-                            variableEntity -> {
-                                LOGGER.warn("Variable " + variableName + " already exists in the task " + taskId + "!");
-                            },
-                            () -> {
-                                TaskVariableEntity taskVariableEntity = createTaskVariableEntity(
-                                    variableCreatedEvent,
-                                    taskEntity,
-                                    processInstanceEntity
-                                );
-                                taskEntity.getVariables().add(taskVariableEntity);
-                            }
+        entityManagerFinder.findTaskWithVariables(taskId).ifPresentOrElse(
+            taskEntity -> {
+                taskEntity.getVariable(variableName).ifPresentOrElse(
+                    variableEntity -> {
+                        LOGGER.warn("Variable " + variableName + " already exists in the task " + taskId + "!");
+                    },
+                    () -> {
+                        TaskVariableEntity taskVariableEntity = createTaskVariableEntity(
+                            variableCreatedEvent,
+                            taskEntity,
+                            processInstanceEntity
                         );
-                },
-                () -> {
-                    throw new QueryException("Task '" + taskId + "' not found!");
-                }
-            );
+                        taskEntity.getVariables().add(taskVariableEntity);
+                    }
+                );
+            },
+            () -> {
+                throw new QueryException("Task '" + taskId + "' not found!");
+            }
+        );
     }
 
     private TaskVariableEntity createTaskVariableEntity(

@@ -78,17 +78,15 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     bindingServiceProperties.setBindings(entry.getValue());
                 });
 
-            bindingServiceProperties
-                .getBindings()
-                .forEach((bindingName, bindingProperties) -> {
-                    String source = Optional.ofNullable(bindingProperties.getDestination()).orElse(bindingName);
+            bindingServiceProperties.getBindings().forEach((bindingName, bindingProperties) -> {
+                String source = Optional.ofNullable(bindingProperties.getDestination()).orElse(bindingName);
 
-                    String destination = destinationTransformer.apply(source);
+                String destination = destinationTransformer.apply(source);
 
-                    bindingProperties.setDestination(destination);
+                bindingProperties.setDestination(destination);
 
-                    log.warn("Configured destination '{}' for binding '{}'", destination, bindingName);
-                });
+                log.warn("Configured destination '{}' for binding '{}'", destination, bindingName);
+            });
 
             if (functionRouter.isEnabled()) {
                 functionRouter

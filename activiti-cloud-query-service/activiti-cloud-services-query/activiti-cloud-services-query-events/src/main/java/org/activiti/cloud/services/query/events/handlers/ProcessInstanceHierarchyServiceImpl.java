@@ -100,8 +100,7 @@ public class ProcessInstanceHierarchyServiceImpl implements ProcessInstanceHiera
             entityManager.find(
                 ProcessInstanceHierarchyEntity.class,
                 new ProcessInstanceHierarchyId(ancestorId, descendantId)
-            ) ==
-            null
+            ) == null
         ) {
             entityManager.persist(new ProcessInstanceHierarchyEntity(ancestorId, descendantId, depth, relationType));
         }

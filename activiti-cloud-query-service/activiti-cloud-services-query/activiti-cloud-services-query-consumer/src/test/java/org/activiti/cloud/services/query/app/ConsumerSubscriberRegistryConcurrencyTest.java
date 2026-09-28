@@ -68,7 +68,7 @@ class ConsumerSubscriberRegistryConcurrencyTest {
 
             // Concurrently drop every holder but the last; the user must stay watched throughout.
             CountDownLatch allButLastRemoved = submitEach(pool, instances - 1, source ->
-                registry.unregister("alice", source)
+                registry.unregister("alice", source, T0)
             );
             assertThat(allButLastRemoved.await(30, TimeUnit.SECONDS)).isTrue();
         } finally {
@@ -78,7 +78,7 @@ class ConsumerSubscriberRegistryConcurrencyTest {
         assertThat(registry.isWatching("alice")).isTrue();
         assertThat(registry.sourcesOf("alice")).containsExactly(lastSource);
 
-        registry.unregister("alice", lastSource);
+        registry.unregister("alice", lastSource, T0);
         assertThat(registry.isWatching("alice")).isFalse();
     }
 

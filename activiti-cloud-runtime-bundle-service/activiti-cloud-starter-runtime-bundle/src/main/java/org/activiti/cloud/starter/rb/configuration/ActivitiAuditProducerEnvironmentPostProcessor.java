@@ -48,26 +48,24 @@ public class ActivitiAuditProducerEnvironmentPostProcessor implements Environmen
         Integer partitionCount = environment.getProperty(ACTIVITI_CLOUD_MESSAGING_PARTITION_COUNT, Integer.class);
 
         // enable partitioned producer conditionally based on configuration property
-        isPartitioned
-            .filter(Boolean.TRUE::equals)
-            .ifPresent(value -> {
-                Map<String, Object> properties = new LinkedHashMap<>();
+        isPartitioned.filter(Boolean.TRUE::equals).ifPresent(value -> {
+            Map<String, Object> properties = new LinkedHashMap<>();
 
-                properties.put(
-                    "spring.cloud.stream.bindings.auditProducer.producer.partitionKeyExtractorName",
-                    ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME
+            properties.put(
+                "spring.cloud.stream.bindings.auditProducer.producer.partitionKeyExtractorName",
+                ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME
+            );
+            properties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionCount", partitionCount);
+
+            environment
+                .getPropertySources()
+                .addAfter(
+                    SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+                    new MapPropertySource(
+                        ActivitiAuditProducerEnvironmentPostProcessor.class.getSimpleName(),
+                        properties
+                    )
                 );
-                properties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionCount", partitionCount);
-
-                environment
-                    .getPropertySources()
-                    .addAfter(
-                        SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                        new MapPropertySource(
-                            ActivitiAuditProducerEnvironmentPostProcessor.class.getSimpleName(),
-                            properties
-                        )
-                    );
-            });
+        });
     }
 }

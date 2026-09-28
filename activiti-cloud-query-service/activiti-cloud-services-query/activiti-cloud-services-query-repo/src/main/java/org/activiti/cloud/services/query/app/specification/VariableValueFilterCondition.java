@@ -18,5 +18,16 @@ package org.activiti.cloud.services.query.app.specification;
 import jakarta.persistence.criteria.Predicate;
 
 public interface VariableValueFilterCondition {
+    /**
+     * @return the value comparison applied to the {@code max(case when ... end)} aggregate, to be
+     *         used in the {@code HAVING} clause of a query grouped by the root entity id.
+     */
     Predicate getPredicate();
+
+    /**
+     * @return the variable selection predicate combined with the value comparison applied to the
+     *         plain (non aggregated) extracted value, to be used in the {@code WHERE} clause of a
+     *         correlated {@code EXISTS} subquery.
+     */
+    Predicate getSubqueryPredicate();
 }

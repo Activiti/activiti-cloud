@@ -42,16 +42,14 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
-@Import(
-    {
-        EventRepresentationModelAssemblerConfiguration.class,
-        AuditEventsAdminControllerImpl.class,
-        AuditEventsControllerImpl.class,
-        AuditEventsControllerV2Impl.class,
-        AuditEventsAdminControllerV2Impl.class,
-        AuditEventsDeleteController.class,
-    }
-)
+@Import({
+    EventRepresentationModelAssemblerConfiguration.class,
+    AuditEventsAdminControllerImpl.class,
+    AuditEventsControllerImpl.class,
+    AuditEventsControllerV2Impl.class,
+    AuditEventsAdminControllerV2Impl.class,
+    AuditEventsDeleteController.class,
+})
 public class AuditJPAControllersAutoConfiguration {
 
     @Bean

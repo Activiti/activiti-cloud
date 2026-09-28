@@ -763,14 +763,12 @@ class KeycloakManagementServiceTest {
 
     private void assertThatGroupsAreEqual(List<Group> groups, Stream<Group> groupsToCompare) {
         assertTrue(
-            groupsToCompare
-                .map(Group::getId)
-                .allMatch(originalGroupId ->
-                    groups
-                        .stream()
-                        .map(Group::getId)
-                        .anyMatch(retrievedGroupId -> Objects.equals(retrievedGroupId, originalGroupId))
-                )
+            groupsToCompare.map(Group::getId).allMatch(originalGroupId ->
+                groups
+                    .stream()
+                    .map(Group::getId)
+                    .anyMatch(retrievedGroupId -> Objects.equals(retrievedGroupId, originalGroupId))
+            )
         );
     }
 

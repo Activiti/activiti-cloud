@@ -25,9 +25,8 @@ import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-public class CustomAuthorizationManager<
-    RequestAuthorizationContext
-> implements AuthorizationManager<RequestAuthorizationContext> {
+public class CustomAuthorizationManager<RequestAuthorizationContext> implements
+    AuthorizationManager<RequestAuthorizationContext> {
 
     public static final String ROLE_PREFIX = "ROLE_";
     public static final String PERMISSION_PREFIX = "PERMISSION_";

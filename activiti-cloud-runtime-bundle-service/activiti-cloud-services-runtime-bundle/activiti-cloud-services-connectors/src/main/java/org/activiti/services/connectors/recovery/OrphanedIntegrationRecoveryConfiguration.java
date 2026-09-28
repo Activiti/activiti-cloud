@@ -20,15 +20,16 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.conf.RuntimeBundleShedLockConfiguration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
 @Import(RuntimeBundleShedLockConfiguration.class)
 @AutoConfigureAfter(name = "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration")
+@EnableConfigurationProperties(OrphanedIntegrationRecoveryProperties.class)
 public class OrphanedIntegrationRecoveryConfiguration {
 
     @Bean
@@ -36,14 +37,14 @@ public class OrphanedIntegrationRecoveryConfiguration {
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
-        @Value("${activiti.orphaned-integration-recovery.threshold-seconds:10800}") int thresholdSeconds, // 3 hours
+        OrphanedIntegrationRecoveryProperties properties,
         FeatureToggle featureToggle
     ) {
         return new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
             integrationRequestBuilder,
             errorEventHandler,
-            thresholdSeconds,
+            properties.getThresholdSeconds(),
             featureToggle
         );
     }

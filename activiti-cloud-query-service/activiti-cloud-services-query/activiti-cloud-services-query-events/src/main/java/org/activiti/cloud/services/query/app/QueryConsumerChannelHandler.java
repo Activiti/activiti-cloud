@@ -19,14 +19,14 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Gatherers;
+import org.activiti.cloud.api.events.CloudRuntimeEventSorter;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class QueryConsumerChannelHandler {
@@ -34,6 +34,7 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
     private final EntityManager entityManager;
+    private int chunkSize = 100;
 
     public QueryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
@@ -46,32 +47,48 @@ public class QueryConsumerChannelHandler {
     }
 
     public void receive(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
-        afterCompletion(entityManager::clear);
-        var optimizedEvents = optimizer.optimize(events);
-        enrichWithMessageMetadata(optimizedEvents, headers);
-        eventHandlerContext.handle(optimizedEvents.toArray(new CloudRuntimeEvent[] {}));
+        final var counter = new AtomicInteger(0);
+
+        events
+            .stream()
+            .<CloudRuntimeEvent<?, ?>>map(it -> enrichWithMessageMetadata(counter.getAndIncrement(), it, headers))
+            .sorted(CloudRuntimeEventSorter.COMPARATOR)
+            .gather(Gatherers.windowFixed(chunkSize))
+            .map(optimizer::optimize)
+            .map(list -> list.toArray(CloudRuntimeEvent[]::new))
+            .forEach(eventsChunk -> {
+                try {
+                    eventHandlerContext.handle(eventsChunk);
+                    entityManager.flush();
+                } finally {
+                    entityManager.clear();
+                }
+            });
     }
 
-    private static void enrichWithMessageMetadata(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
+    public QueryConsumerChannelHandler chunkSize(int chunkSize) {
+        if (chunkSize <= 0) {
+            throw new IllegalArgumentException("chunkSize must be greater than zero");
+        }
+
+        this.chunkSize = chunkSize;
+
+        return this;
+    }
+
+    private CloudRuntimeEvent<?, ?> enrichWithMessageMetadata(
+        Integer sequenceNumber,
+        CloudRuntimeEvent<?, ?> event,
+        Map<String, Object> headers
+    ) {
         Object idHeader = headers.get("id");
         var messageId = idHeader != null ? idHeader.toString() : null;
-        var counter = new AtomicInteger(0);
-        for (CloudRuntimeEvent<?, ?> event : events) {
-            if (event instanceof CloudRuntimeEventImpl<?, ?> impl) {
-                impl.setMessageId(messageId);
-                impl.setSequenceNumber(counter.getAndIncrement());
-            }
-        }
-    }
 
-    private static void afterCompletion(Runnable action) {
-        TransactionSynchronizationManager.registerSynchronization(
-            new TransactionSynchronization() {
-                @Override
-                public void afterCompletion(int status) {
-                    action.run();
-                }
-            }
-        );
+        if (event instanceof CloudRuntimeEventImpl<?, ?> impl) {
+            impl.setMessageId(messageId);
+            impl.setSequenceNumber(sequenceNumber);
+        }
+
+        return event;
     }
 }

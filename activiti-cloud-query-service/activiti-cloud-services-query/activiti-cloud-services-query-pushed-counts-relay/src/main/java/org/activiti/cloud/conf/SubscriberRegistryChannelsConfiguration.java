@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.subscriber;
+package org.activiti.cloud.conf;
 
-import java.time.Instant;
+import org.activiti.cloud.services.query.app.SubscriberRegistryChannels;
+import org.springframework.context.annotation.Configuration;
 
-/** Published when a user's last live session on this instance closes. */
-public record SubscriberWentQuietEvent(String userId, Instant at) {}
+@Configuration
+public class SubscriberRegistryChannelsConfiguration implements SubscriberRegistryChannels {}

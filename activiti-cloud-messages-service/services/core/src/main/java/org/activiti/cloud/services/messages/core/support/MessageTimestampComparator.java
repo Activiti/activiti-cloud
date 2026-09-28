@@ -36,6 +36,6 @@ public class MessageTimestampComparator implements Comparator<Message<?>> {
         if (value == null) {
             return null;
         }
-        return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
+        return value instanceof Long ? (Long) value : Long.parseLong(value.toString());
     }
 }

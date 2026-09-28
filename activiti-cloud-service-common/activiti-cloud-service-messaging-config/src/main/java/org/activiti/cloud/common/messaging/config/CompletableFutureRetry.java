@@ -51,19 +51,16 @@ class CompletableFutureRetry {
         Duration delay,
         int currentAttempt
     ) {
-        return supplier
-            .get()
-            .exceptionallyCompose(exception -> {
-                if (currentAttempt < maxRetries) {
-                    log.debug("Attempt {} of {} failed. Retrying in {}", currentAttempt + 1, maxRetries, delay);
-                    // Schedule the retry on the scheduler thread (after the delay) instead of
+        return supplier.get().exceptionallyCompose(exception -> {
+            if (currentAttempt < maxRetries) {
+                log.debug("Attempt {} of {} failed. Retrying in {}", currentAttempt + 1, maxRetries, delay);
+                // Schedule the retry on the scheduler thread (after the delay) instead of
                     // composing it inline. The previous attempt completes on the per-registration
                     // executor's own worker thread, and re-invoking the supplier there would
                     // resubmit to that same single-thread executor - whose backpressure handler
                     // blocks waiting for the queue to drain, deadlocking the worker against itself.
                     var retry = new CompletableFuture<T>();
-                    scheduler.schedule(
-                        () ->
+                    scheduler.schedule(() ->
                             supplyAsyncWithRetry(supplier, maxRetries, delay, currentAttempt + 1).whenComplete(
                                 (result, error) -> {
                                     if (error != null) {
@@ -75,12 +72,12 @@ class CompletableFutureRetry {
                             ),
                         delay.toMillis(),
                         TimeUnit.MILLISECONDS
-                    );
+                );
                     return retry;
-                } else {
-                    log.debug("Maximum of {} retries reached. Failing operation.", maxRetries, exception);
-                    return CompletableFuture.failedFuture(exception);
-                }
-            });
+            } else {
+                log.debug("Maximum of {} retries reached. Failing operation.", maxRetries, exception);
+                return CompletableFuture.failedFuture(exception);
+            }
+        });
     }
 }

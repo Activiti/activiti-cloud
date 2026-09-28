@@ -64,6 +64,16 @@ public class VariableSelectionExpressionImpl<
         );
     }
 
+    /**
+     * @return the predicate that selects the variable the filter refers to, i.e. the equality
+     *         checks on {@code name} (and {@code processDefinitionKey} for process variables).
+     *         In the aggregated form it is the {@code when} of the {@code case} expression; in the
+     *         {@code EXISTS} subquery form it goes straight into the {@code where} clause.
+     */
+    protected Predicate getSelectionPredicate() {
+        return selectionPredicate;
+    }
+
     @Override
     public Expression getSelectionExpression() {
         if (selectionExpression == null) {

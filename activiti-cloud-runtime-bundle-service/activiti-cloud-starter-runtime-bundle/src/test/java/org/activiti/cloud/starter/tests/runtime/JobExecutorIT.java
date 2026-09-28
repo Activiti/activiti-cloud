@@ -306,7 +306,7 @@ public class JobExecutorIT {
         });
 
         // After setting the clock to time '5 minutes and 5 seconds', the timer should fire
-        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((5 * 60 * 1000) + 5000)));
+        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + (5 * 60 * 1000 + 5000)));
 
         // timer event has been scheduled
         assertThat(timerScheduled.await(1, TimeUnit.MINUTES)).as("should schedule timer").isTrue();
@@ -479,7 +479,7 @@ public class JobExecutorIT {
         });
 
         // After setting the clock to time '1 hour and 5 seconds', the timer should fire
-        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((60 * 60 * 1000) + 5000)));
+        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + (60 * 60 * 1000 + 5000)));
         // then
         await("the process should start and no more timer jobs should exist").untilAsserted(() -> {
             assertThat(
@@ -541,7 +541,7 @@ public class JobExecutorIT {
         });
 
         // After setting the clock to time '5 minutes and 5 seconds', the timer should fire
-        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((5 * 60 * 1000) + 5000)));
+        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + (5 * 60 * 1000 + 5000)));
 
         // timer event has been scheduled
         assertThat(timerScheduled.await(1, TimeUnit.MINUTES)).as("should schedule timer").isTrue();

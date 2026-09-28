@@ -56,7 +56,8 @@ class PushedCountsRegistryRuntimeToggleOffIT {
             MessageBuilder.withPayload(
                 """
                 {"type":"REGISTERED","userId":"frank","groups":["eng"],"sourceId":"rest-1","sentAt":"2026-01-01T00:00:00Z"}
-                """.strip()
+                """
+                    .strip()
                     .getBytes(StandardCharsets.UTF_8)
             )
                 .setHeader("contentType", "application/json")

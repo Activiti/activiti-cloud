@@ -154,25 +154,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityForActivitiUser() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         ExecutionResult result = executor.execute(query);
@@ -196,25 +196,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityForModelerUser() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         ExecutionResult result = executor.execute(query);
@@ -246,25 +246,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityForCompositeRolesUser() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         ExecutionResult result = executor.execute(query);
@@ -286,25 +286,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityAnonymous() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         ExecutionResult result = executor.execute(query);
@@ -337,25 +337,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityUnauthenticated() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         var result = catchThrowable(() -> executor.execute(query));
@@ -369,25 +369,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityEmptyRoles() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         ExecutionResult result = executor.execute(query);
@@ -421,25 +421,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityNoMatchingRoles() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         ExecutionResult result = executor.execute(query);
@@ -473,25 +473,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityAdmin() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         ExecutionResult result = executor.execute(query);
@@ -505,25 +505,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     public void testGraphqlFieldVisibilityManager() {
         //given
         String query = """
-            {
-                Task(id: "1") { id }
-                Tasks { select { id } }
-                ProcessInstance(id: "1") { id }
-                ProcessInstances { select { id } }
-                ProcessDefinition(id: "1") { id }
-                ProcessDefinitions { select { id } }
-                ProcessVariable(id: 1) { id }
-                ProcessVariables { select { id } }
-                TaskVariable(id: 1) { id }
-                TaskVariables { select { id } }
-                Application(id: "foo") { name }
-                Applications { select { name } }
-                ProcessModel(id: "1") { id }
-                ProcessModels { select { id } }
-                ServiceTask(id: "1") { id }
-                ServiceTasks { select { id } }
-            }
-            """;
+        {
+            Task(id: "1") { id }
+            Tasks { select { id } }
+            ProcessInstance(id: "1") { id }
+            ProcessInstances { select { id } }
+            ProcessDefinition(id: "1") { id }
+            ProcessDefinitions { select { id } }
+            ProcessVariable(id: 1) { id }
+            ProcessVariables { select { id } }
+            TaskVariable(id: 1) { id }
+            TaskVariables { select { id } }
+            Application(id: "foo") { name }
+            Applications { select { name } }
+            ProcessModel(id: "1") { id }
+            ProcessModels { select { id } }
+            ServiceTask(id: "1") { id }
+            ServiceTasks { select { id } }
+        }
+        """;
 
         //when
         ExecutionResult result = executor.execute(query);

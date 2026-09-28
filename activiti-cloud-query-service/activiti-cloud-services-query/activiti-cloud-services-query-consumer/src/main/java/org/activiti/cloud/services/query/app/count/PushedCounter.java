@@ -13,10 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.subscriber;
+package org.activiti.cloud.services.query.app.count;
 
-import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
+import org.activiti.cloud.services.query.subscription.ScopeKeys;
 
-/** Published when a user goes from no live sessions on this instance to at least one. */
-public record SubscriberWentLiveEvent(String userId, Set<String> groups, Instant at) {}
+/** One counter type's recompute logic. Implementations register as Spring beans, collected via {@code Set<PushedCounter>}. */
+public interface PushedCounter {
+    ScopeKeys.PushedCountType type();
+
+    /**
+     * @param affectedUserIds users the pipeline determined need this counter recomputed this window
+     * @return absolute count per user; a user absent from the result is treated as zero
+     */
+    Map<String, Long> compute(Set<String> affectedUserIds);
+}
