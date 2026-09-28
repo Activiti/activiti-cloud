@@ -48,7 +48,7 @@ class FunctionRouterDeliveryFailureIT {
             taskStarted.countDown();
             try {
                 releaseTask.await();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
             }
         });
@@ -77,7 +77,7 @@ class FunctionRouterDeliveryFailureIT {
             taskStarted.countDown();
             try {
                 releaseTask.await();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
             }
         });
@@ -159,7 +159,7 @@ class FunctionRouterDeliveryFailureIT {
             taskStarted.countDown();
             try {
                 releaseTask.await();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
             }
         });
