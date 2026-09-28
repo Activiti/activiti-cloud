@@ -272,6 +272,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
+          # Sonar needs the full history to resolve the PR target branch and
+          # analyse the diff instead of falling back to a whole-file analysis
+          fetch-depth: 0
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         env:
