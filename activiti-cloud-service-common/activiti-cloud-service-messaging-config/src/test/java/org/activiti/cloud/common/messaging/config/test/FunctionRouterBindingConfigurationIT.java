@@ -927,7 +927,7 @@ class FunctionRouterBindingConfigurationIT {
         final var futureResult = CompletableFuture.supplyAsync(() -> {
             try {
                 countDownLatch.await();
-                } catch (InterruptedException _) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
             }
 
