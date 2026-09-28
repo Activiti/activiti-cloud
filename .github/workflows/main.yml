@@ -273,7 +273,7 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@9db1b99c084c3e74c2e79af2d1510195a0dae25b # AAE-52548 guard check, do not merge
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
