@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,25 +51,48 @@ class VariableRequestSizeLimitFilterTest {
         filter = new VariableRequestSizeLimitFilter(MAX_SIZE_BYTES);
     }
 
-    // --- Byte-counting: actual body size checks ---
+    // --- Content-Length up-front rejection ---
 
     @Test
-    void should_throwException_when_actualBodyExceedsLimit() throws ServletException, IOException {
+    void should_throwException_when_contentLengthExceedsLimit() {
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
+        request.setContentType("application/json");
+        // MockHttpServletRequest derives getContentLengthLong() from setContent(),
+        // so we must provide an oversized array for stage 1 to see a Content-Length > limit
+        request.setContent(new byte[(int) MAX_SIZE_BYTES + 1]);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain))
+            .isInstanceOf(RequestBodyTooLargeException.class)
+            .hasMessageContaining("exceeds the maximum allowed size of 256 bytes");
+    }
+
+    @Test
+    void should_allowRequest_when_contentLengthWithinLimit() throws Exception {
+        byte[] body = "{\"var1\":\"value1\"}".getBytes();
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
+        request.setContentType("application/json");
+        request.setContent(body);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        Mockito.verify(filterChain).doFilter(Mockito.any(), Mockito.any());
+    }
+
+    // --- Body draining: actual body size checks ---
+
+    @Test
+    void should_throwException_when_actualBodyExceedsLimit() {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
         request.setContentType("application/json");
         request.setContent(oversizedBody);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
-
-        // Simulate what the downstream filter chain does: read the input stream
-        Mockito.doAnswer(invocation -> {
-            HttpServletRequest wrappedReq = invocation.getArgument(0);
-            wrappedReq.getInputStream().readAllBytes();
-            return null;
-        })
-            .when(filterChain)
-            .doFilter(Mockito.any(), Mockito.any());
 
         assertThatThrownBy(() -> filter.doFilter(request, response, filterChain))
             .isInstanceOf(RequestBodyTooLargeException.class)
@@ -84,17 +108,48 @@ class VariableRequestSizeLimitFilterTest {
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Mockito.doAnswer(invocation -> {
-            HttpServletRequest wrappedReq = invocation.getArgument(0);
-            wrappedReq.getInputStream().readAllBytes();
-            return null;
-        })
-            .when(filterChain)
-            .doFilter(Mockito.any(), Mockito.any());
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+    }
+
+    @Test
+    void should_allowRequest_when_bodyExactlyAtLimit() throws Exception {
+        byte[] exactBody = new byte[(int) MAX_SIZE_BYTES];
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
+        request.setContentType("application/json");
+        request.setContent(exactBody);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilter(request, response, filterChain);
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+    }
+
+    // --- Buffered body is passed downstream ---
+
+    @Test
+    void should_passBufferedBodyToDownstream() throws Exception {
+        byte[] body = "{\"var1\":\"value1\"}".getBytes();
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
+        request.setContentType("application/json");
+        request.setContent(body);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        ArgumentCaptor<HttpServletRequest> captor = ArgumentCaptor.forClass(HttpServletRequest.class);
+
+        filter.doFilter(request, response, filterChain);
+
+        Mockito.verify(filterChain).doFilter(captor.capture(), Mockito.any());
+        HttpServletRequest wrappedRequest = captor.getValue();
+
+        assertThat(wrappedRequest).isInstanceOf(SizeLimitedRequestWrapper.class);
+        assertThat(wrappedRequest.getContentLengthLong()).isEqualTo(body.length);
+
+        byte[] downstreamBody = wrappedRequest.getInputStream().readAllBytes();
+        assertThat(downstreamBody).isEqualTo(body);
     }
 
     // --- Method filtering ---
@@ -160,21 +215,13 @@ class VariableRequestSizeLimitFilterTest {
         "POST, /v1/process-instances",
         "PUT, /admin/v1/process-instances/789/variables",
     })
-    void should_throwException_forOversizedBody(String method, String path) throws ServletException, IOException {
+    void should_throwException_forOversizedBody(String method, String path) {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest(method, path);
         request.setContentType("application/json");
         request.setContent(oversizedBody);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
-
-        Mockito.doAnswer(invocation -> {
-            HttpServletRequest wrappedReq = invocation.getArgument(0);
-            wrappedReq.getInputStream().readAllBytes();
-            return null;
-        })
-            .when(filterChain)
-            .doFilter(Mockito.any(), Mockito.any());
 
         assertThatThrownBy(() -> filter.doFilter(request, response, filterChain)).isInstanceOf(
             RequestBodyTooLargeException.class
@@ -199,59 +246,6 @@ class VariableRequestSizeLimitFilterTest {
         assertThat(filter.shouldNotFilter(request)).isFalse();
     }
 
-    // --- ByteCountingInputStream: single-byte read ---
-
-    @Test
-    void should_throwException_when_singleByteReadExceedsLimit() throws Exception {
-        byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 1];
-        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
-        request.setContentType("application/json");
-        request.setContent(oversizedBody);
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        // Read byte-by-byte to exercise the single-byte read() method
-        Mockito.doAnswer(invocation -> {
-            HttpServletRequest wrappedReq = invocation.getArgument(0);
-            ServletInputStream is = wrappedReq.getInputStream();
-            while (is.read() != -1) {
-                // keep reading
-            }
-            return null;
-        })
-            .when(filterChain)
-            .doFilter(Mockito.any(), Mockito.any());
-
-        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain)).isInstanceOf(
-            RequestBodyTooLargeException.class
-        );
-    }
-
-    @Test
-    void should_allowRequest_when_singleByteReadWithinLimit() throws Exception {
-        byte[] body = new byte[10];
-        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
-        request.setContentType("application/json");
-        request.setContent(body);
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        Mockito.doAnswer(invocation -> {
-            HttpServletRequest wrappedReq = invocation.getArgument(0);
-            ServletInputStream is = wrappedReq.getInputStream();
-            while (is.read() != -1) {
-                // keep reading
-            }
-            return null;
-        })
-            .when(filterChain)
-            .doFilter(Mockito.any(), Mockito.any());
-
-        filter.doFilter(request, response, filterChain);
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-    }
-
     // --- SizeLimitedRequestWrapper: getInputStream() returns same instance ---
 
     @Test
@@ -260,7 +254,7 @@ class VariableRequestSizeLimitFilterTest {
         request.setContentType("application/json");
         request.setContent("{}".getBytes());
 
-        SizeLimitedRequestWrapper wrapper = new SizeLimitedRequestWrapper(request, MAX_SIZE_BYTES);
+        SizeLimitedRequestWrapper wrapper = new SizeLimitedRequestWrapper(request, "{}".getBytes());
 
         ServletInputStream first = wrapper.getInputStream();
         ServletInputStream second = wrapper.getInputStream();
@@ -268,36 +262,22 @@ class VariableRequestSizeLimitFilterTest {
         assertThat(first).isSameAs(second);
     }
 
-    // --- ByteCountingInputStream: delegate methods ---
+    // --- SizeLimitedRequestWrapper: delegate methods ---
 
     @Test
     void should_delegateIsFinishedAndIsReady() throws Exception {
+        byte[] body = "{}".getBytes();
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
-        request.setContentType("application/json");
-        request.setContent("{}".getBytes());
 
-        SizeLimitedRequestWrapper wrapper = new SizeLimitedRequestWrapper(request, MAX_SIZE_BYTES);
+        SizeLimitedRequestWrapper wrapper = new SizeLimitedRequestWrapper(request, body);
         ServletInputStream is = wrapper.getInputStream();
 
         assertThat(is.isFinished()).isFalse();
         assertThat(is.isReady()).isTrue();
 
-        // Read all bytes so the stream finishes
         is.readAllBytes();
 
         assertThat(is.isFinished()).isTrue();
-    }
-
-    @Test
-    void should_delegateClose() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
-        request.setContentType("application/json");
-        request.setContent("{}".getBytes());
-
-        SizeLimitedRequestWrapper wrapper = new SizeLimitedRequestWrapper(request, MAX_SIZE_BYTES);
-        ServletInputStream is = wrapper.getInputStream();
-
-        is.close(); // should not throw
     }
 
     // --- RequestBodyTooLargeException ---
@@ -306,29 +286,5 @@ class VariableRequestSizeLimitFilterTest {
     void should_containMaxSizeInMessage() {
         RequestBodyTooLargeException ex = new RequestBodyTooLargeException(5242880);
         assertThat(ex.getMessage()).isEqualTo("Request body exceeds the maximum allowed size of 5242880 bytes");
-    }
-
-    // --- Edge case: body exactly at limit ---
-
-    @Test
-    void should_allowRequest_when_bodyExactlyAtLimit() throws Exception {
-        byte[] exactBody = new byte[(int) MAX_SIZE_BYTES];
-        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
-        request.setContentType("application/json");
-        request.setContent(exactBody);
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        Mockito.doAnswer(invocation -> {
-            HttpServletRequest wrappedReq = invocation.getArgument(0);
-            wrappedReq.getInputStream().readAllBytes();
-            return null;
-        })
-            .when(filterChain)
-            .doFilter(Mockito.any(), Mockito.any());
-
-        filter.doFilter(request, response, filterChain);
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 }

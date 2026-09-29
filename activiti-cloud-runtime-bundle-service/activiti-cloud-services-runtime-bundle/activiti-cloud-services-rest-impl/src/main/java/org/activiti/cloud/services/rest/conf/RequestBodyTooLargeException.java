@@ -15,9 +15,13 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * Exception thrown when the actual bytes read from the request body exceed the allowed limit.
  */
+@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class RequestBodyTooLargeException extends RuntimeException {
 
     public RequestBodyTooLargeException(long maxAllowed) {
