@@ -154,13 +154,11 @@ class VariableRequestSizeLimitFilterTest {
     // --- Endpoint coverage ---
 
     @ParameterizedTest(name = "{0} {1}")
-    @CsvSource(
-        {
-            "POST, /v1/tasks/456/variables",
-            "POST, /v1/process-instances",
-            "PUT, /admin/v1/process-instances/789/variables",
-        }
-    )
+    @CsvSource({
+        "POST, /v1/tasks/456/variables",
+        "POST, /v1/process-instances",
+        "PUT, /admin/v1/process-instances/789/variables",
+    })
     void should_throwException_forOversizedBody(String method, String path) throws ServletException, IOException {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest(method, path);
