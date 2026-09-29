@@ -79,6 +79,7 @@ create table process_instance
     service_type               varchar(255),
     service_version            varchar(255),
     business_key               varchar(255),
+    correlation_id             varchar(255),
     initiator                  varchar(255),
     last_modified              timestamp,
     last_modified_from         timestamp,
@@ -282,6 +283,7 @@ create index pd_name_idx on process_definition (name);
 create index pd_key_idx on process_definition (process_definition_key);
 create index pi_status_idx on process_instance (status);
 create index pi_businessKey_idx on process_instance (business_key);
+create index pi_correlationId_idx on process_instance (correlation_id);
 create index pi_name_idx on process_instance (name);
 create index pi_parentId_idx on process_instance (parent_id);
 create index pi_processDefinitionId_idx on process_instance (process_definition_id);

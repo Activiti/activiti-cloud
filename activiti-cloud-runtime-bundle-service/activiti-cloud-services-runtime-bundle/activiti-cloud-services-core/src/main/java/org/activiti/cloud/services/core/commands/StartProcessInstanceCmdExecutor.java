@@ -19,6 +19,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.results.ProcessInstanceResult;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.cloud.services.events.correlation.CorrelationIdContext;
 
 public class StartProcessInstanceCmdExecutor extends AbstractCommandExecutor<StartProcessPayload> {
 
@@ -30,7 +31,9 @@ public class StartProcessInstanceCmdExecutor extends AbstractCommandExecutor<Sta
 
     @Override
     public ProcessInstanceResult execute(StartProcessPayload startProcessPayload) {
-        ProcessInstance processInstance = processAdminRuntime.start(startProcessPayload);
+        ProcessInstance processInstance = CorrelationIdContext.startWithCorrelationId(startProcessPayload, () ->
+            processAdminRuntime.start(startProcessPayload)
+        );
         if (processInstance != null) {
             return new ProcessInstanceResult(startProcessPayload, processInstance);
         } else {

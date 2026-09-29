@@ -17,7 +17,9 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.api.process.runtime.events.ProcessCreatedEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
+import org.activiti.cloud.services.events.correlation.CorrelationIdContext;
 
 public class CloudProcessCreatedProducer implements ProcessEventListener<ProcessCreatedEvent> {
 
@@ -34,6 +36,14 @@ public class CloudProcessCreatedProducer implements ProcessEventListener<Process
 
     @Override
     public void onEvent(ProcessCreatedEvent event) {
+        String correlationId = CorrelationIdContext.consume();
+        if (
+            correlationId != null &&
+            event.getEntity() instanceof ProcessInstanceImpl processInstanceImpl &&
+            processInstanceImpl.getCorrelationId() == null
+        ) {
+            processInstanceImpl.setCorrelationId(correlationId);
+        }
         eventsAggregator.add(eventConverter.from(event));
     }
 }
