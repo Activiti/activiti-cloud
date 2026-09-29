@@ -149,13 +149,9 @@ class VariableRequestSizeLimitFilterIT {
         byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
         Arrays.fill(oversizedBody, (byte) 'a');
 
-        MockHttpServletRequestBuilder request = post("/v1/process-instances")
-            .contentType(APPLICATION_JSON)
-            .content(oversizedBody);
-
-        assertThatThrownBy(() -> mockMvc.perform(request))
-            .rootCause()
-            .isInstanceOf(RequestBodyTooLargeException.class);
+        assertThatThrownBy(() ->
+            mockMvc.perform(post("/v1/process-instances").contentType(APPLICATION_JSON).content(oversizedBody))
+        ).isInstanceOf(RequestBodyTooLargeException.class);
     }
 
     @Test
@@ -178,16 +174,13 @@ class VariableRequestSizeLimitFilterIT {
         byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
         Arrays.fill(oversizedBody, (byte) 'a');
 
-        MockHttpServletRequestBuilder request = put(
-            "/v1/process-instances/{processInstanceId}/variables",
-            UUID.randomUUID().toString()
-        )
-            .contentType(APPLICATION_JSON)
-            .content(oversizedBody);
-
-        assertThatThrownBy(() -> mockMvc.perform(request))
-            .rootCause()
-            .isInstanceOf(RequestBodyTooLargeException.class);
+        assertThatThrownBy(() ->
+            mockMvc.perform(
+                put("/v1/process-instances/{processInstanceId}/variables", UUID.randomUUID().toString())
+                    .contentType(APPLICATION_JSON)
+                    .content(oversizedBody)
+            )
+        ).isInstanceOf(RequestBodyTooLargeException.class);
     }
 
     @Test
@@ -195,6 +188,7 @@ class VariableRequestSizeLimitFilterIT {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("1");
         processInstance.setProcessDefinitionKey("1");
+        processInstance.setAppVersion("1");
         when(processRuntime.processInstance(any())).thenReturn(processInstance);
 
         Map<String, Object> variables = new HashMap<>();
@@ -214,6 +208,17 @@ class VariableRequestSizeLimitFilterIT {
                     )
             )
             .andExpect(status().isOk());
+    }
+
+    // --- Content-Length header rejection (stage 1) ---
+
+    @Test
+    void should_rejectOversizedContentLength_forStartProcessEndpoint() {
+        byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 1];
+
+        assertThatThrownBy(() ->
+            mockMvc.perform(post("/v1/process-instances").contentType(APPLICATION_JSON).content(oversizedBody))
+        ).isInstanceOf(RequestBodyTooLargeException.class);
     }
 
     // --- Filter should not apply to non-variable endpoints ---
