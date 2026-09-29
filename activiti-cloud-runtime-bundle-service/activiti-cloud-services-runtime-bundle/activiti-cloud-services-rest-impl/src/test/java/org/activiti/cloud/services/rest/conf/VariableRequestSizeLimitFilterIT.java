@@ -67,6 +67,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest({ ProcessInstanceControllerImpl.class, ProcessInstanceVariableControllerImpl.class })
@@ -150,9 +151,11 @@ class VariableRequestSizeLimitFilterIT {
         byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
         Arrays.fill(oversizedBody, (byte) 'a');
 
-        assertThatThrownBy(() ->
-            mockMvc.perform(post("/v1/process-instances").contentType(APPLICATION_JSON).content(oversizedBody))
-        )
+        MockHttpServletRequestBuilder request = post("/v1/process-instances")
+            .contentType(APPLICATION_JSON)
+            .content(oversizedBody);
+
+        assertThatThrownBy(() -> mockMvc.perform(request))
             .rootCause()
             .isInstanceOf(RequestBodyTooLargeException.class);
     }
@@ -177,13 +180,14 @@ class VariableRequestSizeLimitFilterIT {
         byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
         Arrays.fill(oversizedBody, (byte) 'a');
 
-        assertThatThrownBy(() ->
-            mockMvc.perform(
-                put("/v1/process-instances/{processInstanceId}/variables", UUID.randomUUID().toString())
-                    .contentType(APPLICATION_JSON)
-                    .content(oversizedBody)
-            )
+        MockHttpServletRequestBuilder request = put(
+            "/v1/process-instances/{processInstanceId}/variables",
+            UUID.randomUUID().toString()
         )
+            .contentType(APPLICATION_JSON)
+            .content(oversizedBody);
+
+        assertThatThrownBy(() -> mockMvc.perform(request))
             .rootCause()
             .isInstanceOf(RequestBodyTooLargeException.class);
     }
