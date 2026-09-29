@@ -420,6 +420,7 @@ jobs:
       - delete-test-images
     if: >-
       always() && github.event_name == 'push'
+      && needs.pre-checks.result == 'success'
       && needs.pre-checks.outputs.skip != 'true'
       && needs.create-tag.result == 'success'
       && needs.delete-test-images.result == 'success'
