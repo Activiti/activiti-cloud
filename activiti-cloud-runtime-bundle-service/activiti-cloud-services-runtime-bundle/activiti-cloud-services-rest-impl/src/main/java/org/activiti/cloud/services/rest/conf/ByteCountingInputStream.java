@@ -18,12 +18,16 @@ package org.activiti.cloud.services.rest.conf;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link ServletInputStream} decorator that counts every byte read and throws
  * {@link RequestBodyTooLargeException} if the total exceeds the allowed maximum.
  */
 public class ByteCountingInputStream extends ServletInputStream {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ByteCountingInputStream.class);
 
     private final ServletInputStream delegate;
     private final long maxBytes;
@@ -56,7 +60,8 @@ public class ByteCountingInputStream extends ServletInputStream {
 
     private void checkLimit() {
         if (bytesRead > maxBytes) {
-            throw new RequestBodyTooLargeException(bytesRead, maxBytes);
+            LOGGER.warn("Request body of {} bytes exceeds the maximum allowed size of {} bytes", bytesRead, maxBytes);
+            throw new RequestBodyTooLargeException(maxBytes);
         }
     }
 
