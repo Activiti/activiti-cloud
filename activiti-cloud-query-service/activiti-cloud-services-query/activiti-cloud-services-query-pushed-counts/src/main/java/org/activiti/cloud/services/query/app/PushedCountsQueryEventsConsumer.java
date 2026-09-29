@@ -41,7 +41,7 @@ public class PushedCountsQueryEventsConsumer implements Consumer<Message<List<Cl
         try {
             recomputeEventCapturer.capture(message.getPayload());
         } catch (RuntimeException e) {
-            LOGGER.warn("Skipping a queryEvents batch that failed to capture for pushed counts", e);
+            LOGGER.error("Skipping a queryEvents batch that failed to capture for pushed counts", e);
         }
     }
 }
