@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-class FunctionRouterDeliveryFailureIT {
+class FunctionRouterDeliveryFailureTest {
 
     private final FunctionRouterExecutorFactory factory = new FunctionRouterExecutorFactory(Duration.ofMillis(50));
 
@@ -38,7 +38,7 @@ class FunctionRouterDeliveryFailureIT {
     }
 
     @Test
-    void should_not_send_error_message_when_executor_queue_overflows() throws InterruptedException {
+    void shouldNotSendErrorMessageWhenExecutorQueueOverflows() throws InterruptedException {
         var executor = factory.apply("testConnector");
 
         var taskStarted = new CountDownLatch(1);
@@ -67,7 +67,7 @@ class FunctionRouterDeliveryFailureIT {
     }
 
     @Test
-    void should_not_send_error_message_when_executor_shuts_down() throws InterruptedException {
+    void shouldNotSendErrorMessageWhenExecutorShutsDown() throws InterruptedException {
         var executor = factory.apply("testConnector");
 
         var taskStarted = new CountDownLatch(1);
@@ -96,7 +96,7 @@ class FunctionRouterDeliveryFailureIT {
     }
 
     @Test
-    void delivery_failures_are_rethrown_not_collected_as_errors() {
+    void deliveryFailuresAreRethrownNotCollectedAsErrors() {
         // both delivery-failure types are recognised by the filter in functionRouterMessageHandler
         Throwable rejectionError = new RejectedExecutionException("queue full");
         Throwable shutdownError = new RequeueDeliveryException("shutdown");
@@ -111,8 +111,7 @@ class FunctionRouterDeliveryFailureIT {
     }
 
     @Test
-    void supplyAsync_throws_synchronously_when_executor_rejects_instead_of_failing_the_future()
-        throws InterruptedException {
+    void supplyAsyncThrowsSynchronouslyWhenExecutorRejectsInsteadOfFailingTheFuture() throws InterruptedException {
         // root cause: supplyAsync() calls executor.execute() on the calling thread, so a throwing
         // RejectedExecutionHandler escapes synchronously instead of failing the future - a chained
         // exceptionally() would never see it.
@@ -125,8 +124,7 @@ class FunctionRouterDeliveryFailureIT {
     }
 
     @Test
-    void wrapping_supplyAsync_in_try_catch_converts_synchronous_rejection_to_failed_future()
-        throws InterruptedException {
+    void wrappingSupplyAsyncInTryCatchConvertsSynchronousRejectionToFailedFuture() throws InterruptedException {
         // the fix: wrap submission in try/catch and convert a synchronous rejection into
         // failedFuture(e) so it flows through the normal exceptionally() pipeline.
         var executor = factory.apply("testConnector");
