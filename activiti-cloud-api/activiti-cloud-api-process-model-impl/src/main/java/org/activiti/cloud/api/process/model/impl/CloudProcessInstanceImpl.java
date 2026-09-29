@@ -34,6 +34,12 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     )
     private String businessKey;
 
+    @Schema(
+        description = "An opaque correlation identifier associated to the process instance. It could be useful to correlate the process instance with external systems.",
+        readOnly = true
+    )
+    private String correlationId;
+
     private ProcessInstanceStatus status;
     private String processDefinitionId;
 
@@ -59,6 +65,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         startDate = processInstance.getStartDate();
         initiator = processInstance.getInitiator();
         businessKey = processInstance.getBusinessKey();
+        correlationId = processInstance.getCorrelationId();
         status = processInstance.getStatus();
         processDefinitionId = processInstance.getProcessDefinitionId();
         processDefinitionKey = processInstance.getProcessDefinitionKey();
@@ -128,6 +135,15 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
 
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
+    }
+
+    @Override
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
     }
 
     @Override

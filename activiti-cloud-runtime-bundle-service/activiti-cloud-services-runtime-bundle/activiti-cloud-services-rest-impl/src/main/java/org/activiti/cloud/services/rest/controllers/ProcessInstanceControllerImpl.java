@@ -50,6 +50,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.events.correlation.CorrelationIdContext;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.engine.RepositoryService;
@@ -117,9 +118,12 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     @Override
     public EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
-
-        return representationModelAssembler.toModel(processRuntime.start(startProcessPayload));
+        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+        ProcessInstance processInstance = CorrelationIdContext.startWithCorrelationId(
+            convertedStartProcessPayload,
+            () -> processRuntime.start(convertedStartProcessPayload)
+        );
+        return representationModelAssembler.toModel(processInstance);
     }
 
     @Override

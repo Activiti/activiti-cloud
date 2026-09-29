@@ -60,6 +60,7 @@ import org.springframework.format.annotation.DateTimeFormat;
     indexes = {
         @Index(name = "pi_status_idx", columnList = "status", unique = false),
         @Index(name = "pi_businessKey_idx", columnList = "businessKey", unique = false),
+        @Index(name = "pi_correlationId_idx", columnList = "correlationId", unique = false),
         @Index(name = "pi_parentId_idx", columnList = "parentId", unique = false),
         @Index(name = "pi_processDefinitionKey_idx", columnList = "processDefinitionKey", unique = false),
         @Index(name = "pi_processDefinitionName_idx", columnList = "processDefinitionName", unique = false),
@@ -103,6 +104,12 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
         readOnly = true
     )
     private String businessKey;
+
+    @Schema(
+        description = "An opaque correlation identifier associated to the process instance. It could be useful to correlate the process instance with external systems.",
+        readOnly = true
+    )
+    private String correlationId;
 
     @Enumerated(EnumType.STRING)
     private ProcessInstanceStatus status;
@@ -414,6 +421,14 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
+    }
+
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
     }
 
     @Override

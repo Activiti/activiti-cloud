@@ -46,6 +46,7 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.events.correlation.CorrelationIdContext;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceRepresentationModelAssembler;
@@ -117,8 +118,12 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
     @Override
     public EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
         StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+        ProcessInstance processInstance = CorrelationIdContext.startWithCorrelationId(
+            convertedStartProcessPayload,
+            () -> processAdminRuntime.start(convertedStartProcessPayload)
+        );
 
-        return representationModelAssembler.toModel(processAdminRuntime.start(convertedStartProcessPayload));
+        return representationModelAssembler.toModel(processInstance);
     }
 
     @Override
