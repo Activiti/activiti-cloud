@@ -1780,6 +1780,12 @@
             "type" : "string"
           }
         }, {
+          "name" : "correlationId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
           "name" : "status",
           "in" : "query",
           "schema" : {
@@ -2071,6 +2077,12 @@
             "type" : "string"
           }
         }, {
+          "name" : "correlationId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
           "name" : "status",
           "in" : "query",
           "schema" : {
@@ -2340,6 +2352,12 @@
           }
         }, {
           "name" : "businessKey",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "correlationId",
           "in" : "query",
           "schema" : {
             "type" : "string"
@@ -3609,6 +3627,12 @@
             "type" : "string"
           }
         }, {
+          "name" : "correlationId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
           "name" : "status",
           "in" : "query",
           "schema" : {
@@ -4214,6 +4238,12 @@
           }
         }, {
           "name" : "businessKey",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "correlationId",
           "in" : "query",
           "schema" : {
             "type" : "string"
@@ -5867,6 +5897,12 @@
             "type" : "string"
           }
         }, {
+          "name" : "correlationId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
           "name" : "status",
           "in" : "query",
           "schema" : {
@@ -6701,6 +6737,12 @@
           }
         }, {
           "name" : "businessKey",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "correlationId",
           "in" : "query",
           "schema" : {
             "type" : "string"
@@ -8036,6 +8078,9 @@
           "businessKey" : {
             "type" : "string"
           },
+          "correlationId" : {
+            "type" : "string"
+          },
           "processDefinitionId" : {
             "type" : "string"
           },
@@ -8426,6 +8471,9 @@
           "businessKey" : {
             "type" : "string"
           },
+          "correlationId" : {
+            "type" : "string"
+          },
           "processDefinitionId" : {
             "type" : "string"
           },
@@ -8557,6 +8605,9 @@
             "format" : "date-time"
           },
           "businessKey" : {
+            "type" : "string"
+          },
+          "correlationId" : {
             "type" : "string"
           },
           "processDefinitionId" : {
@@ -8908,6 +8959,9 @@
             "format" : "date-time"
           },
           "businessKey" : {
+            "type" : "string"
+          },
+          "correlationId" : {
             "type" : "string"
           },
           "processDefinitionId" : {
