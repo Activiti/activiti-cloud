@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -89,7 +89,7 @@ class RecomputePipelineTest {
     }
 
     @Test
-    void aFailedEmit_isLoggedAndSkipped_ratherThanThrown() {
+    void aFailedEmit_isThrown_soTheSchedulerRetriesTheWholeWindow() {
         when(audienceResolver.resolve(any())).thenReturn(Map.of(PushedCountType.ASSIGNED, Set.of("alice")));
         PushedCounter assignedCounter = counterFor(PushedCountType.ASSIGNED, Map.of("alice", 3L));
         RecomputePipeline pipeline = new RecomputePipeline(
@@ -100,7 +100,7 @@ class RecomputePipelineTest {
         );
         pushedCountsSink.tryEmitComplete();
 
-        assertThatNoException().isThrownBy(() -> pipeline.process(nonEmptyWindow()));
+        assertThatThrownBy(() -> pipeline.process(nonEmptyWindow())).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

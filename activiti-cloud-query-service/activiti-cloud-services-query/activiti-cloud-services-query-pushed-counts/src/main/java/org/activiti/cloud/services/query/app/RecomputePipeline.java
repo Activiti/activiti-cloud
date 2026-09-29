@@ -75,7 +75,7 @@ public class RecomputePipeline {
             String scopeKey = ScopeKeys.of(counter.type(), userId);
             Sinks.EmitResult result = pushedCountsSink.tryEmitNext(new CountChangedMessage(scopeKey, count, asOf));
             if (result.isFailure()) {
-                LOGGER.warn("Failed to emit a pushed-count update for {}: {}", scopeKey, result);
+                throw new IllegalStateException("Failed to emit a pushed-count update for " + scopeKey + ": " + result);
             }
         }
     }
