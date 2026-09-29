@@ -67,7 +67,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest({ ProcessInstanceControllerImpl.class, ProcessInstanceVariableControllerImpl.class })
