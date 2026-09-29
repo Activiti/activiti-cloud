@@ -20,14 +20,7 @@ package org.activiti.cloud.services.rest.conf;
  */
 public class RequestBodyTooLargeException extends RuntimeException {
 
-    private final long bytesRead;
-
-    public RequestBodyTooLargeException(long bytesRead, long maxAllowed) {
-        super("Request body of " + bytesRead + " bytes exceeds the maximum allowed size of " + maxAllowed + " bytes");
-        this.bytesRead = bytesRead;
-    }
-
-    public long getBytesRead() {
-        return bytesRead;
+    public RequestBodyTooLargeException(long maxAllowed) {
+        super("Request body exceeds the maximum allowed size of " + maxAllowed + " bytes");
     }
 }

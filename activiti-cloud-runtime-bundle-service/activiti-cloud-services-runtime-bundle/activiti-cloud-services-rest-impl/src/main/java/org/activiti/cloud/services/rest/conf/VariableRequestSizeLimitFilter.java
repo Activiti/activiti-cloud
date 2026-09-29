@@ -41,6 +41,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
 
+    public static final String POST = "POST";
+    public static final String PUT = "PUT";
+
     private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private static final List<String> VARIABLE_ENDPOINT_PATTERNS = List.of(
@@ -50,7 +53,6 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
         "/**/v1/tasks/*/variables",
         "/**/v1/tasks/*/variables/**"
     );
-
     private final long maxContentLengthBytes;
 
     public VariableRequestSizeLimitFilter(long maxContentLengthBytes) {
@@ -68,7 +70,7 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String method = request.getMethod();
-        if (!"PUT".equalsIgnoreCase(method) && !"POST".equalsIgnoreCase(method)) {
+        if (!PUT.equalsIgnoreCase(method) && !POST.equalsIgnoreCase(method)) {
             return true;
         }
         String uri = request.getRequestURI();
