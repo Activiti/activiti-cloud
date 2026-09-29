@@ -415,15 +415,23 @@ jobs:
       - maven-build-common
       - maven-build
       - maven-build-dependencies-bom
-      - build-summary
+      - maven-test
+      - playwright-tests
       - delete-test-images
     if: >-
-      github.event_name == 'push' && needs.pre-checks.outputs.skip != 'true'
+      always() && github.event_name == 'push'
+      && needs.pre-checks.result == 'success'
+      && needs.pre-checks.outputs.skip != 'true'
+      && needs.create-tag.result == 'success'
+      && needs.delete-test-images.result == 'success'
       && needs.maven-build-common.result == 'success'
       && needs.maven-build.result == 'success'
       && needs.maven-build-dependencies-bom.result == 'success'
       && (
-        needs.build-summary.result == 'success'
+        (
+          needs.maven-test.result == 'success'
+          && needs.playwright-tests.result == 'success'
+        )
         || needs.pre-checks.outputs.skip-tests == 'true'
       )
     steps:
