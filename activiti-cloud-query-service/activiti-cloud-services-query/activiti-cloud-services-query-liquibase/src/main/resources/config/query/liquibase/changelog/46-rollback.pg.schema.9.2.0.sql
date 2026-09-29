@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS bpmn_activity_activitytype_starteddate_idx;
