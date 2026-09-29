@@ -58,4 +58,37 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
 
         assertThat(foundParentIdIndex).isTrue();
     }
+
+    @Test
+    void shouldCreateActivityTypeStartedDateIndexForBpmnActivity() throws Exception {
+        boolean foundActivityTypeColumn = false;
+        boolean foundStartedDateColumn = false;
+
+        try (
+            Connection connection = dataSource.getConnection();
+            ResultSet indexes = connection.getMetaData().getIndexInfo(null, null, "BPMN_ACTIVITY", false, false)
+        ) {
+            while (indexes.next()) {
+                if ("BPMN_ACTIVITY_ACTIVITYTYPE_STARTEDDATE_IDX".equalsIgnoreCase(indexes.getString("INDEX_NAME"))) {
+                    String columnName = indexes.getString("COLUMN_NAME");
+                    if (
+                        "ACTIVITY_TYPE".equalsIgnoreCase(columnName) &&
+                        indexes.getShort("ORDINAL_POSITION") == 1 &&
+                        "A".equalsIgnoreCase(indexes.getString("ASC_OR_DESC"))
+                    ) {
+                        foundActivityTypeColumn = true;
+                    } else if (
+                        "STARTED_DATE".equalsIgnoreCase(columnName) &&
+                        indexes.getShort("ORDINAL_POSITION") == 2 &&
+                        "D".equalsIgnoreCase(indexes.getString("ASC_OR_DESC"))
+                    ) {
+                        foundStartedDateColumn = true;
+                    }
+                }
+            }
+        }
+
+        assertThat(foundActivityTypeColumn).isTrue();
+        assertThat(foundStartedDateColumn).isTrue();
+    }
 }
