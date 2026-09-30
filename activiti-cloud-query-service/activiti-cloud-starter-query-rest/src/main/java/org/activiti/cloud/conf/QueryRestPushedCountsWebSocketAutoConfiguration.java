@@ -39,7 +39,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
@@ -87,11 +86,10 @@ public class QueryRestPushedCountsWebSocketAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SubscriberRegistry subscriberRegistry(
-        ApplicationEventPublisher eventPublisher,
         @Value("${activiti.cloud.query.pushed-counts.registry.max-size:50000}") long maxSize
     ) {
         LOGGER.debug("Creating SubscriberRegistry with a maximum size of {}", maxSize);
-        return new SubscriberRegistry(eventPublisher, maxSize);
+        return new SubscriberRegistry(maxSize);
     }
 
     @Bean

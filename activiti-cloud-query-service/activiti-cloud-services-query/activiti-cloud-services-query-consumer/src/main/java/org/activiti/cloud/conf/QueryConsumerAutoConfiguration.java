@@ -25,7 +25,6 @@ import org.activiti.cloud.common.messaging.config.PartitionedChannelGracefulShut
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
-import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.slf4j.Logger;
@@ -103,21 +102,14 @@ public class QueryConsumerAutoConfiguration {
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
         IntegrationFlow queryEventsQueueIntegrationFlow,
-        Optional<RecomputeEventCapturer> recomputeEventCapturer,
         @Value("${activiti.cloud.query.consumer.message-handler.chunk-size:100}") Integer chunkSize
     ) {
-        LOGGER.debug(
-            "Pushed-counts recompute capture is {}",
-            recomputeEventCapturer.isPresent() ? "enabled" : "disabled"
-        );
         return new QueryConsumerMessageHandler(
             eventHandlerContext,
             optimizer,
             entityManager,
             queryEventsQueueIntegrationFlow.getInputChannel()
-        )
-            .chunkSize(chunkSize)
-            .recomputeEventCapturer(recomputeEventCapturer.orElse(null));
+        ).chunkSize(chunkSize);
     }
 
     @Bean

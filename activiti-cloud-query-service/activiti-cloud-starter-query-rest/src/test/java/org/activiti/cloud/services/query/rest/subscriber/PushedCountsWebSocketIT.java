@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.activiti.cloud.services.query.subscription.CountChangedMessage;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
-import org.activiti.cloud.services.query.subscription.SubscriberWentLiveEvent;
-import org.activiti.cloud.services.query.subscription.SubscriberWentQuietEvent;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.services.test.identity.JwtGraphQlClientInterceptor;
@@ -48,7 +46,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.event.EventListener;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -77,11 +74,7 @@ import reactor.test.StepVerifier;
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Import({
-    PushedCountsWebSocketIT.WentLiveEventCaptor.class,
-    PushedCountsWebSocketIT.WentQuietEventCaptor.class,
-    PushedCountsWebSocketIT.AdjustableClockConfiguration.class,
-})
+@Import({ PushedCountsWebSocketIT.AdjustableClockConfiguration.class })
 class PushedCountsWebSocketIT {
 
     private static final String WS_GRAPHQL_URI = "/v2/ws/graphql";
@@ -103,10 +96,7 @@ class PushedCountsWebSocketIT {
     private PushedCountsSubscriptionTracker pushedCountsSubscriptionTracker;
 
     @Autowired
-    private WentLiveEventCaptor wentLiveEventCaptor;
-
-    @Autowired
-    private WentQuietEventCaptor wentQuietEventCaptor;
+    private SubscriberRegistry subscriberRegistry;
 
     @Autowired
     private AdjustableClock adjustableClock;
@@ -135,10 +125,7 @@ class PushedCountsWebSocketIT {
 
     /**
      * Proves the handshake/schema/interceptor wiring alone works - a live subscription with no
-     * message sent - before any relay assertion depends on it too. Also the first subscription
-     * opened in this class, so the {@link SubscriberRegistry} is still empty for {@link #TEST_USER}
-     * beforehand - the only point where a fresh 0 -&gt; 1 transition (and its
-     * {@link SubscriberWentLiveEvent}) is guaranteed, rather than racing an earlier test's cleanup.
+     * message sent - before any relay assertion depends on it too.
      */
     @Test
     @Order(1)
@@ -148,11 +135,18 @@ class PushedCountsWebSocketIT {
             .executeSubscription()
             .toFlux("assignedTasks", Map.class);
 
-        StepVerifier.create(flux).expectSubscription().thenAwait(Duration.ofMillis(300)).thenCancel().verify(TIMEOUT);
-
-        assertThat(wentLiveEventCaptor.events())
-            .as("the interceptor-resolved groups reached SubscriberRegistry.register(...) intact")
-            .anyMatch(event -> event.userId().equals(TEST_USER) && event.groups().equals(Set.of(TEST_USER_GROUP)));
+        StepVerifier.create(flux)
+            .expectSubscription()
+            .then(() ->
+                await()
+                    .atMost(TIMEOUT)
+                    .alias("the interceptor-resolved groups reached SubscriberRegistry.register(...) intact")
+                    .untilAsserted(() ->
+                        assertThat(subscriberRegistry.groupsOf(TEST_USER)).isEqualTo(Set.of(TEST_USER_GROUP))
+                    )
+            )
+            .thenCancel()
+            .verify(TIMEOUT);
     }
 
     @Test
@@ -299,9 +293,7 @@ class PushedCountsWebSocketIT {
 
             await()
                 .atMost(TIMEOUT)
-                .untilAsserted(() ->
-                    assertThat(wentQuietEventCaptor.events()).anyMatch(event -> event.userId().equals(TEST_USER))
-                );
+                .untilAsserted(() -> assertThat(subscriberRegistry.isWatching(TEST_USER)).isFalse());
         } finally {
             subscription.dispose();
         }
@@ -309,42 +301,6 @@ class PushedCountsWebSocketIT {
 
     private void sendCountChanged(CountChangedMessage message) {
         pushedCountsSink.tryEmitNext(message);
-    }
-
-    /**
-     * Collects {@link SubscriberWentLiveEvent}s on whichever thread publishes them - the
-     * subscription is established on a server-side Reactor/Netty thread, not the test's own, so
-     * Spring Test's thread-local {@code ApplicationEvents} recording can't see it.
-     */
-    @TestConfiguration
-    static class WentLiveEventCaptor {
-
-        private final List<SubscriberWentLiveEvent> events = new CopyOnWriteArrayList<>();
-
-        @EventListener
-        void onSubscriberWentLive(SubscriberWentLiveEvent event) {
-            events.add(event);
-        }
-
-        List<SubscriberWentLiveEvent> events() {
-            return events;
-        }
-    }
-
-    /** Collects {@link SubscriberWentQuietEvent}s - see {@link WentLiveEventCaptor}. */
-    @TestConfiguration
-    static class WentQuietEventCaptor {
-
-        private final List<SubscriberWentQuietEvent> events = new CopyOnWriteArrayList<>();
-
-        @EventListener
-        void onSubscriberWentQuiet(SubscriberWentQuietEvent event) {
-            events.add(event);
-        }
-
-        List<SubscriberWentQuietEvent> events() {
-            return events;
-        }
     }
 
     /**
