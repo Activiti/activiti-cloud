@@ -58,13 +58,11 @@ public class ProcessDefinitionValuesService {
                 .get(extensionsStartEventId.id());
 
             if (startEventMappings != null) {
-                startEventMappings
-                    .getInputs()
-                    .forEach((input, mapping) -> {
-                        if (SourceMappingType.VALUE.equals(mapping.getType())) {
-                            result.put(input, mapping.getValue());
-                        }
-                    });
+                startEventMappings.getInputs().forEach((input, mapping) -> {
+                    if (SourceMappingType.VALUE.equals(mapping.getType())) {
+                        result.put(input, mapping.getValue());
+                    }
+                });
             }
         }
 

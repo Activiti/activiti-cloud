@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.events.message;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,7 +39,7 @@ public class EventChunker {
     public Collection<List<CloudRuntimeEventImpl<?, ?>>> chunk(List<CloudRuntimeEventImpl<?, ?>> events) {
         List<List<CloudRuntimeEventImpl<?, ?>>> chunks = new ArrayList<>();
         List<CloudRuntimeEventImpl<?, ?>> currentChunk = new ArrayList<>();
-        var currentChunkSize = 0;
+        var currentChunkSize = 0L;
 
         for (CloudRuntimeEventImpl<?, ?> event : events) {
             var eventSizeInBytes = getEventSizeInBytes(event);
@@ -61,13 +64,13 @@ public class EventChunker {
         return chunks;
     }
 
-    private boolean isSingleEventExceedingMaxLimit(int eventSizeInBytes) {
+    private boolean isSingleEventExceedingMaxLimit(long eventSizeInBytes) {
         return eventSizeInBytes > this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener();
     }
 
     private boolean wouldChunkExceedMaxLimit(
-        int currentChunkSize,
-        int eventSizeInBytes,
+        long currentChunkSize,
+        long eventSizeInBytes,
         List<CloudRuntimeEventImpl<?, ?>> currentChunk
     ) {
         return (
@@ -77,11 +80,33 @@ public class EventChunker {
         );
     }
 
-    private int getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {
-        try {
-            return this.objectMapper.writeValueAsBytes(event).length;
+    private long getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {
+        try (var counter = new CountingOutputStream()) {
+            this.objectMapper.writeValue(counter, event);
+            return counter.getCount();
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to serialize event to JSON", e);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Unexpected I/O error while counting event JSON size", e);
+        }
+    }
+
+    private static class CountingOutputStream extends OutputStream {
+
+        private long count = 0;
+
+        @Override
+        public void write(int b) {
+            count++;
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            count += len;
+        }
+
+        public long getCount() {
+            return count;
         }
     }
 }

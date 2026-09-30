@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 
 public record RestrictedProcessInstanceCountCacheKey(
     String authenticatedUserId,

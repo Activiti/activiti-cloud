@@ -60,8 +60,7 @@ public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
             entityManager.find(
                 TaskCandidateGroupEntity.class,
                 new TaskCandidateGroupId(entity.getTaskId(), entity.getGroupId())
-            ) !=
-            null
+            ) != null
         );
     }
 }

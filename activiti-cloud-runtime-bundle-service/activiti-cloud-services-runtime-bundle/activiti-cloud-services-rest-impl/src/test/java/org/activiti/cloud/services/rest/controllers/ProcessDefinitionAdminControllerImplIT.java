@@ -87,20 +87,18 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(ProcessDefinitionAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        RuntimeBundleProperties.class,
-        CloudEventsAutoConfiguration.class,
-        ProcessEngineChannelsConfiguration.class,
-        ActivitiCoreCommonUtilAutoConfiguration.class,
-        ProcessExtensionsAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class,
-        ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class,
-        CacheAutoConfiguration.class,
-    }
-)
+@Import({
+    RuntimeBundleProperties.class,
+    CloudEventsAutoConfiguration.class,
+    ProcessEngineChannelsConfiguration.class,
+    ActivitiCoreCommonUtilAutoConfiguration.class,
+    ProcessExtensionsAutoConfiguration.class,
+    ServicesRestWebMvcAutoConfiguration.class,
+    ServicesCoreAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    StreamConfig.class,
+    CacheAutoConfiguration.class,
+})
 @ExtendWith(MockitoExtension.class)
 class ProcessDefinitionAdminControllerImplIT {
 
@@ -178,9 +176,9 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionPage
         );
 
-        this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(
-            status().isOk()
-        );
+        this.mockMvc
+            .perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -203,7 +201,8 @@ class ProcessDefinitionAdminControllerImplIT {
         ).willReturn(processDefinitionPage);
 
         //when
-        MvcResult result = this.mockMvc.perform(
+        MvcResult result = this.mockMvc
+            .perform(
                 get("/admin/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE)
             )
             .andExpect(status().isOk())
@@ -340,8 +339,8 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList.size()
         );
         when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
-        this.mockMvc.perform(
-            get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE)
-        ).andExpect(status().isOk());
+        this.mockMvc
+            .perform(get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
     }
 }

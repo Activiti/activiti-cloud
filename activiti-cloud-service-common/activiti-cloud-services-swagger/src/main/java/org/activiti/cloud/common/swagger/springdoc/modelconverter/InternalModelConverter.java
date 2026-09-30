@@ -46,7 +46,7 @@ public abstract class InternalModelConverter<T> implements ModelConverter {
                 return this.resolve(annotatedType, context, chain);
             }
         }
-        return (chain.hasNext()) ? chain.next().resolve(annotatedType, context, chain) : null;
+        return chain.hasNext() ? chain.next().resolve(annotatedType, context, chain) : null;
     }
 
     protected abstract boolean applies(JavaType javaType);

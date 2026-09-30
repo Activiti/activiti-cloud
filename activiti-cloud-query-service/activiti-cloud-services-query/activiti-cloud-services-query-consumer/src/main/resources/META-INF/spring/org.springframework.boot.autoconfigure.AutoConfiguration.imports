@@ -1,1 +1,2 @@
 org.activiti.cloud.conf.QueryConsumerAutoConfiguration
+org.activiti.cloud.conf.PushedCountsAutoConfiguration

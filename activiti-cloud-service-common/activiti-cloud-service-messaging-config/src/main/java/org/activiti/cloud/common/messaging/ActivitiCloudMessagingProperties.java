@@ -528,15 +528,13 @@ public class ActivitiCloudMessagingProperties {
         public Map<String, List<String>> registrations() {
             Map<String, List<String>> result = new LinkedCaseInsensitiveMap<>();
 
-            registrations
-                .values()
-                .forEach(it -> {
-                    it.forEach((key, value) ->
-                        result.compute(key, (k, v) ->
-                            v == null ? value : Stream.concat(v.stream(), value.stream()).distinct().toList()
-                        )
-                    );
-                });
+            registrations.values().forEach(it -> {
+                it.forEach((key, value) ->
+                    result.compute(key, (k, v) ->
+                        v == null ? value : Stream.concat(v.stream(), value.stream()).distinct().toList()
+                    )
+                );
+            });
 
             return result;
         }
@@ -609,38 +607,34 @@ public class ActivitiCloudMessagingProperties {
         }
 
         public void register(String bindingName, String functionBeanName) {
-            destinations
-                .keySet()
-                .forEach(routingContext ->
-                    Optional.ofNullable(destinations.get(routingContext))
-                        .map(it -> it.get(bindingName))
-                        .ifPresent(destination -> {
-                            registrations(routingContext)
-                                .computeIfAbsent(destination, key -> new ArrayList<>())
-                                .add(functionBeanName);
-                            registrationBindings.put(functionBeanName, bindingName);
-                        })
-                );
+            destinations.keySet().forEach(routingContext ->
+                Optional.ofNullable(destinations.get(routingContext))
+                    .map(it -> it.get(bindingName))
+                    .ifPresent(destination -> {
+                        registrations(routingContext)
+                            .computeIfAbsent(destination, key -> new ArrayList<>())
+                            .add(functionBeanName);
+                        registrationBindings.put(functionBeanName, bindingName);
+                    })
+            );
         }
 
         public void register(String bindingName, String functionBeanName, String connectorType) {
-            destinations
-                .keySet()
-                .forEach(routingContext ->
-                    Optional.ofNullable(destinations.get(routingContext))
-                        .map(it -> it.get(bindingName))
-                        .ifPresent(destinations ->
-                            Stream.of(destinations.split(","))
-                                .filter(connectorType::equals)
-                                .findFirst()
-                                .ifPresent(destination -> {
-                                    registrations(routingContext)
-                                        .computeIfAbsent(destination, key -> new ArrayList<>())
-                                        .add(functionBeanName);
-                                    registrationBindings.put(functionBeanName, bindingName);
-                                })
-                        )
-                );
+            destinations.keySet().forEach(routingContext ->
+                Optional.ofNullable(destinations.get(routingContext))
+                    .map(it -> it.get(bindingName))
+                    .ifPresent(destinations ->
+                        Stream.of(destinations.split(","))
+                            .filter(connectorType::equals)
+                            .findFirst()
+                            .ifPresent(destination -> {
+                                registrations(routingContext)
+                                    .computeIfAbsent(destination, key -> new ArrayList<>())
+                                    .add(functionBeanName);
+                                registrationBindings.put(functionBeanName, bindingName);
+                            })
+                    )
+            );
         }
 
         public Optional<String> bindingNameFor(String functionBeanName) {

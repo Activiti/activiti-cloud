@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.process.model;
 
+import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
@@ -26,6 +27,14 @@ public interface IntegrationRequest extends CloudRuntimeEntity {
     String getErrorDestination();
 
     default String getIncidentDestination() {
+        return null;
+    }
+
+    default Date getRequestDate() {
+        return null;
+    }
+
+    default Integer getTtlSeconds() {
         return null;
     }
 }

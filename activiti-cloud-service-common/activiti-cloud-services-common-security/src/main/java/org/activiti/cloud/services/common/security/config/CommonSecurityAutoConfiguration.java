@@ -205,10 +205,9 @@ public class CommonSecurityAutoConfiguration {
     @SuppressWarnings({ "java:S4502", "java:S5122" })
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
-        http
-            .authorizeHttpRequests(spec ->
-                spec.requestMatchers(actuatorEndpointsMatcher()).authenticated().anyRequest().permitAll()
-            )
+        http.authorizeHttpRequests(spec ->
+            spec.requestMatchers(actuatorEndpointsMatcher()).authenticated().anyRequest().permitAll()
+        )
             .cors(spec ->
                 spec.configurationSource(request -> {
                     CorsConfiguration corsConfiguration = new CorsConfiguration();

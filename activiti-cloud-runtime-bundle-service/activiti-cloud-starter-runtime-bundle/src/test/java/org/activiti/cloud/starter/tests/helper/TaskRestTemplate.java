@@ -57,9 +57,8 @@ public class TaskRestTemplate {
         CONTENT_TYPE_HEADER.setContentType(MediaType.APPLICATION_JSON);
     }
 
-    private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<
-        CloudTask
-    >() {};
+    private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE =
+        new ParameterizedTypeReference<CloudTask>() {};
     private static final ParameterizedTypeReference<PagedModel<CloudTask>> PAGED_TASKS_RESPONSE_TYPE =
         new ParameterizedTypeReference<PagedModel<CloudTask>>() {};
     private static final ParameterizedTypeReference<
@@ -70,9 +69,8 @@ public class TaskRestTemplate {
     > CANDIDATES_GROUPS_RESPONSE_TYPE = new ParameterizedTypeReference<
         CollectionModel<EntityModel<CandidateGroup>>
     >() {};
-    private static final ParameterizedTypeReference<Void> VOID_RESPONSE_TYPE = new ParameterizedTypeReference<
-        Void
-    >() {};
+    private static final ParameterizedTypeReference<Void> VOID_RESPONSE_TYPE =
+        new ParameterizedTypeReference<Void>() {};
 
     private TestRestTemplate testRestTemplate;
 

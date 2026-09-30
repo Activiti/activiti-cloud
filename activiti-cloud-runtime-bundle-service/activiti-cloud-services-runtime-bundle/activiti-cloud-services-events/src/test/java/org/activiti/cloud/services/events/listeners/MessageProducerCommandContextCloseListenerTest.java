@@ -416,7 +416,8 @@ class MessageProducerCommandContextCloseListenerTest {
             .containsExactly("TASK_CREATED", "VARIABLE_CREATED", "VARIABLE_CREATED", "VARIABLE_CREATED");
 
         verify(this.auditChannel, atLeastOnce()).send(this.messageArgumentCaptor.capture());
-        var sentEvents = this.messageArgumentCaptor.getAllValues()
+        var sentEvents = this.messageArgumentCaptor
+            .getAllValues()
             .stream()
             .flatMap(message -> Arrays.stream(message.getPayload()))
             .toList();

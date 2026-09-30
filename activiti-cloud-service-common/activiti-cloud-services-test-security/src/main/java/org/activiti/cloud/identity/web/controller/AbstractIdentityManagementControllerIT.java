@@ -59,7 +59,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnGroups_when_searchByName() throws Exception {
-        this.mockMvc.perform(get("/v1/groups?search=group"))
+        this.mockMvc
+            .perform(get("/v1/groups?search=group"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[?(@.name)].name", containsInAnyOrder("testgroup", "salesgroup")));
@@ -67,7 +68,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnUsers_when_searchByUsername() throws Exception {
-        this.mockMvc.perform(get("/v1/users?search=hr"))
+        this.mockMvc
+            .perform(get("/v1/users?search=hr"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)))
             .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));
@@ -75,7 +77,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnUsers_when_searchByGroup() throws Exception {
-        this.mockMvc.perform(get("/v1/users?group=hr"))
+        this.mockMvc
+            .perform(get("/v1/users?group=hr"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(
@@ -85,7 +88,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnUsers_when_searchByEmail() throws Exception {
-        this.mockMvc.perform(get("/v1/users?search=hr@example.com"))
+        this.mockMvc
+            .perform(get("/v1/users?search=hr@example.com"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is(HRUSER)));
@@ -93,7 +97,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnUsers_when_searchByLastName() throws Exception {
-        this.mockMvc.perform(get("/v1/users?search=snow"))
+        this.mockMvc
+            .perform(get("/v1/users?search=snow"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is(JOHNSNOW)));
@@ -101,7 +106,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnUsers_when_searchByFirstName() throws Exception {
-        this.mockMvc.perform(get("/v1/users?search=john"))
+        this.mockMvc
+            .perform(get("/v1/users?search=john"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is(JOHNSNOW)));
@@ -333,7 +339,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnApplicationPermissions_when_filteringByRole() throws Exception {
-        this.mockMvc.perform(get("/v1/permissions/{application}?role={role}", "activiti", "ACTIVITI_USER"))
+        this.mockMvc
+            .perform(get("/v1/permissions/{application}?role={role}", "activiti", "ACTIVITI_USER"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].role", is("ACTIVITI_USER")))
@@ -343,7 +350,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnApplicationPermissions() throws Exception {
-        this.mockMvc.perform(get("/v1/permissions/{application}", "activiti"))
+        this.mockMvc
+            .perform(get("/v1/permissions/{application}", "activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(
@@ -356,7 +364,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_notReturnApplicationPermissions_when_roleIsInvalid() throws Exception {
-        this.mockMvc.perform(get("/v1/permissions/{application}?role={role}", "activiti", "role"))
+        this.mockMvc
+            .perform(get("/v1/permissions/{application}?role={role}", "activiti", "role"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(0)));
     }
@@ -412,7 +421,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnDeactivatedUsers_whenNotSpecified() throws Exception {
-        this.mockMvc.perform(get("/v1/users?search=hr"))
+        this.mockMvc
+            .perform(get("/v1/users?search=hr"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)))
             .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));
@@ -420,7 +430,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_filterDeactivatedUsers_whenSpecifiedTrue() throws Exception {
-        this.mockMvc.perform(get("/v1/users?search=hr&hideDeactivatedUser=true"))
+        this.mockMvc
+            .perform(get("/v1/users?search=hr&hideDeactivatedUser=true"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER)));
@@ -428,7 +439,8 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnDeactivatedUsers_whenSpecifiedFalse() throws Exception {
-        this.mockMvc.perform(get("/v1/users?search=hr&hideDeactivatedUser=false"))
+        this.mockMvc
+            .perform(get("/v1/users?search=hr&hideDeactivatedUser=false"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)))
             .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));

@@ -23,7 +23,6 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
@@ -43,17 +42,7 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
             createMissingIntegrationContextEntity(integrationEvent)
         );
 
-        String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
-        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
-
-        if (serviceTaskEntity != null && entity.getServiceTask() == null) {
-            entity.setServiceTask(serviceTaskEntity);
-
-            // Increment counter if this is a newly created entity
-            if (isNewEntity) {
-                serviceTaskEntity.incrementIntegrationContextCounter();
-            }
-        }
+        linkServiceTaskAndHandleCounter(integrationEvent, entity, isNewEntity);
 
         entity.setResultDate(new Date(integrationEvent.getTimestamp()));
         entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
