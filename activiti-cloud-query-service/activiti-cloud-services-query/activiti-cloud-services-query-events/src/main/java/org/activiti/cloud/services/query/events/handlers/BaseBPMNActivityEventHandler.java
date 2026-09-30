@@ -22,13 +22,23 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 
 public abstract class BaseBPMNActivityEventHandler {
 
     protected final EntityManager entityManager;
+    private final boolean postgres;
 
     public BaseBPMNActivityEventHandler(EntityManager entityManager) {
         this.entityManager = entityManager;
+        this.postgres =
+            entityManager
+                    .getEntityManagerFactory()
+                    .unwrap(SessionFactoryImplementor.class)
+                    .getJdbcServices()
+                    .getDialect() instanceof
+                PostgreSQLDialect;
     }
 
     protected BaseBPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
@@ -37,6 +47,10 @@ public abstract class BaseBPMNActivityEventHandler {
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
         String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
+
+        if (postgres) {
+            acquireCrossPodLock(pkId);
+        }
 
         BaseBPMNActivityEntity bpmnActivityEntity = null;
 
@@ -51,6 +65,13 @@ public abstract class BaseBPMNActivityEventHandler {
         }
 
         return bpmnActivityEntity;
+    }
+
+    private void acquireCrossPodLock(String pkId) {
+        entityManager
+            .createNativeQuery("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))")
+            .setParameter("key", pkId)
+            .getSingleResult();
     }
 
     public BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
