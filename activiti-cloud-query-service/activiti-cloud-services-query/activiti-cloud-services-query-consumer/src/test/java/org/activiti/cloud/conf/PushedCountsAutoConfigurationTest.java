@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.ConsumerRecomputeBuffer;
 import org.activiti.cloud.services.query.app.ConsumerRecomputeScheduler;
 import org.activiti.cloud.services.query.app.ConsumerSubscriberRegistry;
+import org.activiti.cloud.services.query.app.QueuedTaskCounter;
 import org.activiti.cloud.services.query.app.RecomputeAudienceResolver;
 import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.app.RecomputePipeline;
@@ -74,6 +75,7 @@ class PushedCountsAutoConfigurationTest {
             assertThat(context).hasSingleBean(RecomputeAudienceResolver.class);
             assertThat(context).hasSingleBean(RecomputePipeline.class);
             assertThat(context).hasSingleBean(ConsumerRecomputeScheduler.class);
+            assertThat(context).hasSingleBean(QueuedTaskCounter.class);
         });
     }
 
@@ -82,6 +84,7 @@ class PushedCountsAutoConfigurationTest {
         contextRunner.withPropertyValues("activiti.cloud.query.pushed-counts.enabled=false").run(context -> {
             assertThat(context).doesNotHaveBean(ConsumerSubscriberRegistry.class);
             assertThat(context).doesNotHaveBean(AssignedTaskCounter.class);
+            assertThat(context).doesNotHaveBean(QueuedTaskCounter.class);
             assertThat(context).doesNotHaveBean("subscriberRegistryConsumerFunction");
         });
     }

@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,10 +94,12 @@ class PushedCountsRecomputePipelineIT {
 
         messageHandler.accept(message);
 
-        Message<byte[]> received = output.receive(5000, COUNT_DESTINATION);
-        assertThat(received).isNotNull();
-        String payload = new String(received.getPayload(), StandardCharsets.UTF_8);
-        assertThat(payload).contains("assigned:alice").contains("\"count\":5");
+        // A single flush recomputes every badge alice is in scope for: the assigned count, plus the
+        // over-included queued=0 (she is a named user of the window). Drain them all so no leftover
+        // message leaks into the next test.
+        assertThat(drainCountMessages()).anySatisfy(payload ->
+            assertThat(payload).contains("assigned:alice").contains("\"count\":5")
+        );
     }
 
     @Test
@@ -111,6 +114,19 @@ class PushedCountsRecomputePipelineIT {
         assertThat(output.receive(1000, COUNT_DESTINATION)).isNull();
     }
 
+    private List<String> drainCountMessages() {
+        List<String> payloads = new ArrayList<>();
+        // Wait generously for the first message (the async flush warms up), then only briefly for
+        // its same-flush siblings, so nothing is left behind for the next test.
+        long timeout = 5000;
+        Message<byte[]> message;
+        while ((message = output.receive(timeout, COUNT_DESTINATION)) != null) {
+            payloads.add(new String(message.getPayload(), StandardCharsets.UTF_8));
+            timeout = 500;
+        }
+        return payloads;
+    }
+
     private static TaskImpl assignedTask() {
         TaskImpl task = new TaskImpl();
         task.setId("task-1");
@@ -123,7 +139,6 @@ class PushedCountsRecomputePipelineIT {
 
         @Bean
         AssignedTaskCounter testAssignedCounter(TaskRepository taskRepository) {
-            // Replaces the real ASSIGNED counter (via @ConditionalOnMissingBean) so the pipeline runs exactly one, with a fixed count.
             return new AssignedTaskCounter(taskRepository) {
                 @Override
                 public Map<String, Long> compute(Set<String> affectedUserIds) {
