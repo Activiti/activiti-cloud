@@ -87,15 +87,13 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
         //user is involved because another task of the same process instance is visible to them;
         //correlating on processInstanceId keeps the subquery scoped to the current process instance
         //instead of scanning/aggregating every process instance visible to the user
-        BooleanExpression hasVisibleTaskInSameProcess = JPAExpressions
-            .selectOne()
+        BooleanExpression hasVisibleTaskInSameProcess = JPAExpressions.selectOne()
             .from(candidateTask)
             .where(candidateTask.processInstanceId.eq(taskEntity.processInstanceId).and(candidateTaskRestrictions))
             .exists();
 
-        BooleanExpression userIsInvolved = isInitiator
-            .or(hasVisibleTaskInSameProcess)
-            .or(currentTaskRestrictions); //apply default conditions directly to the current task
+        //apply default conditions directly to the current task
+        BooleanExpression userIsInvolved = isInitiator.or(hasVisibleTaskInSameProcess).or(currentTaskRestrictions);
 
         return addAndConditionToPredicate(predicate, userIsInvolved);
     }

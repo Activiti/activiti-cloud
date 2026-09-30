@@ -19,13 +19,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.JPQLSerializer;
+import com.querydsl.jpa.JPQLTemplates;
 import java.util.Arrays;
 import java.util.UUID;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
@@ -54,6 +58,9 @@ class RestrictTaskEntityQueryIT {
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
     @Autowired
+    private ProcessInstanceRepository processInstanceRepository;
+
+    @Autowired
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
     @MockitoBean
@@ -67,6 +74,7 @@ class RestrictTaskEntityQueryIT {
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskRepository.deleteAll();
+        processInstanceRepository.deleteAll();
     }
 
     @Test
@@ -445,5 +453,185 @@ class RestrictTaskEntityQueryIT {
         );
         Iterable<TaskEntity> iterable = taskRepository.findInProcessInstanceScope(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
+    }
+
+    /*
+     * The following tests exercise the same call path used by TaskControllerHelper.canUserViewTask(...)
+     * for a specific task (existsInProcessInstanceScope), which is where the correlated EXISTS subquery
+     * replaces the previous global process-instance IN subquery.
+     */
+
+    private ProcessInstanceEntity createProcessInstance(String id, String initiator) {
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId(id);
+        processInstanceEntity.setName("name-" + id);
+        processInstanceEntity.setInitiator(initiator);
+        processInstanceEntity.setProcessDefinitionKey("defKey");
+        processInstanceEntity.setServiceName("test-cmd-endpoint");
+        return processInstanceRepository.save(processInstanceEntity);
+    }
+
+    private TaskEntity createTask(String id, String processInstanceId, String assignee, String owner) {
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId(id);
+        taskEntity.setProcessInstanceId(processInstanceId);
+        taskEntity.setAssignee(assignee);
+        taskEntity.setOwner(owner);
+        return taskRepository.save(taskEntity);
+    }
+
+    private boolean canUserViewTask(String taskId) {
+        Predicate predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(
+            QTaskEntity.taskEntity.id.eq(taskId)
+        );
+        return taskRepository.existsInProcessInstanceScope(predicate);
+    }
+
+    @Test
+    void shouldGrantAccessWhenUserIsProcessInitiator() {
+        createProcessInstance("pi-initiator", "initiatorUser");
+        //the current task itself is not directly visible to initiatorUser
+        createTask("t-initiator", "pi-initiator", "someoneElse", null);
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("initiatorUser");
+
+        assertThat(canUserViewTask("t-initiator")).isTrue();
+    }
+
+    @Test
+    void shouldGrantAccessWhenUserIsCurrentTaskAssignee() {
+        createProcessInstance("pi-assignee", "someoneElse");
+        createTask("t-assignee", "pi-assignee", "testuser", null);
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-assignee")).isTrue();
+    }
+
+    @Test
+    void shouldGrantAccessWhenUserIsCurrentTaskOwner() {
+        createProcessInstance("pi-owner", "someoneElse");
+        createTask("t-owner", "pi-owner", "someoneElse", "testuser");
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-owner")).isTrue();
+    }
+
+    @Test
+    void shouldGrantAccessWhenUserIsCandidateUserOfCurrentTask() {
+        createProcessInstance("pi-candidate-user", "someoneElse");
+        createTask("t-candidate-user", "pi-candidate-user", null, null);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity("t-candidate-user", "testuser"));
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-candidate-user")).isTrue();
+    }
+
+    @Test
+    void shouldGrantAccessWhenUserBelongsToCandidateGroupOfCurrentTask() {
+        createProcessInstance("pi-candidate-group", "someoneElse");
+        createTask("t-candidate-group", "pi-candidate-group", null, null);
+        taskCandidateGroupRepository.save(new TaskCandidateGroupEntity("t-candidate-group", "hr"));
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
+
+        assertThat(canUserViewTask("t-candidate-group")).isTrue();
+    }
+
+    @Test
+    void shouldGrantAccessWhenAnotherVisibleTaskExistsInSameProcessInstance() {
+        createProcessInstance("pi-same-process", "someoneElse");
+        //current task is not directly visible to testuser
+        createTask("t-current", "pi-same-process", "someoneElse", null);
+        //a different task in the same process instance is visible to testuser
+        TaskEntity visibleTask = createTask("t-visible", "pi-same-process", null, null);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(visibleTask.getId(), "testuser"));
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-current")).isTrue();
+    }
+
+    @Test
+    void shouldNotGrantAccessWhenVisibleTaskExistsOnlyInDifferentProcessInstance() {
+        createProcessInstance("pi-a", "someoneElse");
+        createProcessInstance("pi-b", "someoneElse");
+        //current task belongs to pi-a and is not directly visible to testuser
+        createTask("t-current-2", "pi-a", "someoneElse", null);
+        //visible task belongs to a different process instance (pi-b)
+        TaskEntity visibleTaskInOtherProcess = createTask("t-visible-other-process", "pi-b", null, null);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(visibleTaskInOtherProcess.getId(), "testuser"));
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-current-2")).isFalse();
+    }
+
+    @Test
+    void shouldGrantAccessToUnassignedTaskWithNoCandidates() {
+        createProcessInstance("pi-no-candidates", "someoneElse");
+        createTask("t-no-candidates", "pi-no-candidates", null, null);
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-no-candidates")).isTrue();
+    }
+
+    @Test
+    void shouldNotGrantAccessWhenTaskNotVisibleToUser() {
+        createProcessInstance("pi-not-visible", "someoneElse");
+        createTask("t-not-visible", "pi-not-visible", "someoneElse", "someoneElse");
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-not-visible")).isFalse();
+    }
+
+    @Test
+    void shouldGrantAccessToStandaloneTaskWhenDirectlyVisible() {
+        //standalone task: no processInstanceId
+        createTask("t-standalone-visible", null, null, null);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity("t-standalone-visible", "testuser"));
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-standalone-visible")).isTrue();
+    }
+
+    @Test
+    void shouldNotConnectStandaloneTasksViaNullProcessInstanceId() {
+        //current standalone task is not directly visible to testuser
+        createTask("t-standalone-current", null, "someoneElse", null);
+        //another standalone task (also null processInstanceId) is visible to testuser,
+        //but must NOT grant access to an unrelated standalone task
+        TaskEntity otherStandaloneTask = createTask("t-standalone-other", null, null, null);
+        taskCandidateUserRepository.save(new TaskCandidateUserEntity(otherStandaloneTask.getId(), "testuser"));
+
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+
+        assertThat(canUserViewTask("t-standalone-current")).isFalse();
+    }
+
+    @Test
+    void shouldGenerateCorrelatedExistsSubqueryInsteadOfGlobalInSubquery() {
+        when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
+
+        Predicate predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(
+            QTaskEntity.taskEntity.id.eq("someTaskId")
+        );
+
+        JPQLSerializer serializer = new JPQLSerializer(JPQLTemplates.DEFAULT);
+        serializer.handle(predicate);
+        String generated = serializer.toString();
+
+        assertThat(generated)
+            .as("generated predicate: %s", generated)
+            .contains("exists (select 1")
+            .contains("candidateTask.processInstanceId = taskEntity.processInstanceId")
+            .doesNotContain("taskEntity.processInstanceId in (select");
     }
 }
