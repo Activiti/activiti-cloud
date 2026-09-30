@@ -15,7 +15,6 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # PR ref names include the PR number, avoiding collisions with branch names.
   group: ${{ github.workflow }}-${{ github.ref_name || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
