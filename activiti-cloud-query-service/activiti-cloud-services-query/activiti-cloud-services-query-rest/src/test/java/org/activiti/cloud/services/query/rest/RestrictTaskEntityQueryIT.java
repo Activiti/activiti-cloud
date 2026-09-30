@@ -615,6 +615,12 @@ class RestrictTaskEntityQueryIT {
         assertThat(canUserViewTask("t-standalone-current")).isFalse();
     }
 
+    /*
+     * Behavioral tests above already cover the authorization semantics; this test is a lower-priority,
+     * implementation-detail regression guard confirming the involved-user branch is generated as a
+     * correlated EXISTS instead of the previous global process-instance IN (select ...) subquery. It is
+     * expected to require updating if the predicate construction or the QueryDSL serialization format changes.
+     */
     @Test
     void shouldGenerateCorrelatedExistsSubqueryInsteadOfGlobalInSubquery() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
