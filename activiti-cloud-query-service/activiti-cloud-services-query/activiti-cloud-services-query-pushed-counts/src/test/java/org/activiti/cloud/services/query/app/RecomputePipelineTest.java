@@ -100,7 +100,8 @@ class RecomputePipelineTest {
         );
         pushedCountsSink.tryEmitComplete();
 
-        assertThatThrownBy(() -> pipeline.process(nonEmptyWindow())).isInstanceOf(IllegalStateException.class);
+        var window = nonEmptyWindow();
+        assertThatThrownBy(() -> pipeline.process(window)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
