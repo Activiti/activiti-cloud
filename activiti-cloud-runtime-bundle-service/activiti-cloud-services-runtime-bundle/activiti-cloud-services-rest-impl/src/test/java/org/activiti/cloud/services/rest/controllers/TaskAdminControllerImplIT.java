@@ -71,20 +71,18 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(TaskAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        RuntimeBundleProperties.class,
-        CloudEventsAutoConfiguration.class,
-        ProcessEngineChannelsConfiguration.class,
-        TaskSamples.class,
-        ActivitiCoreCommonUtilAutoConfiguration.class,
-        ProcessExtensionsAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class,
-        CacheAutoConfiguration.class,
-    }
-)
+@Import({
+    RuntimeBundleProperties.class,
+    CloudEventsAutoConfiguration.class,
+    ProcessEngineChannelsConfiguration.class,
+    TaskSamples.class,
+    ActivitiCoreCommonUtilAutoConfiguration.class,
+    ProcessExtensionsAutoConfiguration.class,
+    ServicesRestWebMvcAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    StreamConfig.class,
+    CacheAutoConfiguration.class,
+})
 class TaskAdminControllerImplIT {
 
     @Autowired
@@ -138,9 +136,9 @@ class TaskAdminControllerImplIT {
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(tasks);
 
-        this.mockMvc.perform(get("/admin/v1/tasks?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(
-            status().isOk()
-        );
+        this.mockMvc
+            .perform(get("/admin/v1/tasks?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -149,9 +147,9 @@ class TaskAdminControllerImplIT {
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(taskPage);
 
-        this.mockMvc.perform(
-            get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk());
+        this.mockMvc
+            .perform(get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -169,11 +167,13 @@ class TaskAdminControllerImplIT {
             .withDescription("update-description")
             .build();
 
-        this.mockMvc.perform(
-            put("/admin/v1/tasks/{taskId}", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(updateTaskCmd))
-        ).andExpect(status().isOk());
+        this.mockMvc
+            .perform(
+                put("/admin/v1/tasks/{taskId}", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(updateTaskCmd))
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -187,11 +187,13 @@ class TaskAdminControllerImplIT {
         given(taskAdminRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
         AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
 
-        this.mockMvc.perform(
-            post("/admin/v1/tasks/{taskId}/assign", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(assignTaskCmd))
-        ).andExpect(status().isOk());
+        this.mockMvc
+            .perform(
+                post("/admin/v1/tasks/{taskId}/assign", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(assignTaskCmd))
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -202,10 +204,12 @@ class TaskAdminControllerImplIT {
             .withAssignee("assignee")
             .build();
 
-        this.mockMvc.perform(
-            post("/admin/v1/tasks/assign")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(assignTasksCmd))
-        ).andExpect(status().isOk());
+        this.mockMvc
+            .perform(
+                post("/admin/v1/tasks/assign")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(assignTasksCmd))
+            )
+            .andExpect(status().isOk());
     }
 }

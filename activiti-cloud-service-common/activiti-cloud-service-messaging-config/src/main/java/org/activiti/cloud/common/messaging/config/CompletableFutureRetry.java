@@ -50,18 +50,16 @@ class CompletableFutureRetry {
         Duration delay,
         int currentAttempt
     ) {
-        return supplier
-            .get()
-            .exceptionallyCompose(exception -> {
-                if (currentAttempt < maxRetries) {
-                    log.debug("Attempt {} of {} failed. Retrying in {}", currentAttempt + 1, maxRetries, delay);
-                    return java.util.concurrent.CompletableFuture.supplyAsync(() -> null, scheduler).thenCompose(
-                        ignored -> supplyAsyncWithRetry(supplier, maxRetries, delay, currentAttempt + 1)
-                    );
-                } else {
-                    log.debug("Maximum of {} retries reached. Failing operation.", maxRetries, exception);
-                    return CompletableFuture.failedFuture(exception);
-                }
-            });
+        return supplier.get().exceptionallyCompose(exception -> {
+            if (currentAttempt < maxRetries) {
+                log.debug("Attempt {} of {} failed. Retrying in {}", currentAttempt + 1, maxRetries, delay);
+                return java.util.concurrent.CompletableFuture.supplyAsync(() -> null, scheduler).thenCompose(ignored ->
+                    supplyAsyncWithRetry(supplier, maxRetries, delay, currentAttempt + 1)
+                );
+            } else {
+                log.debug("Maximum of {} retries reached. Failing operation.", maxRetries, exception);
+                return CompletableFuture.failedFuture(exception);
+            }
+        });
     }
 }

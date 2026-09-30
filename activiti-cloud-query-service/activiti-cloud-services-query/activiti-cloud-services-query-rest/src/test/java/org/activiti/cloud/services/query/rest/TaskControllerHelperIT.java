@@ -134,7 +134,12 @@ public class TaskControllerHelperIT {
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
             .extracting(QueryCloudTask::getId)
             .containsExactly(
-                taskEntities.reversed().stream().limit(pageSize).map(TaskEntity::getId).toArray(String[]::new)
+                taskEntities
+                    .reversed()
+                    .stream()
+                    .limit(pageSize)
+                    .map(TaskEntity::getId)
+                    .toArray(String[]::new)
             );
 
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).allSatisfy(task ->

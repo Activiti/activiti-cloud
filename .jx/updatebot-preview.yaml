@@ -1,0 +1,21 @@
+apiVersion: updatebot.jenkins-x.io/v1alpha1
+kind: UpdateConfig
+spec:
+  rules:
+    - urls:
+        - https://github.com/Alfresco/hxp-common-libraries
+      reusePullRequest: true
+      changes:
+        - command:
+            name: sh
+            args:
+              - -c
+              - |
+                sed -i "s|<activiti-cloud.version>.*</activiti-cloud.version>|<activiti-cloud.version>${ACTIVITI_CLOUD_VERSION}</activiti-cloud.version>|g" pom.xml
+                # Always produce a diff so re-runs on the same PR version are picked up.
+                # Without this, sed would be a no-op when the version string hasn't changed
+                # (e.g. every commit on PR #1234 produces the same 0.0.1-PR-1234-SNAPSHOT),
+                # leaving no file change → no new commit → stale downstream PR.
+                printf "activiti-cloud.version=%s\nbuild.run.id=%s\n" \
+                  "${ACTIVITI_CLOUD_VERSION}" "${BUILD_RUN_ID}" \
+                  > preview-build.properties

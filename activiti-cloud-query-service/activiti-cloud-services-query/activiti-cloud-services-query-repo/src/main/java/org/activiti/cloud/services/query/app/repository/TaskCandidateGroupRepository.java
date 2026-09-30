@@ -37,6 +37,8 @@ public interface TaskCandidateGroupRepository
 {
     Set<TaskCandidateGroupEntity> findByTaskIdIn(Set<String> collect);
 
+    Set<TaskCandidateGroupEntity> findByTask_ProcessInstanceIdIn(Set<String> processInstanceIds);
+
     @Override
     default void customize(QuerydslBindings bindings, QTaskCandidateGroupEntity root) {
         whitelist(root).apply(bindings);

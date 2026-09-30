@@ -18,10 +18,10 @@ package org.activiti.cloud.services.query.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
+import org.activiti.cloud.services.query.app.filter.VariableType;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

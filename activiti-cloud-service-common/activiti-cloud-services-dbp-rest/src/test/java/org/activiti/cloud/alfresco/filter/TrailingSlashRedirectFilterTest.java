@@ -41,16 +41,14 @@ class TrailingSlashRedirectFilterTest {
 
     @Test
     void testGreeting() throws Exception {
-        mvc
-            .perform(get(BASEURL + "/greeting").accept(APPLICATION_JSON_VALUE))
+        mvc.perform(get(BASEURL + "/greeting").accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().string("Hello, World!"));
     }
 
     @Test
     void testGreetingWithRequestParams() throws Exception {
-        mvc
-            .perform(get(BASEURL + "/greeting?query=Foo").accept(APPLICATION_JSON_VALUE))
+        mvc.perform(get(BASEURL + "/greeting?query=Foo").accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().string("Hello, Foo!"));
     }
@@ -62,15 +60,14 @@ class TrailingSlashRedirectFilterTest {
 
     @Test
     void testGreetingTrailingSlashAndRequestQueryParameter() throws Exception {
-        mvc
-            .perform(get(BASEURL + "/greeting/?query=Bar").accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isNotFound());
+        mvc.perform(get(BASEURL + "/greeting/?query=Bar").accept(APPLICATION_JSON_VALUE)).andExpect(
+            status().isNotFound()
+        );
     }
 
     @Test
     void testGreetingTrailingSlash() throws Exception {
-        mvc
-            .perform(get(BASEURL + "/greeting/slash/").accept(APPLICATION_JSON_VALUE))
+        mvc.perform(get(BASEURL + "/greeting/slash/").accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().string("Hello with slash"));
     }

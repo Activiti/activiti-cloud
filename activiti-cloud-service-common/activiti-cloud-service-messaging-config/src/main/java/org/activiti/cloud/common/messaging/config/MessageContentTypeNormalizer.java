@@ -24,9 +24,10 @@ import org.springframework.util.MimeTypeUtils;
 public class MessageContentTypeNormalizer {
 
     public <T> Message<T> normalizeToExpected(Message<T> message, String expectedContentType) {
-        String effectiveExpected = (expectedContentType == null || expectedContentType.isBlank())
-            ? MimeTypeUtils.APPLICATION_JSON_VALUE
-            : expectedContentType;
+        String effectiveExpected =
+            expectedContentType == null || expectedContentType.isBlank()
+                ? MimeTypeUtils.APPLICATION_JSON_VALUE
+                : expectedContentType;
         MimeType expected = MimeType.valueOf(effectiveExpected);
         Object current = message.getHeaders().get(MessageHeaders.CONTENT_TYPE);
         if (current != null && expected.isCompatibleWith(MimeType.valueOf(current.toString()))) {

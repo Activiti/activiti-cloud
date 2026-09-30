@@ -59,9 +59,11 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ProcessInstanceBpmnActivitiesAdminController.class)
 @EnableSpringDataWebSupport
-@Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
-)
+@Import({
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+})
 @WithMockUser
 class ProcessInstanceBpmnActivitiesAdminControllerIT {
 

@@ -92,14 +92,16 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
                         Optional.ofNullable(bindingProperties.getProducer())
                             .filter(ProducerProperties::isPartitioned)
                             .ifPresent(isPartitioned -> {
-                                InterceptableChannel.class.cast(bean).addInterceptor(
-                                    new DefaultPartitioningInterceptor(bindingProperties, beanFactory)
-                                );
+                                InterceptableChannel.class
+                                    .cast(bean)
+                                    .addInterceptor(new DefaultPartitioningInterceptor(bindingProperties, beanFactory));
                             });
 
-                        InterceptableChannel.class.cast(bean).addInterceptor(
-                            new OutboundContentTypeConvertingInterceptor("application/json", messageConverter)
-                        );
+                        InterceptableChannel.class
+                            .cast(bean)
+                            .addInterceptor(
+                                new OutboundContentTypeConvertingInterceptor("application/json", messageConverter)
+                            );
                     });
                 }
 

@@ -25,6 +25,7 @@ import org.activiti.cloud.common.messaging.config.PartitionedChannelGracefulShut
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
+import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.slf4j.Logger;
@@ -101,14 +102,22 @@ public class QueryConsumerAutoConfiguration {
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        IntegrationFlow queryEventsQueueIntegrationFlow
+        IntegrationFlow queryEventsQueueIntegrationFlow,
+        Optional<RecomputeEventCapturer> recomputeEventCapturer,
+        @Value("${activiti.cloud.query.consumer.message-handler.chunk-size:100}") Integer chunkSize
     ) {
+        LOGGER.debug(
+            "Pushed-counts recompute capture is {}",
+            recomputeEventCapturer.isPresent() ? "enabled" : "disabled"
+        );
         return new QueryConsumerMessageHandler(
             eventHandlerContext,
             optimizer,
             entityManager,
             queryEventsQueueIntegrationFlow.getInputChannel()
-        );
+        )
+            .chunkSize(chunkSize)
+            .recomputeEventCapturer(recomputeEventCapturer.orElse(null));
     }
 
     @Bean
@@ -118,8 +127,8 @@ public class QueryConsumerAutoConfiguration {
                 if (message instanceof ErrorMessage errorMessage) {
                     final var exception = errorMessage.getPayload();
                     final var failedMessage =
-                        exception instanceof MessageHandlingException
-                            ? ((MessageHandlingException) exception).getFailedMessage()
+                        exception instanceof MessageHandlingException messageHandlingException
+                            ? messageHandlingException.getFailedMessage()
                             : errorMessage.getOriginalMessage();
 
                     LOGGER.error(

@@ -133,7 +133,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
         try {
             List<User> users = new ArrayList<>();
             String firstGroup = groups.iterator().next();
-            users.addAll(findUsersByGroupName((firstGroup)));
+            users.addAll(findUsersByGroupName(firstGroup));
             groups.forEach(group -> users.retainAll(findUsersByGroupName(group)));
             return users.stream().filter(maybeMatchSearchKey).collect(Collectors.toList());
         } catch (IdentityInvalidGroupException exception) {

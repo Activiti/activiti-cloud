@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.app;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
@@ -34,6 +35,7 @@ public class QueryConsumerMessageHandler
 {
 
     private final MessageChannel queryEventsChannel;
+    private RecomputeEventCapturer recomputeEventCapturer;
 
     public QueryConsumerMessageHandler(
         QueryEventHandlerContext eventHandlerContext,
@@ -46,9 +48,25 @@ public class QueryConsumerMessageHandler
     }
 
     @Override
+    public QueryConsumerMessageHandler chunkSize(int chunkSize) {
+        super.chunkSize(chunkSize);
+
+        return this;
+    }
+
+    public QueryConsumerMessageHandler recomputeEventCapturer(RecomputeEventCapturer recomputeEventCapturer) {
+        this.recomputeEventCapturer = recomputeEventCapturer;
+
+        return this;
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
         beforeCommit(() -> queryEventsChannel.send(message));
+        Optional.ofNullable(recomputeEventCapturer).ifPresent(capturer ->
+            afterCommit(() -> capturer.capture(message.getPayload()))
+        );
         receive(message.getPayload(), message.getHeaders());
     }
 
@@ -57,6 +75,17 @@ public class QueryConsumerMessageHandler
             new TransactionSynchronization() {
                 @Override
                 public void beforeCommit(boolean readOnly) {
+                    action.run();
+                }
+            }
+        );
+    }
+
+    private static void afterCommit(Runnable action) {
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
                     action.run();
                 }
             }

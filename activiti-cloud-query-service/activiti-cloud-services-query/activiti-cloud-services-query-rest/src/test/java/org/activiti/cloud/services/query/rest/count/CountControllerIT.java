@@ -65,15 +65,15 @@ class CountControllerIT {
     private static final String ADMIN_COUNT_ENDPOINT = "/admin/v1/count";
 
     private static final String COUNT_REQUEST_BODY = """
-        {
-          "TASK": [
-            { "requestId": "requestId1", "status": ["ASSIGNED"], "sort": { "field": "createdDate", "direction": "desc", "isProcessVariable": false } },
-            { "requestId": "requestId2", "status": ["CREATED"] }
-          ],
-          "PROCESS_INSTANCE": [
-            { "requestId": "requestId3", "status": ["RUNNING"] }
-          ]
-        }""";
+    {
+      "TASK": [
+        { "requestId": "requestId1", "status": ["ASSIGNED"], "sort": { "field": "createdDate", "direction": "desc", "isProcessVariable": false } },
+        { "requestId": "requestId2", "status": ["CREATED"] }
+      ],
+      "PROCESS_INSTANCE": [
+        { "requestId": "requestId3", "status": ["RUNNING"] }
+      ]
+    }""";
 
     @Autowired
     private WebApplicationContext context;
@@ -178,11 +178,11 @@ class CountControllerIT {
     @Test
     void should_countSingleFilterWithMultipleStatuses() {
         String body = """
-            {
-              "TASK": [
-                { "requestId": "requestId1", "status": ["ASSIGNED", "CREATED"] }
-              ]
-            }""";
+        {
+          "TASK": [
+            { "requestId": "requestId1", "status": ["ASSIGNED", "CREATED"] }
+          ]
+        }""";
 
         given()
             .contentType(MediaType.APPLICATION_JSON)

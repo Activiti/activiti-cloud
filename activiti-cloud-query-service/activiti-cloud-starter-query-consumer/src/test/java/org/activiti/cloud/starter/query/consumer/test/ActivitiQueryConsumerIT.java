@@ -47,7 +47,8 @@ import org.springframework.messaging.support.MessageBuilder;
     classes = QueryConsumerTestApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = {
-        "activiti.cloud.services.oauth2.iam-name=test", "activiti.cloud.query.consumer.shutdown-timeout=30s",
+        "activiti.cloud.services.oauth2.iam-name=test",
+        "activiti.cloud.query.consumer.shutdown-timeout=30s",
     }
 )
 @EnableTestBinder

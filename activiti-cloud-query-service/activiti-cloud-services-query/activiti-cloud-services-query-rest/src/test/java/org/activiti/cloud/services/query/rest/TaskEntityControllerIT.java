@@ -72,14 +72,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(TaskController.class)
-@Import(
-    {
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        CommonExceptionHandlerQuery.class,
-    }
-)
+@Import({
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    CommonExceptionHandlerQuery.class,
+})
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -197,7 +195,8 @@ class TaskEntityControllerIT {
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
-        this.mockMvc.perform(get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
+        this.mockMvc
+            .perform(get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
             //then
             .andExpect(status().isOk());
     }
@@ -217,9 +216,8 @@ class TaskEntityControllerIT {
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
-        MvcResult mvcResult = this.mockMvc.perform(
-                get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE)
-            )
+        MvcResult mvcResult = this.mockMvc
+            .perform(get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -269,9 +267,8 @@ class TaskEntityControllerIT {
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
-        MvcResult mvcResult = this.mockMvc.perform(
-                get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE)
-            )
+        MvcResult mvcResult = this.mockMvc
+            .perform(get("/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
             //then
             .andExpect(status().isOk())
             .andReturn();

@@ -255,7 +255,8 @@ public class FunctionRouterConfiguration {
                                 .stream()
                                 .map(Map.Entry.class::cast)
                                 .filter(entry ->
-                                    Optional.class.cast(entry.getValue())
+                                    Optional.class
+                                        .cast(entry.getValue())
                                         .filter(Exception.class::isInstance)
                                         .isPresent()
                                 )

@@ -49,7 +49,7 @@ public class JwtSecurityContextPrincipalProviderTest {
         assertThat(result)
             .isPresent()
             .containsInstanceOf(JwtAuthenticationToken.class)
-            .contains((jwtAuthenticationToken));
+            .contains(jwtAuthenticationToken);
     }
 
     @Test

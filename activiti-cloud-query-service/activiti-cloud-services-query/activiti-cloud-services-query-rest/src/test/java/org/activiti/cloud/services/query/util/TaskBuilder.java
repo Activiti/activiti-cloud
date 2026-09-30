@@ -164,22 +164,22 @@ public class TaskBuilder {
     }
 
     public TaskEntity buildAndSave() {
-        Set<TaskCandidateUserEntity> candidateUsers = this.candidateUserIds.stream()
+        Set<TaskCandidateUserEntity> candidateUsers = this.candidateUserIds
+            .stream()
             .map(user -> new TaskCandidateUserEntity(task.getId(), user))
             .collect(Collectors.toSet());
         taskCandidateUserRepository.saveAll(candidateUsers);
         task.setTaskCandidateUsers(candidateUsers);
-        Set<TaskCandidateGroupEntity> candidateGroups = this.candidateGroupsIds.stream()
+        Set<TaskCandidateGroupEntity> candidateGroups = this.candidateGroupsIds
+            .stream()
             .map(group -> new TaskCandidateGroupEntity(task.getId(), group))
             .collect(Collectors.toSet());
         taskCandidateGroupRepository.saveAll(candidateGroups);
         task.setTaskCandidateGroups(candidateGroups);
-        task
-            .getVariables()
-            .forEach(variable -> {
-                variable.setTaskId(task.getId());
-                variable.setProcessInstanceId(task.getProcessInstanceId());
-            });
+        task.getVariables().forEach(variable -> {
+            variable.setTaskId(task.getId());
+            variable.setProcessInstanceId(task.getProcessInstanceId());
+        });
         taskVariableRepository.saveAll(task.getVariables());
         if (task.getCreatedDate() == null) {
             task.setCreatedDate(new Date());

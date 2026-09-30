@@ -60,6 +60,11 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-services-query-pushed-counts-relay</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-query</artifactId>
         <version>${project.version}</version>
       </dependency>
