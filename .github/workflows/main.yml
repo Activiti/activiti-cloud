@@ -321,6 +321,7 @@ jobs:
     needs:
       - pre-checks
       - create-tag
+      - scan-image-dirs
       - maven-build-common
       - maven-build
       - maven-build-dependencies-bom
@@ -331,18 +332,8 @@ jobs:
       - name: Check CI results
         if: >-
           ${{
-              contains(needs.maven-build-common.result, 'failure')
-           || contains(needs.maven-build-common.result, 'cancelled')
-           || contains(needs.maven-build.result, 'failure')
-           || contains(needs.maven-build.result, 'cancelled')
-           || contains(needs.maven-build-dependencies-bom.result, 'failure')
-           || contains(needs.maven-build-dependencies-bom.result, 'cancelled')
-           || contains(needs.maven-test.result, 'failure')
-           || contains(needs.maven-test.result, 'cancelled')
-           || contains(needs.sonar.result, 'failure')
-           || contains(needs.sonar.result, 'cancelled')
-           || contains(needs.playwright-tests.result, 'failure')
-           || contains(needs.playwright-tests.result, 'cancelled')
+              contains(needs.*.result, 'failure')
+           || contains(needs.*.result, 'cancelled')
           }}
         run: |
           echo "CI jobs have failed or been cancelled. Exiting ..."
