@@ -1,7 +1,8 @@
 {
   "./activiti-cloud-examples/example-runtime-bundle": {
     "shortName": "example-runtime-bundle",
-    "extraModules": "activiti-cloud-runtime-bundle-service,activiti-cloud-examples/example-runtime-bundle/starter"
+    "extraModules": "activiti-cloud-runtime-bundle-service,activiti-cloud-examples/example-runtime-bundle/starter",
+    "testExtraModules": "activiti-cloud-messages-service/integration-tests,activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-services-identity-basic,activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-runtime-bundle-rest-client,activiti-cloud-runtime-bundle-service/activiti-cloud-starter-runtime-bundle-it"
   },
   "./activiti-cloud-examples/example-cloud-connector": {
     "shortName": "example-cloud-connector",
