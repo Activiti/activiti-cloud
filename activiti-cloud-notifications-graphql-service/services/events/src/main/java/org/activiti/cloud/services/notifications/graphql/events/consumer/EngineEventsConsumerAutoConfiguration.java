@@ -57,12 +57,10 @@ import reactor.core.scheduler.Schedulers;
     name = "spring.activiti.cloud.services.notifications.graphql.events.enabled",
     matchIfMissing = true
 )
-@PropertySources(
-    {
-        @PropertySource(value = "classpath:META-INF/graphql-events.properties"),
-        @PropertySource(value = "classpath:graphql-events.properties", ignoreResourceNotFound = true),
-    }
-)
+@PropertySources({
+    @PropertySource(value = "classpath:META-INF/graphql-events.properties"),
+    @PropertySource(value = "classpath:graphql-events.properties", ignoreResourceNotFound = true),
+})
 public class EngineEventsConsumerAutoConfiguration {
 
     @Configuration

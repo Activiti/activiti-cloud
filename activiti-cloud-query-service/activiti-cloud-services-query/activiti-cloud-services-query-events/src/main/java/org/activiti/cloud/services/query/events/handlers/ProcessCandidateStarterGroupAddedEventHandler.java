@@ -61,8 +61,7 @@ public class ProcessCandidateStarterGroupAddedEventHandler implements QueryEvent
             entityManager.find(
                 ProcessCandidateStarterGroupEntity.class,
                 new ProcessCandidateStarterGroupId(entity.getProcessDefinitionId(), entity.getGroupId())
-            ) !=
-            null
+            ) != null
         );
     }
 }

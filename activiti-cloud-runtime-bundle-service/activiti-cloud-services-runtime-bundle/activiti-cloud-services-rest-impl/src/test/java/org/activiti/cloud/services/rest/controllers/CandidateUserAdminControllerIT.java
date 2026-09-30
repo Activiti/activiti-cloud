@@ -59,20 +59,18 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(CandidateUserAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        RuntimeBundleProperties.class,
-        CloudEventsAutoConfiguration.class,
-        ProcessEngineChannelsConfiguration.class,
-        TaskSamples.class,
-        ActivitiCoreCommonUtilAutoConfiguration.class,
-        ProcessExtensionsAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class,
-        CacheAutoConfiguration.class,
-    }
-)
+@Import({
+    RuntimeBundleProperties.class,
+    CloudEventsAutoConfiguration.class,
+    ProcessEngineChannelsConfiguration.class,
+    TaskSamples.class,
+    ActivitiCoreCommonUtilAutoConfiguration.class,
+    ProcessExtensionsAutoConfiguration.class,
+    ServicesRestWebMvcAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    StreamConfig.class,
+    CacheAutoConfiguration.class,
+})
 class CandidateUserAdminControllerIT {
 
     @Autowired
@@ -122,9 +120,8 @@ class CandidateUserAdminControllerIT {
         List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(
-                get("/admin/v1/tasks/{taskId}/candidate-users", 1).accept(MediaType.APPLICATION_JSON)
-            )
+        MvcResult result = this.mockMvc
+            .perform(get("/admin/v1/tasks/{taskId}/candidate-users", 1).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -141,9 +138,8 @@ class CandidateUserAdminControllerIT {
         List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(
-                get("/admin/v1/tasks/{taskId}/candidate-users", 1).accept(MediaTypes.HAL_JSON_VALUE)
-            )
+        MvcResult result = this.mockMvc
+            .perform(get("/admin/v1/tasks/{taskId}/candidate-users", 1).accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk())
             .andReturn();
 

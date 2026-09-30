@@ -34,14 +34,14 @@ import java.util.stream.IntStream;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.activiti.cloud.services.query.app.filter.FilterOperator;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
+import org.activiti.cloud.services.query.app.filter.VariableType;
+import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
+import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.rest.filter.FilterOperator;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
-import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.activiti.cloud.services.query.util.TaskBuilder;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
@@ -107,15 +107,15 @@ public abstract class AbstractTaskControllerIT {
     void should_return400_whenInvalidSearchParameterIsProvided(boolean taskCountCacheEnabled) {
         setTaskCountCacheEnabled(taskCountCacheEnabled);
         String missingSortField = """
-            {
-                "sort": {
-                    "direction": "ASC",
-                    "isProcessVariable": false,
-                    "processDefinitionKey": null,
-                    "type": "bigdecimal",
-                    "processVariable": false
-                }
-            }""";
+        {
+            "sort": {
+                "direction": "ASC",
+                "isProcessVariable": false,
+                "processDefinitionKey": null,
+                "type": "bigdecimal",
+                "processVariable": false
+            }
+        }""";
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -322,7 +322,11 @@ public abstract class AbstractTaskControllerIT {
     @Test
     void should_returnTasks_filteredById() {
         IntStream.range(0, 3).forEach(i ->
-            queryTestUtils.buildTask().withId("id" + i).withAssignee(CURRENT_USER).buildAndSave()
+            queryTestUtils
+                .buildTask()
+                .withId("id" + i)
+                .withAssignee(CURRENT_USER)
+                .buildAndSave()
         );
 
         TaskSearchRequest request = new TaskSearchRequestBuilder().withId("id0", "id2").build();

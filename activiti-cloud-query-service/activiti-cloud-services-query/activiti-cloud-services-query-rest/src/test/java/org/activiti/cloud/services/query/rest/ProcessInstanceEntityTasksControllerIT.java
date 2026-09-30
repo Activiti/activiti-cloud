@@ -64,9 +64,11 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(ProcessInstanceTasksController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
-)
+@Import({
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+})
 @WithMockUser
 public class ProcessInstanceEntityTasksControllerIT {
 

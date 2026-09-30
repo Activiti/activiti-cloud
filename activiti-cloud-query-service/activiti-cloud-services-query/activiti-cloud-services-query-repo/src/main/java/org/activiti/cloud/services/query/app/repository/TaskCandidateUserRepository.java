@@ -38,6 +38,8 @@ public interface TaskCandidateUserRepository
 {
     Set<TaskCandidateUserEntity> findByTaskIdIn(Collection<String> taskIds);
 
+    Set<TaskCandidateUserEntity> findByTask_ProcessInstanceIdIn(Collection<String> processInstanceIds);
+
     @Override
     default void customize(QuerydslBindings bindings, QTaskCandidateUserEntity root) {
         whitelist(root).apply(bindings);

@@ -25,15 +25,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
-import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
 
 public class ProcessInstanceBuilder {
 

@@ -64,19 +64,17 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        RuntimeBundleProperties.class,
-        CloudEventsAutoConfiguration.class,
-        ProcessEngineChannelsConfiguration.class,
-        ActivitiCoreCommonUtilAutoConfiguration.class,
-        ProcessExtensionsAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class,
-        CacheAutoConfiguration.class,
-    }
-)
+@Import({
+    RuntimeBundleProperties.class,
+    CloudEventsAutoConfiguration.class,
+    ProcessEngineChannelsConfiguration.class,
+    ActivitiCoreCommonUtilAutoConfiguration.class,
+    ProcessExtensionsAutoConfiguration.class,
+    ServicesRestWebMvcAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    StreamConfig.class,
+    CacheAutoConfiguration.class,
+})
 class ProcessInstanceTasksControllerImplIT {
 
     @Autowired
@@ -134,11 +132,13 @@ class ProcessInstanceTasksControllerImplIT {
 
         when(taskRuntime.tasks(any(), any())).thenReturn(tasks);
 
-        this.mockMvc.perform(
-            get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10", 1, 1).accept(
-                MediaTypes.HAL_JSON_VALUE
+        this.mockMvc
+            .perform(
+                get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10", 1, 1).accept(
+                    MediaTypes.HAL_JSON_VALUE
+                )
             )
-        ).andExpect(status().isOk());
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -149,12 +149,14 @@ class ProcessInstanceTasksControllerImplIT {
 
         when(taskRuntime.tasks(any(), any())).thenReturn(taskPage);
 
-        this.mockMvc.perform(
-            get(
-                "/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",
-                task.getProcessInstanceId(),
-                1
-            ).accept(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk());
+        this.mockMvc
+            .perform(
+                get(
+                    "/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",
+                    task.getProcessInstanceId(),
+                    1
+                ).accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk());
     }
 }

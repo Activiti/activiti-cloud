@@ -61,8 +61,7 @@ public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventH
             entityManager.find(
                 ProcessCandidateStarterUserEntity.class,
                 new ProcessCandidateStarterUserId(entity.getProcessDefinitionId(), entity.getUserId())
-            ) !=
-            null
+            ) != null
         );
     }
 }

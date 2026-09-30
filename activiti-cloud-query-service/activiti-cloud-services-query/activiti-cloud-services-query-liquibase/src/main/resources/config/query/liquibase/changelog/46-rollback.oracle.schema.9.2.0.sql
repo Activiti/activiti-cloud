@@ -1,0 +1,6 @@
+BEGIN
+  EXECUTE IMMEDIATE 'DROP INDEX bpmn_activity_activitytype_starteddate_idx';
+EXCEPTION
+  WHEN OTHERS THEN
+    IF SQLCODE != -1418 THEN RAISE; END IF;
+END;

@@ -72,19 +72,17 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(ProcessInstanceVariableAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        RuntimeBundleProperties.class,
-        CloudEventsAutoConfiguration.class,
-        ProcessEngineChannelsConfiguration.class,
-        ActivitiCoreCommonUtilAutoConfiguration.class,
-        ProcessExtensionsAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class,
-        CacheAutoConfiguration.class,
-    }
-)
+@Import({
+    RuntimeBundleProperties.class,
+    CloudEventsAutoConfiguration.class,
+    ProcessEngineChannelsConfiguration.class,
+    ActivitiCoreCommonUtilAutoConfiguration.class,
+    ProcessExtensionsAutoConfiguration.class,
+    ServicesRestWebMvcAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    StreamConfig.class,
+    CacheAutoConfiguration.class,
+})
 class ProcessInstanceVariableAdminControllerImplIT {
 
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
@@ -172,9 +170,11 @@ class ProcessInstanceVariableAdminControllerImplIT {
         );
         given(processAdminRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
-        this.mockMvc.perform(
-            get("/admin/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
-        ).andExpect(status().isOk());
+        this.mockMvc
+            .perform(
+                get("/admin/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -212,18 +212,20 @@ class ProcessInstanceVariableAdminControllerImplIT {
 
     @Test
     void deleteVariables() throws Exception {
-        this.mockMvc.perform(
-            delete("/admin/v1/process-instances/{processInstanceId}/variables", "1")
-                .accept(MediaTypes.HAL_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    mapper.writeValueAsString(
-                        ProcessPayloadBuilder.removeVariables()
-                            .withVariableNames(Arrays.asList("varName1", "varName2"))
-                            .build()
+        this.mockMvc
+            .perform(
+                delete("/admin/v1/process-instances/{processInstanceId}/variables", "1")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder.removeVariables()
+                                .withVariableNames(Arrays.asList("varName1", "varName2"))
+                                .build()
+                        )
                     )
-                )
-        ).andExpect(status().isOk());
+            )
+            .andExpect(status().isOk());
         verify(processAdminRuntime).removeVariables(any());
     }
 }

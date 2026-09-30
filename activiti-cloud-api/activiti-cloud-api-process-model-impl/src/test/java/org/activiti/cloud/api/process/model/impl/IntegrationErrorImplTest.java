@@ -155,8 +155,8 @@ class IntegrationErrorImplTest {
 
     static Stream<Arguments> jsonMessagesProvider() {
         var jsonError = """
-            {"message":"Dmn table notDefined-v2.dmn not valid or not found","severity":"ERROR"}
-            """;
+        {"message":"Dmn table notDefined-v2.dmn not valid or not found","severity":"ERROR"}
+        """;
         return Stream.of(Arguments.of(jsonError, "Error", jsonError), Arguments.of("ERROR", jsonError, jsonError));
     }
 

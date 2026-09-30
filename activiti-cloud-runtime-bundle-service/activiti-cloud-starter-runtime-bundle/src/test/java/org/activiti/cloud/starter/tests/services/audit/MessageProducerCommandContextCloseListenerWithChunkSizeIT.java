@@ -118,7 +118,8 @@ class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
         );
         assertThat(executionContextCaptorValue.getExecution().getProcessInstanceId()).isNotEmpty();
 
-        var result = this.runtimeService.createProcessInstanceQuery()
+        var result = this.runtimeService
+            .createProcessInstanceQuery()
             .processDefinitionKey(processDefinitionKey)
             .singleResult();
         assertThat(result).isNull();

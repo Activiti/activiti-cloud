@@ -1,0 +1,110 @@
+/*
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.activiti.cloud.services.query.app.specification;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import org.activiti.cloud.services.query.app.filter.VariableFilter;
+import org.activiti.cloud.services.query.model.AbstractVariableEntity;
+import org.hibernate.query.sqm.produce.function.FunctionArgumentException;
+
+public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntity>
+    extends VariableSelectionExpressionImpl<R, K>
+    implements VariableValueFilterCondition
+{
+
+    private final VariableFilter filter;
+
+    protected VariableValueFilterConditionImpl(
+        From<R, K> root,
+        Map<Path<String>, String> selectionFilters,
+        Class<?> variableJavaType,
+        VariableFilter filter,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        super(root, selectionFilters, variableJavaType, criteriaBuilder);
+        this.filter = filter;
+    }
+
+    public VariableFilter getFilter() {
+        return filter;
+    }
+
+    @Override
+    public Predicate getPredicate() {
+        return buildValuePredicate(getSelectionExpression());
+    }
+
+    /**
+     * Same value comparison as {@link #getPredicate()}, but applied to the plain extracted value
+     * instead of the {@code max(case when ... end)} aggregate and combined with the selection
+     * predicate, so that the whole condition can live in the {@code WHERE} clause of a correlated
+     * {@code EXISTS} subquery where no {@code GROUP BY} is in place.
+     */
+    @Override
+    public Predicate getSubqueryPredicate() {
+        return criteriaBuilder.and(getSelectionPredicate(), buildValuePredicate(getExtractedValue()));
+    }
+
+    private Predicate buildValuePredicate(Expression valueExpression) {
+        try {
+            return switch (filter.operator()) {
+                case EQUALS -> criteriaBuilder.equal(valueExpression, getConvertedFilterValue());
+                case NOT_EQUALS -> criteriaBuilder.notEqual(valueExpression, getConvertedFilterValue());
+                case GREATER_THAN -> criteriaBuilder.greaterThan(valueExpression, getConvertedFilterValue());
+                case GREATER_THAN_OR_EQUAL -> criteriaBuilder.greaterThanOrEqualTo(
+                    valueExpression,
+                    getConvertedFilterValue()
+                );
+                case LESS_THAN -> criteriaBuilder.lessThan(valueExpression, getConvertedFilterValue());
+                case LESS_THAN_OR_EQUAL -> criteriaBuilder.lessThanOrEqualTo(
+                    valueExpression,
+                    getConvertedFilterValue()
+                );
+                case LIKE -> criteriaBuilder.like(
+                    criteriaBuilder.lower(valueExpression),
+                    "%" + filter.value().toLowerCase() + "%"
+                );
+            };
+        } catch (FunctionArgumentException | IllegalArgumentException e) {
+            throw new IllegalFilterException(filter.type(), filter.operator(), filter.value(), e);
+        }
+    }
+
+    private Expression getConvertedFilterValue() {
+        if (variableJavaType == Boolean.class) {
+            return criteriaBuilder.literal(Boolean.parseBoolean(filter.value()) ? 1 : 0);
+        }
+        if (variableJavaType == BigDecimal.class || variableJavaType == Integer.class) {
+            return criteriaBuilder.literal(new BigDecimal(filter.value()));
+        }
+        if (variableJavaType == LocalDateTime.class) {
+            return criteriaBuilder.literal(OffsetDateTime.parse(filter.value()));
+        }
+        if (variableJavaType == LocalDate.class) {
+            return criteriaBuilder.literal(LocalDate.parse(filter.value()));
+        }
+        return criteriaBuilder.literal(filter.value());
+    }
+}

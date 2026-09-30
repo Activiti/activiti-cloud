@@ -276,12 +276,12 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .get();
 
             var document = """
-                subscription($appName: String!, $eventTypes: [EngineEventType!]) {
-                  engineEvents(appName: [$appName], eventType: $eventTypes) {
-                    processInstanceId
-                    eventType
-                  }
-                }""";
+            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+              engineEvents(appName: [$appName], eventType: $eventTypes) {
+                processInstanceId
+                eventType
+              }
+            }""";
 
             CloudProcessCreatedEvent event1 = new CloudProcessCreatedEventImpl() {
                 {
@@ -350,12 +350,12 @@ class ActivitiGraphQLWsNativeStarterIT {
             Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app").get();
 
             var document = """
-                subscription($appName: String!) {
-                  engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) {
-                    processDefinitionKey
-                    eventType
-                  }
-                }""";
+            subscription($appName: String!) {
+              engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) {
+                processDefinitionKey
+                eventType
+              }
+            }""";
 
             CloudProcessDeployedEvent event1 = new CloudProcessDeployedEventImpl(
                 "id",
@@ -402,13 +402,13 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .get();
 
             var document = """
-                subscription($appName: String!, $eventType: EngineEventType!) {
-                  engineEvents(appName: [$appName], eventType: [$eventType]) {
-                    processInstanceId
-                    processDefinitionId
-                    eventType
-                  }
-                }""";
+            subscription($appName: String!, $eventType: EngineEventType!) {
+              engineEvents(appName: [$appName], eventType: [$eventType]) {
+                processInstanceId
+                processDefinitionId
+                eventType
+              }
+            }""";
 
             CloudBPMNSignalReceivedEvent event1 = new CloudBPMNSignalReceivedEventImpl(
                 "id",
@@ -462,13 +462,13 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .get();
 
             var document = """
-                subscription($appName: String!, $eventType: EngineEventType!) {
-                  engineEvents(appName: [$appName], eventType: [$eventType]) {
-                    processInstanceId
-                    processDefinitionId
-                    eventType
-                  }
-                }""";
+            subscription($appName: String!, $eventType: EngineEventType!) {
+              engineEvents(appName: [$appName], eventType: [$eventType]) {
+                processInstanceId
+                processDefinitionId
+                eventType
+              }
+            }""";
 
             CloudBPMNSignalReceivedEvent event1 = new CloudBPMNSignalReceivedEventImpl(
                 "id",
@@ -522,14 +522,14 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .get();
 
             var document = """
-                subscription($appName: String!, $eventTypes: [EngineEventType!]) {
-                  engineEvents(appName: [$appName], eventType: $eventTypes) {
-                    processInstanceId
-                    processDefinitionId
-                    entity
-                    eventType
-                  }
-                }""";
+            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+              engineEvents(appName: [$appName], eventType: $eventTypes) {
+                processInstanceId
+                processDefinitionId
+                entity
+                eventType
+              }
+            }""";
 
             var bpmnTimer = new BPMNTimerImpl("timerId");
             bpmnTimer.setTimerPayload(new TimerPayload());
@@ -738,13 +738,13 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .get();
 
             var document = """
-                subscription($appName: String!, $eventTypes: [EngineEventType!]) {
-                  engineEvents(appName: [$appName], eventType: $eventTypes) {
-                    processInstanceId
-                    processDefinitionId
-                    eventType
-                  }
-                }""";
+            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+              engineEvents(appName: [$appName], eventType: $eventTypes) {
+                processInstanceId
+                processDefinitionId
+                eventType
+              }
+            }""";
 
             var bpmnMessage = new BPMNMessageImpl("messageId");
             CloudBPMNMessageEvent event1 = new CloudBPMNMessageSentEventImpl(
@@ -851,20 +851,16 @@ class ActivitiGraphQLWsNativeStarterIT {
 
         private static Predicate<List> messageMatches(List<Map<String, Object>> messages) {
             return m ->
-                messages
-                    .stream()
-                    .allMatch(message ->
-                        m
-                            .stream()
-                            .anyMatch(o -> {
-                                var map = ((Map) o);
-                                return (
-                                    map.get("processInstanceId").equals(message.get("processInstanceId")) &&
-                                    map.get("processDefinitionId").equals(message.get("processDefinitionId")) &&
-                                    map.get("eventType").equals(message.get("eventType"))
-                                );
-                            })
-                    );
+                messages.stream().allMatch(message ->
+                    m.stream().anyMatch(o -> {
+                        var map = (Map) o;
+                        return (
+                            map.get("processInstanceId").equals(message.get("processInstanceId")) &&
+                            map.get("processDefinitionId").equals(message.get("processDefinitionId")) &&
+                            map.get("eventType").equals(message.get("eventType"))
+                        );
+                    })
+                );
         }
 
         @Test
@@ -876,13 +872,13 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .get();
 
             var document = """
-                subscription($appName: String!, $eventTypes: [EngineEventType!], $actor: String!) {
-                  engineEvents(appName: [$appName], eventType: $eventTypes, actor: [$actor]) {
-                    processInstanceId
-                    eventType
-                    actor
-                  }
-                }""";
+            subscription($appName: String!, $eventTypes: [EngineEventType!], $actor: String!) {
+              engineEvents(appName: [$appName], eventType: $eventTypes, actor: [$actor]) {
+                processInstanceId
+                eventType
+                actor
+              }
+            }""";
 
             CloudProcessCompletedEvent event1 = new CloudProcessCompletedEventImpl() {
                 {

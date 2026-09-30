@@ -28,6 +28,7 @@ updates:
     - "/.github/actions/playwright-run"
     - "/.github/actions/prepare-preview-for-playwright"
     - "/.github/actions/setup-env-for-broker"
+    - "/.github/actions/close-orphaned-preview-prs"
     schedule:
       interval: "weekly"
     cooldown:

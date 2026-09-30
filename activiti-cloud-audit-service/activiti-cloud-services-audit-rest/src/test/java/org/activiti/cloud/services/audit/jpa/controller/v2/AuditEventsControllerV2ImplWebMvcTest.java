@@ -69,16 +69,14 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(AuditEventsControllerV2Impl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    {
-        EventRepresentationModelAssemblerConfiguration.class,
-        AuditAPIAutoConfiguration.class,
-        AuditJPAAutoConfiguration.class,
-        AuditJPASecurityAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class,
-        AuditEventsService.class,
-    }
-)
+@Import({
+    EventRepresentationModelAssemblerConfiguration.class,
+    AuditAPIAutoConfiguration.class,
+    AuditJPAAutoConfiguration.class,
+    AuditJPASecurityAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+    AuditEventsService.class,
+})
 class AuditEventsControllerV2ImplWebMvcTest {
 
     @MockitoBean

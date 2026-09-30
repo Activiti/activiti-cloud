@@ -79,7 +79,9 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
             .or(
                 taskEntity.processInstanceId.in(
                     //user is Involved in one of the tasks of the Process
-                    JPAExpressions.select(taskEntity.processInstanceId).from(taskEntity).where(defaultRestrictions)
+                    JPAExpressions.select(taskEntity.processInstanceId)
+                        .from(taskEntity)
+                        .where(defaultRestrictions)
                 )
             )
             .or(defaultRestrictions); //apply default conditions

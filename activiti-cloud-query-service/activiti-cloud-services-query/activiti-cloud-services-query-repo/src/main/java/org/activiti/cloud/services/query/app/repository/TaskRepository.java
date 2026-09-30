@@ -21,13 +21,16 @@ import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface TaskRepository
     extends
@@ -39,6 +42,24 @@ public interface TaskRepository
         CrudRepository<TaskEntity, String>
 {
     List<TaskEntity> findByProcessInstanceIdIn(Collection<String> processInstanceIds);
+
+    // Assignees with no task in the given status are absent from the result (their count is zero);
+    // mirrors the predicate the REST count endpoint applies for {status:[ASSIGNED], assignee:[user]}.
+    @Query(
+        "select t.assignee as assignee, count(t) as taskCount " +
+            "from Task t " +
+            "where t.assignee in :assignees and t.status = :status " +
+            "group by t.assignee"
+    )
+    List<AssigneeCount> countGroupedByAssignee(
+        @Param("assignees") Collection<String> assignees,
+        @Param("status") Task.TaskStatus status
+    );
+
+    interface AssigneeCount {
+        String getAssignee();
+        long getTaskCount();
+    }
 
     @Override
     default void customize(QuerydslBindings bindings, QTaskEntity root) {

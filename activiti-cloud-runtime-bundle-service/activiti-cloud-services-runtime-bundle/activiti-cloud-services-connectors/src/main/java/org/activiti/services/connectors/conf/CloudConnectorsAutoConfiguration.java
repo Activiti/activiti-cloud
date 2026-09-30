@@ -15,6 +15,7 @@
  */
 package org.activiti.services.connectors.conf;
 
+import java.time.Clock;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.ConnectorIncidentEvent;
@@ -46,9 +47,11 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEvent
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -60,6 +63,7 @@ import org.springframework.resilience.annotation.EnableResilientMethods;
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
 @PropertySource("classpath:config/integration-result-stream.properties")
 @EnableResilientMethods
+@EnableConfigurationProperties(OrphanedIntegrationRecoveryProperties.class)
 public class CloudConnectorsAutoConfiguration {
 
     private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
@@ -160,9 +164,15 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean
     public IntegrationRequestBuilder integrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        FunctionBindingConfiguration.BindingResolver bindingResolver
+        FunctionBindingConfiguration.BindingResolver bindingResolver,
+        OrphanedIntegrationRecoveryProperties orphanedIntegrationRecoveryProperties
     ) {
-        return new IntegrationRequestBuilder(runtimeBundleInfoAppender, bindingResolver);
+        return new IntegrationRequestBuilder(
+            runtimeBundleInfoAppender,
+            bindingResolver,
+            orphanedIntegrationRecoveryProperties,
+            Clock.systemUTC()
+        );
     }
 
     @Bean

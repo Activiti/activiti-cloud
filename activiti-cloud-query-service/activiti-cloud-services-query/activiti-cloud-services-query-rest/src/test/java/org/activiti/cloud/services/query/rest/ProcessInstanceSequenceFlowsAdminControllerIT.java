@@ -58,9 +58,11 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(ProcessInstanceSequenceFlowsAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
-)
+@Import({
+    QueryRestWebMvcAutoConfiguration.class,
+    CommonModelAutoConfiguration.class,
+    AlfrescoWebAutoConfiguration.class,
+})
 @WithMockUser
 class ProcessInstanceSequenceFlowsAdminControllerIT {
 

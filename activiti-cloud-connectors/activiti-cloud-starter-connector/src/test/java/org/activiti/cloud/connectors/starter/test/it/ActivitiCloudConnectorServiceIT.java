@@ -320,18 +320,18 @@ public class ActivitiCloudConnectorServiceIT {
     ) {
         //given
         String idpPayload = """
-            {
-              "id": "da504fe5-479d-11f1-95ff-4afa9ca877cc",
-              %s
-              "processInstanceId": "d992cc3f-479d-11f1-95ff-4afa9ca877cc",
-              "processDefinitionId": "Process_1:2:e9a4af07",
-              "processDefinitionKey": "Process_1",
-              "processDefinitionVersion": 2,
-              "clientId": "hxpIdpConnector",
-              "clientType": "ServiceTask",
-              "connectorType": "my-classification.CLASSIFICATION"
-            }
-            """.formatted(variablesFragment);
+        {
+          "id": "da504fe5-479d-11f1-95ff-4afa9ca877cc",
+          %s
+          "processInstanceId": "d992cc3f-479d-11f1-95ff-4afa9ca877cc",
+          "processDefinitionId": "Process_1:2:e9a4af07",
+          "processDefinitionKey": "Process_1",
+          "processDefinitionVersion": 2,
+          "clientId": "hxpIdpConnector",
+          "clientType": "ServiceTask",
+          "connectorType": "my-classification.CLASSIFICATION"
+        }
+        """.formatted(variablesFragment);
 
         //when
         CloudIntegrationContextImpl context = objectMapper.readValue(
