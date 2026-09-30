@@ -72,19 +72,30 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
         String userId = securityManager.getAuthenticatedUserId();
 
-        Predicate defaultRestrictions = restrictTaskQuery(new BooleanBuilder());
+        //restrictions directly applicable to the task being checked
+        Predicate currentTaskRestrictions = restrictTaskQuery(new BooleanBuilder());
 
-        BooleanExpression userIsInvolved = processInstanceEntity.initiator
-            .eq(userId) //is Initiator
-            .or(
-                taskEntity.processInstanceId.in(
-                    //user is Involved in one of the tasks of the Process
-                    JPAExpressions.select(taskEntity.processInstanceId)
-                        .from(taskEntity)
-                        .where(defaultRestrictions)
-                )
-            )
-            .or(defaultRestrictions); //apply default conditions
+        //a distinct alias is required so the subquery below can be correlated (via
+        //processInstanceId) to the outer task instead of computing the global set of
+        //process instance ids that contain any task visible to the user, which forces
+        //the database to materialize/hash every accessible process instance up front
+        QTaskEntity candidateTask = new QTaskEntity("candidateTask");
+        Predicate candidateTaskRestrictions = restrictTaskQuery(new BooleanBuilder(), candidateTask);
+
+        BooleanExpression isInitiator = processInstanceEntity.initiator.eq(userId);
+
+        //user is involved because another task of the same process instance is visible to them;
+        //correlating on processInstanceId keeps the subquery scoped to the current process instance
+        //instead of scanning/aggregating every process instance visible to the user
+        BooleanExpression hasVisibleTaskInSameProcess = JPAExpressions
+            .selectOne()
+            .from(candidateTask)
+            .where(candidateTask.processInstanceId.eq(taskEntity.processInstanceId).and(candidateTaskRestrictions))
+            .exists();
+
+        BooleanExpression userIsInvolved = isInitiator
+            .or(hasVisibleTaskInSameProcess)
+            .or(currentTaskRestrictions); //apply default conditions directly to the current task
 
         return addAndConditionToPredicate(predicate, userIsInvolved);
     }
