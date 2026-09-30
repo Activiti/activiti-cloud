@@ -22,23 +22,20 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-import org.hibernate.dialect.PostgreSQLDialect;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 public abstract class BaseBPMNActivityEventHandler {
 
     protected final EntityManager entityManager;
-    private final boolean postgres;
+    private final TransactionTemplate requiresNewTransactionTemplate;
 
-    public BaseBPMNActivityEventHandler(EntityManager entityManager) {
+    public BaseBPMNActivityEventHandler(EntityManager entityManager, PlatformTransactionManager transactionManager) {
         this.entityManager = entityManager;
-        this.postgres =
-            entityManager
-                    .getEntityManagerFactory()
-                    .unwrap(SessionFactoryImplementor.class)
-                    .getJdbcServices()
-                    .getDialect() instanceof
-                PostgreSQLDialect;
+        this.requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
+        this.requiresNewTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     protected BaseBPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
@@ -48,30 +45,40 @@ public abstract class BaseBPMNActivityEventHandler {
 
         String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
 
-        if (postgres) {
-            acquireCrossPodLock(pkId);
-        }
+        Class<? extends BaseBPMNActivityEntity> entityClass = "serviceTask".equals(bpmnActivity.getActivityType())
+            ? ServiceTaskEntity.class
+            : BPMNActivityEntity.class;
 
-        BaseBPMNActivityEntity bpmnActivityEntity = null;
-
-        if ("serviceTask".equals(bpmnActivity.getActivityType())) {
-            bpmnActivityEntity = entityManager.find(ServiceTaskEntity.class, pkId);
-        } else {
-            bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class, pkId);
-        }
+        BaseBPMNActivityEntity bpmnActivityEntity = entityManager.find(entityClass, pkId);
 
         if (bpmnActivityEntity == null) {
-            bpmnActivityEntity = entityManager.merge(createBpmnActivityEntity(event));
+            claimRow(event);
+            bpmnActivityEntity = entityManager.find(entityClass, pkId);
         }
 
         return bpmnActivityEntity;
     }
 
-    private void acquireCrossPodLock(String pkId) {
-        entityManager
-            .createNativeQuery("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))")
-            .setParameter("key", pkId)
-            .getSingleResult();
+    private void claimRow(CloudRuntimeEvent<?, ?> event) {
+        try {
+            requiresNewTransactionTemplate.executeWithoutResult(status -> {
+                entityManager.persist(createBpmnActivityEntity(event));
+                entityManager.flush();
+            });
+        } catch (RuntimeException ex) {
+            if (!isConstraintViolation(ex)) {
+                throw ex;
+            }
+        }
+    }
+
+    private static boolean isConstraintViolation(Throwable ex) {
+        for (Throwable current = ex; current != null; current = current.getCause()) {
+            if (current instanceof ConstraintViolationException) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {

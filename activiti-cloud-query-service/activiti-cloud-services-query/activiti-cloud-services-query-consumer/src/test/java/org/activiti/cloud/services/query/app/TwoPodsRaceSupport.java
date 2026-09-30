@@ -114,9 +114,9 @@ final class TwoPodsRaceSupport {
 
             QueryEventHandlerContext handlerContext = new QueryEventHandlerContext(
                 Set.of(
-                    new BPMNActivityStartedEventHandler(entityManager),
-                    new BPMNActivityCompletedEventHandler(entityManager),
-                    new BPMNActivityCancelledEventHandler(entityManager)
+                    new BPMNActivityStartedEventHandler(entityManager, transactionManager),
+                    new BPMNActivityCompletedEventHandler(entityManager, transactionManager),
+                    new BPMNActivityCancelledEventHandler(entityManager, transactionManager)
                 )
             );
             QueryEventHandlerContextOptimizer optimizer = new QueryEventHandlerContextOptimizer(entityManager);

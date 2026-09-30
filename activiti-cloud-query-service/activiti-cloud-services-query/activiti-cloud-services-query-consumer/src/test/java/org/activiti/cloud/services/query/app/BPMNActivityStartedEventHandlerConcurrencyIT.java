@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.app;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -38,6 +37,10 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -91,27 +94,26 @@ class BPMNActivityStartedEventHandlerConcurrencyIT {
         String executionId = UUID.randomUUID().toString();
         String conflictingId = processInstanceId + ":" + elementId + ":" + executionId;
 
+        JpaTransactionManager transactionManager = new JpaTransactionManager(sessionFactory);
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        EntityManager entityManager = SharedEntityManagerCreator.createSharedEntityManager(sessionFactory);
+        BPMNActivityStartedEventHandler handler = new BPMNActivityStartedEventHandler(
+            entityManager,
+            transactionManager
+        );
+
         ExecutorService pool = Executors.newFixedThreadPool(2);
 
         Callable<Outcome> raceParticipant = () -> {
-            EntityManager entityManager = sessionFactory.createEntityManager();
-            EntityTransaction tx = entityManager.getTransaction();
             try {
-                tx.begin();
-
-                BPMNActivityStartedEventHandler handler = new BPMNActivityStartedEventHandler(entityManager);
-                handler.handle(startedEvent(processInstanceId, elementId, executionId));
-
-                entityManager.flush();
-                tx.commit();
+                transactionTemplate.executeWithoutResult(status -> {
+                    handler.handle(startedEvent(processInstanceId, elementId, executionId));
+                    entityManager.flush();
+                });
                 return Outcome.ok();
             } catch (Exception ex) {
-                if (tx.isActive()) {
-                    tx.rollback();
-                }
                 return Outcome.failure(ex);
-            } finally {
-                entityManager.close();
             }
         };
 
