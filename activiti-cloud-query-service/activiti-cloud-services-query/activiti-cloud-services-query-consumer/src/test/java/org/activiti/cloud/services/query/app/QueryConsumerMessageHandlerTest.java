@@ -58,17 +58,9 @@ public class QueryConsumerMessageHandlerTest {
     @Mock
     private MessageChannel queryEventsChannel;
 
-    @Mock
-    private RecomputeEventCapturer recomputeEventCapturer;
-
     @BeforeEach
     void setUp() {
-        consumer = new QueryConsumerMessageHandler(
-            eventHandlerContext,
-            optimizer,
-            entityManager,
-            queryEventsChannel
-        ).recomputeEventCapturer(recomputeEventCapturer);
+        consumer = new QueryConsumerMessageHandler(eventHandlerContext, optimizer, entityManager, queryEventsChannel);
     }
 
     @Test
@@ -93,7 +85,6 @@ public class QueryConsumerMessageHandlerTest {
         verify(entityManager).flush();
         verify(entityManager).clear();
         verify(queryEventsChannel).send(message);
-        verify(recomputeEventCapturer).capture(events);
     }
 
     @Test
@@ -118,7 +109,6 @@ public class QueryConsumerMessageHandlerTest {
         verify(entityManager, never()).flush();
         verify(entityManager).clear();
         verify(queryEventsChannel, never()).send(any(Message.class));
-        verify(recomputeEventCapturer, never()).capture(any());
     }
 
     @Test
@@ -148,20 +138,5 @@ public class QueryConsumerMessageHandlerTest {
         verify(entityManager).flush();
         verify(entityManager).clear();
         verify(queryEventsChannel, never()).send(any(Message.class));
-        verify(recomputeEventCapturer, never()).capture(any());
-    }
-
-    @Test
-    void handleMessageShouldSucceed_whenRecomputeEventCapturerIsAbsent() {
-        consumer.recomputeEventCapturer(null);
-        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
-        List<CloudRuntimeEvent<?, ?>> events = List.of(processStartedEvent);
-        final var message = MessageBuilder.withPayload(events).build();
-        when(optimizer.optimize(events)).thenReturn(events);
-
-        new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx -> consumer.accept(message));
-
-        verify(queryEventsChannel).send(message);
-        verify(recomputeEventCapturer, never()).capture(any());
     }
 }

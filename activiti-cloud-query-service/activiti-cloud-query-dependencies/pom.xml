@@ -60,7 +60,7 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-services-query-pushed-counts-relay</artifactId>
+        <artifactId>activiti-cloud-services-query-pushed-counts</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

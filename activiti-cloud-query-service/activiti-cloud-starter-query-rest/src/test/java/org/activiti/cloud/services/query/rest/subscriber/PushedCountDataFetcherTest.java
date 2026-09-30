@@ -255,9 +255,9 @@ class PushedCountDataFetcherTest {
         verify(subscriberRegistry).register("alice", Set.of("eng"), "session-1", NOW);
 
         assignedTasksDisposable.dispose();
-        verify(subscriberRegistry, never()).unregister(any(), any(), any());
+        verify(subscriberRegistry, never()).unregister(any(), any());
 
         queuedTasksDisposable.dispose();
-        verify(subscriberRegistry).unregister("alice", "session-1", NOW);
+        verify(subscriberRegistry).unregister("alice", "session-1");
     }
 }
