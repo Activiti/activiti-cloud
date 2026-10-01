@@ -48,6 +48,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @EnableAutoConfiguration
 class RestrictTaskEntityQueryIT {
 
+    private static final String OTHER_USER = "someoneElse";
+
     @Autowired
     private TaskRepository taskRepository;
 
@@ -455,12 +457,6 @@ class RestrictTaskEntityQueryIT {
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
 
-    /*
-     * The following tests exercise the same call path used by TaskControllerHelper.canUserViewTask(...)
-     * for a specific task (existsInProcessInstanceScope), which is where the correlated EXISTS subquery
-     * replaces the previous global process-instance IN subquery.
-     */
-
     private ProcessInstanceEntity createProcessInstance(String id, String initiator) {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId(id);
@@ -490,8 +486,7 @@ class RestrictTaskEntityQueryIT {
     @Test
     void shouldGrantAccessWhenUserIsProcessInitiator() {
         createProcessInstance("pi-initiator", "initiatorUser");
-        //the current task itself is not directly visible to initiatorUser
-        createTask("t-initiator", "pi-initiator", "someoneElse", null);
+        createTask("t-initiator", "pi-initiator", OTHER_USER, null);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("initiatorUser");
 
@@ -500,7 +495,7 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldGrantAccessWhenUserIsCurrentTaskAssignee() {
-        createProcessInstance("pi-assignee", "someoneElse");
+        createProcessInstance("pi-assignee", OTHER_USER);
         createTask("t-assignee", "pi-assignee", "testuser", null);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -510,8 +505,8 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldGrantAccessWhenUserIsCurrentTaskOwner() {
-        createProcessInstance("pi-owner", "someoneElse");
-        createTask("t-owner", "pi-owner", "someoneElse", "testuser");
+        createProcessInstance("pi-owner", OTHER_USER);
+        createTask("t-owner", "pi-owner", OTHER_USER, "testuser");
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
@@ -520,7 +515,7 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldGrantAccessWhenUserIsCandidateUserOfCurrentTask() {
-        createProcessInstance("pi-candidate-user", "someoneElse");
+        createProcessInstance("pi-candidate-user", OTHER_USER);
         createTask("t-candidate-user", "pi-candidate-user", null, null);
         taskCandidateUserRepository.save(new TaskCandidateUserEntity("t-candidate-user", "testuser"));
 
@@ -531,7 +526,7 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldGrantAccessWhenUserBelongsToCandidateGroupOfCurrentTask() {
-        createProcessInstance("pi-candidate-group", "someoneElse");
+        createProcessInstance("pi-candidate-group", OTHER_USER);
         createTask("t-candidate-group", "pi-candidate-group", null, null);
         taskCandidateGroupRepository.save(new TaskCandidateGroupEntity("t-candidate-group", "hr"));
 
@@ -543,10 +538,8 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldGrantAccessWhenAnotherVisibleTaskExistsInSameProcessInstance() {
-        createProcessInstance("pi-same-process", "someoneElse");
-        //current task is not directly visible to testuser
-        createTask("t-current", "pi-same-process", "someoneElse", null);
-        //a different task in the same process instance is visible to testuser
+        createProcessInstance("pi-same-process", OTHER_USER);
+        createTask("t-current", "pi-same-process", OTHER_USER, null);
         TaskEntity visibleTask = createTask("t-visible", "pi-same-process", null, null);
         taskCandidateUserRepository.save(new TaskCandidateUserEntity(visibleTask.getId(), "testuser"));
 
@@ -557,11 +550,9 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldNotGrantAccessWhenVisibleTaskExistsOnlyInDifferentProcessInstance() {
-        createProcessInstance("pi-a", "someoneElse");
-        createProcessInstance("pi-b", "someoneElse");
-        //current task belongs to pi-a and is not directly visible to testuser
-        createTask("t-current-2", "pi-a", "someoneElse", null);
-        //visible task belongs to a different process instance (pi-b)
+        createProcessInstance("pi-a", OTHER_USER);
+        createProcessInstance("pi-b", OTHER_USER);
+        createTask("t-current-2", "pi-a", OTHER_USER, null);
         TaskEntity visibleTaskInOtherProcess = createTask("t-visible-other-process", "pi-b", null, null);
         taskCandidateUserRepository.save(new TaskCandidateUserEntity(visibleTaskInOtherProcess.getId(), "testuser"));
 
@@ -572,7 +563,7 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldGrantAccessToUnassignedTaskWithNoCandidates() {
-        createProcessInstance("pi-no-candidates", "someoneElse");
+        createProcessInstance("pi-no-candidates", OTHER_USER);
         createTask("t-no-candidates", "pi-no-candidates", null, null);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -582,8 +573,8 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldNotGrantAccessWhenTaskNotVisibleToUser() {
-        createProcessInstance("pi-not-visible", "someoneElse");
-        createTask("t-not-visible", "pi-not-visible", "someoneElse", "someoneElse");
+        createProcessInstance("pi-not-visible", OTHER_USER);
+        createTask("t-not-visible", "pi-not-visible", OTHER_USER, OTHER_USER);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
@@ -592,7 +583,6 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldGrantAccessToStandaloneTaskWhenDirectlyVisible() {
-        //standalone task: no processInstanceId
         createTask("t-standalone-visible", null, null, null);
         taskCandidateUserRepository.save(new TaskCandidateUserEntity("t-standalone-visible", "testuser"));
 
@@ -603,10 +593,7 @@ class RestrictTaskEntityQueryIT {
 
     @Test
     void shouldNotConnectStandaloneTasksViaNullProcessInstanceId() {
-        //current standalone task is not directly visible to testuser
-        createTask("t-standalone-current", null, "someoneElse", null);
-        //another standalone task (also null processInstanceId) is visible to testuser,
-        //but must NOT grant access to an unrelated standalone task
+        createTask("t-standalone-current", null, OTHER_USER, null);
         TaskEntity otherStandaloneTask = createTask("t-standalone-other", null, null, null);
         taskCandidateUserRepository.save(new TaskCandidateUserEntity(otherStandaloneTask.getId(), "testuser"));
 
@@ -615,12 +602,6 @@ class RestrictTaskEntityQueryIT {
         assertThat(canUserViewTask("t-standalone-current")).isFalse();
     }
 
-    /*
-     * Behavioral tests above already cover the authorization semantics; this test is a lower-priority,
-     * implementation-detail regression guard confirming the involved-user branch is generated as a
-     * correlated EXISTS instead of the previous global process-instance IN (select ...) subquery. It is
-     * expected to require updating if the predicate construction or the QueryDSL serialization format changes.
-     */
     @Test
     void shouldGenerateCorrelatedExistsSubqueryInsteadOfGlobalInSubquery() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
