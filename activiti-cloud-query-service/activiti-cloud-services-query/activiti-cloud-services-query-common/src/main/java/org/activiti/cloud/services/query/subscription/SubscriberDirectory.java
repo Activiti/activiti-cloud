@@ -28,5 +28,7 @@ public interface SubscriberDirectory {
 
     Set<String> watchedUserIds();
 
-    int size();
+    default int size() {
+        return watchedUserIds().size();
+    }
 }

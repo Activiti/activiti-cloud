@@ -137,14 +137,16 @@ public final class PushedCountsRecomputeBuffer {
 
     /**
      * Re-adds a drained window's identities after a failed flush, so a transient failure loses
-     * nothing - unless the buffer is already at capacity, in which case the whole window is
-     * dropped rather than pushing further past the hard cap.
+     * nothing - unless merging would push the buffer past the hard cap, in which case the whole
+     * window is dropped instead.
      */
     public synchronized void mergeBack(PushedCountsRecomputeWindow window, Instant at) {
         if (window.isEmpty()) {
             return;
         }
-        if (atCapacity()) {
+        int mergedSize =
+            unionSize(taskIds, window.taskIds()) + unionSize(processInstanceIds, window.processInstanceIds());
+        if (mergedSize > hardCap) {
             LOGGER.warn("Recompute buffer at hard cap ({}); dropping a failed window on merge-back", hardCap);
             return;
         }
@@ -158,6 +160,13 @@ public final class PushedCountsRecomputeBuffer {
 
     private boolean atCapacity() {
         return size() >= hardCap;
+    }
+
+    /** The size the union of {@code current} and {@code additional} would have, without mutating either. */
+    private static int unionSize(Set<String> current, Set<String> additional) {
+        Set<String> union = new HashSet<>(current);
+        union.addAll(additional);
+        return union.size();
     }
 
     private void markTouch(Instant at) {

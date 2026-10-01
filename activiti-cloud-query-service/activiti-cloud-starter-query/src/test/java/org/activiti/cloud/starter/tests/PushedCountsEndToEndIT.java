@@ -159,33 +159,33 @@ class PushedCountsEndToEndIT {
         private static final String GRACE = "pushed-counts-e2e-grace";
 
         @Autowired
-        private MyProducer producer;
+        private MyProducer hardCapProducer;
 
         @Autowired
-        private SubscriberRegistry subscriberRegistry;
+        private SubscriberRegistry hardCapSubscriberRegistry;
 
         @Autowired
-        private Flux<CountChangedMessage> pushedCountsFlux;
+        private Flux<CountChangedMessage> hardCapPushedCountsFlux;
 
-        private final CopyOnWriteArrayList<CountChangedMessage> received = new CopyOnWriteArrayList<>();
-        private Disposable subscription;
+        private final CopyOnWriteArrayList<CountChangedMessage> hardCapReceived = new CopyOnWriteArrayList<>();
+        private Disposable hardCapSubscription;
 
         @BeforeEach
         void subscribe() {
-            subscription = pushedCountsFlux.subscribe(received::add);
+            hardCapSubscription = hardCapPushedCountsFlux.subscribe(hardCapReceived::add);
         }
 
         @AfterEach
         void tearDown() {
-            subscription.dispose();
-            subscriberRegistry.unregister(FRANK, "test-session");
-            subscriberRegistry.unregister(GRACE, "test-session");
+            hardCapSubscription.dispose();
+            hardCapSubscriberRegistry.unregister(FRANK, "test-session");
+            hardCapSubscriberRegistry.unregister(GRACE, "test-session");
         }
 
         @Test
         void touchingMoreTasksThanTheHardCap_dropsTheOverflow_soOnlyTheFirstIsCounted() {
-            subscriberRegistry.register(FRANK, Set.of(), "test-session", Instant.now());
-            subscriberRegistry.register(GRACE, Set.of(), "test-session", Instant.now());
+            hardCapSubscriberRegistry.register(FRANK, Set.of(), "test-session", Instant.now());
+            hardCapSubscriberRegistry.register(GRACE, Set.of(), "test-session", Instant.now());
 
             TaskImpl frankTask = new TaskImpl();
             frankTask.setId("pushed-counts-e2e-hardcap-task-1");
@@ -194,14 +194,21 @@ class PushedCountsEndToEndIT {
             graceTask.setId("pushed-counts-e2e-hardcap-task-2");
             graceTask.setAssignee(GRACE);
 
-            producer.send(new CloudTaskCreatedEventImpl(frankTask), new CloudTaskCreatedEventImpl(graceTask));
+            hardCapProducer.send(new CloudTaskCreatedEventImpl(frankTask), new CloudTaskCreatedEventImpl(graceTask));
 
             await()
                 .atMost(Duration.ofSeconds(10))
                 .untilAsserted(() ->
-                    assertThat(received).anyMatch(message -> message.scopeKey().equals("assigned:" + FRANK))
+                    assertThat(hardCapReceived).anyMatch(message -> message.scopeKey().equals("assigned:" + FRANK))
                 );
-            assertThat(received).noneMatch(message -> message.scopeKey().equals("assigned:" + GRACE));
+            // Give a delayed Grace message - from a scheduler flush racing the capture of this
+            // same batch - a real chance to surface before asserting she was never counted.
+            await()
+                .during(Duration.ofSeconds(1))
+                .atMost(Duration.ofSeconds(2))
+                .until(() ->
+                    hardCapReceived.stream().noneMatch(message -> message.scopeKey().equals("assigned:" + GRACE))
+                );
         }
     }
 
@@ -229,31 +236,31 @@ class PushedCountsEndToEndIT {
         private static final String ERIN = "pushed-counts-e2e-erin";
 
         @Autowired
-        private MyProducer producer;
+        private MyProducer softCapProducer;
 
         @Autowired
-        private SubscriberRegistry subscriberRegistry;
+        private SubscriberRegistry softCapSubscriberRegistry;
 
         @Autowired
-        private Flux<CountChangedMessage> pushedCountsFlux;
+        private Flux<CountChangedMessage> softCapPushedCountsFlux;
 
-        private final CopyOnWriteArrayList<CountChangedMessage> received = new CopyOnWriteArrayList<>();
-        private Disposable subscription;
+        private final CopyOnWriteArrayList<CountChangedMessage> softCapReceived = new CopyOnWriteArrayList<>();
+        private Disposable softCapSubscription;
 
         @BeforeEach
         void subscribe() {
-            subscription = pushedCountsFlux.subscribe(received::add);
+            softCapSubscription = softCapPushedCountsFlux.subscribe(softCapReceived::add);
         }
 
         @AfterEach
         void tearDown() {
-            subscription.dispose();
-            subscriberRegistry.unregister(ERIN, "test-session");
+            softCapSubscription.dispose();
+            softCapSubscriberRegistry.unregister(ERIN, "test-session");
         }
 
         @Test
         void touchingAsManyTasksAsTheSoftCap_flushesEarly_withoutWaitingOutTheMuchLongerWindow() {
-            subscriberRegistry.register(ERIN, Set.of(), "test-session", Instant.now());
+            softCapSubscriberRegistry.register(ERIN, Set.of(), "test-session", Instant.now());
 
             TaskImpl task1 = new TaskImpl();
             task1.setId("pushed-counts-e2e-softcap-task-1");
@@ -262,12 +269,12 @@ class PushedCountsEndToEndIT {
             task2.setId("pushed-counts-e2e-softcap-task-2");
             task2.setAssignee(ERIN);
 
-            producer.send(new CloudTaskCreatedEventImpl(task1), new CloudTaskCreatedEventImpl(task2));
+            softCapProducer.send(new CloudTaskCreatedEventImpl(task1), new CloudTaskCreatedEventImpl(task2));
 
             await()
                 .atMost(Duration.ofSeconds(3))
                 .untilAsserted(() ->
-                    assertThat(received).anyMatch(message -> message.scopeKey().equals("assigned:" + ERIN))
+                    assertThat(softCapReceived).anyMatch(message -> message.scopeKey().equals("assigned:" + ERIN))
                 );
         }
     }
