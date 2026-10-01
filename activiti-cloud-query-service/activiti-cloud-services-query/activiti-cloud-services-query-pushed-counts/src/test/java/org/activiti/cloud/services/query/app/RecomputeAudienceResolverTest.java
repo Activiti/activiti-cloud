@@ -25,9 +25,9 @@ import java.util.Set;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository.TaskIdAndAssignee;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
-import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -143,9 +143,9 @@ class RecomputeAudienceResolverTest {
     @Test
     void processDomain_alsoIncludesCurrentAssigneesOfTasksInTheTouchedProcess() {
         registry.register("iris", Set.of());
-        TaskEntity task = new TaskEntity();
-        task.setAssignee("iris");
-        when(taskRepository.findByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(List.of(task));
+        when(taskRepository.findIdAndAssigneeByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(
+            List.of(new TaskIdAndAssigneeStub(null, "iris"))
+        );
         PushedCountsRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
 
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
@@ -158,8 +158,9 @@ class RecomputeAudienceResolverTest {
     @Test
     void processDomain_ignoresUnassignedTasksInTheTouchedProcess() {
         registry.register("iris", Set.of());
-        TaskEntity task = new TaskEntity();
-        when(taskRepository.findByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(List.of(task));
+        when(taskRepository.findIdAndAssigneeByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(
+            List.of(new TaskIdAndAssigneeStub(null, null))
+        );
         PushedCountsRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
 
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
@@ -186,9 +187,7 @@ class RecomputeAudienceResolverTest {
     void openTask_unassignedWithNoCandidates_feedsEveryWatchedUser_butNotProcesses() {
         registry.register("liz", Set.of());
         registry.register("moe", Set.of("ops"));
-        TaskEntity task = new TaskEntity();
-        task.setId("task-1");
-        when(taskRepository.findAllById(Set.of("task-1"))).thenReturn(List.of(task));
+        when(taskRepository.existsByIdInAndAssigneeIsNull(Set.of("task-1"))).thenReturn(true);
         PushedCountsRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of(), Set.of());
 
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
@@ -201,10 +200,7 @@ class RecomputeAudienceResolverTest {
     @Test
     void openTask_thatIsAssigned_doesNotFeedEveryWatchedUser() {
         registry.register("liz", Set.of());
-        TaskEntity task = new TaskEntity();
-        task.setId("task-1");
-        task.setAssignee("someone-else");
-        when(taskRepository.findAllById(Set.of("task-1"))).thenReturn(List.of(task));
+        when(taskRepository.existsByIdInAndAssigneeIsNull(Set.of("task-1"))).thenReturn(false);
         PushedCountsRecomputeWindow window = window(Set.of("task-1"), Set.of(), Set.of(), Set.of(), Set.of());
 
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
@@ -229,9 +225,9 @@ class RecomputeAudienceResolverTest {
     void openProcessTask_unassignedWithNoCandidates_feedsEveryWatchedUser_butNotProcesses() {
         registry.register("liz", Set.of());
         registry.register("moe", Set.of("ops"));
-        TaskEntity task = new TaskEntity();
-        task.setId("task-1");
-        when(taskRepository.findByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(List.of(task));
+        when(taskRepository.findIdAndAssigneeByProcessInstanceIdIn(Set.of("proc-1"))).thenReturn(
+            List.of(new TaskIdAndAssigneeStub("task-1", null))
+        );
         PushedCountsRecomputeWindow window = window(Set.of(), Set.of(), Set.of(), Set.of("proc-1"), Set.of());
 
         Map<PushedCountType, Set<String>> audience = resolver.resolve(window);
@@ -293,5 +289,17 @@ class RecomputeAudienceResolverTest {
             processInstanceIds,
             namedInitiatorIds
         );
+    }
+
+    private record TaskIdAndAssigneeStub(String id, String assignee) implements TaskIdAndAssignee {
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public String getAssignee() {
+            return assignee;
+        }
     }
 }

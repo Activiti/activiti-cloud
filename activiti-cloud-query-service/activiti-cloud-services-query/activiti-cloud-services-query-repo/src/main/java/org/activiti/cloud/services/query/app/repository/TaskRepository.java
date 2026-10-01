@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.app.repository;
 
 import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
 
+import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,14 +57,26 @@ public interface TaskRepository
         @Param("status") Task.TaskStatus status
     );
 
+    @Query("select t.id as id, t.assignee as assignee from Task t where t.processInstanceId in :processInstanceIds")
+    List<TaskIdAndAssignee> findIdAndAssigneeByProcessInstanceIdIn(
+        @Param("processInstanceIds") Collection<String> processInstanceIds
+    );
+
+    boolean existsByIdInAndAssigneeIsNull(Collection<String> ids);
+
     interface AssigneeCount {
         String getAssignee();
         long getTaskCount();
     }
 
+    interface TaskIdAndAssignee {
+        String getId();
+        String getAssignee();
+    }
+
     @Override
     default void customize(QuerydslBindings bindings, QTaskEntity root) {
-        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
+        bindings.bind(String.class).first(SimpleExpression::eq);
         bindings.bind(root.createdFrom).first((path, value) -> root.createdDate.after(value));
         bindings.bind(root.createdTo).first((path, value) -> root.createdDate.before(value));
         bindings.bind(root.lastModifiedFrom).first((path, value) -> root.lastModified.after(value));
@@ -78,8 +91,8 @@ public interface TaskRepository
             .bind(root.candidateGroupId)
             .first((path, value) -> root.taskCandidateGroups.any().groupId.in(Arrays.asList(value.split(","))));
 
-        bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
-        bindings.bind(root.description).first((path, value) -> path.like("%" + value.toString() + "%"));
+        bindings.bind(root.name).first((path, value) -> path.like("%" + value + "%"));
+        bindings.bind(root.description).first((path, value) -> path.like("%" + value + "%"));
 
         whitelist(root)
             .excluding(root.variables)
