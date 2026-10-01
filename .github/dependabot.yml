@@ -17,6 +17,24 @@ updates:
         versions:
           - ">= 4.0"
 
+  - package-ecosystem: "docker"
+    directories:
+      - "/activiti-cloud-examples/activiti-cloud-identity-adapter"
+      - "/activiti-cloud-examples/activiti-cloud-query"
+      - "/activiti-cloud-examples/example-cloud-connector"
+      - "/activiti-cloud-examples/example-runtime-bundle"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 3
+    groups:
+      docker:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "github-actions"
     directories:
     - "/"
