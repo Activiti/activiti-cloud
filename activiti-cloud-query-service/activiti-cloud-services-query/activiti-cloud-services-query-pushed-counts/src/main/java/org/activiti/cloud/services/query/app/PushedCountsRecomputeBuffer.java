@@ -37,6 +37,7 @@ public final class PushedCountsRecomputeBuffer {
     private final Set<String> namedInitiatorIds = new HashSet<>();
     private final int hardCap;
     private Instant windowStartedAt;
+    private int droppedCaptureCount;
 
     public PushedCountsRecomputeBuffer() {
         this(DEFAULT_HARD_CAP);
@@ -53,7 +54,7 @@ public final class PushedCountsRecomputeBuffer {
             return;
         }
         if (!taskIds.contains(taskId) && atCapacity()) {
-            LOGGER.warn("Recompute buffer at hard cap ({}); dropping capture for task {}", hardCap, taskId);
+            logFirstDropOfWindow("Recompute buffer at hard cap ({}); dropping capture for task {}", hardCap, taskId);
             return;
         }
         markTouch(at);
@@ -71,7 +72,7 @@ public final class PushedCountsRecomputeBuffer {
             return;
         }
         if (!taskIds.contains(taskId) && atCapacity()) {
-            LOGGER.warn(
+            logFirstDropOfWindow(
                 "Recompute buffer at hard cap ({}); dropping candidate-group capture for task {}",
                 hardCap,
                 taskId
@@ -89,7 +90,7 @@ public final class PushedCountsRecomputeBuffer {
             return;
         }
         if (!processInstanceIds.contains(processInstanceId) && atCapacity()) {
-            LOGGER.warn(
+            logFirstDropOfWindow(
                 "Recompute buffer at hard cap ({}); dropping capture for process {}",
                 hardCap,
                 processInstanceId
@@ -119,6 +120,13 @@ public final class PushedCountsRecomputeBuffer {
 
     /** Atomically snapshots the window and clears the buffer for the next one. */
     public synchronized PushedCountsRecomputeWindow drainAndReset() {
+        if (droppedCaptureCount > 0) {
+            LOGGER.warn(
+                "Recompute buffer at hard cap ({}); dropped {} captures during this window",
+                hardCap,
+                droppedCaptureCount
+            );
+        }
         PushedCountsRecomputeWindow snapshot = new PushedCountsRecomputeWindow(
             Set.copyOf(taskIds),
             Set.copyOf(touchedGroupIds),
@@ -132,6 +140,7 @@ public final class PushedCountsRecomputeBuffer {
         processInstanceIds.clear();
         namedInitiatorIds.clear();
         windowStartedAt = null;
+        droppedCaptureCount = 0;
         return snapshot;
     }
 
@@ -160,6 +169,14 @@ public final class PushedCountsRecomputeBuffer {
 
     private boolean atCapacity() {
         return size() >= hardCap;
+    }
+
+    /** Logs only the first hard-cap drop of the current window, to avoid a log storm while at capacity. */
+    private void logFirstDropOfWindow(String message, Object... args) {
+        if (droppedCaptureCount == 0) {
+            LOGGER.warn(message, args);
+        }
+        droppedCaptureCount++;
     }
 
     /** The size the union of {@code current} and {@code additional} would have, without mutating either. */

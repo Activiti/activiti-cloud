@@ -17,23 +17,46 @@ package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 class PushedCountsRecomputeBufferTest {
 
     private static final Instant T0 = Instant.parse("2026-01-01T00:00:00Z");
 
     private final PushedCountsRecomputeBuffer buffer = new PushedCountsRecomputeBuffer();
+
+    private Logger bufferLogger;
+    private ListAppender<ILoggingEvent> logAppender;
+
+    @BeforeEach
+    void setUpLogCapture() {
+        bufferLogger = (Logger) LoggerFactory.getLogger(PushedCountsRecomputeBuffer.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        bufferLogger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void tearDownLogCapture() {
+        bufferLogger.detachAppender(logAppender);
+    }
 
     @Test
     void isEmpty_whenNothingCaptured() {
@@ -145,6 +168,46 @@ class PushedCountsRecomputeBufferTest {
         PushedCountsRecomputeWindow window = capped.drainAndReset();
         assertThat(window.processInstanceIds()).isEmpty();
         assertThat(window.namedInitiatorIds()).isEmpty();
+    }
+
+    @Test
+    void capturesPastTheHardCap_logOnlyTheFirstDrop_thenAnAggregateOnDrain() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureTask("task-2", T0);
+        capped.captureTaskCandidateGroup("task-3", "eng", T0);
+        capped.captureProcess("proc-1", "alice", T0);
+        List<ILoggingEvent> loggedDuringCapture = List.copyOf(logAppender.list);
+
+        capped.drainAndReset();
+
+        assertThat(loggedDuringCapture).hasSize(1);
+        assertThat(logAppender.list).hasSize(2);
+        assertThat(logAppender.list.get(1).getFormattedMessage()).contains("dropped 3 captures");
+    }
+
+    @Test
+    void drainAndReset_withNoDrops_logsNoAggregate() {
+        buffer.captureTask("task-1", T0);
+
+        buffer.drainAndReset();
+
+        assertThat(logAppender.list).isEmpty();
+    }
+
+    @Test
+    void drainAndReset_resetsTheDropCounter_soTheNextWindowLogsItsOwnFirstDrop() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+        capped.captureTask("task-2", T0);
+        capped.drainAndReset();
+        logAppender.list.clear();
+
+        capped.captureTask("task-1", T0);
+        capped.captureTask("task-3", T0);
+
+        assertThat(logAppender.list).hasSize(1);
     }
 
     @Test
