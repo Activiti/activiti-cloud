@@ -58,7 +58,7 @@ jobs:
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
       - name: Ensure all actions are covered by Dependabot
-        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@0fa2704957dfff688af2371cc7a935de53d26610 # v19.1.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
 
   create-tag:
     runs-on: ubuntu-latest
@@ -155,7 +155,7 @@ jobs:
           )
           echo "modules=$MODULES" >> "$GITHUB_OUTPUT"
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@0fa2704957dfff688af2371cc7a935de53d26610 # v19.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -221,7 +221,7 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@0fa2704957dfff688af2371cc7a935de53d26610 # v19.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
