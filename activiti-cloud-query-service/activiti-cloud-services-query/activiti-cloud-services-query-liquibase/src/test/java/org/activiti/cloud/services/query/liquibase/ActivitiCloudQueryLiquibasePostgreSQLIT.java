@@ -32,7 +32,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 class ActivitiCloudQueryLiquibasePostgreSQLIT {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine");
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -54,8 +54,8 @@ class ActivitiCloudQueryLiquibasePostgreSQLIT {
             """
         );
 
-        assertThat(index.get("pg_get_indexdef", String.class)).contains("start_date DESC NULLS LAST");
-        assertThat(index.get("pg_get_expr", String.class)).isEqualTo(
+        assertThat(index.get("pg_get_indexdef")).asString().contains("start_date DESC NULLS LAST");
+        assertThat(index.get("pg_get_expr")).isEqualTo(
             "((parent_id IS NULL) AND ((linked_process_instance_id IS NULL) OR (linked_process_instance_type IS NULL)))"
         );
     }
