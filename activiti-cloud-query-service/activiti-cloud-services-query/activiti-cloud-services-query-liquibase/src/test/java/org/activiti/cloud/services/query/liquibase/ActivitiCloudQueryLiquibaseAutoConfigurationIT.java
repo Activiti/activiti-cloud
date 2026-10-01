@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,5 +91,39 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
 
         assertThat(foundActivityTypeColumn).isTrue();
         assertThat(foundStartedDateColumn).isTrue();
+    }
+
+    @Test
+    void shouldCreateAllowSelfServiceColumnOnTask() throws Exception {
+        boolean foundColumn = false;
+
+        try (
+            Connection connection = dataSource.getConnection();
+            ResultSet columns = connection.getMetaData().getColumns(null, null, "TASK", "ALLOW_SELF_SERVICE")
+        ) {
+            if (columns.next()) {
+                foundColumn = true;
+            }
+        }
+
+        assertThat(foundColumn).isTrue();
+    }
+
+    @Test
+    void shouldDefaultAllowSelfServiceToFalseWhenColumnOmitted() throws Exception {
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+            statement.executeUpdate(
+                "INSERT INTO task (id, priority) VALUES ('task-allow-self-service-default', 0)"
+            );
+
+            try (
+                ResultSet result = statement.executeQuery(
+                    "SELECT allow_self_service FROM task WHERE id = 'task-allow-self-service-default'"
+                )
+            ) {
+                assertThat(result.next()).isTrue();
+                assertThat(result.getBoolean("allow_self_service")).isFalse();
+            }
+        }
     }
 }
