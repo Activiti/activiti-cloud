@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -62,6 +63,16 @@ class PushedCountsRecomputeBufferTest {
     void isEmpty_whenNothingCaptured() {
         assertThat(buffer.isEmpty()).isTrue();
         assertThat(buffer.size()).isZero();
+    }
+
+    @Test
+    void constructor_rejectsAZeroHardCap() {
+        assertThatThrownBy(() -> new PushedCountsRecomputeBuffer(0)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void constructor_rejectsANegativeHardCap() {
+        assertThatThrownBy(() -> new PushedCountsRecomputeBuffer(-1)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

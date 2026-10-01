@@ -43,8 +43,15 @@ public final class PushedCountsRecomputeBuffer {
         this(DEFAULT_HARD_CAP);
     }
 
-    /** @param hardCap total touched tasks + processes above which further captures are dropped. */
+    /**
+     * @param hardCap total touched tasks + processes above which further captures are dropped;
+     * must be positive, otherwise every capture would be dropped and the buffer would never fill
+     * enough to flush.
+     */
     public PushedCountsRecomputeBuffer(int hardCap) {
+        if (hardCap <= 0) {
+            throw new IllegalArgumentException("hardCap must be positive, got " + hardCap);
+        }
         this.hardCap = hardCap;
     }
 
