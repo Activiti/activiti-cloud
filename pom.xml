@@ -228,12 +228,12 @@
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <checkstyle.version>13.8.0</checkstyle.version>
-    <maven-sonar-plugin.version>5.7.0.6970</maven-sonar-plugin.version>
+    <maven-sonar-plugin.version>5.8.0.7211</maven-sonar-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
     <org-json.version>20260814</org-json.version>
 
     <!-- dependencies versions -->
-    <hibernate.version>7.4.9.Final</hibernate.version>
+    <hibernate.version>7.4.11.Final</hibernate.version>
     <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
     <byte-buddy.version>1.17.8</byte-buddy.version>
     <!-- End Temporary Dependency -->
