@@ -47,6 +47,7 @@ import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 
@@ -252,7 +253,8 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
         if (sort != null) {
             validateSort(sort);
             Expression<?> orderByClause;
-            if (sort.isProcessVariable()) {
+            boolean isProcessVariable = sort.isProcessVariable();
+            if (isProcessVariable) {
                 From<T, ProcessVariableEntity> joinRoot = joinSupplier.get();
                 orderByClause = new VariableSelectionExpressionImpl<>(
                     joinRoot,
@@ -269,11 +271,22 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
             } else {
                 orderByClause = root.get(sort.field());
             }
-            query.orderBy(
-                sort.direction().isAscending()
-                    ? criteriaBuilder.asc(orderByClause)
-                    : criteriaBuilder.desc(orderByClause)
-            );
+            boolean ascending = sort.direction().isAscending();
+            if (isProcessVariable) {
+                // Process variable values can legitimately be null (e.g. the variable was not
+                // set on some instances). We always want those to sort last, regardless of
+                // direction, so this is requested explicitly here rather than relying on a
+                // global null-ordering default that would otherwise also affect non-nullable
+                // columns and defeat their indexes.
+                HibernateCriteriaBuilder hibernateCriteriaBuilder = (HibernateCriteriaBuilder) criteriaBuilder;
+                query.orderBy(
+                    ascending
+                        ? hibernateCriteriaBuilder.asc(orderByClause, false)
+                        : hibernateCriteriaBuilder.desc(orderByClause, false)
+                );
+            } else {
+                query.orderBy(ascending ? criteriaBuilder.asc(orderByClause) : criteriaBuilder.desc(orderByClause));
+            }
         }
     }
 

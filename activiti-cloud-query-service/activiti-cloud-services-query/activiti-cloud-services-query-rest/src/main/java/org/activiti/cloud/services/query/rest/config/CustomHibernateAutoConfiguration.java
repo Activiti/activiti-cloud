@@ -32,7 +32,13 @@ public class CustomHibernateAutoConfiguration implements HibernatePropertiesCust
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
         hibernateProperties.put("hibernate.dialect", CustomPostgreSQLDialect.class.getName());
-        hibernateProperties.put("hibernate.order_by.default_null_ordering", "last");
+        // NOTE: we intentionally do NOT force a global "nulls last" default here anymore.
+        // That previously forced every DESC sort (including non-nullable columns such as
+        // startedDate/timestamp) to render an explicit "NULLS LAST", which prevents Postgres
+        // from using a plain ascending index via backward scan and forces an expensive sort.
+        // The only place that genuinely needs null-last ordering is process variable sorting
+        // (variable values can be legitimately null), which now requests it explicitly in
+        // SpecificationSupport#applySorting instead of relying on this global setting.
         hibernateProperties.put(MappingSettings.JSON_FORMAT_MAPPER, new Jackson3JsonFormatMapper());
     }
 }
