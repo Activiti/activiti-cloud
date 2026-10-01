@@ -68,4 +68,3 @@ public class TaskUpdatedEventHandlerTest {
         assertThat(handledEvent).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name());
     }
 }
-

@@ -57,4 +57,3 @@ public class CloudTaskImplTest {
         assertThat(deserialized.isAllowSelfService()).isTrue();
     }
 }
-
