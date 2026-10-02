@@ -27,4 +27,8 @@ public interface SubscriberDirectory {
     Set<String> groupsOf(String userId);
 
     Set<String> watchedUserIds();
+
+    default int size() {
+        return watchedUserIds().size();
+    }
 }
