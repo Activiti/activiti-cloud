@@ -19,11 +19,15 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Optional;
+import java.util.function.Function;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Import;
@@ -45,6 +49,15 @@ public class ConnectorConfigurationFunctionRouterEnabledIT extends ConnectorConf
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
 
+    @Autowired
+    private ActivitiCloudMessagingProperties messagingProperties;
+
+    @Autowired
+    private Function<
+        ConnectorBinding,
+        Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
+    > connectorErrorHandlerDefinitionResolver;
+
     @Test
     @Override
     void testShouldDiscardMessageWithInValidAppVersionWithRetryWithRepublishEvent() {
@@ -53,17 +66,23 @@ public class ConnectorConfigurationFunctionRouterEnabledIT extends ConnectorConf
 
     @Test
     @Override
-    @Disabled
     void defaultErrorHandlerDefinition() {
         AssertionsForClassTypes.assertThat(bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_INPUT))
             .extracting(BindingProperties::getErrorHandlerDefinition)
-            .isEqualTo(MY_ERROR_HANDLER);
+            .isEqualTo("functionRouterErrorMessageHandler");
 
         AssertionsForClassTypes.assertThat(
             bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_ANONYMOUS_INPUT)
         )
             .extracting(BindingProperties::getErrorHandlerDefinition)
-            .isEqualTo(MY_ERROR_HANDLER);
+            .isEqualTo("functionRouterErrorMessageHandler");
+    }
+
+    @Test
+    void functionRouterBindingsConnectorErrorHandlerDefinition() {
+        assertThat(messagingProperties.getFunctionRouter().bindings().get("auditConsumer"))
+            .extracting(BindingProperties::getErrorHandlerDefinition)
+            .isEqualTo("myErrorHandler");
     }
 
     @Test

@@ -95,6 +95,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
         "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
         "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
+        "spring.cloud.stream.bindings.auditConsumer.error-handler-definition=myErrorHandler",
         "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
         "spring.cloud.stream.bindings.integrationrequests.destination=rest-connector.GET,rest-connector.POST,script.EXECUTE",
