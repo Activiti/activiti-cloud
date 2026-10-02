@@ -53,7 +53,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
 import org.springframework.cloud.function.context.MessageRoutingCallback;
-import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
@@ -266,12 +265,12 @@ public class FunctionRouterConfiguration {
                                                 .getValue()
                                                 .map(CompletionException.class::cast)
                                                 .map(CompletionException::getCause)
-                                                .map(exception -> {
-                                                    if (exception instanceof MessagingException messagingException) {
+                                                .map(cause -> {
+                                                    if (cause instanceof MessagingException messagingException) {
                                                         return new ErrorMessage(messagingException, message);
                                                     } else {
                                                         return new ErrorMessage(
-                                                            new MessagingException(message, exception),
+                                                            new MessagingException(message, cause),
                                                             message
                                                         );
                                                     }
@@ -305,9 +304,7 @@ public class FunctionRouterConfiguration {
                                         .filter(Objects::nonNull)
                                         .map(entry -> {
                                             final var errorHandlerDefinition = Optional.of(entry.getKey())
-                                                .map(bindingName ->
-                                                    bindingServiceProperties.getBindings().get(bindingName)
-                                                )
+                                                .map(bindingName -> functionRouter.bindings().get(bindingName))
                                                 .map(BindingProperties::getErrorHandlerDefinition)
                                                 .or(() ->
                                                     Optional.ofNullable(
@@ -345,23 +342,6 @@ public class FunctionRouterConfiguration {
                                             errorHandlingResults
                                         );
                                     }
-
-                                    Optional.ofNullable(
-                                        environment.getProperty(
-                                            "spring.cloud.stream.default.error-handler-definition",
-                                            String.class
-                                        )
-                                    )
-                                        .filter(StringUtils::hasText)
-                                        .map(functionCatalog::lookup)
-                                        .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
-                                        .ifPresent(errorHandlerDefinition -> {
-                                            errors
-                                                .stream()
-                                                .filter(Objects::nonNull)
-                                                .map(Map.Entry::getValue)
-                                                .forEach(errorHandlerDefinition);
-                                        });
                                 } else {
                                     log.debug("Successfully completed function route message request {}", message);
                                 }

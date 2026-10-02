@@ -33,7 +33,10 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.cloud.function.context.FunctionProperties.FUNCTION_DEFINITION;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
@@ -88,6 +91,7 @@ import org.springframework.integration.dispatcher.AggregateMessageDeliveryExcept
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.resilience.annotation.EnableResilientMethods;
@@ -113,6 +117,7 @@ import tools.jackson.databind.ObjectMapper;
         "spring.cloud.stream.bindings.engineEventsConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.integrationRequests.destination=integration-requests",
         "spring.cloud.stream.bindings.integrationRequests.group=${spring.application.name}",
+        "spring.cloud.stream.bindings.integrationRequests.error-handler-definition=errorMessageConsumer",
         "spring.cloud.stream.bindings.scriptRuntimeConsumer.destination=script.EXECUTE",
         "spring.cloud.stream.bindings.scriptRuntimeConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.restConsumer.destination=rest.GET,rest.POST",
@@ -207,6 +212,9 @@ public class FunctionRouterBindingConfigurationIT {
     @MockitoSpyBean
     private Consumer<ErrorMessage> functionRouterErrorMessageHandler;
 
+    @MockitoSpyBean
+    private Consumer<ErrorMessage> errorMessageConsumer;
+
     @TestConfiguration
     @EnableResilientMethods
     static class ApplicationConfig {
@@ -293,6 +301,18 @@ public class FunctionRouterBindingConfigurationIT {
                 throw new RuntimeException("optimistic locking exception");
             };
         }
+
+        @Bean
+        Consumer<ErrorMessage> errorMessageConsumer() {
+            return new Consumer<ErrorMessage>() {
+                @Override
+                public void accept(ErrorMessage errorMessage) {
+                    if (errorMessage.getPayload() instanceof MessagingException messagingException) {
+                        throw messagingException;
+                    }
+                }
+            };
+        }
     }
 
     public static class TypedPayload {
@@ -341,6 +361,23 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(bindingResolver.getBindingDestination("integrationRequests")).isEqualTo("integration-requests");
         assertThat(bindingResolver.getBindingDestination("commandResults")).isEqualTo("command-results");
         assertThat(bindingResolver.getBindingDestination("fooBar")).isEqualTo("fooBar");
+    }
+
+    @Test
+    void functionRouterBindings() {
+        assertThat(messagingProperties.getFunctionRouter().bindings())
+            .extracting(Map::keySet)
+            .asInstanceOf(InstanceOfAssertFactories.set(String.class))
+            .containsOnly(
+                "commandConsumer",
+                "queryConsumer",
+                "auditConsumer",
+                "integrationRequests",
+                "scriptRuntimeConsumer",
+                "engineEventsConsumer",
+                "restConsumer",
+                "integrationResultTypedConsumer"
+            );
     }
 
     @Test
@@ -590,6 +627,10 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(exceptionCaptor.getException())
             .isInstanceOf(AggregateMessageDeliveryException.class)
             .hasMessageContaining("Function router result errors");
+
+        verify(errorMessageConsumer, times(messagingProperties.getFunctionRouter().getMaxRetries())).accept(
+            any(ErrorMessage.class)
+        );
     }
 
     @Test
