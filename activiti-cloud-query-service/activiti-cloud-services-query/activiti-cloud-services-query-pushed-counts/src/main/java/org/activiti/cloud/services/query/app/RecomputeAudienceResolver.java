@@ -24,9 +24,9 @@ import java.util.Set;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository.TaskIdAndAssignee;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
-import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.subscription.ScopeKeys.PushedCountType;
 import org.activiti.cloud.services.query.subscription.SubscriberDirectory;
 import org.slf4j.Logger;
@@ -61,15 +61,25 @@ public class RecomputeAudienceResolver {
     }
 
     public Map<PushedCountType, Set<String>> resolve(PushedCountsRecomputeWindow window) {
+        if (registry.size() == 0) {
+            return Map.of(
+                PushedCountType.ASSIGNED,
+                Set.of(),
+                PushedCountType.QUEUED,
+                Set.of(),
+                PushedCountType.PROCESSES,
+                Set.of()
+            );
+        }
         Set<TaskCandidateUserEntity> taskCandidateUsers = window.taskIds().isEmpty()
             ? Set.of()
             : taskCandidateUserRepository.findByTaskIdIn(window.taskIds());
         Set<TaskCandidateGroupEntity> taskCandidateGroups = window.taskIds().isEmpty()
             ? Set.of()
             : taskCandidateGroupRepository.findByTaskIdIn(window.taskIds());
-        List<TaskEntity> processTasks = window.processInstanceIds().isEmpty()
+        List<TaskIdAndAssignee> processTasks = window.processInstanceIds().isEmpty()
             ? List.of()
-            : taskRepository.findByProcessInstanceIdIn(window.processInstanceIds());
+            : taskRepository.findIdAndAssigneeByProcessInstanceIdIn(window.processInstanceIds());
         Set<TaskCandidateUserEntity> processTaskCandidateUsers = window.processInstanceIds().isEmpty()
             ? Set.of()
             : taskCandidateUserRepository.findByTask_ProcessInstanceIdIn(window.processInstanceIds());
@@ -122,11 +132,11 @@ public class RecomputeAudienceResolver {
 
     /** Current assignee and candidate-users of every task still under a touched process. */
     private Set<String> resolveProcessTaskAudience(
-        List<TaskEntity> processTasks,
+        List<TaskIdAndAssignee> processTasks,
         Set<TaskCandidateUserEntity> processTaskCandidateUsers
     ) {
         Set<String> audience = new HashSet<>();
-        for (TaskEntity task : processTasks) {
+        for (TaskIdAndAssignee task : processTasks) {
             addIfWatched(audience, task.getAssignee());
         }
         for (TaskCandidateUserEntity candidate : processTaskCandidateUsers) {
@@ -148,17 +158,15 @@ public class RecomputeAudienceResolver {
         if (candidateFreeTaskIds.isEmpty()) {
             return Set.of();
         }
-        for (TaskEntity task : taskRepository.findAllById(candidateFreeTaskIds)) {
-            if (task.getAssignee() == null) {
-                return Set.copyOf(registry.watchedUserIds());
-            }
+        if (taskRepository.existsByIdInAndAssigneeIsNull(candidateFreeTaskIds)) {
+            return Set.copyOf(registry.watchedUserIds());
         }
         return Set.of();
     }
 
     /** Same rule, for tasks reached through a touched process - their state is already loaded, so no extra query. */
     private Set<String> resolveOpenProcessTaskAudience(
-        List<TaskEntity> processTasks,
+        List<TaskIdAndAssignee> processTasks,
         Set<TaskCandidateUserEntity> processTaskCandidateUsers,
         Set<TaskCandidateGroupEntity> processTaskCandidateGroups
     ) {
@@ -169,7 +177,7 @@ public class RecomputeAudienceResolver {
         for (TaskCandidateGroupEntity candidate : processTaskCandidateGroups) {
             tasksWithCandidates.add(candidate.getTaskId());
         }
-        for (TaskEntity task : processTasks) {
+        for (TaskIdAndAssignee task : processTasks) {
             if (task.getAssignee() == null && !tasksWithCandidates.contains(task.getId())) {
                 return Set.copyOf(registry.watchedUserIds());
             }

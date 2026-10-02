@@ -1,0 +1,50 @@
+/*
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.activiti.cloud.services.query.app;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import org.activiti.cloud.services.query.subscription.SubscriberDirectory;
+
+final class FakeSubscriberDirectory implements SubscriberDirectory {
+
+    private final Map<String, Set<String>> watching = new HashMap<>();
+
+    void register(String userId, Set<String> groups) {
+        watching.put(userId, groups);
+    }
+
+    @Override
+    public boolean isWatching(String userId) {
+        return watching.containsKey(userId);
+    }
+
+    @Override
+    public Set<String> groupsOf(String userId) {
+        return watching.getOrDefault(userId, Set.of());
+    }
+
+    @Override
+    public Set<String> watchedUserIds() {
+        return Set.copyOf(watching.keySet());
+    }
+
+    @Override
+    public int size() {
+        return watching.size();
+    }
+}

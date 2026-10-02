@@ -71,18 +71,21 @@ public class PushedCountsRecomputeAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    PushedCountsRecomputeBuffer pushedCountsRecomputeBuffer() {
-        return new PushedCountsRecomputeBuffer();
+    PushedCountsRecomputeBuffer pushedCountsRecomputeBuffer(
+        @Value("${activiti.cloud.query.pushed-counts.buffer-hard-cap:10000}") int bufferHardCap
+    ) {
+        return new PushedCountsRecomputeBuffer(bufferHardCap);
     }
 
     @Bean
     @ConditionalOnMissingBean
     RecomputeEventCapturer recomputeEventCapturer(
         PushedCountsRecomputeBuffer buffer,
+        SubscriberDirectory registry,
         FeatureToggle featureToggle,
         Clock clock
     ) {
-        return new RecomputeEventCapturer(buffer, featureToggle, clock);
+        return new RecomputeEventCapturer(buffer, registry, featureToggle, clock);
     }
 
     @Bean
