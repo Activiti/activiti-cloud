@@ -128,7 +128,7 @@ public class AuditEventsService {
         SearchParams searchParams,
         Pageable pageable
     ) {
-        pageable = applyDefaultSort(pageable);
+        pageable = applyDefaultSort(pageable, Sort.NullHandling.NULLS_FIRST);
 
         Specification<AuditEventEntity> spec = securedSearchSpec(searchParams);
 
@@ -146,8 +146,12 @@ public class AuditEventsService {
     }
 
     private Pageable applyDefaultSort(Pageable pageable) {
+        return applyDefaultSort(pageable, Sort.NullHandling.NATIVE);
+    }
+
+    private Pageable applyDefaultSort(Pageable pageable, Sort.NullHandling nullHandling) {
         if (pageable.getSort().isUnsorted()) {
-            Sort defaultSort = Sort.by(Sort.Direction.DESC, TIMESTAMP);
+            Sort defaultSort = Sort.by(Sort.Order.desc(TIMESTAMP).with(nullHandling));
             if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
                 Pageable inner = alfrescoPageRequest.getPageable();
                 return new AlfrescoPageRequest(
