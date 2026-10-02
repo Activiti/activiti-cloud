@@ -110,7 +110,7 @@ public class AuditEventsService {
         SearchParams searchParams,
         Pageable pageable
     ) {
-        pageable = applyDefaultSort(pageable, timestampDescSort());
+        pageable = applyDefaultSort(pageable);
 
         Specification<AuditEventEntity> spec = securedSearchSpec(searchParams);
 
@@ -145,12 +145,12 @@ public class AuditEventsService {
         );
     }
 
-    private Sort timestampDescSort() {
-        return Sort.by(Sort.Order.desc(TIMESTAMP));
-    }
-
     private Sort timestampDescSortWithoutNullPrecedence() {
         return Sort.by(Sort.Order.desc(TIMESTAMP).nullsFirst());
+    }
+
+    private Pageable applyDefaultSort(Pageable pageable) {
+        return applyDefaultSort(pageable, Sort.by(Sort.Direction.DESC, TIMESTAMP));
     }
 
     private Pageable applyDefaultSort(Pageable pageable, Sort defaultSort) {
