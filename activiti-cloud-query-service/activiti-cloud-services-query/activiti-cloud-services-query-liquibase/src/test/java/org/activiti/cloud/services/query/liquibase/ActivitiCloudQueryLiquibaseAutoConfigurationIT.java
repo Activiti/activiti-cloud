@@ -91,4 +91,27 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
         assertThat(foundActivityTypeColumn).isTrue();
         assertThat(foundStartedDateColumn).isTrue();
     }
+
+    @Test
+    void shouldCreateRootUnlinkedStartDateIndexForProcessInstance() throws Exception {
+        boolean foundStartDateColumn = false;
+
+        try (
+            Connection connection = dataSource.getConnection();
+            ResultSet indexes = connection.getMetaData().getIndexInfo(null, null, "PROCESS_INSTANCE", false, false)
+        ) {
+            while (indexes.next()) {
+                if (
+                    "PI_ROOT_UNLINKED_STARTDATE_IDX".equalsIgnoreCase(indexes.getString("INDEX_NAME")) &&
+                    "START_DATE".equalsIgnoreCase(indexes.getString("COLUMN_NAME")) &&
+                    "D".equalsIgnoreCase(indexes.getString("ASC_OR_DESC"))
+                ) {
+                    foundStartDateColumn = true;
+                    break;
+                }
+            }
+        }
+
+        assertThat(foundStartDateColumn).isTrue();
+    }
 }
