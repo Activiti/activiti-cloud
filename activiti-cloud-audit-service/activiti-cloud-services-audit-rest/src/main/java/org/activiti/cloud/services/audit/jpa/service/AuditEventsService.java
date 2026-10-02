@@ -149,6 +149,13 @@ public class AuditEventsService {
         return applyDefaultSort(pageable, Sort.NullHandling.NATIVE);
     }
 
+    /**
+     * Applies the default timestamp descending sort with the given null handling.
+     * Passing {@link Sort.NullHandling#NULLS_FIRST} overrides the global
+     * {@code hibernate.order_by.default_null_ordering=last} setting: since {@code NULLS FIRST} is
+     * PostgreSQL's native precedence for descending order, Hibernate omits the explicit null
+     * precedence and renders {@code ORDER BY ... timestamp DESC}.
+     */
     private Pageable applyDefaultSort(Pageable pageable, Sort.NullHandling nullHandling) {
         if (pageable.getSort().isUnsorted()) {
             Sort defaultSort = Sort.by(Sort.Order.desc(TIMESTAMP).with(nullHandling));
