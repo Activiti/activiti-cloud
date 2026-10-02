@@ -30,6 +30,8 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.specification.TaskSpecification;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
 import org.activiti.cloud.services.query.subscription.SubscriberDirectory;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Pushed "queued for me" badge: unassigned {@link Task.TaskStatus#CREATED} tasks a user may claim —
@@ -55,6 +57,7 @@ public class QueuedTaskCounter implements PushedCounter {
     }
 
     @Override
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public Map<String, Long> compute(Set<String> affectedUserIds) {
         if (affectedUserIds.isEmpty()) {
             return Map.of();
