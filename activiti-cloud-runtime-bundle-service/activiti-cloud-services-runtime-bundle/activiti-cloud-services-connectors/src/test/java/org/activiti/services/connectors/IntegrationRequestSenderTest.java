@@ -53,7 +53,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -180,7 +179,7 @@ public class IntegrationRequestSenderTest {
         //when
         integrationRequestSender.sendIntegrationRequest(integrationRequest);
 
-        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+        TransactionSynchronizationManager.getSynchronizations().forEach(txSync -> txSync.beforeCommit(false));
 
         //then
         verify(streamBridge).send(eq(CONNECTOR_TYPE), integrationRequestMessageCaptor.capture());
