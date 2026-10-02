@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import jakarta.persistence.criteria.JoinType;
@@ -76,6 +77,37 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
             verify(ctx.query(), atLeast(4)).subquery(any(Class.class));
             verify(ctx.root(), never()).join(eq(TaskEntity_.taskCandidateUsers), any(JoinType.class));
             verify(ctx.root(), never()).join(eq(TaskEntity_.taskCandidateGroups), any(JoinType.class));
+        }
+    }
+
+    @Nested
+    class GroupVisibleRestriction {
+
+        @Test
+        void shouldUseLegacyJoinPathWithoutSubqueries_whenExistsSubqueriesToggleIsOff() {
+            TaskSearchRequest request = new TaskSearchRequestBuilder().build();
+            TaskSpecification spec = TaskSpecification.groupVisible(request, List.of("group1"));
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+            verify(ctx.query()).distinct(true);
+            verify(ctx.query(), never()).subquery(any(Class.class));
+        }
+
+        @Test
+        void shouldBuildOnlyTheThreeGroupDoorSubqueries_whenExistsSubqueriesToggleIsOn() {
+            enableExistsSubqueriesToggle();
+            TaskSearchRequest request = new TaskSearchRequestBuilder().build();
+            TaskSpecification spec = TaskSpecification.groupVisible(request, List.of("group1"));
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+            // restricted builds 4 correlated subqueries; group-visible keys off no user id, so it drops the
+            // candidate-user = userId probe and builds exactly the 3 group-door subqueries.
+            verify(ctx.query(), times(3)).subquery(any(Class.class));
+            verify(ctx.query(), never()).distinct(true);
         }
     }
 
