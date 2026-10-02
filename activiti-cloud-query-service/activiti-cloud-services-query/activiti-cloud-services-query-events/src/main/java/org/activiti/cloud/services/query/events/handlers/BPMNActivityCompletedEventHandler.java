@@ -22,11 +22,15 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
+import org.springframework.transaction.PlatformTransactionManager;
 
 public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
-    public BPMNActivityCompletedEventHandler(EntityManager entityManager) {
-        super(entityManager);
+    public BPMNActivityCompletedEventHandler(
+        EntityManager entityManager,
+        PlatformTransactionManager transactionManager
+    ) {
+        super(entityManager, transactionManager);
     }
 
     @Override
