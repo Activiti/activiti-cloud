@@ -110,7 +110,7 @@ public class AuditEventsService {
         SearchParams searchParams,
         Pageable pageable
     ) {
-        pageable = applyDefaultSort(pageable);
+        pageable = applyDefaultSort(pageable, timestampDescSort());
 
         Specification<AuditEventEntity> spec = securedSearchSpec(searchParams);
 
@@ -128,7 +128,7 @@ public class AuditEventsService {
         SearchParams searchParams,
         Pageable pageable
     ) {
-        pageable = applyDefaultSort(pageable, Sort.NullHandling.NULLS_FIRST);
+        pageable = applyDefaultSort(pageable, timestampDescSortWithoutNullPrecedence());
 
         Specification<AuditEventEntity> spec = securedSearchSpec(searchParams);
 
@@ -145,20 +145,16 @@ public class AuditEventsService {
         );
     }
 
-    private Pageable applyDefaultSort(Pageable pageable) {
-        return applyDefaultSort(pageable, Sort.NullHandling.NATIVE);
+    private Sort timestampDescSort() {
+        return Sort.by(Sort.Order.desc(TIMESTAMP));
     }
 
-    /**
-     * Applies the default timestamp descending sort with the given null handling.
-     * Passing {@link Sort.NullHandling#NULLS_FIRST} overrides the global
-     * {@code hibernate.order_by.default_null_ordering=last} setting: since {@code NULLS FIRST} is
-     * PostgreSQL's native precedence for descending order, Hibernate omits the explicit null
-     * precedence and renders {@code ORDER BY ... timestamp DESC}.
-     */
-    private Pageable applyDefaultSort(Pageable pageable, Sort.NullHandling nullHandling) {
+    private Sort timestampDescSortWithoutNullPrecedence() {
+        return Sort.by(Sort.Order.desc(TIMESTAMP).nullsFirst());
+    }
+
+    private Pageable applyDefaultSort(Pageable pageable, Sort defaultSort) {
         if (pageable.getSort().isUnsorted()) {
-            Sort defaultSort = Sort.by(Sort.Order.desc(TIMESTAMP).with(nullHandling));
             if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
                 Pageable inner = alfrescoPageRequest.getPageable();
                 return new AlfrescoPageRequest(
