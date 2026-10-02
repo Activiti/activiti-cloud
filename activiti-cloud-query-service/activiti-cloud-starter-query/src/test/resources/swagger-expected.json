@@ -7537,7 +7537,7 @@
         "type" : "object",
         "properties" : {
           "processDefinitionKey" : {
-            "type" : "string"
+            "type" : [ "string", "null" ]
           },
           "name" : {
             "type" : "string"
@@ -9866,7 +9866,7 @@
         "type" : "object",
         "properties" : {
           "processDefinitionKey" : {
-            "type" : "string"
+            "type" : [ "string", "null" ]
           },
           "name" : {
             "type" : "string"

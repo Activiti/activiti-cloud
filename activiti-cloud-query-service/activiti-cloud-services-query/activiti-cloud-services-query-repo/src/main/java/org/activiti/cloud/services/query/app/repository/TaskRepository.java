@@ -56,9 +56,21 @@ public interface TaskRepository
         @Param("status") Task.TaskStatus status
     );
 
+    @Query("select t.id as id, t.assignee as assignee from Task t where t.processInstanceId in :processInstanceIds")
+    List<TaskIdAndAssignee> findIdAndAssigneeByProcessInstanceIdIn(
+        @Param("processInstanceIds") Collection<String> processInstanceIds
+    );
+
+    boolean existsByIdInAndAssigneeIsNull(Collection<String> ids);
+
     interface AssigneeCount {
         String getAssignee();
         long getTaskCount();
+    }
+
+    interface TaskIdAndAssignee {
+        String getId();
+        String getAssignee();
     }
 
     @Override
@@ -78,8 +90,8 @@ public interface TaskRepository
             .bind(root.candidateGroupId)
             .first((path, value) -> root.taskCandidateGroups.any().groupId.in(Arrays.asList(value.split(","))));
 
-        bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
-        bindings.bind(root.description).first((path, value) -> path.like("%" + value.toString() + "%"));
+        bindings.bind(root.name).first((path, value) -> path.like("%" + value + "%"));
+        bindings.bind(root.description).first((path, value) -> path.like("%" + value + "%"));
 
         whitelist(root)
             .excluding(root.variables)

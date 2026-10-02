@@ -104,6 +104,7 @@ public class SubscriberRegistry implements SubscriberDirectory {
         });
     }
 
+    @Override
     public int size() {
         return registrations.size();
     }
