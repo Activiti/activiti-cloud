@@ -23,9 +23,12 @@ import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeBuffer;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeScheduler;
+import org.activiti.cloud.services.query.app.QueuedTaskCounter;
 import org.activiti.cloud.services.query.app.RecomputeAudienceResolver;
 import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.app.RecomputePipeline;
+import org.activiti.cloud.services.query.app.RunningProcessesCounter;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -47,6 +50,7 @@ class PushedCountsRecomputeAutoConfigurationTest {
         .withBean(TaskCandidateUserRepository.class, () -> mock(TaskCandidateUserRepository.class))
         .withBean(TaskCandidateGroupRepository.class, () -> mock(TaskCandidateGroupRepository.class))
         .withBean(TaskRepository.class, () -> mock(TaskRepository.class))
+        .withBean(ProcessInstanceRepository.class, () -> mock(ProcessInstanceRepository.class))
         .withBean(FeatureToggle.class, () -> name -> false)
         .withBean("pushedCountsSink", Sinks.Many.class, () -> Sinks.many().multicast().onBackpressureBuffer())
         .withPropertyValues("activiti.cloud.query.pushed-counts.enabled=true")
@@ -61,6 +65,8 @@ class PushedCountsRecomputeAutoConfigurationTest {
             assertThat(context).hasSingleBean(RecomputePipeline.class);
             assertThat(context).hasSingleBean(PushedCountsRecomputeScheduler.class);
             assertThat(context).hasSingleBean(AssignedTaskCounter.class);
+            assertThat(context).hasSingleBean(QueuedTaskCounter.class);
+            assertThat(context).hasSingleBean(RunningProcessesCounter.class);
             assertThat(context).hasBean("pushedCountsQueryEventsConsumerFunction");
         });
     }
@@ -69,6 +75,8 @@ class PushedCountsRecomputeAutoConfigurationTest {
     void backsOffEntirely_whenStartupPropertyIsDisabled() {
         contextRunner.withPropertyValues("activiti.cloud.query.pushed-counts.enabled=false").run(context -> {
             assertThat(context).doesNotHaveBean(AssignedTaskCounter.class);
+            assertThat(context).doesNotHaveBean(QueuedTaskCounter.class);
+            assertThat(context).doesNotHaveBean(RunningProcessesCounter.class);
             assertThat(context).doesNotHaveBean(RecomputePipeline.class);
             assertThat(context).doesNotHaveBean("pushedCountsQueryEventsConsumerFunction");
         });

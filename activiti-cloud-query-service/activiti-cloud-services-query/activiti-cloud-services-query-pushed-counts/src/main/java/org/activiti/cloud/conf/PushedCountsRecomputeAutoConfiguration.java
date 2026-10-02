@@ -28,10 +28,13 @@ import org.activiti.cloud.services.query.app.PushedCountsQueryEventsConsumer;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeBuffer;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeChannels;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeScheduler;
+import org.activiti.cloud.services.query.app.QueuedTaskCounter;
 import org.activiti.cloud.services.query.app.RecomputeAudienceResolver;
 import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.app.RecomputePipeline;
+import org.activiti.cloud.services.query.app.RunningProcessesCounter;
 import org.activiti.cloud.services.query.app.count.PushedCounter;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -139,5 +142,21 @@ public class PushedCountsRecomputeAutoConfiguration {
     @ConditionalOnMissingBean
     AssignedTaskCounter assignedTaskCounter(TaskRepository taskRepository) {
         return new AssignedTaskCounter(taskRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    QueuedTaskCounter queuedTaskCounter(TaskRepository taskRepository, SubscriberDirectory registry) {
+        return new QueuedTaskCounter(taskRepository, registry);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    RunningProcessesCounter runningProcessesCounter(
+        ProcessInstanceRepository processInstanceRepository,
+        TaskRepository taskRepository,
+        TaskCandidateUserRepository taskCandidateUserRepository
+    ) {
+        return new RunningProcessesCounter(processInstanceRepository, taskRepository, taskCandidateUserRepository);
     }
 }

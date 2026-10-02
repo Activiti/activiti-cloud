@@ -21,6 +21,7 @@ import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -71,6 +72,47 @@ public interface TaskRepository
     interface TaskIdAndAssignee {
         String getId();
         String getAssignee();
+    }
+
+    // Per user, the number of unassigned tasks in the given status they are personally a candidate on that
+    // none of the given groups can already see (NOT EXISTS a candidate group in :groups). Excluding the
+    // group-visible tasks keeps this "personal remainder" disjoint from the shared group-visible count so
+    // the two can be summed without double-counting. Users with none are absent from the result (zero).
+    @Query(
+        "select cu.userId as userId, count(distinct t.id) as taskCount " +
+            "from TaskCandidateUser cu join cu.task t " +
+            "where cu.userId in :userIds " +
+            "and t.status = :status " +
+            "and t.assignee is null " +
+            "and not exists (" +
+            "select cg.taskId from TaskCandidateGroup cg " +
+            "where cg.taskId = t.id and cg.groupId in :groups" +
+            ") " +
+            "group by cu.userId"
+    )
+    List<UserCount> countQueuedPersonalRemainderGroupedByUser(
+        @Param("userIds") Collection<String> userIds,
+        @Param("status") Task.TaskStatus status,
+        @Param("groups") Collection<String> groups
+    );
+
+    interface UserCount {
+        String getUserId();
+        long getTaskCount();
+    }
+
+    @Query(
+        "select t.assignee as userId, t.processInstanceId as processInstanceId from Task t " +
+            "where t.assignee in :userIds and t.processInstance.status = :status"
+    )
+    List<AssigneeProcess> findRunningProcessesByAssigneeIn(
+        @Param("userIds") Collection<String> userIds,
+        @Param("status") ProcessInstance.ProcessInstanceStatus status
+    );
+
+    interface AssigneeProcess {
+        String getUserId();
+        String getProcessInstanceId();
     }
 
     @Override
