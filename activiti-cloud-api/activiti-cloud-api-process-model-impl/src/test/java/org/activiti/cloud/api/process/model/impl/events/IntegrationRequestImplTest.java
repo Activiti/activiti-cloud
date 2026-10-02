@@ -80,4 +80,71 @@ class IntegrationRequestImplTest {
         assertThat(integrationRequest.getRequestDate()).isNull();
         assertThat(integrationRequest.getTtlSeconds()).isNull();
     }
+
+    @Test
+    void copyWithoutContext_should_copyAllRoutingMetadata() {
+        // given
+        given(integrationContext.getAppVersion()).willReturn("1");
+        IntegrationRequestImpl source = new IntegrationRequestImpl(integrationContext);
+        source.setAppName("myApp");
+        source.setServiceName("myService");
+        source.setServiceFullName("myServiceFullName");
+        source.setServiceType("myServiceType");
+        source.setServiceVersion("1.0");
+        source.setResultDestination("resultDest");
+        source.setErrorDestination("errorDest");
+        source.setIncidentDestination("incidentDest");
+        Date requestDate = new Date();
+        source.setRequestDate(requestDate);
+        source.setTtlSeconds(30);
+
+        // when
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithoutContext(source);
+
+        // then
+        assertThat(copy.getAppName()).isEqualTo("myApp");
+        assertThat(copy.getAppVersion()).isEqualTo("1");
+        assertThat(copy.getServiceName()).isEqualTo("myService");
+        assertThat(copy.getServiceFullName()).isEqualTo("myServiceFullName");
+        assertThat(copy.getServiceType()).isEqualTo("myServiceType");
+        assertThat(copy.getServiceVersion()).isEqualTo("1.0");
+        assertThat(copy.getResultDestination()).isEqualTo("resultDest");
+        assertThat(copy.getErrorDestination()).isEqualTo("errorDest");
+        assertThat(copy.getIncidentDestination()).isEqualTo("incidentDest");
+        assertThat(copy.getRequestDate()).isEqualTo(requestDate);
+        assertThat(copy.getTtlSeconds()).isEqualTo(30);
+    }
+
+    @Test
+    void copyWithoutContext_should_notCopyIntegrationContext() {
+        // given
+        given(integrationContext.getAppVersion()).willReturn("1");
+        IntegrationRequestImpl source = new IntegrationRequestImpl(integrationContext);
+        assertThat(source.getIntegrationContext()).isNotNull();
+
+        // when
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithoutContext(source);
+
+        // then
+        assertThat(copy.getIntegrationContext()).isNull();
+    }
+
+    @Test
+    void copyWithoutContext_should_handleNullFields() {
+        // given
+        IntegrationRequestImpl source = new IntegrationRequestImpl();
+
+        // when
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithoutContext(source);
+
+        // then
+        assertThat(copy.getAppName()).isNull();
+        assertThat(copy.getServiceFullName()).isNull();
+        assertThat(copy.getResultDestination()).isNull();
+        assertThat(copy.getErrorDestination()).isNull();
+        assertThat(copy.getIncidentDestination()).isNull();
+        assertThat(copy.getRequestDate()).isNull();
+        assertThat(copy.getTtlSeconds()).isNull();
+        assertThat(copy.getIntegrationContext()).isNull();
+    }
 }
