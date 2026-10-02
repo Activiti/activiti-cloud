@@ -95,6 +95,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .filter(bindingServiceProperties.getBindings()::containsKey)
                     .forEach(bindingName -> {
                         var value = bindingServiceProperties.getBindings().remove(bindingName);
+                        functionRouter.bindings().put(bindingName, value);
 
                         Optional.ofNullable(value.getGroup())
                             .filter(StringUtils::hasText)
@@ -192,6 +193,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     bindingProperties.setGroup(new Base64UrlNamingStrategy(groupPrefix).generateName());
                     bindingProperties.setConsumer(functionRouter.getAnonymous().getConsumer());
                     bindingProperties.setErrorHandlerDefinition(functionRouter.getErrorHandlerDefinition());
+                    bindingProperties.getConsumer().setMaxAttempts(functionRouter.getMaxRetries());
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_ANONYMOUS_INPUT, bindingProperties);
 
@@ -212,6 +214,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     bindingProperties.setGroup(group);
                     bindingProperties.setConsumer(functionRouter.getConsumer());
                     bindingProperties.setErrorHandlerDefinition(functionRouter.getErrorHandlerDefinition());
+                    bindingProperties.getConsumer().setMaxAttempts(functionRouter.getMaxRetries());
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, bindingProperties);
 

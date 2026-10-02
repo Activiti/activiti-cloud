@@ -245,17 +245,8 @@ class OrphanedIntegrationRecoveryIT {
             )
             .isEqualTo(1L);
 
-        if (functionRouterEnabled) {
-            // Function router ACKs the message on receipt before routing it to the connector.
-            // On crash the message is already gone — ctx2's connector should never receive it.
-            await()
-                .during(Duration.ofSeconds(5))
-                .atMost(Duration.ofSeconds(6))
-                .until(() -> !integrationRequestReceived.get());
-        } else {
-            // MANUAL ACK + resetConnection causes the broker to redeliver the message to ctx2.
-            await().atMost(Duration.ofSeconds(30)).until(integrationRequestReceived::get);
-        }
+        // MANUAL ACK + resetConnection causes the broker to redeliver the message to ctx2.
+        await().atMost(Duration.ofSeconds(30)).until(integrationRequestReceived::get);
 
         var errorHandler = AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(
             ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)

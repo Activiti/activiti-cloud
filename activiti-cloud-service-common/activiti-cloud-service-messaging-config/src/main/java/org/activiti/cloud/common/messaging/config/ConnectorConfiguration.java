@@ -52,6 +52,7 @@ import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
@@ -271,7 +272,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                     .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
                                     .throwExceptionOnRejection(false)
                             )
-                            .handle(Message.class, handler)
+                            .handle(Message.class, handler, spec -> spec.advice())
                             .log(DEBUG, beanName + ".integrationResult")
                             .bridge()
                             .get();
@@ -336,12 +337,23 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
     > connectorErrorHandlerDefinitionResolver(
         ActivitiCloudMessagingProperties messagingProperties,
         BindingServiceProperties bindingServiceProperties,
-        @Lazy FunctionCatalog functionCatalog
+        @Lazy FunctionCatalog functionCatalog,
+        Environment environment
     ) {
         return connectorBinding ->
             Optional.of(messagingProperties.getFunctionRouter())
                 .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
-                .map(ActivitiCloudMessagingProperties.FunctionRouterProperties::getErrorHandlerDefinition)
+                .map(functionRouter ->
+                    Optional.ofNullable(functionRouter.bindings().get(connectorBinding.input()))
+                        .map(BindingProperties::getErrorHandlerDefinition)
+                        .filter(StringUtils::hasText)
+                        .orElseGet(() ->
+                            environment.getProperty(
+                                "spring.cloud.stream.default.error-handler-definition",
+                                String.class
+                            )
+                        )
+                )
                 .filter(StringUtils::hasText)
                 .or(() ->
                     Optional.of(bindingServiceProperties.getBindings())

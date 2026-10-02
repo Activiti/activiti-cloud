@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.cloud.stream.binder.ConsumerProperties;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.validation.annotation.Validated;
@@ -488,12 +489,14 @@ public class ActivitiCloudMessagingProperties {
 
         private final Map<String, String> registrationBindings = new LinkedCaseInsensitiveMap<>();
 
+        private final Map<String, BindingProperties> bindings = new LinkedCaseInsensitiveMap<>();
+
         @NotEmpty
         private String group = "function-router";
 
         private String errorHandlerDefinition;
 
-        private int maxRetries = 3;
+        private int maxRetries = 1;
 
         private Duration retryInterval = Duration.ofMillis(10);
 
@@ -709,6 +712,10 @@ public class ActivitiCloudMessagingProperties {
 
         public void setRequestTimeout(Duration requestTimeout) {
             this.requestTimeout = requestTimeout;
+        }
+
+        public Map<String, BindingProperties> bindings() {
+            return bindings;
         }
     }
 
