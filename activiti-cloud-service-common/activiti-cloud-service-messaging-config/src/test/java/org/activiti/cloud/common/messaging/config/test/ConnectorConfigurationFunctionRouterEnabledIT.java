@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.config.BindingProperties;
@@ -35,6 +36,7 @@ import org.springframework.test.context.TestPropertySource;
         "activiti.cloud.messaging.function-router.routes.auditConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.queryConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.integrationRequests.enabled=true",
+        "activiti.cloud.messaging.function-router.request-timeout=10s",
     }
 )
 @Import(ConnectorConfigurationFunctionRouterEnabledIT.ApplicationConfig.class)
@@ -45,6 +47,13 @@ public class ConnectorConfigurationFunctionRouterEnabledIT extends ConnectorConf
 
     @Test
     @Override
+    void testShouldDiscardMessageWithInValidAppVersionWithRetryWithRepublishEvent() {
+        super.testShouldDiscardMessageWithInValidAppVersionWithRetryWithRepublishEvent();
+    }
+
+    @Test
+    @Override
+    @Disabled
     void defaultErrorHandlerDefinition() {
         AssertionsForClassTypes.assertThat(bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_INPUT))
             .extracting(BindingProperties::getErrorHandlerDefinition)

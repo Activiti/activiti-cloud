@@ -32,6 +32,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -60,6 +61,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.integration.MessageDispatchingException;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dispatcher.AggregateMessageDeliveryException;
@@ -177,7 +179,7 @@ public class FunctionRouterConfiguration {
         Function<Message<?>, ExecutorService> functionExecutorSelector,
         MessageContentTypeNormalizer messageContentTypeNormalizer,
         BindingServiceProperties bindingServiceProperties,
-        SubscribableChannel functionRouterAnonymousInput
+        Environment environment
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
@@ -287,6 +289,16 @@ public class FunctionRouterConfiguration {
 
                                 if (!errors.isEmpty()) {
                                     log.debug("Errors handling function route message request {}", errors);
+                                    final Function<
+                                        ErrorMessage,
+                                        Supplier<Consumer<ErrorMessage>>
+                                    > fallbackErrorHandler = errorMessage -> () ->
+                                        new Consumer<ErrorMessage>() {
+                                            @Override
+                                            public void accept(ErrorMessage errorMessage) {
+                                                throw new RuntimeException(errorMessage.getPayload());
+                                            }
+                                        };
 
                                     final var errorHandlingResults = errors
                                         .stream()
@@ -297,18 +309,19 @@ public class FunctionRouterConfiguration {
                                                     bindingServiceProperties.getBindings().get(bindingName)
                                                 )
                                                 .map(BindingProperties::getErrorHandlerDefinition)
+                                                .or(() ->
+                                                    Optional.ofNullable(
+                                                        environment.getProperty(
+                                                            "spring.cloud.stream.default.error-handler-definition",
+                                                            String.class
+                                                        )
+                                                    )
+                                                )
                                                 .filter(StringUtils::hasText)
                                                 .map(functionCatalog::lookup)
                                                 .filter(Consumer.class::isInstance)
                                                 .map(Consumer.class::cast)
-                                                .orElseGet(() ->
-                                                    new Consumer() {
-                                                        @Override
-                                                        public void accept(Object o) {
-                                                            throw new RuntimeException(entry.getValue().getPayload());
-                                                        }
-                                                    }
-                                                );
+                                                .orElseGet(fallbackErrorHandler.apply(entry.getValue()));
 
                                             try {
                                                 return CompletableFuture.runAsync(
@@ -334,7 +347,10 @@ public class FunctionRouterConfiguration {
                                     }
 
                                     Optional.ofNullable(
-                                        messagingProperties.getFunctionRouter().getErrorHandlerDefinition()
+                                        environment.getProperty(
+                                            "spring.cloud.stream.default.error-handler-definition",
+                                            String.class
+                                        )
                                     )
                                         .filter(StringUtils::hasText)
                                         .map(functionCatalog::lookup)
