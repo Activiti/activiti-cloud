@@ -95,6 +95,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .filter(bindingServiceProperties.getBindings()::containsKey)
                     .forEach(bindingName -> {
                         var value = bindingServiceProperties.getBindings().remove(bindingName);
+                        functionRouter.bindings().put(bindingName, value);
 
                         Optional.ofNullable(value.getGroup())
                             .filter(StringUtils::hasText)
