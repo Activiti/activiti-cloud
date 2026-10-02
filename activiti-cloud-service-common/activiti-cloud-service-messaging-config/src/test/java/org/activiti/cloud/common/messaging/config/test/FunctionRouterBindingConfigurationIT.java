@@ -33,6 +33,7 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.doAnswer;
 import static org.springframework.cloud.function.context.FunctionProperties.FUNCTION_DEFINITION;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
@@ -63,6 +64,9 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -80,10 +84,14 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
+import org.springframework.integration.dispatcher.AggregateMessageDeliveryException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.resilience.annotation.EnableResilientMethods;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.util.MimeTypeUtils;
 import tools.jackson.databind.ObjectMapper;
 
@@ -128,7 +136,7 @@ import tools.jackson.databind.ObjectMapper;
         "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
         "activiti.cloud.messaging.function-router.routes.auditProducerIncidents.override-required-producer-groups=consumer",
         "activiti.cloud.messaging.function-router.anonymous.consumer.concurrency=2",
-        "activiti.cloud.messaging.function-router.request-timeout=1s",
+        "activiti.cloud.messaging.function-router.request-timeout=10s",
     }
 )
 @EnableTestBinder
@@ -196,7 +204,11 @@ public class FunctionRouterBindingConfigurationIT {
     @Autowired
     private FunctionRouterExecutorFactory functionRouterExecutorFactory;
 
+    @MockitoSpyBean
+    private Consumer<ErrorMessage> functionRouterErrorMessageHandler;
+
     @TestConfiguration
+    @EnableResilientMethods
     static class ApplicationConfig {
 
         @Bean(FUNCTION_HANDLER_NAME)
@@ -272,6 +284,14 @@ public class FunctionRouterBindingConfigurationIT {
         @FunctionBinding(input = INTEGRATION_RESULT_TYPED_CONSUMER)
         public Consumer<Message<TypedPayload>> integrationResultTypedConsumerHandler() {
             return message -> receivedTypedPayload.set(message.getPayload());
+        }
+
+        @Bean
+        @FunctionBinding(input = INTEGRATION_REQUESTS)
+        public Consumer<Message<TypedPayload>> integrationRequestsConsumerHandler() {
+            return message -> {
+                throw new RuntimeException("optimistic locking exception");
+            };
         }
     }
 
@@ -551,6 +571,28 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
+    void aggregateMessageDeliveryException() throws Exception {
+        // given
+        // given
+        Message<String> message = MessageBuilder.withPayload("Test")
+            .setHeader(FUNCTION_DESTINATION, "integration-requests")
+            .build();
+
+        ExceptionCaptor<RuntimeException> exceptionCaptor = new ExceptionCaptor<>();
+        ArgumentCaptor<ErrorMessage> errorMessageCaptor = ArgumentCaptor.forClass(ErrorMessage.class);
+        doAnswer(exceptionCaptor).when(functionRouterErrorMessageHandler).accept(errorMessageCaptor.capture());
+
+        // when
+        assertThatThrownBy(() -> input.send(message, "integration-requests"))
+            .hasCauseInstanceOf(RuntimeException.class)
+            .hasRootCauseMessage("optimistic locking exception");
+
+        assertThat(exceptionCaptor.getException())
+            .isInstanceOf(AggregateMessageDeliveryException.class)
+            .hasMessageContaining("Function router result errors");
+    }
+
+    @Test
     void testConsumerBindings() {
         // given
         Message<String> message = MessageBuilder.withPayload("Test")
@@ -614,7 +656,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void testConnectorBindings() {
+    void testConnectorBindings() throws InterruptedException {
         // given
         Message<String> message = MessageBuilder.withPayload("run_test();")
             .setHeader(FUNCTION_DESTINATION, "script.EXECUTE")
@@ -627,6 +669,27 @@ public class FunctionRouterBindingConfigurationIT {
         await().untilAsserted(() -> {
             assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
         });
+    }
+
+    public static class ExceptionCaptor<T extends Throwable> implements Answer<Object> {
+
+        private T result = null;
+
+        public T getException() {
+            return result;
+        }
+
+        @Override
+        public Object answer(InvocationOnMock invocation) throws Throwable {
+            // Call the actual method and store the result
+            try {
+                return invocation.callRealMethod();
+            } catch (Throwable e) {
+                result = (T) e;
+
+                throw e;
+            }
+        }
     }
 
     @Test
@@ -703,7 +766,7 @@ public class FunctionRouterBindingConfigurationIT {
     void messagingProperties() {
         assertThat(messagingProperties.getFunctionRouter().getMaxRetries()).isEqualTo(4);
         assertThat(messagingProperties.getFunctionRouter().getRetryInterval()).isEqualTo(Duration.ofMillis(100));
-        assertThat(messagingProperties.getFunctionRouter().getRequestTimeout()).isEqualTo(Duration.ofSeconds(1));
+        assertThat(messagingProperties.getFunctionRouter().getRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
     }
 
     @Test
@@ -735,7 +798,8 @@ public class FunctionRouterBindingConfigurationIT {
             Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
             Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
             Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
-            Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration"))
+            Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration")),
+            Map.entry("integration-requests", List.of("integrationRequestsConsumerHandler_registration"))
         );
     }
 
@@ -752,7 +816,8 @@ public class FunctionRouterBindingConfigurationIT {
             Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
             Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
             Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
-            Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration"))
+            Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration")),
+            Map.entry("integration-requests", List.of("integrationRequestsConsumerHandler_registration"))
         );
     }
 
@@ -923,7 +988,7 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Test
     void functionRouterExecutorFactoryTimeout() {
-        assertThat(functionRouterExecutorFactory.getTimeout()).isEqualTo(Duration.ofSeconds(1));
+        assertThat(functionRouterExecutorFactory.getTimeout()).isEqualTo(Duration.ofSeconds(10));
     }
 
     void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {
