@@ -74,6 +74,11 @@ import org.springframework.util.StringUtils;
     after = { BinderFactoryAutoConfiguration.class, ActivitiMessagingDestinationsAutoConfiguration.class }
 )
 @ConditionalOnProperty("activiti.cloud.messaging.function-router.enabled")
+@ConditionalOnProperty(
+    name = "activiti.cloud.messaging.function-router.type",
+    havingValue = "legacy",
+    matchIfMissing = true
+)
 public class FunctionRouterConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(FunctionRouterConfiguration.class);
