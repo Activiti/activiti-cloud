@@ -101,11 +101,6 @@ public interface TaskRepository
         long getTaskCount();
     }
 
-    interface TaskIdAndAssignee {
-        String getId();
-        String getAssignee();
-    }
-
     @Query(
         "select t.assignee as userId, t.processInstanceId as processInstanceId from Task t " +
             "where t.assignee in :userIds and t.processInstance.status = :status"
