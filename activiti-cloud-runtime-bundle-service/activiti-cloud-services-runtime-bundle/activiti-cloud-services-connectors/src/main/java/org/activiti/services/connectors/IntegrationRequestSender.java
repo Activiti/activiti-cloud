@@ -52,7 +52,7 @@ public class IntegrationRequestSender {
         TransactionSynchronizationManager.registerSynchronization(
             new TransactionSynchronization() {
                 @Override
-                public void beforeCommit(boolean readOnly) {
+                public void afterCommit() {
                     streamBridge.send(
                         event.getIntegrationContext().getConnectorType(),
                         buildIntegrationRequestMessage(event)
