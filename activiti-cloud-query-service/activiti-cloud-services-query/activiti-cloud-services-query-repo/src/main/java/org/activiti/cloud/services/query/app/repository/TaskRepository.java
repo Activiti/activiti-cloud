@@ -100,11 +100,6 @@ public interface TaskRepository
         long getTaskCount();
     }
 
-    interface TaskIdAndAssignee {
-        String getId();
-        String getAssignee();
-    }
-
     @Override
     default void customize(QuerydslBindings bindings, QTaskEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
