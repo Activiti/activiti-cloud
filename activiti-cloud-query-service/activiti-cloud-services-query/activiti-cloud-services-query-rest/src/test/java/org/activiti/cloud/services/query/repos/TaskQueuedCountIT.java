@@ -141,7 +141,7 @@ class TaskQueuedCountIT {
     }
 
     @Test
-    void shouldReturnOneRowPerMemberWithExtras_whenSomeBucketMembersHaveNoRemainder() {
+    void shouldOmitBucketMembersWithNoPersonalRemainder() {
         queryTestUtils.buildTask().withStatus(Task.TaskStatus.CREATED).withTaskCandidateUsers("alice").buildAndSave();
         // bob shares the bucket but has no personal-only task.
         queryTestUtils.buildTask().withStatus(Task.TaskStatus.CREATED).withTaskCandidateGroups("g1").buildAndSave();
