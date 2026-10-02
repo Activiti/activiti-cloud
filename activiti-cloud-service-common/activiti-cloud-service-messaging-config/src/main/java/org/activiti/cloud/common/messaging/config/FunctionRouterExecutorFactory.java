@@ -26,6 +26,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 public class FunctionRouterExecutorFactory implements Function<String, ExecutorService> {
@@ -42,7 +43,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
         if (executor.isShutdown() || executor.isTerminating()) {
-            throw new RejectedExecutionException("Executor has been shutdown");
+            throw new RejectedExecutionException(
+                "Executor has been shutdown",
+                new IllegalStateException("Executor is shutdown")
+            );
         }
 
         try {
@@ -50,7 +54,8 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             // until the queue can accept the task.
             if (!executor.getQueue().offer(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 throw new RejectedExecutionException(
-                    "Timeout after %s duration because the queue is full".formatted(timeout)
+                    "Timeout after %s duration because the queue is full".formatted(timeout),
+                    new TimeoutException("Task queue wait timeout")
                 );
             }
         } catch (InterruptedException e) {
