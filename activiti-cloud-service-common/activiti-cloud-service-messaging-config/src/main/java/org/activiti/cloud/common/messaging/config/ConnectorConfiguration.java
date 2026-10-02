@@ -343,8 +343,16 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         return connectorBinding ->
             Optional.of(messagingProperties.getFunctionRouter())
                 .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
-                .map(it ->
-                    environment.getProperty("spring.cloud.stream.default.error-handler-definition", String.class)
+                .map(functionRouter ->
+                    Optional.ofNullable(functionRouter.bindings().get(connectorBinding.input()))
+                        .map(BindingProperties::getErrorHandlerDefinition)
+                        .filter(StringUtils::hasText)
+                        .orElseGet(() ->
+                            environment.getProperty(
+                                "spring.cloud.stream.default.error-handler-definition",
+                                String.class
+                            )
+                        )
                 )
                 .filter(StringUtils::hasText)
                 .or(() ->
