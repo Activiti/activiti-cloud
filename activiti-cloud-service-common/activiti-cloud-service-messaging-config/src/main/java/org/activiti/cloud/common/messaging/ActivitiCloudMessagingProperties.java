@@ -493,7 +493,7 @@ public class ActivitiCloudMessagingProperties {
 
         private String errorHandlerDefinition;
 
-        private int maxRetries = 3;
+        private int maxRetries = 1;
 
         private Duration retryInterval = Duration.ofMillis(10);
 
