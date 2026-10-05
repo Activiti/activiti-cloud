@@ -18,21 +18,21 @@
     <postgresql.version>42.7.13</postgresql.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <netty.version>4.2.17.Final</netty.version>
-    <jackson.version>3.1.5</jackson.version>
-    <jackson2.version>2.22.1</jackson2.version>
+    <jackson.version>3.1.7</jackson.version>
+    <jackson2.version>2.22.3</jackson2.version>
     <rest-assured.version>6.0.0</rest-assured.version>
     <!-- AAE-43864 temporary update for security issue -->
     <plexus-utils.version>4.0.3</plexus-utils.version>
     <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
     <spring-kafka.version>4.0.6</spring-kafka.version>
     <!-- Security fix AAE-49996: hibernate-platform pins micrometer-core below the version Spring Boot manages. -->
-    <micrometer.version>1.16.6</micrometer.version>
+    <micrometer.version>1.17.1</micrometer.version>
     <!-- Security fix AAE-50658: override httpcore5 (incl. httpcore5-h2) transitive version. -->
     <httpcore5.version>5.4.3</httpcore5.version>
     <!-- Security fix AAE-50658: override httpclient5 (incl. httpclient5-cache/-fluent) transitive version. -->
     <httpclient5.version>5.6.4</httpclient5.version>
-    <!-- Security fix AAE-50657: override RabbitMQ amqp-client. Remove once the managed Spring Boot BOM ships amqp-client 5.33.1+. -->
-    <amqp-client.version>5.33.1</amqp-client.version>
+    <!-- Security fix AAE-52151 (was AAE-50657): override RabbitMQ amqp-client for GHSA-jh4v-gfqj-7rhx (frame-level OOM). Remove once the managed Spring Boot BOM ships amqp-client 5.34.0+. -->
+    <amqp-client.version>5.34.0</amqp-client.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -198,9 +198,9 @@
         <version>${httpclient5.version}</version>
       </dependency>
 
-      <!-- Security fix AAE-50658: com.rabbitmq:amqp-client transitive version. Managed by the import-scope
+      <!-- Security fix AAE-52151 (was AAE-50658): com.rabbitmq:amqp-client transitive version. Managed by the import-scope
            Spring Boot BOM, so a property alone does not override it; an explicit dependencyManagement entry is
-           required. Remove once the managed Spring Boot BOM ships amqp-client 5.33.1+. -->
+           required. Remove once the managed Spring Boot BOM ships amqp-client 5.34.0+. -->
       <dependency>
         <groupId>com.rabbitmq</groupId>
         <artifactId>amqp-client</artifactId>

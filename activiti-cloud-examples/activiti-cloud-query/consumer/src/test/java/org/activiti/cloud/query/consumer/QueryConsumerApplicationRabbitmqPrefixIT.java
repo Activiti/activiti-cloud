@@ -50,12 +50,7 @@ public class QueryConsumerApplicationRabbitmqPrefixIT extends QueryConsumerAppli
     @Test
     @Override
     void anonymousRabbitQueues() {
-        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
-            .isNotEmpty()
-            .hasSize(1)
-            .satisfies(map ->
-                assertThat(map.keySet()).anyMatch(key -> key.startsWith("default-app.subscriberRegistry.anonymous."))
-            );
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
     }
 
     @Test
@@ -63,11 +58,6 @@ public class QueryConsumerApplicationRabbitmqPrefixIT extends QueryConsumerAppli
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys(
-                "default-app.engineEvents",
-                "default-app.queryEvents",
-                "default-app.subscriberRegistry",
-                "default-app.pushedCounts"
-            );
+            .containsOnlyKeys("default-app.engineEvents", "default-app.queryEvents");
     }
 }

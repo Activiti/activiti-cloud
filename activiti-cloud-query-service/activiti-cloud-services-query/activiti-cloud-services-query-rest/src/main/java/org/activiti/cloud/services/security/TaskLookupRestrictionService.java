@@ -68,25 +68,27 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
             return restrictTaskQuery(predicate);
         }
 
-        QTaskEntity taskEntity = QTaskEntity.taskEntity;
-        QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
-        String userId = securityManager.getAuthenticatedUserId();
-
-        Predicate defaultRestrictions = restrictTaskQuery(new BooleanBuilder());
-
-        BooleanExpression userIsInvolved = processInstanceEntity.initiator
-            .eq(userId) //is Initiator
-            .or(
-                taskEntity.processInstanceId.in(
-                    //user is Involved in one of the tasks of the Process
-                    JPAExpressions.select(taskEntity.processInstanceId)
-                        .from(taskEntity)
-                        .where(defaultRestrictions)
-                )
-            )
-            .or(defaultRestrictions); //apply default conditions
+        BooleanExpression userIsInvolved = isProcessInitiator()
+            .or(hasVisibleTaskInSameProcessInstance())
+            .or(restrictTaskQuery(new BooleanBuilder()));
 
         return addAndConditionToPredicate(predicate, userIsInvolved);
+    }
+
+    private BooleanExpression isProcessInitiator() {
+        String userId = securityManager.getAuthenticatedUserId();
+        return QProcessInstanceEntity.processInstanceEntity.initiator.eq(userId);
+    }
+
+    private BooleanExpression hasVisibleTaskInSameProcessInstance() {
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        QTaskEntity candidateTask = new QTaskEntity("candidateTask");
+        Predicate candidateTaskRestrictions = restrictTaskQuery(new BooleanBuilder(), candidateTask);
+
+        return JPAExpressions.selectOne()
+            .from(candidateTask)
+            .where(candidateTask.processInstanceId.eq(taskEntity.processInstanceId).and(candidateTaskRestrictions))
+            .exists();
     }
 
     private Predicate restrictTaskQuery(Predicate predicate, QTaskEntity task) {
@@ -94,39 +96,45 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
             return predicate;
         }
 
-        //get authenticated user
         String userId = securityManager.getAuthenticatedUserId();
-
-        BooleanExpression restriction = null;
-
-        if (userId != null) {
-            BooleanExpression isNotAssigned = task.assignee.isNull();
-            restriction = task.assignee
-                .eq(userId) //user is assignee
-                .or(task.owner.eq(userId)) //user is owner
-                .or(
-                    task.taskCandidateUsers
-                        .any()
-                        .userId.eq(userId) //is candidate user and task is not assigned
-                        .and(isNotAssigned)
-                );
-
-            List<String> groups = null;
-            if (securityManager != null) {
-                groups = securityManager.getAuthenticatedUserGroups();
-            }
-            if (groups != null && groups.size() > 0) {
-                //belongs to candidate group and task is not assigned
-                restriction = restriction.or(task.taskCandidateGroups.any().groupId.in(groups).and(isNotAssigned));
-            }
-
-            //or there are no candidates set and task is not assigned
-            restriction = restriction.or(
-                task.taskCandidateUsers.isEmpty().and(task.taskCandidateGroups.isEmpty()).and(isNotAssigned)
-            );
-        }
+        BooleanExpression restriction = userId != null ? buildUserVisibilityRestriction(task, userId) : null;
 
         return addAndConditionToPredicate(predicate, restriction);
+    }
+
+    private BooleanExpression buildUserVisibilityRestriction(QTaskEntity task, String userId) {
+        BooleanExpression isNotAssigned = task.assignee.isNull();
+
+        BooleanExpression restriction = isAssignee(task, userId)
+            .or(isOwner(task, userId))
+            .or(isCandidateUser(task, userId).and(isNotAssigned));
+
+        List<String> groups = securityManager != null ? securityManager.getAuthenticatedUserGroups() : null;
+        if (groups != null && groups.size() > 0) {
+            restriction = restriction.or(isCandidateGroupMember(task, groups).and(isNotAssigned));
+        }
+
+        return restriction.or(hasNoCandidates(task).and(isNotAssigned));
+    }
+
+    private BooleanExpression isAssignee(QTaskEntity task, String userId) {
+        return task.assignee.eq(userId);
+    }
+
+    private BooleanExpression isOwner(QTaskEntity task, String userId) {
+        return task.owner.eq(userId);
+    }
+
+    private BooleanExpression isCandidateUser(QTaskEntity task, String userId) {
+        return task.taskCandidateUsers.any().userId.eq(userId);
+    }
+
+    private BooleanExpression isCandidateGroupMember(QTaskEntity task, List<String> groups) {
+        return task.taskCandidateGroups.any().groupId.in(groups);
+    }
+
+    private BooleanExpression hasNoCandidates(QTaskEntity task) {
+        return task.taskCandidateUsers.isEmpty().and(task.taskCandidateGroups.isEmpty());
     }
 
     private Predicate addAndConditionToPredicate(Predicate predicate, BooleanExpression expression) {

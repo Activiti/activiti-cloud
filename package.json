@@ -53,21 +53,21 @@
     "@michalfidor/playswag": "^1.11.0",
     "@reportportal/agent-js-playwright": "^5.5.0",
     "@playwright/test": "^1.63.0",
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.3",
     "@types/ws": "^8.18.1",
-    "tsx": "^4.23.13",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=22"
   },
   "dependencies": {
-    "chalk": "^6.0.0",
+    "chalk": "^6.0.1",
     "date-fns": "^4.4.0",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.4",
     "jwt-decode": "^4.0.0",
     "winston": "^3.19.0",
-    "ws": "^8.21.3"
+    "ws": "^8.22.0"
   },
   "overrides": {
     "fast-uri": "3.1.6",

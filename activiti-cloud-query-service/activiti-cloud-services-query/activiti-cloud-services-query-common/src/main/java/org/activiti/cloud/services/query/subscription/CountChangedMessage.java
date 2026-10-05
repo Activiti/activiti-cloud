@@ -19,10 +19,10 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Count-channel message published by the query-consumer and relayed to the owning socket by
- * query-rest. The {@code scopeKey} (see {@link ScopeKeys}) says who the number is for and which
- * count type it belongs to; {@code count} is absolute (never a delta); {@code asOf} is when the count
- * was computed, not when the triggering event happened.
+ * Published by the recompute pipeline directly into this instance's own {@code pushedCountsSink}.
+ * The {@code scopeKey} (see {@link ScopeKeys}) says who the number is for and which count type it
+ * belongs to; {@code count} is absolute (never a delta); {@code asOf} is when the count was
+ * computed, not when the triggering event happened.
  */
 public record CountChangedMessage(String scopeKey, long count, Instant asOf) {
     public CountChangedMessage {
