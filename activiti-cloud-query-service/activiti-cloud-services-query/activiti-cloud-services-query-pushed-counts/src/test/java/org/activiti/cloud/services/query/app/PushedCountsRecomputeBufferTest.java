@@ -1,0 +1,348 @@
+/*
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.activiti.cloud.services.query.app;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
+
+class PushedCountsRecomputeBufferTest {
+
+    private static final Instant T0 = Instant.parse("2026-01-01T00:00:00Z");
+
+    private final PushedCountsRecomputeBuffer buffer = new PushedCountsRecomputeBuffer();
+
+    private Logger bufferLogger;
+    private ListAppender<ILoggingEvent> logAppender;
+
+    @BeforeEach
+    void setUpLogCapture() {
+        bufferLogger = (Logger) LoggerFactory.getLogger(PushedCountsRecomputeBuffer.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        bufferLogger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void tearDownLogCapture() {
+        bufferLogger.detachAppender(logAppender);
+    }
+
+    @Test
+    void isEmpty_whenNothingCaptured() {
+        assertThat(buffer.isEmpty()).isTrue();
+        assertThat(buffer.size()).isZero();
+    }
+
+    @Test
+    void constructor_rejectsAZeroHardCap() {
+        assertThatThrownBy(() -> new PushedCountsRecomputeBuffer(0)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void constructor_rejectsANegativeHardCap() {
+        assertThatThrownBy(() -> new PushedCountsRecomputeBuffer(-1)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void captureTask_recordsTheTaskAndItsNamedUsers() {
+        buffer.captureTask("task-1", T0, "alice", "bob");
+
+        PushedCountsRecomputeWindow window = buffer.drainAndReset();
+
+        assertThat(window.taskIds()).containsExactly("task-1");
+        assertThat(window.namedUserIds()).containsExactlyInAnyOrder("alice", "bob");
+    }
+
+    @Test
+    void captureTask_ignoresBlankOrNullNamedUsers() {
+        buffer.captureTask("task-1", T0, "alice", null, "", "  ");
+
+        assertThat(buffer.drainAndReset().namedUserIds()).containsExactly("alice");
+    }
+
+    @Test
+    void captureTask_withNullTaskId_isIgnored() {
+        buffer.captureTask(null, T0, "alice");
+
+        assertThat(buffer.isEmpty()).isTrue();
+    }
+
+    @Test
+    void captureTaskCandidateGroup_recordsTheTaskAndTheGroup() {
+        buffer.captureTaskCandidateGroup("task-1", "eng", T0);
+
+        PushedCountsRecomputeWindow window = buffer.drainAndReset();
+
+        assertThat(window.taskIds()).containsExactly("task-1");
+        assertThat(window.touchedGroupIds()).containsExactly("eng");
+    }
+
+    @Test
+    void captureProcess_recordsTheProcessAndItsInitiator() {
+        buffer.captureProcess("proc-1", "alice", T0);
+
+        PushedCountsRecomputeWindow window = buffer.drainAndReset();
+
+        assertThat(window.processInstanceIds()).containsExactly("proc-1");
+        assertThat(window.namedInitiatorIds()).containsExactly("alice");
+    }
+
+    @Test
+    void captureProcess_withNoInitiator_recordsOnlyTheProcess() {
+        buffer.captureProcess("proc-1", null, T0);
+
+        PushedCountsRecomputeWindow window = buffer.drainAndReset();
+
+        assertThat(window.processInstanceIds()).containsExactly("proc-1");
+        assertThat(window.namedInitiatorIds()).isEmpty();
+    }
+
+    @Test
+    void size_countsDistinctTasksAndProcesses() {
+        buffer.captureTask("task-1", T0);
+        buffer.captureTask("task-1", T0);
+        buffer.captureTask("task-2", T0);
+        buffer.captureProcess("proc-1", null, T0);
+
+        assertThat(buffer.size()).isEqualTo(3);
+    }
+
+    @Test
+    void captureTask_pastTheHardCap_isDropped() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureTask("task-2", T0);
+
+        assertThat(capped.drainAndReset().taskIds()).containsExactly("task-1");
+    }
+
+    @Test
+    void captureTask_reTouchingAnAlreadyCapturedTask_isAllowed_evenAtTheHardCap() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureTask("task-1", T0, "alice");
+
+        assertThat(capped.drainAndReset().namedUserIds()).containsExactly("alice");
+    }
+
+    @Test
+    void captureTaskCandidateGroup_pastTheHardCap_isDropped() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureTaskCandidateGroup("task-2", "eng", T0);
+
+        assertThat(capped.drainAndReset().taskIds()).containsExactly("task-1");
+    }
+
+    @Test
+    void captureProcess_pastTheHardCap_isDropped() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureProcess("proc-1", "alice", T0);
+
+        PushedCountsRecomputeWindow window = capped.drainAndReset();
+        assertThat(window.processInstanceIds()).isEmpty();
+        assertThat(window.namedInitiatorIds()).isEmpty();
+    }
+
+    @Test
+    void capturesPastTheHardCap_logOnlyTheFirstDrop_thenAnAggregateOnDrain() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+
+        capped.captureTask("task-2", T0);
+        capped.captureTaskCandidateGroup("task-3", "eng", T0);
+        capped.captureProcess("proc-1", "alice", T0);
+        List<ILoggingEvent> loggedDuringCapture = List.copyOf(logAppender.list);
+
+        capped.drainAndReset();
+
+        assertThat(loggedDuringCapture).hasSize(1);
+        assertThat(logAppender.list).hasSize(2);
+        assertThat(logAppender.list.get(1).getFormattedMessage()).contains("dropped 3 captures");
+    }
+
+    @Test
+    void drainAndReset_withNoDrops_logsNoAggregate() {
+        buffer.captureTask("task-1", T0);
+
+        buffer.drainAndReset();
+
+        assertThat(logAppender.list).isEmpty();
+    }
+
+    @Test
+    void drainAndReset_resetsTheDropCounter_soTheNextWindowLogsItsOwnFirstDrop() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+        capped.captureTask("task-2", T0);
+        capped.drainAndReset();
+        logAppender.list.clear();
+
+        capped.captureTask("task-1", T0);
+        capped.captureTask("task-3", T0);
+
+        assertThat(logAppender.list).hasSize(1);
+    }
+
+    @Test
+    void captureProcess_reTouchingAnAlreadyCapturedProcess_isAllowed_evenAtTheHardCap() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureProcess("proc-1", null, T0);
+
+        capped.captureProcess("proc-1", "alice", T0);
+
+        assertThat(capped.drainAndReset().namedInitiatorIds()).containsExactly("alice");
+    }
+
+    @Test
+    void mergeBack_pastTheHardCap_dropsTheWholeWindow() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+        PushedCountsRecomputeWindow failedWindow = new PushedCountsRecomputeWindow(
+            Set.of("task-2"),
+            Set.of(),
+            Set.of("alice"),
+            Set.of(),
+            Set.of()
+        );
+
+        capped.mergeBack(failedWindow, T0);
+
+        assertThat(capped.drainAndReset().taskIds()).containsExactly("task-1");
+    }
+
+    @Test
+    void captureTask_succeedsAgain_afterDrainAndResetFreesCapacity() {
+        PushedCountsRecomputeBuffer capped = new PushedCountsRecomputeBuffer(1);
+        capped.captureTask("task-1", T0);
+        capped.drainAndReset();
+
+        capped.captureTask("task-2", T0);
+
+        assertThat(capped.drainAndReset().taskIds()).containsExactly("task-2");
+    }
+
+    @Test
+    void age_isZero_whenNothingCapturedYet() {
+        Clock clock = Clock.fixed(T0, ZoneOffset.UTC);
+
+        assertThat(buffer.age(clock)).isEqualTo(Duration.ZERO);
+    }
+
+    @Test
+    void age_measuresFromTheFirstCaptureOfTheWindow_notTheLatest() {
+        buffer.captureTask("task-1", T0);
+        buffer.captureTask("task-2", T0.plusSeconds(1));
+
+        Clock clock = Clock.fixed(T0.plusSeconds(2), ZoneOffset.UTC);
+
+        assertThat(buffer.age(clock)).isEqualTo(Duration.ofSeconds(2));
+    }
+
+    @Test
+    void mergeBack_restoresADrainedWindow() {
+        buffer.captureTask("task-1", T0, "alice");
+        PushedCountsRecomputeWindow window = buffer.drainAndReset();
+
+        buffer.mergeBack(window, T0.plusSeconds(1));
+
+        PushedCountsRecomputeWindow restored = buffer.drainAndReset();
+        assertThat(restored.taskIds()).containsExactly("task-1");
+        assertThat(restored.namedUserIds()).containsExactly("alice");
+    }
+
+    @Test
+    void mergeBack_ofAnEmptyWindow_doesNothing() {
+        buffer.mergeBack(new PushedCountsRecomputeWindow(Set.of(), Set.of(), Set.of(), Set.of(), Set.of()), T0);
+
+        assertThat(buffer.isEmpty()).isTrue();
+    }
+
+    @Test
+    void drainAndReset_clearsTheBuffer_andStartsAFreshWindow() {
+        buffer.captureTask("task-1", T0, "alice");
+        buffer.drainAndReset();
+
+        assertThat(buffer.isEmpty()).isTrue();
+        assertThat(buffer.age(Clock.fixed(T0.plusSeconds(10), ZoneOffset.UTC))).isEqualTo(Duration.ZERO);
+    }
+
+    @Test
+    void drainAndReset_underConcurrentCapture_neverLosesAnEntry() throws InterruptedException {
+        int threads = 16;
+        int perThread = 200;
+        Set<String> allCaptured;
+        Set<String> drained;
+        try (ExecutorService pool = Executors.newFixedThreadPool(threads)) {
+            CountDownLatch ready = new CountDownLatch(threads);
+            CountDownLatch go = new CountDownLatch(1);
+            allCaptured = ConcurrentHashMap.newKeySet();
+            drained = ConcurrentHashMap.newKeySet();
+
+            for (int t = 0; t < threads; t++) {
+                int threadIndex = t;
+                pool.submit(() -> {
+                    ready.countDown();
+                    try {
+                        go.await();
+                    } catch (InterruptedException _) {
+                        Thread.currentThread().interrupt();
+                    }
+                    for (int i = 0; i < perThread; i++) {
+                        String taskId = "task-" + threadIndex + "-" + i;
+                        allCaptured.add(taskId);
+                        buffer.captureTask(taskId, T0);
+                        if (i % 10 == 0) {
+                            drained.addAll(buffer.drainAndReset().taskIds());
+                        }
+                    }
+                });
+            }
+
+            ready.await();
+            go.countDown();
+            pool.shutdown();
+            assertThat(pool.awaitTermination(30, TimeUnit.SECONDS)).isTrue();
+        }
+        drained.addAll(buffer.drainAndReset().taskIds());
+
+        assertThat(drained).isEqualTo(allCaptured);
+    }
+}

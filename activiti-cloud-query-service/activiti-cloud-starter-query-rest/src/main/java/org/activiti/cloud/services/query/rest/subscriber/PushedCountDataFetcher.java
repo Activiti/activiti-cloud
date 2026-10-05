@@ -93,7 +93,7 @@ public class PushedCountDataFetcher implements DataFetcher<Publisher<PushedCount
             .doFinally(signalType -> {
                 LOGGER.debug("Session {} unsubscribed from {} for user {} ({})", sessionId, type, userId, signalType);
                 if (subscriptionTracker.decrementAndCheckIfNowZero(sessionId)) {
-                    subscriberRegistry.unregister(userId, sessionId, clock.instant());
+                    subscriberRegistry.unregister(userId, sessionId);
                 }
             });
     }

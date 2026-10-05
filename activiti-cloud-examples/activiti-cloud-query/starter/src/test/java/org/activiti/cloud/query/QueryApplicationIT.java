@@ -202,17 +202,14 @@ public class QueryApplicationIT {
     void anonymousRabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
             .isNotEmpty()
-            .hasSize(2)
-            .satisfies(map -> {
-                assertThat(map.keySet()).anyMatch(key -> key.startsWith("queryEvents.anonymous."));
-                assertThat(map.keySet()).anyMatch(key -> key.startsWith("subscriberRegistry.anonymous."));
-            });
+            .hasSize(1)
+            .satisfies(map -> assertThat(map.keySet()).anyMatch(key -> key.startsWith("queryEvents.anonymous.")));
     }
 
     @Test
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("engineEvents", "queryEvents", "subscriberRegistry", "pushedCounts");
+            .containsOnlyKeys("engineEvents", "queryEvents");
     }
 }
