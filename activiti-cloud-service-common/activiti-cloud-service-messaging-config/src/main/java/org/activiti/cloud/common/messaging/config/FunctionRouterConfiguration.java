@@ -26,13 +26,14 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -217,14 +218,28 @@ public class FunctionRouterConfiguration {
                                 .build();
                         };
 
+                        Function<Message<?>, CompletableFuture<Object>> functionFuture = request -> {
+                            final CompletableFuture<Object> future = new CompletableFuture<>();
+                            try {
+                                functionExecutorSelector.apply(request).execute(() -> {
+                                    try {
+                                        future.complete(routingFunction.apply(request));
+                                    } catch (Throwable ex) {
+                                        future.completeExceptionally(ex);
+                                    }
+                                });
+                            } catch (Exception exception) {
+                                future.completeExceptionally(exception);
+                            }
+                            return future;
+                        };
+
                         var functions = registrations
                             .stream()
                             .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
                             .map(functionRequest ->
-                                CompletableFuture.supplyAsync(
-                                    () -> routingFunction.apply(functionRequest),
-                                    functionExecutorSelector.apply(functionRequest)
-                                )
+                                functionFuture
+                                    .apply(functionRequest)
                                     .thenApply(result -> {
                                         var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
                                         log.debug(
@@ -288,15 +303,9 @@ public class FunctionRouterConfiguration {
 
                                 if (!errors.isEmpty()) {
                                     log.debug("Errors handling function route message request {}", errors);
-                                    final Function<
-                                        ErrorMessage,
-                                        Supplier<Consumer<ErrorMessage>>
-                                    > fallbackErrorHandler = errorMessage -> () ->
-                                        new Consumer<ErrorMessage>() {
-                                            @Override
-                                            public void accept(ErrorMessage errorMessage) {
-                                                throw new RuntimeException(errorMessage.getPayload());
-                                            }
+                                    final Function<ErrorMessage, Consumer<ErrorMessage>> fallbackErrorHandler =
+                                        errorMessage -> {
+                                            throw new RuntimeException(errorMessage.getPayload());
                                         };
 
                                     final var errorHandlingResults = errors
@@ -318,7 +327,7 @@ public class FunctionRouterConfiguration {
                                                 .map(functionCatalog::lookup)
                                                 .filter(Consumer.class::isInstance)
                                                 .map(Consumer.class::cast)
-                                                .orElseGet(fallbackErrorHandler.apply(entry.getValue()));
+                                                .orElseGet(() -> fallbackErrorHandler.apply(entry.getValue()));
 
                                             try {
                                                 return CompletableFuture.runAsync(
@@ -372,8 +381,14 @@ public class FunctionRouterConfiguration {
         return new Consumer<ErrorMessage>() {
             @Override
             public void accept(ErrorMessage errorMessage) {
-                findCause(errorMessage.getPayload(), AggregateMessageDeliveryException.class).ifPresent(exception -> {
-                    throw exception;
+                findCause(errorMessage.getPayload(), AggregateMessageDeliveryException.class).ifPresent(
+                    aggregateMessageDeliveryException -> {
+                        throw aggregateMessageDeliveryException;
+                    }
+                );
+
+                findCause(errorMessage.getPayload(), TimeoutException.class).ifPresent(timeoutException -> {
+                    throw new RejectedExecutionException(timeoutException);
                 });
             }
 
