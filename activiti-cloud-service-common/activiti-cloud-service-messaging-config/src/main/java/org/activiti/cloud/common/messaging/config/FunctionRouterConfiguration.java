@@ -28,7 +28,6 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -60,7 +59,6 @@ import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.integration.MessageDispatchingException;
 import org.springframework.integration.channel.DirectChannel;
@@ -218,7 +216,7 @@ public class FunctionRouterConfiguration {
                                 .build();
                         };
 
-                        Function<Message<?>, CompletableFuture<Object>> functionFuture = request -> {
+                        Function<Message<?>, CompletableFuture<Object>> routingFunctionFuture = request -> {
                             final CompletableFuture<Object> future = new CompletableFuture<>();
                             try {
                                 functionExecutorSelector.apply(request).execute(() -> {
@@ -238,7 +236,7 @@ public class FunctionRouterConfiguration {
                             .stream()
                             .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
                             .map(functionRequest ->
-                                functionFuture
+                                routingFunctionFuture
                                     .apply(functionRequest)
                                     .thenApply(result -> {
                                         var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
@@ -251,7 +249,7 @@ public class FunctionRouterConfiguration {
                                     })
                                     .exceptionally(error -> {
                                         var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
-                                        log.error(
+                                        log.warn(
                                             "Error routing message request {} to function registration {}",
                                             functionRequest,
                                             functionDefinition,
@@ -262,11 +260,8 @@ public class FunctionRouterConfiguration {
                             )
                             .toList();
 
-                        var completed = CompletableFuture.allOf(functions.toArray(CompletableFuture[]::new)).thenApply(
-                            v -> functions.stream().map(CompletableFuture::join).toList()
-                        );
-
-                        completed
+                        CompletableFuture.allOf(functions.toArray(CompletableFuture[]::new))
+                            .thenApply(v -> functions.stream().map(CompletableFuture::join).toList())
                             .thenAccept(results -> {
                                 final var errors = results
                                     .stream()
@@ -280,16 +275,6 @@ public class FunctionRouterConfiguration {
                                                 .getValue()
                                                 .map(CompletionException.class::cast)
                                                 .map(CompletionException::getCause)
-                                                .map(cause -> {
-                                                    if (cause instanceof MessagingException messagingException) {
-                                                        return new ErrorMessage(messagingException, message);
-                                                    } else {
-                                                        return new ErrorMessage(
-                                                            new MessagingException(message, cause),
-                                                            message
-                                                        );
-                                                    }
-                                                })
                                                 .get()
                                         )
                                     )
@@ -312,6 +297,18 @@ public class FunctionRouterConfiguration {
                                         .stream()
                                         .filter(Objects::nonNull)
                                         .map(entry -> {
+                                            final var errorMessage = Optional.of(entry.getValue())
+                                                .filter(MessagingException.class::isInstance)
+                                                .map(messagingException ->
+                                                    new ErrorMessage(messagingException, message)
+                                                )
+                                                .orElseGet(() ->
+                                                    new ErrorMessage(
+                                                        new MessagingException(message, entry.getValue()),
+                                                        message
+                                                    )
+                                                );
+
                                             final var errorHandlerDefinition = Optional.of(entry.getKey())
                                                 .map(bindingName -> functionRouter.bindings().get(bindingName))
                                                 .map(BindingProperties::getErrorHandlerDefinition)
@@ -327,7 +324,7 @@ public class FunctionRouterConfiguration {
                                                 .map(functionCatalog::lookup)
                                                 .filter(Consumer.class::isInstance)
                                                 .map(Consumer.class::cast)
-                                                .orElseGet(() -> fallbackErrorHandler.apply(entry.getValue()));
+                                                .orElseGet(() -> fallbackErrorHandler.apply(errorMessage));
 
                                             try {
                                                 return CompletableFuture.runAsync(
@@ -340,7 +337,6 @@ public class FunctionRouterConfiguration {
                                         })
                                         .filter(CompletableFuture::isCompletedExceptionally)
                                         .map(CompletableFuture::exceptionNow)
-                                        .map(NestedExceptionUtils::getMostSpecificCause)
                                         .map(RuntimeException::new)
                                         .toList();
 
@@ -381,15 +377,15 @@ public class FunctionRouterConfiguration {
         return new Consumer<ErrorMessage>() {
             @Override
             public void accept(ErrorMessage errorMessage) {
-                findCause(errorMessage.getPayload(), AggregateMessageDeliveryException.class).ifPresent(
-                    aggregateMessageDeliveryException -> {
-                        throw aggregateMessageDeliveryException;
-                    }
-                );
+                findCause(errorMessage.getPayload(), AggregateMessageDeliveryException.class).ifPresent(rethrow());
 
-                findCause(errorMessage.getPayload(), TimeoutException.class).ifPresent(timeoutException -> {
-                    throw new RejectedExecutionException(timeoutException);
-                });
+                findCause(errorMessage.getPayload(), RejectedExecutionException.class).ifPresent(rethrow());
+            }
+
+            private Consumer<RuntimeException> rethrow() {
+                return exception -> {
+                    throw exception;
+                };
             }
 
             private <T extends Throwable> Optional<T> findCause(Throwable throwable, Class<T> targetType) {
