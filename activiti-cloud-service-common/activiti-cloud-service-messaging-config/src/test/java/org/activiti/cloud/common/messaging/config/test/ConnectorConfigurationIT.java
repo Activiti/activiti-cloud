@@ -49,7 +49,6 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -611,7 +610,6 @@ public class ConnectorConfigurationIT {
     }
 
     @Test
-    @Disabled
     void testShouldDiscardMessageWithInValidAppVersionWithRetryWithRepublishEvent() {
         // given
         byte[] payload = "Test retry".getBytes();
