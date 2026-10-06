@@ -94,49 +94,14 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
             .filter(Predicate.not(Collection::isEmpty))
             .ifPresentOrElse(
                 registrations -> {
-                    Function<Message<?>, String> resolveFunctionDefinition = functionMessage ->
-                        functionMessage.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class);
-                    BiFunction<Message<?>, String, Message<?>> toFunctionRequest = (
-                        functionMessage,
-                        functionRegistration
-                    ) -> {
-                        String expectedContentType = messagingProperties
-                            .getFunctionRouter()
-                            .bindingNameFor(functionRegistration)
-                            .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
-                            .map(BindingProperties::getContentType)
-                            .orElse(null);
-                        return MessageBuilder.fromMessage(
-                            messageContentTypeNormalizer.normalizeToExpected(functionMessage, expectedContentType)
-                        )
-                            .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
-                            .build();
-                    };
-
-                    Function<Message<?>, CompletableFuture<Object>> routingFunctionFuture = request -> {
-                        final CompletableFuture<Object> future = new CompletableFuture<>();
-                        try {
-                            functionExecutorSelector.apply(request).execute(() -> {
-                                try {
-                                    future.complete(routingFunction.apply(request));
-                                } catch (Throwable ex) {
-                                    future.completeExceptionally(ex);
-                                }
-                            });
-                        } catch (Exception exception) {
-                            future.completeExceptionally(exception);
-                        }
-                        return future;
-                    };
-
                     var functions = registrations
                         .stream()
-                        .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
+                        .map(functionRegistration -> toFunctionRequest().apply(message, functionRegistration))
                         .map(functionRequest ->
-                            routingFunctionFuture
+                            routingFunctionFuture()
                                 .apply(functionRequest)
                                 .thenApply(result -> {
-                                    var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
+                                    var functionDefinition = resolveFunctionDefinition().apply(functionRequest);
                                     log.debug(
                                         "Function message request {} successfully routed to {}",
                                         functionRequest,
@@ -145,7 +110,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                                     return Map.entry(functionDefinition, Optional.ofNullable(result));
                                 })
                                 .exceptionally(error -> {
-                                    var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
+                                    var functionDefinition = resolveFunctionDefinition().apply(functionRequest);
                                     log.warn(
                                         "Error routing message request {} to function registration {}",
                                         functionRequest,
@@ -243,6 +208,45 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                     );
                 }
             );
+    }
+
+    private Function<Message<?>, String> resolveFunctionDefinition() {
+        return functionMessage ->
+            functionMessage.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class);
+    }
+
+    private BiFunction<Message<?>, String, Message<?>> toFunctionRequest() {
+        return (functionMessage, functionRegistration) -> {
+            String expectedContentType = messagingProperties
+                .getFunctionRouter()
+                .bindingNameFor(functionRegistration)
+                .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
+                .map(BindingProperties::getContentType)
+                .orElse(null);
+            return MessageBuilder.fromMessage(
+                messageContentTypeNormalizer.normalizeToExpected(functionMessage, expectedContentType)
+            )
+                .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
+                .build();
+        };
+    }
+
+    private Function<Message<?>, CompletableFuture<Object>> routingFunctionFuture() {
+        return request -> {
+            final CompletableFuture<Object> future = new CompletableFuture<>();
+            try {
+                functionExecutorSelector.apply(request).execute(() -> {
+                    try {
+                        future.complete(routingFunction.apply(request));
+                    } catch (Exception ex) {
+                        future.completeExceptionally(ex);
+                    }
+                });
+            } catch (Exception exception) {
+                future.completeExceptionally(exception);
+            }
+            return future;
+        };
     }
 
     private ErrorMessage errorMessage(Message<?> message, Throwable throwable) {
