@@ -88,9 +88,13 @@ public class AuditEventsAdminService {
         );
     }
 
+    private Sort timestampDescSortWithoutNullPrecedence() {
+        return Sort.by(Sort.Order.desc("timestamp").nullsFirst());
+    }
+
     private Pageable applyDefaultSort(Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
-            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            Sort defaultSort = timestampDescSortWithoutNullPrecedence();
             if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
                 Pageable inner = alfrescoPageRequest.getPageable();
                 return new AlfrescoPageRequest(
@@ -121,7 +125,7 @@ public class AuditEventsAdminService {
 
             Page<AuditEventEntity> auditPage;
             do {
-                Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
+                Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, timestampDescSortWithoutNullPrecedence());
                 auditPage = eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(
                     range.start(),
                     range.end(),

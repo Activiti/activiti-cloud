@@ -114,7 +114,7 @@ class AuditEventsAdminControllerV2ImplWebMvcTest {
 
         Sort sort = pageableCaptor.getValue().getSort();
         assertThat(sort.isSorted()).isTrue();
-        assertThat(sort).containsExactly(new Sort.Order(Sort.Direction.DESC, "timestamp"));
+        assertThat(sort).containsExactly(Sort.Order.desc("timestamp").nullsFirst());
     }
 
     @Test

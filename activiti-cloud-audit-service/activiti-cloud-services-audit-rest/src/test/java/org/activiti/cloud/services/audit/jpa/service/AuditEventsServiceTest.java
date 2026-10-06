@@ -161,7 +161,7 @@ class AuditEventsServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void should_defaultSortToTimestampDesc_when_unsorted() {
+    void should_defaultSortToTimestampDescNullsFirst_when_unsorted() {
         Pageable pageable = PageRequest.of(0, 20);
         given(securityPoliciesApplicationService.createSpecWithSecurity(any(), any())).willReturn(
             mock(Specification.class)
@@ -174,9 +174,7 @@ class AuditEventsServiceTest {
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
-        assertThat(pageableCaptor.getValue().getSort()).containsExactly(
-            new Sort.Order(Sort.Direction.DESC, "timestamp")
-        );
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(Sort.Order.desc("timestamp").nullsFirst());
     }
 
     @Test
