@@ -22,12 +22,12 @@ import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
-public class CloudTaskImplTest {
+class CloudTaskImplTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void shouldCopyAllowSelfServiceFromTask() {
+    void shouldCopyAllowSelfServiceFromTask() {
         TaskImpl task = new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED);
         task.setAllowSelfService(true);
 
@@ -37,7 +37,7 @@ public class CloudTaskImplTest {
     }
 
     @Test
-    public void shouldDefaultAllowSelfServiceToFalse() {
+    void shouldDefaultAllowSelfServiceToFalse() {
         TaskImpl task = new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED);
 
         CloudTaskImpl cloudTask = new CloudTaskImpl(task);
@@ -46,7 +46,7 @@ public class CloudTaskImplTest {
     }
 
     @Test
-    public void shouldPreserveAllowSelfServiceThroughJsonRoundTrip() {
+    void shouldPreserveAllowSelfServiceThroughJsonRoundTrip() {
         TaskImpl task = new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED);
         task.setAllowSelfService(true);
         CloudTaskImpl cloudTask = new CloudTaskImpl(task);

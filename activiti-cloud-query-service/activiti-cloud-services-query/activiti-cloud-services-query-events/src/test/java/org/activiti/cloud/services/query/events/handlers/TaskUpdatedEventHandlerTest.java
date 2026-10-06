@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class TaskUpdatedEventHandlerTest {
+class TaskUpdatedEventHandlerTest {
 
     @InjectMocks
     private TaskUpdatedEventHandler handler;
@@ -41,7 +41,7 @@ public class TaskUpdatedEventHandlerTest {
     private EntityManager entityManager;
 
     @Test
-    public void handleShouldCopyAllowSelfServiceOntoExistingTask() {
+    void handleShouldCopyAllowSelfServiceOntoExistingTask() {
         //given
         TaskImpl eventTask = new TaskImpl("id", "name", Task.TaskStatus.ASSIGNED);
         eventTask.setAllowSelfService(true);
@@ -60,7 +60,7 @@ public class TaskUpdatedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventShouldReturnTaskUpdatedEvent() {
+    void getHandledEventShouldReturnTaskUpdatedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 
