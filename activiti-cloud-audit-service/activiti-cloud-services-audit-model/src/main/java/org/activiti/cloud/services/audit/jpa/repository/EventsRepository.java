@@ -34,5 +34,5 @@ public interface EventsRepository<T extends AuditEventEntity> extends
 
     Collection<AuditEventEntity> findAllByTimestampBetweenOrderByTimestampDesc(Long startDateTime, Long endDateTime);
 
-    Page<T> findAllByTimestampBetweenOrderByTimestampDesc(Long startDateTime, Long endDateTime, Pageable pageable);
+    Page<T> findAllByTimestampBetween(Long startDateTime, Long endDateTime, Pageable pageable);
 }
