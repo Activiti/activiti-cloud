@@ -1140,7 +1140,7 @@
     </rollback>
   </changeSet>
 
-  <changeSet author="activiti-query"
+  <changeSet author="activiti-query" runInTransaction="false"
              id="alter48-schema" dbms="postgresql">
     <sqlFile dbms="postgresql"
              encoding="utf8"
@@ -1171,7 +1171,7 @@
                encoding="utf8"
                path="changelog/48-rollback.oracle.schema.9.2.0.sql"
                relativeToChangelogFile="true"
-               splitStatements="true"
+               splitStatements="false"
                stripComments="true"/>
     </rollback>
   </changeSet>
