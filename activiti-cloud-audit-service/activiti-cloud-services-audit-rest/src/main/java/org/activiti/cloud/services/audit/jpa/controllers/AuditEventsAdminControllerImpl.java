@@ -85,7 +85,19 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
 
     @GetMapping
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
-        pageable = applyDefaultSort(pageable);
+        if (pageable.getSort().isUnsorted()) {
+            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
+                Pageable inner = alfrescoPageRequest.getPageable();
+                pageable = new AlfrescoPageRequest(
+                    alfrescoPageRequest.getOffset(),
+                    alfrescoPageRequest.getPageSize(),
+                    PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                );
+            } else {
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+            }
+        }
 
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
 
@@ -120,25 +132,5 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
             events.add(eventConverters.getConverterByEventTypeName(aee.getEventType()).convertToAPI(aee));
         }
         return events;
-    }
-
-    private Pageable applyDefaultSort(Pageable pageable) {
-        if (pageable.getSort().isUnsorted()) {
-            Sort defaultSort = timestampDescSortWithoutNullPrecedence();
-            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
-                Pageable inner = alfrescoPageRequest.getPageable();
-                return new AlfrescoPageRequest(
-                    alfrescoPageRequest.getOffset(),
-                    alfrescoPageRequest.getPageSize(),
-                    PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
-                );
-            }
-            return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
-        }
-        return pageable;
-    }
-
-    private Sort timestampDescSortWithoutNullPrecedence() {
-        return Sort.by(Sort.Order.desc("timestamp").nullsFirst());
     }
 }
