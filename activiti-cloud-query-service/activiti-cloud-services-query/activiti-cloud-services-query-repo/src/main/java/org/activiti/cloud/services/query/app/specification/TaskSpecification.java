@@ -45,11 +45,18 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
 
     private final String userId;
     private final Collection<String> userGroups;
+    private final boolean groupVisibleOnly;
 
-    private TaskSpecification(TaskSearchRequest searchRequest, String userId, Collection<String> userGroups) {
+    private TaskSpecification(
+        TaskSearchRequest searchRequest,
+        String userId,
+        Collection<String> userGroups,
+        boolean groupVisibleOnly
+    ) {
         super(searchRequest);
         this.userId = userId;
         this.userGroups = userGroups;
+        this.groupVisibleOnly = groupVisibleOnly;
     }
 
     /**
@@ -59,7 +66,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
      * @return a specification that applies the filters in the request
      */
     public static TaskSpecification unrestricted(TaskSearchRequest taskSearchRequest) {
-        return new TaskSpecification(taskSearchRequest, null, null);
+        return new TaskSpecification(taskSearchRequest, null, null, false);
     }
 
     /**
@@ -81,7 +88,17 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         String userId,
         Collection<String> userGroups
     ) {
-        return new TaskSpecification(taskSearchRequest, userId, userGroups);
+        return new TaskSpecification(taskSearchRequest, userId, userGroups, false);
+    }
+
+    /**
+     * Restricts to the group-visible slice of {@link #restricted}: unassigned tasks that have a candidate
+     * group in {@code userGroups} or no candidates at all. Emits only the shared group-door term (it takes
+     * no user id), so it is a strict subset of {@link #restricted} and can never match a user's assigned,
+     * owned or personal-candidate tasks.
+     */
+    public static TaskSpecification groupVisible(TaskSearchRequest taskSearchRequest, Collection<String> userGroups) {
+        return new TaskSpecification(taskSearchRequest, null, userGroups, true);
     }
 
     @Override
@@ -352,7 +369,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
-        if (userId == null) {
+        if (userId == null && !groupVisibleOnly) {
             return;
         }
         if (useExistsSubqueries()) {
@@ -370,28 +387,42 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
      * outer query keeps {@code SELECT DISTINCT} to collapse duplicates produced by the joins.
      */
     private void applyUserRestrictionFilterLegacy(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+        Predicate groupDoor = groupDoorPredicateLegacy(root, criteriaBuilder);
+        if (groupVisibleOnly) {
+            predicates.add(groupDoor);
+            return;
+        }
         predicates.add(
             criteriaBuilder.or(
                 criteriaBuilder.equal(root.get(TaskEntity_.assignee), userId),
                 criteriaBuilder.equal(root.get(TaskEntity_.owner), userId),
                 criteriaBuilder.and(
                     criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
-                    criteriaBuilder.or(
-                        criteriaBuilder.equal(
-                            root
-                                .join(TaskEntity_.taskCandidateUsers, JoinType.LEFT)
-                                .get(TaskCandidateUserEntity_.userId),
-                            userId
-                        ),
-                        root
-                            .join(TaskEntity_.taskCandidateGroups, JoinType.LEFT)
-                            .get(TaskCandidateGroupEntity_.groupId)
-                            .in(userGroups),
-                        criteriaBuilder.and(
-                            criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateUsers)),
-                            criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateGroups))
-                        )
+                    criteriaBuilder.equal(
+                        root.join(TaskEntity_.taskCandidateUsers, JoinType.LEFT).get(TaskCandidateUserEntity_.userId),
+                        userId
                     )
+                ),
+                groupDoor
+            )
+        );
+    }
+
+    /**
+     * The shared "group-door" term used by both {@link #restricted} and {@link #groupVisible}: the task is
+     * unassigned and either a candidate group is in {@code userGroups} or it has no candidates at all.
+     */
+    private Predicate groupDoorPredicateLegacy(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+        return criteriaBuilder.and(
+            criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
+            criteriaBuilder.or(
+                root
+                    .join(TaskEntity_.taskCandidateGroups, JoinType.LEFT)
+                    .get(TaskCandidateGroupEntity_.groupId)
+                    .in(userGroups),
+                criteriaBuilder.and(
+                    criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateUsers)),
+                    criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateGroups))
                 )
             )
         );
@@ -409,6 +440,12 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
+        Predicate groupDoor = groupDoorPredicateWithExistsSubqueries(root, query, criteriaBuilder);
+        if (groupVisibleOnly) {
+            predicates.add(groupDoor);
+            return;
+        }
+
         // EXISTS (SELECT 1 FROM task_candidate_user WHERE task_id = root.id AND user_id = userId)
         Subquery<String> candidateUserSubquery = query.subquery(String.class);
         Root<TaskCandidateUserEntity> tcuRoot = candidateUserSubquery.from(TaskCandidateUserEntity.class);
@@ -419,6 +456,28 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
                 criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.userId), userId)
             );
 
+        predicates.add(
+            criteriaBuilder.or(
+                criteriaBuilder.equal(root.get(TaskEntity_.assignee), userId),
+                criteriaBuilder.equal(root.get(TaskEntity_.owner), userId),
+                criteriaBuilder.and(
+                    criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
+                    criteriaBuilder.exists(candidateUserSubquery)
+                ),
+                groupDoor
+            )
+        );
+    }
+
+    /**
+     * The shared "group-door" term used by both {@link #restricted} and {@link #groupVisible}: the task is
+     * unassigned and either a candidate group is in {@code userGroups} or it has no candidates at all.
+     */
+    private Predicate groupDoorPredicateWithExistsSubqueries(
+        Root<TaskEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
         // EXISTS (SELECT 1 FROM task_candidate_group WHERE task_id = root.id AND group_id IN (userGroups))
         Subquery<String> candidateGroupSubquery = query.subquery(String.class);
         Root<TaskCandidateGroupEntity> tcgRoot = candidateGroupSubquery.from(TaskCandidateGroupEntity.class);
@@ -443,20 +502,13 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
             .select(noCgRoot.get(TaskCandidateGroupEntity_.taskId))
             .where(criteriaBuilder.equal(noCgRoot.get(TaskCandidateGroupEntity_.taskId), root.get(TaskEntity_.id)));
 
-        predicates.add(
+        return criteriaBuilder.and(
+            criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
             criteriaBuilder.or(
-                criteriaBuilder.equal(root.get(TaskEntity_.assignee), userId),
-                criteriaBuilder.equal(root.get(TaskEntity_.owner), userId),
+                criteriaBuilder.exists(candidateGroupSubquery),
                 criteriaBuilder.and(
-                    criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
-                    criteriaBuilder.or(
-                        criteriaBuilder.exists(candidateUserSubquery),
-                        criteriaBuilder.exists(candidateGroupSubquery),
-                        criteriaBuilder.and(
-                            criteriaBuilder.not(criteriaBuilder.exists(noCandidateUserSubquery)),
-                            criteriaBuilder.not(criteriaBuilder.exists(noCandidateGroupSubquery))
-                        )
-                    )
+                    criteriaBuilder.not(criteriaBuilder.exists(noCandidateUserSubquery)),
+                    criteriaBuilder.not(criteriaBuilder.exists(noCandidateGroupSubquery))
                 )
             )
         );

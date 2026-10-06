@@ -28,6 +28,7 @@ import org.activiti.cloud.services.query.app.PushedCountsQueryEventsConsumer;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeBuffer;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeChannels;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeScheduler;
+import org.activiti.cloud.services.query.app.QueuedTaskCounter;
 import org.activiti.cloud.services.query.app.RecomputeAudienceResolver;
 import org.activiti.cloud.services.query.app.RecomputeEventCapturer;
 import org.activiti.cloud.services.query.app.RecomputePipeline;
@@ -139,5 +140,11 @@ public class PushedCountsRecomputeAutoConfiguration {
     @ConditionalOnMissingBean
     AssignedTaskCounter assignedTaskCounter(TaskRepository taskRepository) {
         return new AssignedTaskCounter(taskRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    QueuedTaskCounter queuedTaskCounter(TaskRepository taskRepository, SubscriberDirectory registry) {
+        return new QueuedTaskCounter(taskRepository, registry);
     }
 }
