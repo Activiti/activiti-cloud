@@ -328,7 +328,7 @@ public class FunctionRouterConfiguration {
 
                                             try {
                                                 return CompletableFuture.runAsync(
-                                                    () -> errorHandlerDefinition.accept(entry.getValue()),
+                                                    () -> errorHandlerDefinition.accept(errorMessage),
                                                     Runnable::run
                                                 );
                                             } catch (Exception e) {
