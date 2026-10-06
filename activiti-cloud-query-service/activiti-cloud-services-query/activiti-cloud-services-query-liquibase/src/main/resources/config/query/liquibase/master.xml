@@ -1164,7 +1164,7 @@
              encoding="utf8"
              path="changelog/48-alter.oracle.schema.9.2.0.sql"
              relativeToChangelogFile="true"
-             splitStatements="false"
+             splitStatements="true"
              stripComments="true"/>
     <rollback>
       <sqlFile dbms="oracle"

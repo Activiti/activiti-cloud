@@ -27,6 +27,8 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.subscription.ScopeKeys;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Pushed count of running processes visible to a user. */
 public class RunningProcessesCounter implements PushedCounter {
@@ -51,6 +53,7 @@ public class RunningProcessesCounter implements PushedCounter {
     }
 
     @Override
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public Map<String, Long> compute(Set<String> affectedUserIds) {
         if (affectedUserIds.isEmpty()) {
             return Map.of();
