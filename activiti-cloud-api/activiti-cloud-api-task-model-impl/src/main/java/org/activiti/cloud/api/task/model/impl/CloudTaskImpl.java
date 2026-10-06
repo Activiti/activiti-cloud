@@ -52,6 +52,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private String businessKey;
 
     private String taskDefinitionKey;
+    private boolean allowSelfService;
     private List<String> candidateUsers;
     private List<String> candidateGroups;
 
@@ -77,6 +78,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         processDefinitionVersion = task.getProcessDefinitionVersion();
         businessKey = task.getBusinessKey();
         taskDefinitionKey = task.getTaskDefinitionKey();
+        allowSelfService = task.isAllowSelfService();
         candidateUsers = task.getCandidateUsers();
         candidateGroups = task.getCandidateGroups();
     }
@@ -285,6 +287,15 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     }
 
     @Override
+    public boolean isAllowSelfService() {
+        return allowSelfService;
+    }
+
+    public void setAllowSelfService(boolean allowSelfService) {
+        this.allowSelfService = allowSelfService;
+    }
+
+    @Override
     public String getCompletedBy() {
         return this.completedBy;
     }
@@ -343,6 +354,8 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
             businessKey +
             ", taskDefinitionKey=" +
             taskDefinitionKey +
+            ", allowSelfService=" +
+            allowSelfService +
             '}'
         );
     }
@@ -358,6 +371,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         CloudTaskImpl task = (CloudTaskImpl) o;
         return (
             priority == task.priority &&
+            allowSelfService == task.allowSelfService &&
             Objects.equals(id, task.id) &&
             Objects.equals(owner, task.owner) &&
             Objects.equals(assignee, task.assignee) &&
