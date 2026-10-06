@@ -304,14 +304,17 @@ public class FunctionRouterBindingConfigurationIT {
 
         @Bean
         Consumer<ErrorMessage> errorMessageConsumer() {
-            return new Consumer<ErrorMessage>() {
-                @Override
-                public void accept(ErrorMessage errorMessage) {
-                    if (errorMessage.getPayload() instanceof MessagingException messagingException) {
-                        throw messagingException;
-                    }
+            return new ErrorMessageConsumer();
+        }
+
+        static class ErrorMessageConsumer implements Consumer<ErrorMessage> {
+
+            @Override
+            public void accept(ErrorMessage errorMessage) {
+                if (errorMessage.getPayload() instanceof MessagingException messagingException) {
+                    throw messagingException;
                 }
-            };
+            }
         }
     }
 
@@ -608,7 +611,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void aggregateMessageDeliveryException() throws Exception {
+    void aggregateMessageDeliveryException() {
         // given
         // given
         Message<String> message = MessageBuilder.withPayload("Test")
@@ -697,7 +700,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void testConnectorBindings() throws InterruptedException {
+    void testConnectorBindings() {
         // given
         Message<String> message = MessageBuilder.withPayload("run_test();")
             .setHeader(FUNCTION_DESTINATION, "script.EXECUTE")
