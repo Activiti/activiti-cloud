@@ -139,6 +139,20 @@ class ToCloudTaskRuntimeEventConverterTest {
     }
 
     @Test
+    void should_preserveAllowSelfService_when_convertingTaskCreatedEvent() {
+        TaskImpl task = new TaskImpl();
+        task.setId("16");
+        task.setProcessDefinitionId("myProcessDef");
+        task.setAllowSelfService(true);
+
+        TaskCreatedEvent event = new TaskCreatedEventImpl(task);
+
+        CloudTaskCreatedEvent taskCreated = this.converter.from(event);
+
+        assertThat(taskCreated.getEntity().isAllowSelfService()).isTrue();
+    }
+
+    @Test
     void should_convertInternalTaskCandidateUserAddedEvent_when_convertToExternalEvent() {
         TaskCandidateUserImpl candidate = new TaskCandidateUserImpl(USERNAME, "task-1");
         TaskCandidateUserAddedEventImpl event = new TaskCandidateUserAddedEventImpl(candidate);

@@ -431,6 +431,43 @@ class QueryTasksIT {
         });
     }
 
+    @Test
+    void shouldReturnAllowSelfServiceAtTopLevelForBothJsonViews() {
+        //given
+        TaskImpl allowSelfServiceTask = (TaskImpl) taskEventContainedBuilder.aCreatedTask(
+            "Allow self service task",
+            runningProcessInstance
+        );
+        allowSelfServiceTask.setAllowSelfService(true);
+
+        Task defaultTask = taskEventContainedBuilder.aCreatedTask("Default task", runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            ResponseEntity<QueryCloudTask> allowResponse = executeRequestGetTasksById(allowSelfServiceTask.getId());
+            assertThat(allowResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(allowResponse.getBody()).isNotNull();
+            assertThat(allowResponse.getBody().isAllowSelfService()).isTrue();
+
+            ResponseEntity<QueryCloudTask> defaultResponse = executeRequestGetTasksById(defaultTask.getId());
+            assertThat(defaultResponse.getBody()).isNotNull();
+            assertThat(defaultResponse.getBody().isAllowSelfService()).isFalse();
+        });
+
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasksWithProcessVariables(
+                "someProcessDefinitionKey/someVariableName"
+            );
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .filteredOn(task -> task.getId().equals(allowSelfServiceTask.getId()))
+                .extracting(QueryCloudTask::isAllowSelfService)
+                .containsExactly(true);
+        });
+    }
+
     private ResponseEntity<QueryCloudTask> ensureRetrievesTaskByIdSuccessfully(
         String taskId,
         ResponseEntity<PagedModel<QueryCloudTask>> responseEntity

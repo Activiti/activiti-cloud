@@ -79,6 +79,29 @@ public class TaskCreatedEventHandlerTest {
         assertThat(taskEntity.getName()).isEqualTo(expectedEventEntity.getName());
         assertThat(taskEntity.getProcessInstanceId()).isEqualTo(expectedEventEntity.getProcessInstanceId());
         assertThat(taskEntity.getRootProcessInstanceId()).isEqualTo(processInstanceEntity.getRootProcessInstanceId());
+        assertThat(taskEntity.isAllowSelfService()).isTrue();
+    }
+
+    @Test
+    public void handleShouldDefaultAllowSelfServiceToFalse() {
+        //given
+        TaskImpl task = new TaskImpl("id", "name", Task.TaskStatus.CREATED);
+        task.setProcessInstanceId("processInstanceId");
+        CloudTaskCreatedEvent event = new CloudTaskCreatedEventImpl(task);
+
+        when(entityManager.find(TaskEntity.class, event.getEntity().getId())).thenReturn(null);
+        when(entityManagerFinder.findProcessInstanceWithTasks(event.getEntity().getProcessInstanceId())).thenReturn(
+            Optional.of(buildProcessInstanceEntity())
+        );
+
+        //when
+        handler.handle(event);
+
+        //then
+        ArgumentCaptor<TaskEntity> captor = ArgumentCaptor.forClass(TaskEntity.class);
+        verify(entityManager).persist(captor.capture());
+
+        assertThat(captor.getValue().isAllowSelfService()).isFalse();
     }
 
     private ProcessInstanceEntity buildProcessInstanceEntity() {
@@ -92,6 +115,7 @@ public class TaskCreatedEventHandlerTest {
     private static TaskImpl buildTask() {
         TaskImpl task = new TaskImpl("id", "name", Task.TaskStatus.CREATED);
         task.setProcessInstanceId("processInstanceId");
+        task.setAllowSelfService(true);
         return task;
     }
 

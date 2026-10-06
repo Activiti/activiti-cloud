@@ -671,6 +671,12 @@
             "type" : "string"
           }
         }, {
+          "name" : "allowSelfService",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
           "name" : "completedBy",
           "in" : "query",
           "schema" : {
@@ -1013,6 +1019,12 @@
             "type" : "string"
           }
         }, {
+          "name" : "allowSelfService",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
           "name" : "completedBy",
           "in" : "query",
           "schema" : {
@@ -1320,6 +1332,12 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "allowSelfService",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
           }
         }, {
           "name" : "completedBy",
@@ -2989,6 +3007,12 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "allowSelfService",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
           }
         }, {
           "name" : "completedBy",
@@ -7746,6 +7770,9 @@
           "taskDefinitionKey" : {
             "type" : "string"
           },
+          "allowSelfService" : {
+            "type" : "boolean"
+          },
           "completedBy" : {
             "type" : "string"
           },
@@ -8279,6 +8306,9 @@
           "taskDefinitionKey" : {
             "type" : "string"
           },
+          "allowSelfService" : {
+            "type" : "boolean"
+          },
           "completedBy" : {
             "type" : "string"
           },
@@ -8798,6 +8828,9 @@
           },
           "taskDefinitionKey" : {
             "type" : "string"
+          },
+          "allowSelfService" : {
+            "type" : "boolean"
           },
           "completedBy" : {
             "type" : "string"

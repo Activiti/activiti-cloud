@@ -50,6 +50,7 @@ public class TaskUpdatedEventHandler implements QueryEventHandler {
         queryTaskEntity.setParentTaskId(eventTask.getParentTaskId());
         queryTaskEntity.setLastModified(new Date(taskUpdatedEvent.getTimestamp()));
         queryTaskEntity.setStatus(eventTask.getStatus());
+        queryTaskEntity.setAllowSelfService(eventTask.isAllowSelfService());
 
         entityManager.persist(queryTaskEntity);
     }
