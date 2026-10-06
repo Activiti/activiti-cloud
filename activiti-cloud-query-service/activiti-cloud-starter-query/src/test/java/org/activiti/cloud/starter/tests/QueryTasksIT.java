@@ -457,7 +457,7 @@ class QueryTasksIT {
 
         await().untilAsserted(() -> {
             ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasksWithProcessVariables(
-                "anyKey"
+                "someProcessDefinitionKey/someVariableName"
             );
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
