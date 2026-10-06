@@ -178,9 +178,7 @@ class EventsEngineEventsAdminControllerIT {
         events.add(buildVariableAuditEventEntity(2));
 
         Page<AuditEventEntity> page = new PageImpl<>(events);
-        given(
-            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
-        ).willReturn(page);
+        given(eventsRepository.findAllByTimestampBetween(anyLong(), anyLong(), any(Pageable.class))).willReturn(page);
 
         MvcResult response = mockMvc
             .perform(
@@ -207,9 +205,10 @@ class EventsEngineEventsAdminControllerIT {
         PageRequest page2Request = PageRequest.of(1, 1000, Sort.by(Sort.Direction.DESC, "timestamp"));
         Page<AuditEventEntity> page2 = new PageImpl<>(page2Events, page2Request, 2000);
 
-        given(
-            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
-        ).willReturn(page1, page2);
+        given(eventsRepository.findAllByTimestampBetween(anyLong(), anyLong(), any(Pageable.class))).willReturn(
+            page1,
+            page2
+        );
 
         MvcResult response = mockMvc
             .perform(
@@ -227,9 +226,9 @@ class EventsEngineEventsAdminControllerIT {
     void exportEventsEmpty() throws Exception {
         // Empty page
         Page<AuditEventEntity> emptyPage = new PageImpl<>(List.of());
-        given(
-            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
-        ).willReturn(emptyPage);
+        given(eventsRepository.findAllByTimestampBetween(anyLong(), anyLong(), any(Pageable.class))).willReturn(
+            emptyPage
+        );
 
         MvcResult response = mockMvc
             .perform(
