@@ -627,6 +627,8 @@ public class FunctionRouterBindingConfigurationIT {
             .hasCauseInstanceOf(RuntimeException.class)
             .hasRootCauseMessage("optimistic locking exception");
 
+        assertThat(errorMessageCaptor.getValue()).extracting(ErrorMessage::getOriginalMessage).isNotNull();
+
         assertThat(exceptionCaptor.getException())
             .isInstanceOf(AggregateMessageDeliveryException.class)
             .hasMessageContaining("Function router result errors");
