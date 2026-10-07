@@ -31,7 +31,7 @@ jobs:
           ref: ${{ inputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@c176315c6b0b3e3bbf022ea444944fb903c47e0e # v19.2.1
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
