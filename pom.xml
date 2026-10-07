@@ -237,7 +237,7 @@
     <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
     <byte-buddy.version>1.17.8</byte-buddy.version>
     <!-- End Temporary Dependency -->
-    <classgraph.version>4.8.179</classgraph.version>
+    <classgraph.version>4.8.196</classgraph.version>
 
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
