@@ -75,7 +75,7 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@c176315c6b0b3e3bbf022ea444944fb903c47e0e # v19.2.1
         if: github.event_name == 'push'
         id: tag
         env:
