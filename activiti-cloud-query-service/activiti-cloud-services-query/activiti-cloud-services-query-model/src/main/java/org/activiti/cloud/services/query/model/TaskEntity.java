@@ -107,6 +107,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private String processDefinitionName;
     private String businessKey;
     private String taskDefinitionKey;
+
+    @Column(name = "allow_self_service", nullable = false)
+    private boolean allowSelfService;
+
     private String completedBy;
 
     @Enumerated(EnumType.STRING)
@@ -270,6 +274,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         this.processDefinitionVersion = taskCreatedEvent.getProcessDefinitionVersion();
         this.businessKey = taskCreatedEvent.getBusinessKey();
         this.taskDefinitionKey = task.getTaskDefinitionKey();
+        this.allowSelfService = task.isAllowSelfService();
         this.rootProcessInstanceId = task.getTaskProcessRootProcessInstanceId();
     }
 
@@ -539,6 +544,15 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
 
     public void setTaskDefinitionKey(String taskDefinitionKey) {
         this.taskDefinitionKey = taskDefinitionKey;
+    }
+
+    @Override
+    public boolean isAllowSelfService() {
+        return allowSelfService;
+    }
+
+    public void setAllowSelfService(boolean allowSelfService) {
+        this.allowSelfService = allowSelfService;
     }
 
     @Override
