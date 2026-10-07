@@ -50,7 +50,7 @@
   "author": "michal.fidor@hyland.com",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@michalfidor/playswag": "^1.11.0",
+    "@michalfidor/playswag": "^2.0.1",
     "@reportportal/agent-js-playwright": "^5.5.0",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.4",
