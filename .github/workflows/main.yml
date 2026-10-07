@@ -276,7 +276,7 @@ jobs:
           # analyse the diff instead of falling back to a whole-file analysis
           fetch-depth: 0
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@c176315c6b0b3e3bbf022ea444944fb903c47e0e # v19.2.1
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
