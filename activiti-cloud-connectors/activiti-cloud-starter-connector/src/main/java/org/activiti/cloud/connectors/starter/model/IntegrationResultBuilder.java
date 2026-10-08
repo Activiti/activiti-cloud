@@ -20,7 +20,6 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
@@ -33,6 +32,7 @@ public class IntegrationResultBuilder {
     private IntegrationResultImpl integrationResult;
 
     private IntegrationResultBuilder(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
+        this.requestEvent = integrationRequest;
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         IntegrationContextImpl sanitizedIntegrationContext = null;
 
@@ -41,8 +41,7 @@ public class IntegrationResultBuilder {
             sanitizedIntegrationContext.clearInBoundVariables();
         }
 
-        this.requestEvent = IntegrationRequestImpl.copyWithoutContext(integrationRequest);
-        this.integrationResult = new IntegrationResultImpl(this.requestEvent, sanitizedIntegrationContext);
+        this.integrationResult = new IntegrationResultImpl(integrationRequest, sanitizedIntegrationContext);
 
         if (connectorProperties != null) {
             this.integrationResult.setAppName(connectorProperties.getAppName());
