@@ -25,7 +25,6 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
@@ -58,13 +57,6 @@ public class ConnectorConfigurationFunctionRouterEnabledIT extends ConnectorConf
         ConnectorBinding,
         Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
     > connectorErrorHandlerDefinitionResolver;
-
-    @Test
-    @Override
-    @Disabled
-    void testShouldDiscardMessageWithInValidAppVersionWithRetryWithRepublishEvent() {
-        super.testShouldDiscardMessageWithInValidAppVersionWithRetryWithRepublishEvent();
-    }
 
     @Test
     @Override
