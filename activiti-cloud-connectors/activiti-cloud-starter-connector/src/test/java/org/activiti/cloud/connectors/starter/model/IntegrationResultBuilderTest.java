@@ -57,6 +57,7 @@ public class IntegrationResultBuilderTest {
             .build();
 
         //then
+        assertThat(resultEvent.getIntegrationRequest().getIntegrationContext()).isNull();
         assertThat(resultEvent.getIntegrationContext().getInBoundVariables()).isEmpty();
         assertThat(resultEvent.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
         assertThat(resultEvent.getIntegrationContext().getOutBoundVariables()).isEqualTo(

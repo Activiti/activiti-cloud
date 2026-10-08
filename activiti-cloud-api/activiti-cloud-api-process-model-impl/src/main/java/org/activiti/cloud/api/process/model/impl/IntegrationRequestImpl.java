@@ -92,4 +92,25 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
     public void setTtlSeconds(Integer ttlSeconds) {
         this.ttlSeconds = ttlSeconds;
     }
+
+    /**
+     * Creates a shallow copy of the given {@link IntegrationRequest} without the
+     * {@link IntegrationContext} payload. Useful for reducing serialized message size
+     * when only routing metadata is needed.
+     */
+    public static IntegrationRequestImpl copyWithoutContext(IntegrationRequest source) {
+        IntegrationRequestImpl copy = new IntegrationRequestImpl();
+        copy.setAppName(source.getAppName());
+        copy.setAppVersion(source.getAppVersion());
+        copy.setServiceName(source.getServiceName());
+        copy.setServiceFullName(source.getServiceFullName());
+        copy.setServiceType(source.getServiceType());
+        copy.setServiceVersion(source.getServiceVersion());
+        copy.setResultDestination(source.getResultDestination());
+        copy.setErrorDestination(source.getErrorDestination());
+        copy.setIncidentDestination(source.getIncidentDestination());
+        copy.setRequestDate(source.getRequestDate());
+        copy.setTtlSeconds(source.getTtlSeconds());
+        return copy;
+    }
 }
