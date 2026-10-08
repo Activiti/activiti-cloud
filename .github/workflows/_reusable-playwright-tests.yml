@@ -50,20 +50,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - profile: rabbitmq-partitioned-default
+          - profile: rabbitmq-non-partitioned-pdb
             concurrency-slot: 1
-          - profile: rabbitmq-non-partitioned-default
+          - profile: rabbitmq-prefix-pdb
+            concurrency-slot: 1
+          - profile: rabbitmq-partitioned-default
             concurrency-slot: 2
-          - profile: kafka-partitioned-default
+          - profile: rabbitmq-non-partitioned-default
             concurrency-slot: 3
+          - profile: kafka-partitioned-default
+            concurrency-slot: 4
           - profile: kafka-non-partitioned-default
             concurrency-slot: 4
           - profile: kafka-partitioned-override
             concurrency-slot: 3
-          - profile: rabbitmq-non-partitioned-pdb
-            concurrency-slot: 2
-          - profile: rabbitmq-prefix-pdb
-            concurrency-slot: 1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
