@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -28,14 +27,22 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.SmartLifecycle;
 
-public class FunctionRouterExecutorFactory implements Function<String, ExecutorService> {
+public class FunctionRouterExecutorFactory implements Function<String, ExecutorService>, SmartLifecycle {
+
+    private static final Logger log = LoggerFactory.getLogger(FunctionRouterExecutorFactory.class);
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
-    private Duration timeout = Duration.ofSeconds(300);
+    private Duration timeout;
     private static final int SINGLE_THREAD_POOL_SIZE = 1;
+    private volatile boolean running = false;
 
-    public FunctionRouterExecutorFactory() {}
+    public FunctionRouterExecutorFactory() {
+        this(Duration.ofSeconds(300));
+    }
 
     public FunctionRouterExecutorFactory(Duration timeout) {
         this.timeout = timeout;
@@ -81,15 +88,17 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         return executors.computeIfAbsent(key, executorServiceFactory);
     }
 
-    @PreDestroy
     public void destroy() {
         try {
             shutdown();
 
             if (!awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                log.warn("Workers did not finish within timeout. Forcing hard cancellation...");
+
                 shutdownNow();
             }
         } catch (InterruptedException e) {
+            log.error("Shutdown interrupted while waiting for tasks to finish.", e);
             Thread.currentThread().interrupt();
             shutdownNow();
         } finally {
@@ -133,5 +142,26 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     public void setTimeout(Duration timeout) {
         this.timeout = timeout;
+    }
+
+    @Override
+    public void start() {
+        this.running = true;
+    }
+
+    @Override
+    public void stop() {
+        this.running = false;
+        destroy();
+    }
+
+    @Override
+    public boolean isRunning() {
+        return this.running;
+    }
+
+    @Override
+    public int getPhase() {
+        return Integer.MIN_VALUE + 100;
     }
 }
