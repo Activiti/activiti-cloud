@@ -78,18 +78,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
 
     @Override
     public void accept(Message<?> message, String routingContext) {
-        Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
-            .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
-            .or(() ->
-                Optional.ofNullable(messagingProperties.getRabbitmq().getPrefix())
-                    .filter(Predicate.not(String::isBlank))
-                    .flatMap(prefix ->
-                        Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class))
-                            .filter(exchange -> exchange.startsWith(prefix))
-                            .map(exchange -> exchange.substring(prefix.length()))
-                    )
-            )
-            .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
+        resolveDestination(message)
             .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
             .filter(Predicate.not(Collection::isEmpty))
             .ifPresentOrElse(
@@ -100,25 +89,8 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                         .map(functionRequest ->
                             routingFunctionFuture()
                                 .apply(functionRequest)
-                                .thenApply(result -> {
-                                    var functionDefinition = resolveFunctionDefinition().apply(functionRequest);
-                                    log.debug(
-                                        "Function message request {} successfully routed to {}",
-                                        functionRequest,
-                                        functionDefinition
-                                    );
-                                    return Map.entry(functionDefinition, Optional.ofNullable(result));
-                                })
-                                .exceptionally(error -> {
-                                    var functionDefinition = resolveFunctionDefinition().apply(functionRequest);
-                                    log.warn(
-                                        "Error routing message request {} to function registration {}",
-                                        functionRequest,
-                                        functionDefinition,
-                                        error
-                                    );
-                                    return Map.entry(functionDefinition, Optional.of(error));
-                                })
+                                .thenApply(result -> mapResult(functionRequest, result))
+                                .exceptionally(error -> mapError(functionRequest, error))
                         )
                         .toList();
 
@@ -127,19 +99,8 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                         .thenAccept(results -> {
                             final var errors = results
                                 .stream()
-                                .filter(entry ->
-                                    entry.getValue().filter(CompletionException.class::isInstance).isPresent()
-                                )
-                                .map(entry ->
-                                    Map.entry(
-                                        entry.getKey(),
-                                        entry
-                                            .getValue()
-                                            .map(CompletionException.class::cast)
-                                            .map(CompletionException::getCause)
-                                            .get()
-                                    )
-                                )
+                                .filter(this::isCompletedException)
+                                .map(this::getCompletionExceptionCause)
                                 .map(entry ->
                                     messagingProperties
                                         .getFunctionRouter()
@@ -208,6 +169,49 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                     );
                 }
             );
+    }
+
+    private Optional<String> resolveDestination(Message<?> message) {
+        return Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
+            .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
+            .or(() ->
+                Optional.ofNullable(messagingProperties.getRabbitmq().getPrefix())
+                    .filter(Predicate.not(String::isBlank))
+                    .flatMap(prefix ->
+                        Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class))
+                            .filter(exchange -> exchange.startsWith(prefix))
+                            .map(exchange -> exchange.substring(prefix.length()))
+                    )
+            )
+            .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)));
+    }
+
+    private Map.Entry<String, Optional<Object>> mapResult(Message<?> functionRequest, Object result) {
+        var functionDefinition = resolveFunctionDefinition().apply(functionRequest);
+        log.debug("Function message request {} successfully routed to {}", functionRequest, functionDefinition);
+        return Map.entry(functionDefinition, Optional.ofNullable(result));
+    }
+
+    private Map.Entry<String, Optional<Object>> mapError(Message<?> functionRequest, Throwable error) {
+        var functionDefinition = resolveFunctionDefinition().apply(functionRequest);
+        log.warn(
+            "Error routing message request {} to function registration {}",
+            functionRequest,
+            functionDefinition,
+            error
+        );
+        return Map.entry(functionDefinition, Optional.of(error));
+    }
+
+    private boolean isCompletedException(Map.Entry<String, Optional<Object>> entry) {
+        return entry.getValue().filter(CompletionException.class::isInstance).isPresent();
+    }
+
+    private Map.Entry<String, Throwable> getCompletionExceptionCause(Map.Entry<String, Optional<Object>> entry) {
+        return Map.entry(
+            entry.getKey(),
+            entry.getValue().map(CompletionException.class::cast).map(CompletionException::getCause).get()
+        );
     }
 
     private Function<Message<?>, String> resolveFunctionDefinition() {
