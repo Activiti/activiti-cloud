@@ -35,6 +35,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.cloud.function.context.FunctionProperties.FUNCTION_DEFINITION;
@@ -45,12 +46,14 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -87,9 +90,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
-import org.springframework.integration.dispatcher.AggregateMessageDeliveryException;
+import org.springframework.integration.MessageTimeoutException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
@@ -298,7 +302,19 @@ public class FunctionRouterBindingConfigurationIT {
         @FunctionBinding(input = INTEGRATION_REQUESTS)
         public Consumer<Message<TypedPayload>> integrationRequestsConsumerHandler() {
             return message -> {
-                throw new RuntimeException("optimistic locking exception");
+                Optional.ofNullable(message.getHeaders().get("timeout", Duration.class)).ifPresentOrElse(
+                    timeout -> {
+                        try {
+                            Thread.sleep(timeout);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    () -> {
+                        throw new RuntimeException("optimistic locking exception");
+                    }
+                );
             };
         }
 
@@ -613,7 +629,6 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void aggregateMessageDeliveryException() {
         // given
-        // given
         Message<String> message = MessageBuilder.withPayload("Test")
             .setHeader(FUNCTION_DESTINATION, "integration-requests")
             .build();
@@ -630,12 +645,39 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(errorMessageCaptor.getValue()).extracting(ErrorMessage::getOriginalMessage).isNotNull();
 
         assertThat(exceptionCaptor.getException())
-            .isInstanceOf(AggregateMessageDeliveryException.class)
+            .isInstanceOf(MessageDeliveryException.class)
             .hasMessageContaining("Function router result errors");
 
         verify(errorMessageConsumer, times(messagingProperties.getFunctionRouter().getMaxRetries())).accept(
             any(ErrorMessage.class)
         );
+    }
+
+    @Test
+    void messageTimeoutException() {
+        withRequestTimeout(Duration.ofSeconds(1), () -> {
+            // given
+            Message<String> message = MessageBuilder.withPayload("Test")
+                .setHeader(FUNCTION_DESTINATION, "integration-requests")
+                .setHeader("timeout", Duration.ofSeconds(2))
+                .build();
+
+            ExceptionCaptor<RuntimeException> exceptionCaptor = new ExceptionCaptor<>();
+            ArgumentCaptor<ErrorMessage> errorMessageCaptor = ArgumentCaptor.forClass(ErrorMessage.class);
+            doAnswer(exceptionCaptor).when(functionRouterErrorMessageHandler).accept(errorMessageCaptor.capture());
+
+            // when
+            assertThatThrownBy(() -> input.send(message, "integration-requests"))
+                .isInstanceOf(MessageTimeoutException.class)
+                .hasCauseInstanceOf(TimeoutException.class)
+                .isNotNull();
+
+            assertThat(errorMessageCaptor.getValue()).extracting(ErrorMessage::getOriginalMessage).isNotNull();
+
+            assertThat(exceptionCaptor.getException()).isInstanceOf(MessageTimeoutException.class);
+
+            verify(errorMessageConsumer, never()).accept(any(ErrorMessage.class));
+        });
     }
 
     @Test
@@ -1046,6 +1088,18 @@ public class FunctionRouterBindingConfigurationIT {
             runnable.accept(prefix);
         } finally {
             messagingProperties.getRabbitmq().setPrefix(current);
+        }
+    }
+
+    void withRequestTimeout(Duration timeout, Runnable runnable) {
+        final var current = messagingProperties.getFunctionRouter().getRequestTimeout();
+
+        try {
+            messagingProperties.getFunctionRouter().setRequestTimeout(timeout);
+
+            runnable.run();
+        } finally {
+            messagingProperties.getFunctionRouter().setRequestTimeout(current);
         }
     }
 }
