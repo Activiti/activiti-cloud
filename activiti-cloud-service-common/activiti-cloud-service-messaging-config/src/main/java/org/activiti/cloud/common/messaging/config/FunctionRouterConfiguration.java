@@ -15,21 +15,16 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -39,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -50,24 +44,27 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
 import org.springframework.cloud.function.context.MessageRoutingCallback;
-import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.integration.MessageDispatchingException;
+import org.springframework.integration.MessageTimeoutException;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.dispatcher.AggregateMessageDeliveryException;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
+import org.springframework.util.function.ThrowingConsumer;
 
 @AutoConfiguration(
     before = InputBindingConfiguration.class,
@@ -169,146 +166,82 @@ public class FunctionRouterConfiguration {
     BiConsumer<Message<?>, String> functionRouterMessageHandler(
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties,
-        FunctionCatalog functionCatalog,
         Function<Message<?>, ExecutorService> functionExecutorSelector,
         MessageContentTypeNormalizer messageContentTypeNormalizer,
-        BindingServiceProperties bindingServiceProperties
+        BindingServiceProperties bindingServiceProperties,
+        Function<String, Optional<Consumer<ErrorMessage>>> functionRouterErrorHandlerDefinitionResolver
+    ) {
+        return new FunctionRouterMessageHandler(
+            routingFunction,
+            messagingProperties,
+            functionExecutorSelector,
+            messageContentTypeNormalizer,
+            bindingServiceProperties,
+            functionRouterErrorHandlerDefinitionResolver
+        );
+    }
+
+    @Bean
+    Function<String, Optional<Consumer<ErrorMessage>>> functionRouterErrorHandlerDefinitionResolver(
+        ActivitiCloudMessagingProperties messagingProperties,
+        FunctionCatalog functionCatalog,
+        Environment environment
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
-        return (message, routingContext) -> {
-            Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
-                .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
+        return bindingName ->
+            Optional.of(functionRouter.bindings().get(bindingName))
+                .map(BindingProperties::getErrorHandlerDefinition)
                 .or(() ->
-                    Optional.ofNullable(messagingProperties.getRabbitmq().getPrefix())
-                        .filter(Predicate.not(String::isBlank))
-                        .flatMap(prefix ->
-                            Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class))
-                                .filter(exchange -> exchange.startsWith(prefix))
-                                .map(exchange -> exchange.substring(prefix.length()))
-                        )
+                    Optional.ofNullable(
+                        environment.getProperty("spring.cloud.stream.default.error-handler-definition", String.class)
+                    )
                 )
-                .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
-                .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
-                .filter(Predicate.not(Collection::isEmpty))
-                .ifPresentOrElse(
-                    registrations -> {
-                        Function<Message<?>, String> resolveFunctionDefinition = functionMessage ->
-                            functionMessage.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class);
-                        BiFunction<Message<?>, String, Message<?>> toFunctionRequest = (
-                            functionMessage,
-                            functionRegistration
-                        ) -> {
-                            String expectedContentType = functionRouter
-                                .bindingNameFor(functionRegistration)
-                                .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
-                                .map(BindingProperties::getContentType)
-                                .orElse(null);
-                            return MessageBuilder.fromMessage(
-                                messageContentTypeNormalizer.normalizeToExpected(functionMessage, expectedContentType)
-                            )
-                                .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
-                                .build();
-                        };
+                .filter(StringUtils::hasText)
+                .map(functionCatalog::lookup)
+                .filter(Consumer.class::isInstance)
+                .<Consumer<ErrorMessage>>map(Consumer.class::cast);
+    }
 
-                        var functions = registrations
-                            .stream()
-                            .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
-                            .map(functionRequest ->
-                                supplyAsyncWithRetry(
-                                    () ->
-                                        CompletableFuture.supplyAsync(
-                                            () -> routingFunction.apply(functionRequest),
-                                            functionExecutorSelector.apply(functionRequest)
-                                        ),
-                                    functionRouter.getMaxRetries(),
-                                    functionRouter.getRetryInterval()
-                                )
-                                    .thenApply(result -> {
-                                        var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
-                                        log.debug(
-                                            "Function message request {} successfully routed to {}",
-                                            functionRequest,
-                                            functionDefinition
-                                        );
-                                        return Map.entry(functionDefinition, Optional.ofNullable(result));
-                                    })
-                                    .exceptionally(error -> {
-                                        var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
-                                        log.error(
-                                            "Error routing message request {} to function registration {}",
-                                            functionRequest,
-                                            functionDefinition,
-                                            error
-                                        );
-                                        return Map.entry(functionDefinition, Optional.of(error));
-                                    })
-                            )
-                            .toArray(CompletableFuture[]::new);
+    @Bean
+    Consumer<ErrorMessage> functionRouterErrorMessageHandler() {
+        return new Consumer<ErrorMessage>() {
+            @Override
+            public void accept(ErrorMessage errorMessage) {
+                final var originalMessage = errorMessage.getOriginalMessage();
 
-                        var completed = CompletableFuture.allOf(functions).thenApply(v ->
-                            Stream.of(functions).map(CompletableFuture::join).toList()
-                        );
+                findCause(errorMessage, AggregateMessageDeliveryException.class)
+                    .map(cause -> new MessageDeliveryException(originalMessage, cause.getMessage(), cause))
+                    .or(() ->
+                        findCause(errorMessage, TimeoutException.class).map(cause ->
+                            new MessageTimeoutException(originalMessage, cause.getMessage(), cause)
+                        )
+                    )
+                    .ifPresentOrElse(ThrowingConsumer.of(this::throwException), () ->
+                        log.warn("Unresolved function router error message: {}", errorMessage)
+                    );
+            }
 
-                        completed.thenAccept(results -> {
-                            var errors = results
-                                .stream()
-                                .map(Map.Entry.class::cast)
-                                .filter(entry ->
-                                    Optional.class
-                                        .cast(entry.getValue())
-                                        .filter(Exception.class::isInstance)
-                                        .isPresent()
-                                )
-                                .map(entry -> Optional.class.cast(entry.getValue()).get())
-                                .toList();
+            @SuppressWarnings("java:S112")
+            private void throwException(Exception exception) throws Exception {
+                throw exception;
+            }
 
-                            if (!errors.isEmpty()) {
-                                log.debug("Errors handling function route message request {}", errors);
+            private <T extends Throwable> Optional<Throwable> findCause(
+                ErrorMessage errorMessage,
+                Class<T> targetType
+            ) {
+                Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+                var throwable = errorMessage.getPayload();
 
-                                Optional.ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
-                                    .filter(StringUtils::hasText)
-                                    .map(functionCatalog::lookup)
-                                    .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
-                                    .ifPresent(errorHandlerDefinition -> {
-                                        errors
-                                            .stream()
-                                            .map(CompletionException.class::cast)
-                                            .map(CompletionException::getCause)
-                                            .map(exception -> {
-                                                if (exception instanceof MessagingException messagingException) {
-                                                    return new ErrorMessage(messagingException, message);
-                                                } else {
-                                                    return new ErrorMessage(
-                                                        new MessagingException(message, exception),
-                                                        message
-                                                    );
-                                                }
-                                            })
-                                            .forEach(errorMessage -> {
-                                                errorHandlerDefinition.accept(errorMessage);
-                                            });
-                                    });
-                            } else {
-                                log.debug("Successfully completed function route message request {}", message);
-                            }
-                        });
-                    },
-                    () -> {
-                        final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
-
-                        final var registration = Optional.ofNullable(destination)
-                            .map(it -> messagingProperties.getFunctionRouter().registrations(routingContext).get(it))
-                            .orElse(List.of());
-
-                        log.warn(
-                            "Unable to route message {} to destination '{}' for function registration '{}'",
-                            message,
-                            destination,
-                            registration
-                        );
+                while (throwable != null && seen.add(throwable)) {
+                    if (targetType.isInstance(throwable)) {
+                        return Optional.of(throwable);
                     }
-                );
+                    throwable = throwable.getCause();
+                }
+                return Optional.empty();
+            }
         };
     }
 
