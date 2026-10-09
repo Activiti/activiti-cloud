@@ -22,11 +22,15 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
+import org.springframework.transaction.PlatformTransactionManager;
 
 public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
-    public BPMNActivityCancelledEventHandler(EntityManager entityManager) {
-        super(entityManager);
+    public BPMNActivityCancelledEventHandler(
+        EntityManager entityManager,
+        PlatformTransactionManager transactionManager
+    ) {
+        super(entityManager, transactionManager);
     }
 
     @Override
