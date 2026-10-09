@@ -68,6 +68,7 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -305,9 +306,10 @@ public class FunctionRouterBindingConfigurationIT {
                 Optional.ofNullable(message.getHeaders().get("timeout", Duration.class)).ifPresentOrElse(
                     timeout -> {
                         try {
-                            Thread.sleep(timeout);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
+                            await()
+                                .atMost(timeout)
+                                .until(() -> false);
+                        } catch (ConditionTimeoutException e) {
                             throw new RuntimeException(e);
                         }
                     },
