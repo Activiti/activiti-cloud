@@ -210,7 +210,11 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
     private Map.Entry<String, Throwable> getCompletionExceptionCause(Map.Entry<String, Optional<Object>> entry) {
         return Map.entry(
             entry.getKey(),
-            entry.getValue().map(CompletionException.class::cast).map(CompletionException::getCause).get()
+            entry
+                .getValue()
+                .map(CompletionException.class::cast)
+                .map(CompletionException::getCause)
+                .orElseThrow(() -> new IllegalArgumentException("Expected completion exception"))
         );
     }
 
