@@ -36,6 +36,7 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.runtime.api.conf.ConnectorsAutoConfiguration;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
+import org.activiti.services.connectors.IntegrationRequestReloadService;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.ConnectorIncidentEventHandler;
@@ -155,9 +156,33 @@ public class CloudConnectorsAutoConfiguration {
     public IntegrationRequestSender integrationRequestSender(
         StreamBridge streamBridge,
         IntegrationContextMessageBuilderFactory messageBuilderFactory,
-        FunctionBindingConfiguration.BindingResolver bindingResolver
+        FunctionBindingConfiguration.BindingResolver bindingResolver,
+        IntegrationRequestReloadService integrationRequestReloadService
     ) {
-        return new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver);
+        return new IntegrationRequestSender(
+            streamBridge,
+            messageBuilderFactory,
+            bindingResolver,
+            integrationRequestReloadService
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IntegrationRequestReloadService integrationRequestReloadService(
+        RuntimeService runtimeService,
+        IntegrationContextService integrationContextService,
+        IntegrationContextBuilder integrationContextBuilder,
+        IntegrationRequestBuilder integrationRequestBuilder,
+        Set<IntegrationContextEnricher> integrationContextEnrichers
+    ) {
+        return new IntegrationRequestReloadService(
+            runtimeService,
+            integrationContextService,
+            integrationContextBuilder,
+            integrationRequestBuilder,
+            integrationContextEnrichers
+        );
     }
 
     @Bean

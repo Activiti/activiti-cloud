@@ -147,8 +147,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder
+        return new StringBuilder()
             .append("CloudRuntimeEventImpl [appName=")
             .append(appName)
             .append(", serviceFullName=")
@@ -173,8 +172,8 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
             .append(actor)
             .append(", toString()=")
             .append(super.toString())
-            .append("]");
-        return builder.toString();
+            .append("]")
+            .toString();
     }
 
     @Override
