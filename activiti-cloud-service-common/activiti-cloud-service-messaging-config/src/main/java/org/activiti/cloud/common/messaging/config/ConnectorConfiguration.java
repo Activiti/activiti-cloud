@@ -20,6 +20,8 @@ import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -373,9 +375,15 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             final var destination = headers.get("spring.cloud.function.destination", String.class);
             if (destination != null) {
                 int retryCount = getRetryCount(headers);
+                final var sendTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        getStreamBridge().send(destination, newMessage);
+                    }
+                };
+
                 if (retryCount < maxRetry - 1) {
-                    safeSleep(retryDelay);
-                    getStreamBridge().send(destination, newMessage);
+                    new Timer().schedule(sendTask, retryDelay);
                 } else {
                     LOGGER.error("Cannot retry message because retry limited exceeded: {}", maxRetry);
                 }
