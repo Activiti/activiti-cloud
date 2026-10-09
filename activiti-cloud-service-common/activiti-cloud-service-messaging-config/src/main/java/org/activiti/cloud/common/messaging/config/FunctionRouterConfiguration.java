@@ -20,6 +20,7 @@ import java.util.IdentityHashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -51,16 +52,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.integration.MessageDispatchingException;
+import org.springframework.integration.MessageTimeoutException;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dispatcher.AggregateMessageDeliveryException;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
+import org.springframework.util.function.ThrowingConsumer;
 
 @AutoConfiguration(
     before = InputBindingConfiguration.class,
@@ -204,22 +208,34 @@ public class FunctionRouterConfiguration {
         return new Consumer<ErrorMessage>() {
             @Override
             public void accept(ErrorMessage errorMessage) {
-                findCause(errorMessage, AggregateMessageDeliveryException.class).ifPresent(rethrow());
+                final var originalMessage = errorMessage.getOriginalMessage();
+
+                findCause(errorMessage, AggregateMessageDeliveryException.class)
+                    .map(cause -> new MessageDeliveryException(originalMessage, cause.getMessage(), cause))
+                    .or(() ->
+                        findCause(errorMessage, TimeoutException.class).map(cause ->
+                            new MessageTimeoutException(originalMessage, cause.getMessage(), cause)
+                        )
+                    )
+                    .ifPresentOrElse(ThrowingConsumer.of(this::throwException), () ->
+                        log.warn("Unresolved function router error message: {}", errorMessage)
+                    );
             }
 
-            private Consumer<RuntimeException> rethrow() {
-                return exception -> {
-                    throw exception;
-                };
+            private void throwException(Exception exception) throws Exception {
+                throw exception;
             }
 
-            private <T extends Throwable> Optional<T> findCause(ErrorMessage errorMessage, Class<T> targetType) {
+            private <T extends Throwable> Optional<Throwable> findCause(
+                ErrorMessage errorMessage,
+                Class<T> targetType
+            ) {
                 Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
                 var throwable = errorMessage.getPayload();
 
                 while (throwable != null && seen.add(throwable)) {
                     if (targetType.isInstance(throwable)) {
-                        return (Optional<T>) Optional.of(throwable);
+                        return Optional.of(throwable);
                     }
                     throwable = throwable.getCause();
                 }
