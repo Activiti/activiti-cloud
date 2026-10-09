@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.AssignedTaskCounter;
@@ -72,6 +75,7 @@ import reactor.core.publisher.Flux;
 class PushedCountsEndToEndIT {
 
     private static final String ALICE = "pushed-counts-e2e-alice";
+    private static final String HENRY = "pushed-counts-e2e-henry";
 
     @Autowired
     private MyProducer producer;
@@ -97,6 +101,7 @@ class PushedCountsEndToEndIT {
     void tearDown() {
         subscription.dispose();
         subscriberRegistry.unregister(ALICE, "test-session");
+        subscriberRegistry.unregister(HENRY, "test-session");
     }
 
     @Test
@@ -118,6 +123,24 @@ class PushedCountsEndToEndIT {
                 assertThat(received).anyMatch(
                     message -> message.scopeKey().equals("assigned:" + ALICE) && message.count() == 5
                 )
+            );
+    }
+
+    @Test
+    void committedProcessStartedEvent_flowsThroughQueryEvents_toACountChangedMessage_forAWatchingInitiator() {
+        subscriberRegistry.register(HENRY, Set.of(), "test-session", Instant.now());
+
+        CloudProcessInstanceImpl process = new CloudProcessInstanceImpl();
+        process.setId("pushed-counts-e2e-process");
+        process.setInitiator(HENRY);
+
+        // ProcessStartedEventHandler requires the row to already exist.
+        producer.send(new CloudProcessCreatedEventImpl(process), new CloudProcessStartedEventImpl(process));
+
+        await()
+            .atMost(Duration.ofSeconds(10))
+            .untilAsserted(() ->
+                assertThat(received).anyMatch(message -> message.scopeKey().equals("processes:" + HENRY))
             );
     }
 

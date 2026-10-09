@@ -57,7 +57,7 @@ public class QueuedTaskCounter implements PushedCounter {
     }
 
     @Override
-    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     public Map<String, Long> compute(Set<String> affectedUserIds) {
         if (affectedUserIds.isEmpty()) {
             return Map.of();

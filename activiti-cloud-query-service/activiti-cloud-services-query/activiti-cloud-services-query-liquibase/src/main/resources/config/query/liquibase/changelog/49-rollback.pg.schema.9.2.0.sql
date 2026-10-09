@@ -1,0 +1,1 @@
+drop index concurrently if exists idx_process_instance_initiator_status;

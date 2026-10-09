@@ -30,6 +30,8 @@ import org.activiti.cloud.services.query.app.AssignedTaskCounter;
 import org.activiti.cloud.services.query.app.PushedCountsRecomputeBuffer;
 import org.activiti.cloud.services.query.app.RecomputeAudienceResolver;
 import org.activiti.cloud.services.query.app.RecomputePipeline;
+import org.activiti.cloud.services.query.app.RunningProcessesCounter;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -90,6 +92,7 @@ class PushedCountsRecomputeAutoConfigurationWiringTest {
             assertThat(context).hasSingleBean(RecomputeAudienceResolver.class);
             assertThat(context).hasSingleBean(RecomputePipeline.class);
             assertThat(context).hasSingleBean(AssignedTaskCounter.class);
+            assertThat(context).hasSingleBean(RunningProcessesCounter.class);
             assertThat(context.getBean("pushedCountsQueryEventsConsumerFunction")).isNotNull();
             assertThat(context.getBean("pushedCountsQueryEventsConsumer")).isInstanceOf(SubscribableChannel.class);
         });
@@ -154,6 +157,11 @@ class PushedCountsRecomputeAutoConfigurationWiringTest {
         @Bean
         TaskCandidateGroupRepository taskCandidateGroupRepository() {
             return mock(TaskCandidateGroupRepository.class);
+        }
+
+        @Bean
+        ProcessInstanceRepository processInstanceRepository() {
+            return mock(ProcessInstanceRepository.class);
         }
     }
 }
