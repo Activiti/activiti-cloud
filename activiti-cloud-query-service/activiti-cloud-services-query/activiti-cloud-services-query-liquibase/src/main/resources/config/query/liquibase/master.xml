@@ -1176,4 +1176,40 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter49-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/49-alter.pg.schema.9.2.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/49-rollback.pg.schema.9.2.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter49-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/49-alter.oracle.schema.9.2.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="oracle"
+               encoding="utf8"
+               path="changelog/49-rollback.oracle.schema.9.2.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="false"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>
