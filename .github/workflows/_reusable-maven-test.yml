@@ -41,7 +41,7 @@ jobs:
           reuse-testcontainers: 'true'
           maven-command: >-
             verify -Dskip.common.tests=true -Dmaven.install.skip=true -Dswagger.skip
-            -pl ${{ matrix.extra-modules }}${{ matrix.path }} -am
+            -pl ${{ matrix.extra-modules }}${{ matrix.test-extra-modules }}${{ matrix.path }} -am
             ${{ matrix.test-maven-flags }} -U
           jacoco-report-name: jacoco-${{ matrix.short-name }}
           target-folder-upload-name: target-test-${{ matrix.short-name }}

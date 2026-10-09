@@ -130,20 +130,19 @@ jobs:
       # -pl <aggregator> does NOT include its submodules in a filtered reactor.
       # Enumerate every pom.xml under common parents so leaf modules (and tests) are in the reactor.
       # Also include standalone library modules not pulled in by any docker-image cell (-pl -am).
-      # TODO: split these into a dedicated maven-build-libraries job when the graph grows further.
+      # Modules depending on the runtime bundle starter are tested in the example-runtime-bundle
+      # maven-test cell instead (testExtraModules in .github/ci/docker-image-services.json):
+      # listing them here would pull the whole runtime bundle chain into this reactor via -am
+      # and run its tests a second time.
       - name: Resolve common parent modules
         id: common-modules
         run: |
           STANDALONE_MODULES=(
-            activiti-cloud-messages-service/integration-tests
             activiti-cloud-messages-service/starters/hazelcast
             activiti-cloud-messages-service/starters/jdbc
             activiti-cloud-messages-service/starters/redis
             activiti-cloud-notifications-graphql-service/gatling
             activiti-cloud-notifications-graphql-service/starter
-            activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-services-identity-basic
-            activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-runtime-bundle-rest-client
-            activiti-cloud-runtime-bundle-service/activiti-cloud-starter-runtime-bundle-it
           )
           MODULES=$(
             {
