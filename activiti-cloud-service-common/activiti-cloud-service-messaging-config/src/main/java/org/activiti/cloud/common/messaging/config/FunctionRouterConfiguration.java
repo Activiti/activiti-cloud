@@ -222,6 +222,7 @@ public class FunctionRouterConfiguration {
                     );
             }
 
+            @SuppressWarnings("java:S112")
             private void throwException(Exception exception) throws Exception {
                 throw exception;
             }
