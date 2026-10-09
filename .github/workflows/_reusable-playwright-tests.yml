@@ -112,12 +112,6 @@ jobs:
           messaging-destinations-option: ${{ steps.pw-profile.outputs.messaging-destinations }}
           version: ${{ inputs.version }}
 
-      - name: Cache Helm chart checkout
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .git/activiti-cloud-full-chart
-          key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ inputs.version }}
-
       - name: Delete preview for ${{ matrix.profile }}
         if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
         run: kubectl delete ns "$PREVIEW_NAME" || true
