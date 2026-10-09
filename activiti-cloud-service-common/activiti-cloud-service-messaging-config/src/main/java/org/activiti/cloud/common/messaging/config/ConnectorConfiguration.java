@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.config;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import java.lang.reflect.Type;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -36,6 +37,7 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -45,6 +47,7 @@ import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
+import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -55,6 +58,7 @@ import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
+import org.springframework.integration.core.MessageSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowDefinition;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
@@ -118,7 +122,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         AsyncTaskExecutor connectorAsyncTaskExecutor,
         BiFunction<Message<?>, ConnectorBinding, Duration> connectorIntegrationResultTimeoutResolver,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
-        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
+        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay,
+        @Value("${activiti.connector.skip-expired-requests.enabled:true}") boolean skipExpiredRequests,
+        ObjectProvider<JsonMapper> jsonMapperProvider
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -238,6 +244,14 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             .map(ExpressionEvaluatingSelector::new)
                             .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
+                        MessageSelector notExpired = skipExpiredRequests
+                            ? new IntegrationRequestExpirationSelector(
+                                  beanName,
+                                  payload -> jsonMapperProvider.getObject().toJson(payload),
+                                  Clock.systemUTC()
+                              )
+                            : message -> true;
+
                         IntegrationFlow connectorFlow = IntegrationFlow.from(
                             getGatewayInterface(Function.class.isInstance(bean)),
                             gateway -> gateway.replyTimeout(0L)
@@ -267,6 +281,11 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 }
                             })
                             .filter(connectorType, filter ->
+                                filter
+                                    .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                    .throwExceptionOnRejection(false)
+                            )
+                            .filter(notExpired, filter ->
                                 filter
                                     .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
                                     .throwExceptionOnRejection(false)
