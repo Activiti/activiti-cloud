@@ -52,7 +52,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private String businessKey;
 
     private String taskDefinitionKey;
-    private boolean allowSelfService;
+    private Boolean allowSelfService;
     private List<String> candidateUsers;
     private List<String> candidateGroups;
 
@@ -287,11 +287,11 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     }
 
     @Override
-    public boolean isAllowSelfService() {
+    public Boolean isAllowSelfService() {
         return allowSelfService;
     }
 
-    public void setAllowSelfService(boolean allowSelfService) {
+    public void setAllowSelfService(Boolean allowSelfService) {
         this.allowSelfService = allowSelfService;
     }
 
@@ -371,7 +371,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         CloudTaskImpl task = (CloudTaskImpl) o;
         return (
             priority == task.priority &&
-            allowSelfService == task.allowSelfService &&
+            Objects.equals(allowSelfService, task.allowSelfService) &&
             Objects.equals(id, task.id) &&
             Objects.equals(owner, task.owner) &&
             Objects.equals(assignee, task.assignee) &&
