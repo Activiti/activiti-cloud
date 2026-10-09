@@ -375,15 +375,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             final var destination = headers.get("spring.cloud.function.destination", String.class);
             if (destination != null) {
                 int retryCount = getRetryCount(headers);
-                final var sendTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        getStreamBridge().send(destination, newMessage);
-                    }
-                };
-
                 if (retryCount < maxRetry - 1) {
-                    new Timer().schedule(sendTask, retryDelay);
+                    new Timer().schedule(new StreamBridgeSendTask(destination, newMessage), retryDelay);
                 } else {
                     LOGGER.error("Cannot retry message because retry limited exceeded: {}", maxRetry);
                 }
@@ -394,11 +387,19 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         });
     }
 
-    private static void safeSleep(long retryDelay) {
-        try {
-            TimeUnit.SECONDS.sleep(retryDelay);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+    private class StreamBridgeSendTask extends TimerTask {
+
+        private final String destination;
+        private final Message<?> message;
+
+        private StreamBridgeSendTask(String destination, Message<?> message) {
+            this.destination = destination;
+            this.message = message;
+        }
+
+        @Override
+        public void run() {
+            getStreamBridge().send(destination, message);
         }
     }
 
