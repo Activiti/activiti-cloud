@@ -37,12 +37,12 @@ class CloudTaskImplTest {
     }
 
     @Test
-    void shouldDefaultAllowSelfServiceToFalse() {
+    void shouldDefaultAllowSelfServiceToNull() {
         TaskImpl task = new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED);
 
         CloudTaskImpl cloudTask = new CloudTaskImpl(task);
 
-        assertThat(cloudTask.isAllowSelfService()).isFalse();
+        assertThat(cloudTask.isAllowSelfService()).isNull();
     }
 
     @Test
