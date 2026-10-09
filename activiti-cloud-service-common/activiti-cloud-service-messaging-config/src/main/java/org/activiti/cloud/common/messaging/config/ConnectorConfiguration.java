@@ -19,9 +19,11 @@ import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG
 
 import java.lang.reflect.Type;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -82,6 +84,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
     public static final String NULL_CHANNEL = "nullChannel";
     public static final String RETRY_COUNT = "x-retry-count";
     public static final String INTEGRATION_RESULT_TIMEOUT = "integrationResultTimeout";
+
+    private final Map<String, Timer> retryTimers = new ConcurrentHashMap<>();
 
     @Bean(name = CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
     IntegrationFlow functionBindingSelectorDiscardFlow() {
@@ -376,7 +380,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             if (destination != null) {
                 int retryCount = getRetryCount(headers);
                 if (retryCount < maxRetry - 1) {
-                    new Timer().schedule(new StreamBridgeSendTask(destination, newMessage), retryDelay);
+                    final var retryTimer = retryTimers.computeIfAbsent(destination, Timer::new);
+                    retryTimer.schedule(new StreamBridgeSendTask(destination, newMessage), retryDelay);
                 } else {
                     LOGGER.error("Cannot retry message because retry limited exceeded: {}", maxRetry);
                 }
