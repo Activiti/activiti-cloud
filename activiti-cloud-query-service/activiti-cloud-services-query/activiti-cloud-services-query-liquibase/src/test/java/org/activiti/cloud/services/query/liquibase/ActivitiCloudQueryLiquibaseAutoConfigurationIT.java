@@ -133,7 +133,7 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
     }
 
     @Test
-    void shouldDefaultAllowSelfServiceToFalseWhenColumnOmitted() throws Exception {
+    void shouldDefaultAllowSelfServiceToNullWhenColumnOmitted() throws Exception {
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
             statement.executeUpdate("INSERT INTO task (id, priority) VALUES ('task-allow-self-service-default', 0)");
 
@@ -143,7 +143,8 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
                 )
             ) {
                 assertThat(result.next()).isTrue();
-                assertThat(result.getBoolean("allow_self_service")).isFalse();
+                result.getBoolean("allow_self_service");
+                assertThat(result.wasNull()).isTrue();
             }
         }
     }
