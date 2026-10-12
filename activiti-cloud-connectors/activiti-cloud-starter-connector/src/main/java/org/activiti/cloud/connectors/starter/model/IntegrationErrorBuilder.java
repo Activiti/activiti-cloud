@@ -21,7 +21,6 @@ import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -30,7 +29,6 @@ import org.springframework.messaging.support.MessageBuilder;
 public class IntegrationErrorBuilder {
 
     private final IntegrationRequest integrationRequest;
-    private IntegrationContextImpl sanitizedIntegrationContext;
     private final ConnectorProperties connectorProperties;
     private final Throwable error;
     private String customErrorMessage;
@@ -40,12 +38,7 @@ public class IntegrationErrorBuilder {
         ConnectorProperties connectorProperties,
         Throwable error
     ) {
-        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-        if (integrationContext != null) {
-            this.sanitizedIntegrationContext = new IntegrationContextImpl(integrationContext);
-            this.sanitizedIntegrationContext.clearInBoundVariables();
-        }
-        this.integrationRequest = IntegrationRequestImpl.copyWithoutContext(integrationRequest);
+        this.integrationRequest = integrationRequest;
         this.connectorProperties = connectorProperties;
         this.error = error;
     }
@@ -68,6 +61,14 @@ public class IntegrationErrorBuilder {
         Objects.requireNonNull(error);
 
         IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error, customErrorMessage);
+        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+        IntegrationContextImpl sanitizedIntegrationContext = null;
+
+        if (integrationContext != null) {
+            sanitizedIntegrationContext = new IntegrationContextImpl(integrationContext);
+            sanitizedIntegrationContext.clearInBoundVariables();
+        }
+
         integrationError.setIntegrationContext(sanitizedIntegrationContext);
 
         if (connectorProperties != null) {
