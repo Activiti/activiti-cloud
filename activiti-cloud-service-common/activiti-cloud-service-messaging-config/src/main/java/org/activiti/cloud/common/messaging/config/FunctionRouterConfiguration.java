@@ -227,16 +227,13 @@ public class FunctionRouterConfiguration {
                 throw exception;
             }
 
-            private <T extends Throwable> Optional<Throwable> findCause(
-                ErrorMessage errorMessage,
-                Class<T> targetType
-            ) {
+            private <T extends Throwable> Optional<T> findCause(ErrorMessage errorMessage, Class<T> targetType) {
                 Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
                 var throwable = errorMessage.getPayload();
 
                 while (throwable != null && seen.add(throwable)) {
                     if (targetType.isInstance(throwable)) {
-                        return Optional.of(throwable);
+                        return (Optional<T>) Optional.of(throwable);
                     }
                     throwable = throwable.getCause();
                 }

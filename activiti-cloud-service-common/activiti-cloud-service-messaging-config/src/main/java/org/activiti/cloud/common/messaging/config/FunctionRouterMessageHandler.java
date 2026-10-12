@@ -26,8 +26,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -58,6 +61,8 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
     private final BindingServiceProperties bindingServiceProperties;
     private final Function<String, Optional<Consumer<ErrorMessage>>> functionRouterErrorHandlerDefinitionResolver;
     private final ActivitiCloudMessagingProperties.FunctionRouterProperties functionRouter;
+
+    private final Executor completableFutureExecutor = Executors.newCachedThreadPool(Thread.ofVirtual().factory());
 
     public FunctionRouterMessageHandler(
         RoutingFunction routingFunction,
@@ -152,6 +157,12 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                             }
                         })
                         .orTimeout(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS)
+                        .exceptionally(e -> {
+                            if (e instanceof TimeoutException) {
+                                functions.forEach(f -> f.cancel(true));
+                            }
+                            throw new CompletionException(e);
+                        })
                         .join();
                 },
                 () -> {
@@ -241,19 +252,30 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
 
     private Function<Message<?>, CompletableFuture<Object>> routingFunctionFuture() {
         return request -> {
-            final CompletableFuture<Object> future = new CompletableFuture<>();
-            try {
-                functionExecutorSelector.apply(request).execute(() -> {
-                    try {
-                        future.complete(routingFunction.apply(request));
-                    } catch (Exception ex) {
-                        future.completeExceptionally(ex);
-                    }
-                });
-            } catch (Exception exception) {
-                future.completeExceptionally(exception);
-            }
-            return future;
+            final CompletableFuture<Object> result = new CompletableFuture<>();
+            final var executor = functionExecutorSelector.apply(request);
+
+            final var task = executor.submit(() -> {
+                try {
+                    result.complete(routingFunction.apply(request));
+                } catch (Exception ex) {
+                    result.completeExceptionally(ex);
+                }
+
+                return result;
+            });
+
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    final var future = task.get(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS);
+
+                    return future.get();
+                } catch (Exception e) {
+                    task.cancel(true);
+
+                    throw new CompletionException(e);
+                }
+            }, completableFutureExecutor);
         };
     }
 
