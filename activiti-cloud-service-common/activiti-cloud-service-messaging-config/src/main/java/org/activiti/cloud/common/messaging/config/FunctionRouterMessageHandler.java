@@ -131,14 +131,10 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                                             .apply(entry.getKey())
                                             .orElseGet(() -> fallbackErrorHandler.apply(errorMessage));
 
-                                        try {
-                                            return CompletableFuture.runAsync(
-                                                () -> errorHandlerDefinition.accept(errorMessage),
-                                                Runnable::run
-                                            );
-                                        } catch (Exception e) {
-                                            return CompletableFuture.failedFuture(e);
-                                        }
+                                        return CompletableFuture.runAsync(
+                                            () -> errorHandlerDefinition.accept(errorMessage),
+                                            Runnable::run
+                                        );
                                     })
                                     .filter(CompletableFuture::isCompletedExceptionally)
                                     .map(CompletableFuture::exceptionNow)
@@ -270,10 +266,14 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                     final var future = task.get(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS);
 
                     return future.get();
-                } catch (Exception e) {
+                } catch (Exception cause) {
+                    if (cause instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+
                     task.cancel(true);
 
-                    throw new CompletionException(e);
+                    throw new CompletionException(cause);
                 }
             }, completableFutureExecutor);
         };
