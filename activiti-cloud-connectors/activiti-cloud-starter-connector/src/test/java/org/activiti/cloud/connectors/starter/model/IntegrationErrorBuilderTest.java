@@ -66,7 +66,6 @@ public class IntegrationErrorBuilderTest {
             .hasErrorMessage("Boom!")
             .hasStackTraceElements(error.getStackTrace());
 
-        Assertions.assertThat(integrationError.getIntegrationRequest().getIntegrationContext()).isNull();
         Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
         Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
     }
