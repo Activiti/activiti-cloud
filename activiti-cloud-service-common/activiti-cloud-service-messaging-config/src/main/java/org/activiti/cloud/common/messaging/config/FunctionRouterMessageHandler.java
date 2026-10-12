@@ -142,7 +142,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                                     })
                                     .filter(CompletableFuture::isCompletedExceptionally)
                                     .map(CompletableFuture::exceptionNow)
-                                    .map(RuntimeException::new)
+                                    .map(CompletionException::new)
                                     .toList();
 
                                 if (!errorHandlingResults.isEmpty()) {
@@ -157,11 +157,11 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                             }
                         })
                         .orTimeout(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS)
-                        .exceptionally(e -> {
-                            if (e instanceof TimeoutException) {
+                        .exceptionally(cause -> {
+                            if (cause instanceof TimeoutException) {
                                 functions.forEach(f -> f.cancel(true));
                             }
-                            throw new CompletionException(e);
+                            throw new CompletionException(cause);
                         })
                         .join();
                 },

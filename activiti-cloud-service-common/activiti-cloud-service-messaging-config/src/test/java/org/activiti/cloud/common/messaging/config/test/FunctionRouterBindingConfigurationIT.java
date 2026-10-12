@@ -307,14 +307,12 @@ public class FunctionRouterBindingConfigurationIT {
             return message -> {
                 Optional.ofNullable(message.getHeaders().get("timeout", Duration.class)).ifPresentOrElse(
                     timeout -> {
-                        try {
-                            while (!Thread.currentThread().isInterrupted()) {
-                                Thread.sleep(100);
-                            }
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            isInterrupted.set(true);
-                        }
+                        await()
+                            .pollInSameThread()
+                            .pollInterval(Duration.ofMillis(100))
+                            .until(() -> Thread.currentThread().isInterrupted());
+
+                        isInterrupted.set(Thread.currentThread().isInterrupted());
                     },
                     () -> {
                         throw new RuntimeException("optimistic locking exception");
@@ -660,11 +658,11 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Test
     void messageTimeoutException() {
-        withRequestTimeout(Duration.ofSeconds(2), () -> {
+        withRequestTimeout(Duration.ofSeconds(1), () -> {
             // given
             Message<String> message = MessageBuilder.withPayload("Test")
                 .setHeader(FUNCTION_DESTINATION, "integration-requests")
-                .setHeader("timeout", Duration.ofSeconds(1))
+                .setHeader("timeout", Duration.ofSeconds(2))
                 .build();
 
             ExceptionCaptor<RuntimeException> exceptionCaptor = new ExceptionCaptor<>();
