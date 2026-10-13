@@ -82,7 +82,7 @@ class IntegrationRequestImplTest {
     }
 
     @Test
-    void copyWithoutContext_should_copyAllRoutingMetadata() {
+    void copyWithLightweightContext_should_copyAllRoutingMetadata() {
         // given
         given(integrationContext.getAppVersion()).willReturn("1");
         IntegrationRequestImpl source = new IntegrationRequestImpl(integrationContext);
@@ -99,7 +99,7 @@ class IntegrationRequestImplTest {
         source.setTtlSeconds(30);
 
         // when
-        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithoutContext(source);
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithLightweightContext(source);
 
         // then
         assertThat(copy.getAppName()).isEqualTo("myApp");
@@ -116,26 +116,28 @@ class IntegrationRequestImplTest {
     }
 
     @Test
-    void copyWithoutContext_should_notCopyIntegrationContext() {
+    void copyWithLightweightContext_should_haveLightweightContext() {
         // given
         given(integrationContext.getAppVersion()).willReturn("1");
         IntegrationRequestImpl source = new IntegrationRequestImpl(integrationContext);
         assertThat(source.getIntegrationContext()).isNotNull();
 
         // when
-        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithoutContext(source);
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithLightweightContext(source);
 
         // then
-        assertThat(copy.getIntegrationContext()).isNull();
+        assertThat(copy.getIntegrationContext()).isNotNull();
+        assertThat(copy.getIntegrationContext().getInBoundVariables()).isEmpty();
+        assertThat(copy.getIntegrationContext().getOutBoundVariables()).isEmpty();
     }
 
     @Test
-    void copyWithoutContext_should_handleNullFields() {
+    void copyWithLightweightContext_should_handleNullFields() {
         // given
         IntegrationRequestImpl source = new IntegrationRequestImpl();
 
         // when
-        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithoutContext(source);
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithLightweightContext(source);
 
         // then
         assertThat(copy.getAppName()).isNull();

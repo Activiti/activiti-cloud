@@ -17,6 +17,7 @@ package org.activiti.cloud.api.process.model.impl;
 
 import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 
@@ -94,11 +95,11 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
     }
 
     /**
-     * Creates a shallow copy of the given {@link IntegrationRequest} without the
-     * {@link IntegrationContext} payload. Useful for reducing serialized message size
-     * when only routing metadata is needed.
+     * Creates a copy of the given {@link IntegrationRequest} with a lightweight
+     * {@link IntegrationContext} whose inbound and outbound variables are cleared.
+     * Useful for reducing serialized message size when only routing metadata is needed.
      */
-    public static IntegrationRequestImpl copyWithoutContext(IntegrationRequest source) {
+    public static IntegrationRequestImpl copyWithLightweightContext(IntegrationRequest source) {
         IntegrationRequestImpl copy = new IntegrationRequestImpl();
         copy.setAppName(source.getAppName());
         copy.setAppVersion(source.getAppVersion());
@@ -111,6 +112,13 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
         copy.setIncidentDestination(source.getIncidentDestination());
         copy.setRequestDate(source.getRequestDate());
         copy.setTtlSeconds(source.getTtlSeconds());
+        IntegrationContext context = source.getIntegrationContext();
+        if (context != null) {
+            IntegrationContextImpl lightweightContext = new IntegrationContextImpl(context);
+            lightweightContext.clearInBoundVariables();
+            lightweightContext.clearOutBoundVariables();
+            copy.integrationContext = lightweightContext;
+        }
         return copy;
     }
 }

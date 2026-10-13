@@ -45,7 +45,7 @@ public class IntegrationErrorBuilder {
             this.sanitizedIntegrationContext = new IntegrationContextImpl(integrationContext);
             this.sanitizedIntegrationContext.clearInBoundVariables();
         }
-        this.integrationRequest = IntegrationRequestImpl.copyWithoutContext(integrationRequest);
+        this.integrationRequest = IntegrationRequestImpl.copyWithLightweightContext(integrationRequest);
         this.connectorProperties = connectorProperties;
         this.error = error;
     }

@@ -41,7 +41,7 @@ public class IntegrationResultBuilder {
             sanitizedIntegrationContext.clearInBoundVariables();
         }
 
-        this.requestEvent = IntegrationRequestImpl.copyWithoutContext(integrationRequest);
+        this.requestEvent = IntegrationRequestImpl.copyWithLightweightContext(integrationRequest);
         this.integrationResult = new IntegrationResultImpl(this.requestEvent, sanitizedIntegrationContext);
 
         if (connectorProperties != null) {
