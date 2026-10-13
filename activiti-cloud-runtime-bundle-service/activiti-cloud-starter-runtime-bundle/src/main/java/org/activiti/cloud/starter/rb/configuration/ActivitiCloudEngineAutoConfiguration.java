@@ -19,6 +19,7 @@ import static org.activiti.spring.boot.ProcessEngineAutoConfiguration.BEHAVIOR_F
 
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
+import org.activiti.engine.impl.bpmn.helper.ErrorPayloadMappingProvider;
 import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.spring.boot.ProcessEngineAutoConfiguration;
@@ -42,6 +43,7 @@ public class ActivitiCloudEngineAutoConfiguration {
         ExtensionsVariablesMappingProvider variablesMappingProvider,
         ProcessVariablesInitiator processVariablesInitiator,
         EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider,
+        ErrorPayloadMappingProvider errorPayloadMappingProvider,
         VariablesPropagator variablesPropagator
     ) {
         return new SignalBehaviourConfigurer(
@@ -49,6 +51,7 @@ public class ActivitiCloudEngineAutoConfiguration {
             variablesMappingProvider,
             processVariablesInitiator,
             eventSubscriptionPayloadMappingProvider,
+            errorPayloadMappingProvider,
             variablesPropagator
         );
     }
