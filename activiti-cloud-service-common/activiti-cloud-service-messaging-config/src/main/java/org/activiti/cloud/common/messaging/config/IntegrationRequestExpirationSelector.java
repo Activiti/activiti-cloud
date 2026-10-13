@@ -62,7 +62,7 @@ public class IntegrationRequestExpirationSelector implements MessageSelector {
 
         if (expiration.isPresent() && now.isAfter(expiration.get().expiresAt())) {
             LOGGER.info(
-                "Discarding expired integration request {} for connector {}: requestDate {} plus ttlSeconds {} expired at {}",
+                "Discarding expired integration request {} in connector binding {}: requestDate {} plus ttlSeconds {} expired at {}",
                 message.getHeaders().get(INTEGRATION_CONTEXT_ID),
                 connectorName,
                 expiration.get().requestDate(),

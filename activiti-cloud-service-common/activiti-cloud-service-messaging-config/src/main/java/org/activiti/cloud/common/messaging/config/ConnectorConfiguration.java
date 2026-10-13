@@ -257,6 +257,11 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             gateway -> gateway.replyTimeout(0L)
                         )
                             .log(DEBUG, beanName + ".integrationRequest")
+                            .filter(notExpired, filter ->
+                                filter
+                                    .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                    .throwExceptionOnRejection(false)
+                            )
                             .filter(selector, filter -> {
                                 int retry = connectorBinding.retry() != 0 ? connectorBinding.retry() : defaultMaxRetry;
                                 if (retry > 0) {
@@ -281,11 +286,6 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 }
                             })
                             .filter(connectorType, filter ->
-                                filter
-                                    .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
-                                    .throwExceptionOnRejection(false)
-                            )
-                            .filter(notExpired, filter ->
                                 filter
                                     .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
                                     .throwExceptionOnRejection(false)

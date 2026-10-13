@@ -23,6 +23,7 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
@@ -785,6 +786,37 @@ public class ConnectorConfigurationIT {
         assertThat(reply).isNull();
         assertThat(connectorExpirationCounter.get()).isZero();
         assertThat(myErrorHandler.getReference().get()).isNull();
+    }
+
+    @Test
+    void shouldNotRetryExpiredIntegrationRequestRejectedByRetryEnabledConnector() {
+        // given
+        String integrationContextId = "expired-with-retry-destination";
+        Message<byte[]> message = MessageBuilder.fromMessage(
+            expirationTestMessage(integrationRequestJson(Instant.now().minus(Duration.ofHours(1)), 60))
+        )
+            .setHeader("integrationContextId", integrationContextId)
+            .setHeader("spring.cloud.function.destination", "script.EXECUTE")
+            .build();
+
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        await()
+            .during(Duration.ofSeconds(3))
+            .atMost(Duration.ofSeconds(5))
+            .untilAsserted(() ->
+                verify(streamBridge, never()).send(
+                    eq("script.EXECUTE"),
+                    argThat(
+                        sent ->
+                            sent instanceof Message<?> sentMessage &&
+                            integrationContextId.equals(sentMessage.getHeaders().get("integrationContextId"))
+                    )
+                )
+            );
+        assertThat(connectorExpirationCounter.get()).isZero();
     }
 
     @Test
