@@ -18,8 +18,10 @@ package org.activiti.cloud.api.process.model.impl.events;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+import java.util.Collections;
 import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -118,9 +120,15 @@ class IntegrationRequestImplTest {
     @Test
     void copyWithLightweightContext_should_haveLightweightContext() {
         // given
-        given(integrationContext.getAppVersion()).willReturn("1");
-        IntegrationRequestImpl source = new IntegrationRequestImpl(integrationContext);
+        IntegrationContextImpl originalContext = new IntegrationContextImpl();
+        originalContext.setClientId("elementId");
+        originalContext.addInBoundVariables(Collections.singletonMap("inVar", "inValue"));
+        originalContext.addOutBoundVariables(Collections.singletonMap("outVar", "outValue"));
+
+        IntegrationRequestImpl source = new IntegrationRequestImpl(originalContext);
         assertThat(source.getIntegrationContext()).isNotNull();
+        assertThat(source.getIntegrationContext().getInBoundVariables()).isNotEmpty();
+        assertThat(source.getIntegrationContext().getOutBoundVariables()).isNotEmpty();
 
         // when
         IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithLightweightContext(source);
@@ -129,6 +137,7 @@ class IntegrationRequestImplTest {
         assertThat(copy.getIntegrationContext()).isNotNull();
         assertThat(copy.getIntegrationContext().getInBoundVariables()).isEmpty();
         assertThat(copy.getIntegrationContext().getOutBoundVariables()).isEmpty();
+        assertThat(copy.getIntegrationContext().getClientId()).isEqualTo("elementId");
     }
 
     @Test
