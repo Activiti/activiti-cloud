@@ -22,7 +22,7 @@ repos:
           - java
           - markdown
         additional_dependencies:
-          - prettier@3.9.9
+          - prettier@3.9.10
           - prettier-plugin-java@2.11.0
         exclude: ^\.github/workflows/.*\.(lock\.yml|md)$
   - repo: https://github.com/sirosen/check-jsonschema
