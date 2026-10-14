@@ -18,8 +18,10 @@ package org.activiti.cloud.api.process.model.impl.events;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+import java.util.Collections;
 import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,5 +81,81 @@ class IntegrationRequestImplTest {
 
         assertThat(integrationRequest.getRequestDate()).isNull();
         assertThat(integrationRequest.getTtlSeconds()).isNull();
+    }
+
+    @Test
+    void copyWithLightweightContext_should_copyAllRoutingMetadata() {
+        // given
+        given(integrationContext.getAppVersion()).willReturn("1");
+        IntegrationRequestImpl source = new IntegrationRequestImpl(integrationContext);
+        source.setAppName("myApp");
+        source.setServiceName("myService");
+        source.setServiceFullName("myServiceFullName");
+        source.setServiceType("myServiceType");
+        source.setServiceVersion("1.0");
+        source.setResultDestination("resultDest");
+        source.setErrorDestination("errorDest");
+        source.setIncidentDestination("incidentDest");
+        Date requestDate = new Date();
+        source.setRequestDate(requestDate);
+        source.setTtlSeconds(30);
+
+        // when
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithLightweightContext(source);
+
+        // then
+        assertThat(copy.getAppName()).isEqualTo("myApp");
+        assertThat(copy.getAppVersion()).isEqualTo("1");
+        assertThat(copy.getServiceName()).isEqualTo("myService");
+        assertThat(copy.getServiceFullName()).isEqualTo("myServiceFullName");
+        assertThat(copy.getServiceType()).isEqualTo("myServiceType");
+        assertThat(copy.getServiceVersion()).isEqualTo("1.0");
+        assertThat(copy.getResultDestination()).isEqualTo("resultDest");
+        assertThat(copy.getErrorDestination()).isEqualTo("errorDest");
+        assertThat(copy.getIncidentDestination()).isEqualTo("incidentDest");
+        assertThat(copy.getRequestDate()).isEqualTo(requestDate);
+        assertThat(copy.getTtlSeconds()).isEqualTo(30);
+    }
+
+    @Test
+    void copyWithLightweightContext_should_haveLightweightContext() {
+        // given
+        IntegrationContextImpl originalContext = new IntegrationContextImpl();
+        originalContext.setClientId("elementId");
+        originalContext.addInBoundVariables(Collections.singletonMap("inVar", "inValue"));
+        originalContext.addOutBoundVariables(Collections.singletonMap("outVar", "outValue"));
+
+        IntegrationRequestImpl source = new IntegrationRequestImpl(originalContext);
+
+        // when
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithLightweightContext(source);
+
+        // then
+        assertThat(source.getIntegrationContext()).isNotNull();
+        assertThat(source.getIntegrationContext().getInBoundVariables()).isNotEmpty();
+        assertThat(source.getIntegrationContext().getOutBoundVariables()).isNotEmpty();
+        assertThat(copy.getIntegrationContext()).isNotNull();
+        assertThat(copy.getIntegrationContext().getInBoundVariables()).isEmpty();
+        assertThat(copy.getIntegrationContext().getOutBoundVariables()).isEmpty();
+        assertThat(copy.getIntegrationContext().getClientId()).isEqualTo("elementId");
+    }
+
+    @Test
+    void copyWithLightweightContext_should_handleNullFields() {
+        // given
+        IntegrationRequestImpl source = new IntegrationRequestImpl();
+
+        // when
+        IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithLightweightContext(source);
+
+        // then
+        assertThat(copy.getAppName()).isNull();
+        assertThat(copy.getServiceFullName()).isNull();
+        assertThat(copy.getResultDestination()).isNull();
+        assertThat(copy.getErrorDestination()).isNull();
+        assertThat(copy.getIncidentDestination()).isNull();
+        assertThat(copy.getRequestDate()).isNull();
+        assertThat(copy.getTtlSeconds()).isNull();
+        assertThat(copy.getIntegrationContext()).isNull();
     }
 }
