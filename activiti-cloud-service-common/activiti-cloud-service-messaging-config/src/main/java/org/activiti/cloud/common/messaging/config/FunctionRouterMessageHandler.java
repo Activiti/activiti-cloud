@@ -30,7 +30,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -155,12 +154,6 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                             }
                         })
                         .orTimeout(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS)
-                        .exceptionally(cause -> {
-                            if (cause instanceof TimeoutException) {
-                                functions.forEach(f -> f.cancel(true));
-                            }
-                            throw new CompletionException(cause);
-                        })
                         .join();
                 },
                 () -> {

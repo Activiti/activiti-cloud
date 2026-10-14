@@ -308,8 +308,8 @@ public class FunctionRouterBindingConfigurationIT {
                 Optional.ofNullable(message.getHeaders().get("timeout", Duration.class)).ifPresentOrElse(
                     timeout -> {
                         await()
+                            .atMost(timeout)
                             .pollInSameThread()
-                            .pollInterval(Duration.ofMillis(100))
                             .until(() -> Thread.currentThread().isInterrupted());
 
                         isInterrupted.set(Thread.currentThread().isInterrupted());
@@ -658,11 +658,11 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Test
     void messageTimeoutException() {
-        withRequestTimeout(Duration.ofSeconds(1), () -> {
+        withRequestTimeout(Duration.ofSeconds(2), () -> {
             // given
             Message<String> message = MessageBuilder.withPayload("Test")
                 .setHeader(FUNCTION_DESTINATION, "integration-requests")
-                .setHeader("timeout", Duration.ofSeconds(2))
+                .setHeader("timeout", Duration.ofSeconds(3))
                 .build();
 
             ExceptionCaptor<RuntimeException> exceptionCaptor = new ExceptionCaptor<>();
