@@ -451,7 +451,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@f2ba011b2bd8bee8d7418b046541ce2f75d1fbed # v19.4.0
         with:
           version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "true"
@@ -487,7 +487,7 @@ jobs:
       - name: Use preview updatebot config
         shell: bash
         run: cp .jx/updatebot-preview.yaml .jx/updatebot.yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@f2ba011b2bd8bee8d7418b046541ce2f75d1fbed # v19.4.0
         env:
           ACTIVITI_CLOUD_VERSION: ${{ needs.create-tag.outputs.version }}
           BUILD_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
