@@ -126,14 +126,14 @@ class IntegrationRequestImplTest {
         originalContext.addOutBoundVariables(Collections.singletonMap("outVar", "outValue"));
 
         IntegrationRequestImpl source = new IntegrationRequestImpl(originalContext);
-        assertThat(source.getIntegrationContext()).isNotNull();
-        assertThat(source.getIntegrationContext().getInBoundVariables()).isNotEmpty();
-        assertThat(source.getIntegrationContext().getOutBoundVariables()).isNotEmpty();
 
         // when
         IntegrationRequestImpl copy = IntegrationRequestImpl.copyWithLightweightContext(source);
 
         // then
+        assertThat(source.getIntegrationContext()).isNotNull();
+        assertThat(source.getIntegrationContext().getInBoundVariables()).isNotEmpty();
+        assertThat(source.getIntegrationContext().getOutBoundVariables()).isNotEmpty();
         assertThat(copy.getIntegrationContext()).isNotNull();
         assertThat(copy.getIntegrationContext().getInBoundVariables()).isEmpty();
         assertThat(copy.getIntegrationContext().getOutBoundVariables()).isEmpty();
