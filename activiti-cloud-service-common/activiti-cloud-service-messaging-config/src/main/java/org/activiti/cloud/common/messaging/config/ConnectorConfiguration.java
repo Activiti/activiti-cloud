@@ -247,6 +247,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         MessageSelector notExpired = skipExpiredRequests
                             ? new IntegrationRequestExpirationSelector(
                                   beanName,
+                                  message -> connectorType.accept(message) && selector.accept(message),
                                   payload -> jsonMapperProvider.getObject().toJson(payload),
                                   Clock.systemUTC()
                               )

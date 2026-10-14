@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.core.MessageSelector;
@@ -42,15 +43,18 @@ public class IntegrationRequestExpirationSelector implements MessageSelector {
     private static final StdDateFormat DATE_FORMAT = new StdDateFormat();
 
     private final String connectorName;
+    private final Predicate<Message<?>> ownsMessage;
     private final Function<Object, byte[]> payloadSerializer;
     private final Clock clock;
 
     public IntegrationRequestExpirationSelector(
         String connectorName,
+        Predicate<Message<?>> ownsMessage,
         Function<Object, byte[]> payloadSerializer,
         Clock clock
     ) {
         this.connectorName = connectorName;
+        this.ownsMessage = ownsMessage;
         this.payloadSerializer = payloadSerializer;
         this.clock = clock;
     }
@@ -61,7 +65,7 @@ public class IntegrationRequestExpirationSelector implements MessageSelector {
         Instant now = clock.instant();
 
         if (expiration.isPresent() && now.isAfter(expiration.get().expiresAt())) {
-            LOGGER.info(
+            (ownsMessage(message) ? LOGGER.atInfo() : LOGGER.atDebug()).log(
                 "Discarding expired integration request {} in connector binding {}: requestDate {} plus ttlSeconds {} expired at {}",
                 message.getHeaders().get(INTEGRATION_CONTEXT_ID),
                 connectorName,
@@ -72,6 +76,15 @@ public class IntegrationRequestExpirationSelector implements MessageSelector {
             return false;
         }
         return true;
+    }
+
+    private boolean ownsMessage(Message<?> message) {
+        try {
+            return ownsMessage.test(message);
+        } catch (RuntimeException e) {
+            LOGGER.debug("Cannot evaluate message ownership for connector {}", connectorName, e);
+            return false;
+        }
     }
 
     private Optional<Expiration> readExpiration(Object payload) {

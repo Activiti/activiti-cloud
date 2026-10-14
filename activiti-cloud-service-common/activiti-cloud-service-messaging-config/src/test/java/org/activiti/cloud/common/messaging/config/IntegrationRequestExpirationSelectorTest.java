@@ -17,6 +17,10 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
@@ -24,7 +28,10 @@ import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -38,9 +45,71 @@ class IntegrationRequestExpirationSelectorTest {
 
     private final IntegrationRequestExpirationSelector selector = new IntegrationRequestExpirationSelector(
         "testConnector",
+        message -> true,
         failingSerializer,
         Clock.fixed(NOW, ZoneOffset.UTC)
     );
+
+    private final Logger selectorLogger = (Logger) LoggerFactory.getLogger(IntegrationRequestExpirationSelector.class);
+    private final ListAppender<ILoggingEvent> logEvents = new ListAppender<>();
+    private Level originalLevel;
+
+    @BeforeEach
+    void attachLogAppender() {
+        originalLevel = selectorLogger.getLevel();
+        selectorLogger.setLevel(Level.DEBUG);
+        logEvents.start();
+        selectorLogger.addAppender(logEvents);
+    }
+
+    @AfterEach
+    void detachLogAppender() {
+        selectorLogger.detachAppender(logEvents);
+        selectorLogger.setLevel(originalLevel);
+    }
+
+    @Test
+    void shouldLogDiscardAtInfoWhenBindingOwnsMessage() {
+        selector.accept(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO));
+
+        assertThat(logEvents.list).extracting(ILoggingEvent::getLevel).containsExactly(Level.INFO);
+    }
+
+    @Test
+    void shouldLogDiscardAtDebugWhenBindingDoesNotOwnMessage() {
+        IntegrationRequestExpirationSelector foreignSelector = new IntegrationRequestExpirationSelector(
+            "otherConnector",
+            message -> false,
+            failingSerializer,
+            Clock.fixed(NOW, ZoneOffset.UTC)
+        );
+
+        boolean accepted = foreignSelector.accept(
+            jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO)
+        );
+
+        assertThat(accepted).isFalse();
+        assertThat(logEvents.list).extracting(ILoggingEvent::getLevel).containsExactly(Level.DEBUG);
+    }
+
+    @Test
+    void shouldStillDiscardWhenOwnershipCannotBeEvaluated() {
+        IntegrationRequestExpirationSelector failingOwnershipSelector = new IntegrationRequestExpirationSelector(
+            "otherConnector",
+            message -> {
+                throw new IllegalStateException("Cannot evaluate condition");
+            },
+            failingSerializer,
+            Clock.fixed(NOW, ZoneOffset.UTC)
+        );
+
+        boolean accepted = failingOwnershipSelector.accept(
+            jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO)
+        );
+
+        assertThat(accepted).isFalse();
+        assertThat(logEvents.list).extracting(ILoggingEvent::getLevel).containsOnly(Level.DEBUG);
+    }
 
     @Test
     void shouldRejectRequestWhenTtlHasElapsed() {
@@ -147,6 +216,7 @@ class IntegrationRequestExpirationSelectorTest {
         Map<String, Object> payload = Map.of("requestDate", ONE_HOUR_AGO, "ttlSeconds", 60);
         IntegrationRequestExpirationSelector objectSelector = new IntegrationRequestExpirationSelector(
             "testConnector",
+            message -> true,
             value -> {
                 serializedPayload.set(value);
                 return ("{\"requestDate\":\"" + ONE_HOUR_AGO + "\",\"ttlSeconds\":60}").getBytes(
