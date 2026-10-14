@@ -242,7 +242,7 @@
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
-    <swagger-annotations.version>2.2.41</swagger-annotations.version>
+    <swagger-annotations.version>2.2.55</swagger-annotations.version>
     <mockito.agent.arg>-javaagent:"${org.mockito:mockito-core:jar}"</mockito.agent.arg>
   </properties>
   <repositories>
