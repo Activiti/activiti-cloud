@@ -61,8 +61,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
     private final BindingServiceProperties bindingServiceProperties;
     private final Function<String, Optional<Consumer<ErrorMessage>>> functionRouterErrorHandlerDefinitionResolver;
     private final ActivitiCloudMessagingProperties.FunctionRouterProperties functionRouter;
-
-    private final Executor completableFutureExecutor = Executors.newCachedThreadPool(Thread.ofVirtual().factory());
+    private final Executor completableFutureExecutor;
 
     public FunctionRouterMessageHandler(
         RoutingFunction routingFunction,
@@ -79,6 +78,9 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
         this.bindingServiceProperties = bindingServiceProperties;
         this.functionRouterErrorHandlerDefinitionResolver = functionRouterErrorHandlerDefinitionResolver;
         this.functionRouter = messagingProperties.getFunctionRouter();
+        this.completableFutureExecutor = Executors.newCachedThreadPool(
+            Thread.ofVirtual().name(FunctionRouterMessageHandler.class.getSimpleName(), 0).factory()
+        );
     }
 
     @Override
