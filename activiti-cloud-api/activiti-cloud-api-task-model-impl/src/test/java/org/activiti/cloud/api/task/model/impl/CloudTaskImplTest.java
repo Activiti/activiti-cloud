@@ -37,12 +37,12 @@ class CloudTaskImplTest {
     }
 
     @Test
-    void shouldDefaultAllowSelfServiceToFalse() {
+    void shouldDefaultAllowSelfServiceToNull() {
         TaskImpl task = new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED);
 
         CloudTaskImpl cloudTask = new CloudTaskImpl(task);
 
-        assertThat(cloudTask.isAllowSelfService()).isFalse();
+        assertThat(cloudTask.isAllowSelfService()).isNull();
     }
 
     @Test
@@ -55,5 +55,33 @@ class CloudTaskImplTest {
         CloudTaskImpl deserialized = objectMapper.readValue(json, CloudTaskImpl.class);
 
         assertThat(deserialized.isAllowSelfService()).isTrue();
+    }
+
+    @Test
+    void shouldBeEqualWhenAllowSelfServiceMatches() {
+        CloudTaskImpl task = new CloudTaskImpl(new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED));
+        task.setAllowSelfService(true);
+        CloudTaskImpl other = new CloudTaskImpl(new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED));
+        other.setAllowSelfService(true);
+
+        assertThat(task).isEqualTo(other);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenAllowSelfServiceDiffers() {
+        CloudTaskImpl task = new CloudTaskImpl(new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED));
+        task.setAllowSelfService(true);
+        CloudTaskImpl other = new CloudTaskImpl(new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED));
+        other.setAllowSelfService(null);
+
+        assertThat(task).isNotEqualTo(other);
+    }
+
+    @Test
+    void shouldIncludeAllowSelfServiceInToString() {
+        CloudTaskImpl task = new CloudTaskImpl(new TaskImpl("taskId", "my task", Task.TaskStatus.CREATED));
+        task.setAllowSelfService(true);
+
+        assertThat(task.toString()).contains("allowSelfService=true");
     }
 }

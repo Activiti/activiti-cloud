@@ -1212,4 +1212,40 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query"
+             id="alter50-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/50-alter.pg.schema.9.2.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/50-rollback.pg.schema.9.2.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter50-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/50-alter.oracle.schema.9.2.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="oracle"
+               encoding="utf8"
+               path="changelog/50-rollback.oracle.schema.9.2.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>

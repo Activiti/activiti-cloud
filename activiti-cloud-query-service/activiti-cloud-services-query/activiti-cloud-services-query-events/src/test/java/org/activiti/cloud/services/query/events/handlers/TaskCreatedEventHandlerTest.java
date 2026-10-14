@@ -83,7 +83,7 @@ public class TaskCreatedEventHandlerTest {
     }
 
     @Test
-    public void handleShouldDefaultAllowSelfServiceToFalse() {
+    public void handleShouldDefaultAllowSelfServiceToNull() {
         //given
         TaskImpl task = new TaskImpl("id", "name", Task.TaskStatus.CREATED);
         task.setProcessInstanceId("processInstanceId");
@@ -101,7 +101,7 @@ public class TaskCreatedEventHandlerTest {
         ArgumentCaptor<TaskEntity> captor = ArgumentCaptor.forClass(TaskEntity.class);
         verify(entityManager).persist(captor.capture());
 
-        assertThat(captor.getValue().isAllowSelfService()).isFalse();
+        assertThat(captor.getValue().isAllowSelfService()).isNull();
     }
 
     private ProcessInstanceEntity buildProcessInstanceEntity() {
