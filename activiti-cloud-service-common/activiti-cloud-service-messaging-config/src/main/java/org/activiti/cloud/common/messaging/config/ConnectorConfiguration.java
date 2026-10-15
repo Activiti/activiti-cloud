@@ -37,7 +37,6 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -47,7 +46,6 @@ import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
-import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -121,8 +119,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         AsyncTaskExecutor connectorAsyncTaskExecutor,
         BiFunction<Message<?>, ConnectorBinding, Duration> connectorIntegrationResultTimeoutResolver,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
-        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay,
-        ObjectProvider<JsonMapper> jsonMapperProvider
+        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -244,7 +241,6 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                         IntegrationRequestExpirationSelector notExpired = new IntegrationRequestExpirationSelector(
                             beanName,
-                            payload -> jsonMapperProvider.getObject().toJson(payload),
                             Clock.systemUTC()
                         );
 

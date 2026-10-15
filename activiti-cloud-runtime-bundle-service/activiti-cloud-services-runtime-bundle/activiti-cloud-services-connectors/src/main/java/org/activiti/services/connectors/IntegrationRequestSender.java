@@ -16,12 +16,16 @@
 package org.activiti.services.connectors;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
+import static org.activiti.cloud.common.messaging.config.IntegrationRequestExpirationSelector.REQUEST_DATE;
+import static org.activiti.cloud.common.messaging.config.IntegrationRequestExpirationSelector.TTL_SECONDS;
 
+import java.util.Optional;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -65,10 +69,16 @@ public class IntegrationRequestSender {
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
         var destination = bindingResolver.getBindingDestination(event.getIntegrationContext().getConnectorType());
 
-        return messageBuilderFactory
+        MessageBuilder<IntegrationRequest> message = messageBuilderFactory
             .create(event.getIntegrationContext())
             .withPayload(event)
-            .setHeader(FUNCTION_DESTINATION, bindingResolver.getBindingDestination(destination))
-            .build();
+            .setHeader(FUNCTION_DESTINATION, bindingResolver.getBindingDestination(destination));
+
+        Optional.ofNullable(event.getRequestDate()).ifPresent(requestDate ->
+            message.setHeader(REQUEST_DATE, requestDate.getTime())
+        );
+        Optional.ofNullable(event.getTtlSeconds()).ifPresent(ttlSeconds -> message.setHeader(TTL_SECONDS, ttlSeconds));
+
+        return message.build();
     }
 }

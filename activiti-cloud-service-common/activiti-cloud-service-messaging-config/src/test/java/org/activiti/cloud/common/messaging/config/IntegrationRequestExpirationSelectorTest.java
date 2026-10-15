@@ -15,19 +15,17 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.IntegrationRequestExpirationSelector.REQUEST_DATE;
+import static org.activiti.cloud.common.messaging.config.IntegrationRequestExpirationSelector.TTL_SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,14 +36,10 @@ import org.springframework.messaging.support.MessageBuilder;
 class IntegrationRequestExpirationSelectorTest {
 
     private static final Instant NOW = Instant.parse("2026-10-09T10:00:00Z");
-    private static final String ONE_HOUR_AGO = "2026-10-09T09:00:00.000+0000";
-    private final Function<Object, byte[]> failingSerializer = payload -> {
-        throw new IllegalStateException("Cannot serialize " + payload);
-    };
+    private static final long ONE_HOUR_AGO = NOW.minusSeconds(3600).toEpochMilli();
 
     private final IntegrationRequestExpirationSelector selector = new IntegrationRequestExpirationSelector(
         "testConnector",
-        failingSerializer,
         Clock.fixed(NOW, ZoneOffset.UTC)
     );
 
@@ -69,146 +63,104 @@ class IntegrationRequestExpirationSelectorTest {
 
     @Test
     void shouldLogDiscardAtInfo() {
-        selector.accept(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO));
+        selector.accept(message(ONE_HOUR_AGO, 60));
 
         assertThat(logEvents.list).extracting(ILoggingEvent::getLevel).containsExactly(Level.INFO);
     }
 
     @Test
     void shouldReportExpirationWithoutLogging() {
-        assertThat(
-            selector.isExpired(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO))
-        ).isTrue();
-        assertThat(
-            selector.isExpired(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":10800}", ONE_HOUR_AGO))
-        ).isFalse();
+        assertThat(selector.isExpired(message(ONE_HOUR_AGO, 60))).isTrue();
+        assertThat(selector.isExpired(message(ONE_HOUR_AGO, 10800))).isFalse();
         assertThat(logEvents.list).isEmpty();
     }
 
     @Test
     void shouldRejectRequestWhenTtlHasElapsed() {
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO))).isFalse();
+        assertThat(selector.accept(message(ONE_HOUR_AGO, 60))).isFalse();
     }
 
     @Test
     void shouldAcceptRequestWhenTtlHasNotElapsed() {
-        assertThat(
-            selector.accept(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":10800}", ONE_HOUR_AGO))
-        ).isTrue();
+        assertThat(selector.accept(message(ONE_HOUR_AGO, 10800))).isTrue();
     }
 
     @Test
     void shouldAcceptRequestExactlyAtExpiration() {
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":3600}", ONE_HOUR_AGO))).isTrue();
+        assertThat(selector.accept(message(ONE_HOUR_AGO, 3600))).isTrue();
     }
 
     @Test
-    void shouldRejectRequestWhenFieldsFollowLargeNestedProperties() {
-        String payload =
-            "{\"integrationContext\":{\"inBoundVariables\":{\"list\":[1,2,{\"requestDate\":\"2099-01-01T00:00:00Z\"}]}}," +
-            "\"ttlSeconds\":60,\"resultDestination\":\"results\",\"requestDate\":\"" +
-            ONE_HOUR_AGO +
-            "\"}";
-
-        assertThat(
-            selector.accept(MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build())
-        ).isFalse();
-    }
-
-    @Test
-    void shouldIgnoreNestedFieldsWhenTopLevelFieldsAreMissing() {
-        String payload = "{\"integrationContext\":{\"requestDate\":\"" + ONE_HOUR_AGO + "\",\"ttlSeconds\":60}}";
-
-        assertThat(
-            selector.accept(MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build())
-        ).isTrue();
+    void shouldAcceptRequestWithoutExpirationHeaders() {
+        assertThat(selector.accept(MessageBuilder.withPayload("{}").build())).isTrue();
     }
 
     @Test
     void shouldAcceptRequestWithoutRequestDate() {
-        assertThat(selector.accept(jsonMessage("{\"ttlSeconds\":60}"))).isTrue();
+        assertThat(selector.accept(MessageBuilder.withPayload("{}").setHeader(TTL_SECONDS, 60).build())).isTrue();
     }
 
     @Test
     void shouldAcceptRequestWithoutTtlSeconds() {
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":\"%s\"}", ONE_HOUR_AGO))).isTrue();
-    }
-
-    @Test
-    void shouldAcceptRequestWithNullFields() {
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":null,\"ttlSeconds\":null}"))).isTrue();
+        assertThat(
+            selector.accept(MessageBuilder.withPayload("{}").setHeader(REQUEST_DATE, ONE_HOUR_AGO).build())
+        ).isTrue();
     }
 
     @Test
     void shouldAcceptRequestWithNonPositiveTtlSeconds() {
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":0}", ONE_HOUR_AGO))).isTrue();
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":-1}", ONE_HOUR_AGO))).isTrue();
+        assertThat(selector.accept(message(ONE_HOUR_AGO, 0))).isTrue();
+        assertThat(selector.accept(message(ONE_HOUR_AGO, -1))).isTrue();
     }
 
     @Test
-    void shouldAcceptRequestWithUnparsableRequestDate() {
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":\"yesterday\",\"ttlSeconds\":60}"))).isTrue();
+    void shouldReadHeadersSentAsStrings() {
+        Message<String> message = MessageBuilder.withPayload("{}")
+            .setHeader(REQUEST_DATE, String.valueOf(ONE_HOUR_AGO))
+            .setHeader(TTL_SECONDS, "60")
+            .build();
+
+        assertThat(selector.accept(message)).isFalse();
     }
 
     @Test
-    void shouldAcceptRequestWithUnexpectedFieldTypes() {
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":{\"date\":1},\"ttlSeconds\":\"60\"}"))).isTrue();
+    void shouldAcceptRequestWithUnparsableHeaders() {
+        Message<String> message = MessageBuilder.withPayload("{}")
+            .setHeader(REQUEST_DATE, "yesterday")
+            .setHeader(TTL_SECONDS, 60)
+            .build();
+
+        assertThat(selector.accept(message)).isTrue();
     }
 
     @Test
-    void shouldRejectRequestWithRequestDateInIsoFormatWithColonInOffset() {
-        assertThat(
-            selector.accept(jsonMessage("{\"requestDate\":\"2026-10-09T11:00:00.000+02:00\",\"ttlSeconds\":60}"))
-        ).isFalse();
+    void shouldAcceptRequestWithUnexpectedHeaderTypes() {
+        Message<String> message = MessageBuilder.withPayload("{}")
+            .setHeader(REQUEST_DATE, new Object())
+            .setHeader(TTL_SECONDS, 60)
+            .build();
+
+        assertThat(selector.accept(message)).isTrue();
     }
 
     @Test
-    void shouldRejectRequestWithRequestDateInEpochMillis() {
-        long oneHourAgo = NOW.minusSeconds(3600).toEpochMilli();
-
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":%d,\"ttlSeconds\":60}", oneHourAgo))).isFalse();
+    void shouldAcceptRequestWithOutOfRangeRequestDate() {
+        assertThat(selector.accept(message(Long.MAX_VALUE, 60))).isTrue();
     }
 
     @Test
-    void shouldReadStringPayload() {
-        String payload = "{\"requestDate\":\"" + ONE_HOUR_AGO + "\",\"ttlSeconds\":60}";
+    void shouldIgnorePayload() {
+        Message<String> message = MessageBuilder.withPayload(
+            "{\"requestDate\":\"2026-10-09T09:00:00.000+0000\",\"ttlSeconds\":60}"
+        ).build();
 
-        assertThat(selector.accept(MessageBuilder.withPayload(payload).build())).isFalse();
+        assertThat(selector.accept(message)).isTrue();
     }
 
-    @Test
-    void shouldAcceptNonJsonPayloads() {
-        assertThat(selector.accept(MessageBuilder.withPayload("GetRequest").build())).isTrue();
-        assertThat(selector.accept(MessageBuilder.withPayload("GetRequest".getBytes()).build())).isTrue();
-        assertThat(selector.accept(jsonMessage("[{\"requestDate\":\"%s\",\"ttlSeconds\":60}]", ONE_HOUR_AGO))).isTrue();
-        assertThat(selector.accept(jsonMessage("{\"requestDate\":\"%s\",", ONE_HOUR_AGO))).isTrue();
-    }
-
-    @Test
-    void shouldSerializeObjectPayloads() {
-        AtomicReference<Object> serializedPayload = new AtomicReference<>();
-        Map<String, Object> payload = Map.of("requestDate", ONE_HOUR_AGO, "ttlSeconds", 60);
-        IntegrationRequestExpirationSelector objectSelector = new IntegrationRequestExpirationSelector(
-            "testConnector",
-            value -> {
-                serializedPayload.set(value);
-                return ("{\"requestDate\":\"" + ONE_HOUR_AGO + "\",\"ttlSeconds\":60}").getBytes(
-                    StandardCharsets.UTF_8
-                );
-            },
-            Clock.fixed(NOW, ZoneOffset.UTC)
-        );
-
-        assertThat(objectSelector.accept(MessageBuilder.withPayload(payload).build())).isFalse();
-        assertThat(serializedPayload.get()).isSameAs(payload);
-    }
-
-    @Test
-    void shouldAcceptRequestWhenSerializationFails() {
-        assertThat(selector.accept(MessageBuilder.withPayload(Map.of("ttlSeconds", 60)).build())).isTrue();
-    }
-
-    private static Message<byte[]> jsonMessage(String template, Object... args) {
-        return MessageBuilder.withPayload(String.format(template, args).getBytes(StandardCharsets.UTF_8)).build();
+    private static Message<byte[]> message(long requestDate, long ttlSeconds) {
+        return MessageBuilder.withPayload(new byte[0])
+            .setHeader(REQUEST_DATE, requestDate)
+            .setHeader(TTL_SECONDS, ttlSeconds)
+            .build();
     }
 }

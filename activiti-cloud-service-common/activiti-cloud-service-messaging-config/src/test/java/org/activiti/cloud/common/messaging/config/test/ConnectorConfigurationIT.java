@@ -747,36 +747,7 @@ public class ConnectorConfigurationIT {
     @Test
     void shouldDiscardExpiredIntegrationRequest() {
         // given
-        Message<byte[]> message = expirationTestMessage(
-            integrationRequestJson(Instant.now().minus(Duration.ofHours(1)), 60)
-        );
-
-        // when
-        input.send(message, "script.EXECUTE");
-
-        // then
-        Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
-        assertThat(reply).isNull();
-        assertThat(connectorExpirationCounter.get()).isZero();
-        assertThat(myErrorHandler.getReference().get()).isNull();
-    }
-
-    @Test
-    void shouldDiscardExpiredIntegrationRequestWithObjectPayload() {
-        // given
-        Map<String, Object> payload = Map.of(
-            "requestDate",
-            Instant.now().minus(Duration.ofHours(1)).truncatedTo(ChronoUnit.SECONDS).toString(),
-            "ttlSeconds",
-            60
-        );
-        Message<Map<String, Object>> message = MessageBuilder.withPayload(payload)
-            .setHeader("integrationContextId", "expired-object-payload")
-            .setHeader("type", "TestExpiration")
-            .setHeader("appVersion", "1")
-            .setHeader("connectorType", "script.EXECUTE")
-            .setHeader("resultDestination", INTEGRATION_RESULTS)
-            .build();
+        Message<byte[]> message = expirationTestMessage(Instant.now().minus(Duration.ofHours(1)), 60);
 
         // when
         input.send(message, "script.EXECUTE");
@@ -793,7 +764,7 @@ public class ConnectorConfigurationIT {
         // given
         String integrationContextId = "expired-with-retry-destination";
         Message<byte[]> message = MessageBuilder.fromMessage(
-            expirationTestMessage(integrationRequestJson(Instant.now().minus(Duration.ofHours(1)), 60))
+            expirationTestMessage(Instant.now().minus(Duration.ofHours(1)), 60)
         )
             .setHeader("integrationContextId", integrationContextId)
             .setHeader("spring.cloud.function.destination", "script.EXECUTE")
@@ -822,7 +793,7 @@ public class ConnectorConfigurationIT {
     @Test
     void shouldHandleIntegrationRequestWhichHasNotExpired() {
         // given
-        Message<byte[]> message = expirationTestMessage(integrationRequestJson(Instant.now(), 3600));
+        Message<byte[]> message = expirationTestMessage(Instant.now(), 3600);
 
         // when
         input.send(message, "script.EXECUTE");
@@ -839,7 +810,7 @@ public class ConnectorConfigurationIT {
     @Test
     void shouldHandleIntegrationRequestWithoutExpirationFields() {
         // given
-        Message<byte[]> message = expirationTestMessage("{\"resultDestination\":\"integrationResults\"}");
+        Message<byte[]> message = expirationTestMessage();
 
         // when
         input.send(message, "script.EXECUTE");
@@ -930,18 +901,17 @@ public class ConnectorConfigurationIT {
         return resolvedValue;
     }
 
-    private static String integrationRequestJson(Instant requestDate, int ttlSeconds) {
-        return (
-            "{\"requestDate\":\"" +
-            requestDate.truncatedTo(ChronoUnit.SECONDS) +
-            "\",\"ttlSeconds\":" +
-            ttlSeconds +
-            ",\"resultDestination\":\"integrationResults\"}"
-        );
+    private static Message<byte[]> expirationTestMessage(Instant requestDate, int ttlSeconds) {
+        return MessageBuilder.fromMessage(expirationTestMessage())
+            .setHeader("requestDate", requestDate.toEpochMilli())
+            .setHeader("ttlSeconds", ttlSeconds)
+            .build();
     }
 
-    private static Message<byte[]> expirationTestMessage(String json) {
-        return MessageBuilder.withPayload(json.getBytes(StandardCharsets.UTF_8))
+    private static Message<byte[]> expirationTestMessage() {
+        return MessageBuilder.withPayload(
+            "{\"resultDestination\":\"integrationResults\"}".getBytes(StandardCharsets.UTF_8)
+        )
             .setHeader("integrationContextId", "expiration-test")
             .setHeader("type", "TestExpiration")
             .setHeader("appVersion", "1")
