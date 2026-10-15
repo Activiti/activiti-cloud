@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.binder.rabbit.RabbitMessageChannelBinder;
 import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,7 @@ import org.springframework.messaging.support.ErrorMessage;
 
 @AutoConfiguration
 @ConditionalOnClass(RabbitMessageChannelBinder.class)
+@ConditionalOnProperty("activiti.cloud.messaging.rabbitmq.stateful-retry.enabled")
 public class StatefulRetryContainerCustomizerConfiguration {
 
     @Bean
@@ -92,7 +94,7 @@ public class StatefulRetryContainerCustomizerConfiguration {
         MessageKeyGenerator messageKeyGenerator,
         NewMessageIdentifier newMessageIdentifier,
         RejectAndDontRequeueRecoverer rejectAndDontRequeueRecoverer,
-        @Value("${stateful-retry-operations-interceptor.max-retries:3}") Integer maxRetries
+        @Value("${activiti.cloud.messaging.rabbitmq.stateful-retry.max-retries:3}") Integer maxRetries
     ) {
         return RetryInterceptorBuilder.stateful()
             .maxRetries(maxRetries)

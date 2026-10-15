@@ -45,9 +45,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class StatefulRetryContainerCustomizerConfigurationTest {
 
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner().withUserConfiguration(
-        StatefulRetryContainerCustomizerConfiguration.class
-    );
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+        .withUserConfiguration(StatefulRetryContainerCustomizerConfiguration.class)
+        .withPropertyValues("activiti.cloud.messaging.rabbitmq.stateful-retry.enabled=true");
 
     @Nested
     class InterceptorBeanTests {
@@ -72,16 +72,18 @@ class StatefulRetryContainerCustomizerConfigurationTest {
 
         @Test
         void shouldLoadInterceptorWithCustomMaxRetriesProperty() {
-            contextRunner.withPropertyValues("stateful-retry-operations-interceptor.max-retries=5").run(context -> {
-                StatefulRetryOperationsInterceptor interceptor = context.getBean(
-                    StatefulRetryOperationsInterceptor.class
-                );
-                Object retryPolicy = ReflectionTestUtils.getField(interceptor, "retryPolicy");
-                Object backOff = ReflectionTestUtils.getField(retryPolicy, "backOff");
-                Object maxAttempts = ReflectionTestUtils.getField(backOff, "maxAttempts");
+            contextRunner
+                .withPropertyValues("activiti.cloud.messaging.rabbitmq.stateful-retry.max-retries=5")
+                .run(context -> {
+                    StatefulRetryOperationsInterceptor interceptor = context.getBean(
+                        StatefulRetryOperationsInterceptor.class
+                    );
+                    Object retryPolicy = ReflectionTestUtils.getField(interceptor, "retryPolicy");
+                    Object backOff = ReflectionTestUtils.getField(retryPolicy, "backOff");
+                    Object maxAttempts = ReflectionTestUtils.getField(backOff, "maxAttempts");
 
-                assertThat(maxAttempts).isEqualTo(5L);
-            });
+                    assertThat(maxAttempts).isEqualTo(5L);
+                });
         }
     }
 
