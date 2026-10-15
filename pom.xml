@@ -371,6 +371,8 @@
           </executions>
           <configuration>
             <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+            <!-- git.build.time: keep the real build time instead of project.build.outputTimestamp (Maven 3.10+ Super POM default) -->
+            <projectBuildOutputTimestamp>${maven.build.timestamp}</projectBuildOutputTimestamp>
             <generateGitPropertiesFile>true</generateGitPropertiesFile>
             <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
             </generateGitPropertiesFilename>
@@ -439,6 +441,10 @@
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
           <version>${spring-boot.version}</version>
+          <configuration>
+            <!-- build-info: keep the real build time instead of project.build.outputTimestamp (Maven 3.10+ Super POM default) -->
+            <time>${maven.build.timestamp}</time>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>com.mycila</groupId>
