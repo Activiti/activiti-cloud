@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jspecify.annotations.Nullable;
-import org.springframework.amqp.ImmediateRequeueAmqpException;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.StatefulRetryOperationsInterceptor;
 import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
@@ -65,13 +64,9 @@ public class StatefulRetryContainerCustomizerConfiguration {
     Consumer<ErrorMessage> statefulRetryErrorMessageHandler(
         ImmediateRequeueMessageRecoverer immediateRequeueMessageRecoverer
     ) {
-        return errorMessage -> {
-            Throwable throwable = errorMessage.getPayload();
-
-            if (throwable instanceof MessageHandlingException messageHandlingException) {
-                throw new ImmediateRequeueAmqpException(messageHandlingException.getMostSpecificCause());
-            }
-        };
+        return new ErrorHandlerDefinitionMessageRecoverer(immediateRequeueMessageRecoverer).withRecoverableExceptions(
+            Map.of(MessageHandlingException.class, true)
+        );
     }
 
     @Bean

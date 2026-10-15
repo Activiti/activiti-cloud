@@ -151,11 +151,13 @@ class StatefulRetryContainerCustomizerConfigurationTest {
 
                 IllegalArgumentException rootCause = new IllegalArgumentException("Root validation failure");
                 MessageHandlingException exceptionWrapper = new MessageHandlingException(
-                    mock(org.springframework.messaging.Message.class),
+                    MessageBuilder.withPayload(new byte[0])
+                        .setHeader("sourceData", new Message(new byte[0]))
+                        .build(),
                     "Failed handling",
                     rootCause
                 );
-                ErrorMessage errorMessage = new ErrorMessage(exceptionWrapper);
+                ErrorMessage errorMessage = new ErrorMessage(exceptionWrapper, exceptionWrapper.getFailedMessage());
 
                 assertThatThrownBy(() -> handler.accept(errorMessage))
                     .isInstanceOf(ImmediateRequeueAmqpException.class)
@@ -164,15 +166,17 @@ class StatefulRetryContainerCustomizerConfigurationTest {
         }
 
         @Test
-        void shouldIgnoreNonMessageHandlingExceptionPayloads() {
+        void shouldRethrowNonMessageHandlingExceptionPayloads() {
             contextRunner.run(context -> {
                 @SuppressWarnings("unchecked")
                 Consumer<ErrorMessage> handler = context.getBean("statefulRetryErrorMessageHandler", Consumer.class);
 
                 ErrorMessage errorMessage = new ErrorMessage(new IllegalArgumentException("Other error"));
 
-                // Assert no exception is rethrown because it is not an instance of MessageHandlingException
-                assertThatCode(() -> handler.accept(errorMessage)).doesNotThrowAnyException();
+                // Assert exception is rethrown because it is not an instance of MessageHandlingException
+                assertThatCode(() -> handler.accept(errorMessage)).doesNotThrowAnyExceptionExcept(
+                    MessageRejectedException.class
+                );
             });
         }
     }
