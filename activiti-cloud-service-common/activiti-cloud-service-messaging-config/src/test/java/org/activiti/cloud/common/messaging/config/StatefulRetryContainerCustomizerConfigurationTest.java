@@ -28,6 +28,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.config.StatefulRetryOperationsInterceptor;
@@ -47,7 +48,7 @@ class StatefulRetryContainerCustomizerConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
         .withUserConfiguration(StatefulRetryContainerCustomizerConfiguration.class)
-        .withPropertyValues("activiti.cloud.messaging.rabbitmq.stateful-retry.enabled=true");
+        .withPropertyValues("activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.enabled=true");
 
     @Nested
     class InterceptorBeanTests {
@@ -73,7 +74,7 @@ class StatefulRetryContainerCustomizerConfigurationTest {
         @Test
         void shouldLoadInterceptorWithCustomMaxRetriesProperty() {
             contextRunner
-                .withPropertyValues("activiti.cloud.messaging.rabbitmq.stateful-retry.max-retries=5")
+                .withPropertyValues("activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.max-retries=5")
                 .run(context -> {
                     StatefulRetryOperationsInterceptor interceptor = context.getBean(
                         StatefulRetryOperationsInterceptor.class
@@ -138,7 +139,7 @@ class StatefulRetryContainerCustomizerConfigurationTest {
                 ErrorMessage errorMessage = new ErrorMessage(exceptionWrapper);
 
                 assertThatThrownBy(() -> handler.accept(errorMessage))
-                    .isInstanceOf(RuntimeException.class)
+                    .isInstanceOf(ImmediateRequeueAmqpException.class)
                     .hasCause(rootCause);
             });
         }

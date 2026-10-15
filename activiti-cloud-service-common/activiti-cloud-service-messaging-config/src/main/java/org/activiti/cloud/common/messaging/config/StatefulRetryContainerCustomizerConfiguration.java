@@ -44,7 +44,7 @@ import org.springframework.messaging.support.ErrorMessage;
 
 @AutoConfiguration
 @ConditionalOnClass(RabbitMessageChannelBinder.class)
-@ConditionalOnProperty("activiti.cloud.messaging.rabbitmq.stateful-retry.enabled")
+@ConditionalOnProperty("activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.enabled")
 public class StatefulRetryContainerCustomizerConfiguration {
 
     @Bean
@@ -94,7 +94,7 @@ public class StatefulRetryContainerCustomizerConfiguration {
         MessageKeyGenerator messageKeyGenerator,
         NewMessageIdentifier newMessageIdentifier,
         RejectAndDontRequeueRecoverer rejectAndDontRequeueRecoverer,
-        @Value("${activiti.cloud.messaging.rabbitmq.stateful-retry.max-retries:3}") Integer maxRetries
+        @Value("${activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.max-retries:3}") Integer maxRetries
     ) {
         return RetryInterceptorBuilder.stateful()
             .maxRetries(maxRetries)
