@@ -152,7 +152,6 @@
             <arg>-XX:ActiveProcessorCount=2</arg>
             <arg>-Djava.net.preferIPv6Addresses=false</arg>
           </jvmArgs>
-          <resultsFolder>${project.build.directory}/gatling</resultsFolder>
         </configuration>
       </plugin>
       <!-- 3. Use Failsafe to verify results AFTER app shutdown -->

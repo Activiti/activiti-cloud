@@ -23,6 +23,7 @@ env:
   CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
   MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+  MAVEN_VERSION: "3.10.0"
 
 jobs:
   pre-checks:
@@ -83,7 +84,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
           java-version: '25'
-          maven-version: '3.9.9'
+          maven-version: ${{ env.MAVEN_VERSION }}
           git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
           m2-cache-exclusion-pattern: org/activiti
 
@@ -162,7 +163,7 @@ jobs:
         with:
           java-version: '25'
           java-distribution: 'corretto'
-          maven-version: '3.9.9'
+          maven-version: ${{ env.MAVEN_VERSION }}
           reuse-testcontainers: 'true'
           maven-command: >-
             install -T 1C -DunitTests.parallel=true
@@ -228,6 +229,7 @@ jobs:
         with:
           java-version: '25'
           java-distribution: 'corretto'
+          maven-version: ${{ env.MAVEN_VERSION }}
           maven-command: >-
             install -T 1C -pl activiti-cloud-dependencies -am
             -DskipTests=true -DskipITs=true
@@ -288,6 +290,7 @@ jobs:
           ghcr-username: ${{ secrets.BOT_GITHUB_USERNAME }}
           ghcr-password: ${{ secrets.BOT_GITHUB_TOKEN }}
           java-version: '25'
+          maven-version: ${{ env.MAVEN_VERSION }}
 
   playwright-tests:
     needs:
@@ -398,6 +401,7 @@ jobs:
       - uses: ./.github/actions/maven-deploy
         with:
           version: ${{ needs.create-tag.outputs.version }}
+          maven-version: ${{ env.MAVEN_VERSION }}
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 
@@ -437,6 +441,7 @@ jobs:
       - uses: ./.github/actions/maven-deploy
         with:
           version: ${{ needs.create-tag.outputs.version }}
+          maven-version: ${{ env.MAVEN_VERSION }}
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 

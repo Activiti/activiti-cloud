@@ -3,6 +3,10 @@ name: "Dependency Graph Submission of Transitive Dependencies"
 on:
   push:
     branches: ["develop"]
+
+env:
+  MAVEN_VERSION: "3.10.0"
+
 jobs:
   submit:
     name: Submit
@@ -19,7 +23,7 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
         with:
           java-version: '25'
-          maven-version: '3.9.9'
+          maven-version: ${{ env.MAVEN_VERSION }}
           maven-args: -Dmaven.wagon.http.pool=false
           maven-username: ${{ secrets.NEXUS_USERNAME }}
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
