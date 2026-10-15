@@ -27,7 +27,7 @@ runs:
         java-distribution: 'corretto'
         maven-version: ${{ inputs.maven-version }}
         maven-command: >-
-          deploy -DskipTests -Dskip.common.tests=true
+          deploy -DskipTests -DskipITs -Dskip.common.tests=true -P '!attach-sources'
           -Dhttp.keepAlive=false
           -Dmaven.wagon.http.pool=false
           -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
