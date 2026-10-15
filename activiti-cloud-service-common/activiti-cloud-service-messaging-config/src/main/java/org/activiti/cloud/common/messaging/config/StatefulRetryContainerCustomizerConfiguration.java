@@ -16,6 +16,7 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.function.Consumer;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -94,11 +95,12 @@ public class StatefulRetryContainerCustomizerConfiguration {
         MessageKeyGenerator messageKeyGenerator,
         NewMessageIdentifier newMessageIdentifier,
         RejectAndDontRequeueRecoverer rejectAndDontRequeueRecoverer,
-        @Value("${activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.max-retries:3}") Integer maxRetries
+        @Value("${activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.max-retries:3}") Integer maxRetries,
+        @Value("${activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.delay:10ms}") Duration delay
     ) {
         return RetryInterceptorBuilder.stateful()
             .maxRetries(maxRetries)
-            .configureRetryPolicy(retryPolicy -> retryPolicy.delay(Duration.ofMillis(10)))
+            .configureRetryPolicy(retryPolicy -> retryPolicy.delay(delay))
             .messageKeyGenerator(messageKeyGenerator)
             .newMessageIdentifier(newMessageIdentifier)
             .recoverer(rejectAndDontRequeueRecoverer)

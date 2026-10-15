@@ -38,17 +38,34 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.retry.MessageKeyGenerator;
 import org.springframework.amqp.rabbit.retry.NewMessageIdentifier;
 import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
+import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.integration.MessageRejectedException;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.ErrorMessage;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class StatefulRetryContainerCustomizerConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
         .withUserConfiguration(StatefulRetryContainerCustomizerConfiguration.class)
+        .withUserConfiguration(StatefulRetryContainerCustomizerConfigurationTest.TestConfig.class)
         .withPropertyValues("activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.enabled=true");
+
+    @Configuration
+    static class TestConfig {
+
+        @Bean
+        public ConversionService conversionService() {
+            // This includes String to Duration conversion rules out-of-the-box
+            return new ApplicationConversionService();
+        }
+    }
 
     @Nested
     class InterceptorBeanTests {
@@ -65,9 +82,11 @@ class StatefulRetryContainerCustomizerConfigurationTest {
                 Object retryPolicy = ReflectionTestUtils.getField(interceptor, "retryPolicy");
                 Object backOff = ReflectionTestUtils.getField(retryPolicy, "backOff");
                 Object maxAttempts = ReflectionTestUtils.getField(backOff, "maxAttempts");
+                Object delay = ReflectionTestUtils.getField(backOff, "initialInterval");
 
                 // maxRetries(3) translates to 3 attempts in RetryTemplate
                 assertThat(maxAttempts).isEqualTo(3L);
+                assertThat(delay).isEqualTo(10L);
             });
         }
 
