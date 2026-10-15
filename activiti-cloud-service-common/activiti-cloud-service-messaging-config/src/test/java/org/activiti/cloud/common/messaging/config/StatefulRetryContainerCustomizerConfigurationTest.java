@@ -33,6 +33,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.config.StatefulRetryOperationsInterceptor;
 import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.retry.MessageKeyGenerator;
@@ -93,7 +94,10 @@ class StatefulRetryContainerCustomizerConfigurationTest {
         @Test
         void shouldLoadInterceptorWithCustomMaxRetriesProperty() {
             contextRunner
-                .withPropertyValues("activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.max-retries=5")
+                .withPropertyValues(
+                    "activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.max-retries=5",
+                    "activiti.cloud.messaging.rabbitmq.stateful-retry-interceptor.delay=1s"
+                )
                 .run(context -> {
                     StatefulRetryOperationsInterceptor interceptor = context.getBean(
                         StatefulRetryOperationsInterceptor.class
@@ -101,8 +105,10 @@ class StatefulRetryContainerCustomizerConfigurationTest {
                     Object retryPolicy = ReflectionTestUtils.getField(interceptor, "retryPolicy");
                     Object backOff = ReflectionTestUtils.getField(retryPolicy, "backOff");
                     Object maxAttempts = ReflectionTestUtils.getField(backOff, "maxAttempts");
+                    Object delay = ReflectionTestUtils.getField(backOff, "initialInterval");
 
                     assertThat(maxAttempts).isEqualTo(5L);
+                    assertThat(delay).isEqualTo(1000L);
                 });
         }
     }
@@ -128,6 +134,10 @@ class StatefulRetryContainerCustomizerConfigurationTest {
                 ListenerExecutionFailedExceptionInterceptor listenerExecutionFailedExceptionInterceptor =
                     context.getBean(ListenerExecutionFailedExceptionInterceptor.class);
 
+                ConditionalRejectingErrorHandler conditionalRejectingErrorHandler = context.getBean(
+                    ConditionalRejectingErrorHandler.class
+                );
+
                 customizer.configure(mockContainer, "test-destination", "test-group");
 
                 // Verify that structural changes are propagated down to the container wrapper
@@ -136,6 +146,7 @@ class StatefulRetryContainerCustomizerConfigurationTest {
                     statefulRetryOperationsInterceptor,
                     listenerExecutionFailedExceptionInterceptor
                 );
+                verify(mockContainer).setErrorHandler(conditionalRejectingErrorHandler);
             });
         }
     }

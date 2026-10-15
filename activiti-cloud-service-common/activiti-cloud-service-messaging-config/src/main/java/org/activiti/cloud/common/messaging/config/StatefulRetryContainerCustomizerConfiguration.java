@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.StatefulRetryOperationsInterceptor;
 import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.amqp.rabbit.retry.ImmediateRequeueMessageRecoverer;
 import org.springframework.amqp.rabbit.retry.MessageKeyGenerator;
@@ -39,6 +40,7 @@ import org.springframework.cloud.stream.binder.rabbit.RabbitMessageChannelBinder
 import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.integration.MessageRejectedException;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.ErrorMessage;
 
@@ -70,7 +72,23 @@ public class StatefulRetryContainerCustomizerConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    ExceptionTypeFilterExceptionMessageStrategy exceptionTypeFilterExceptionMessageStrategy() {
+        return new ExceptionTypeFilterExceptionMessageStrategy().withUserFatalExceptions(
+            Map.of(MessageRejectedException.class, true)
+        );
+    }
+
+    @Bean
+    ConditionalRejectingErrorHandler conditionalRejectingErrorHandler(
+        ExceptionTypeFilterExceptionMessageStrategy exceptionTypeFilterExceptionMessageStrategy
+    ) {
+        return new ConditionalRejectingErrorHandler(exceptionTypeFilterExceptionMessageStrategy);
+    }
+
+    @Bean
     public ListenerContainerCustomizer<MessageListenerContainer> statefulRetryOperationsInterceptorContainerCustomizer(
+        ConditionalRejectingErrorHandler conditionalRejectingErrorHandler,
         StatefulRetryOperationsInterceptor statefulRetryOperationsInterceptor,
         ListenerExecutionFailedExceptionInterceptor listenerExecutionFailedExceptionInterceptor
     ) {
@@ -81,6 +99,7 @@ public class StatefulRetryContainerCustomizerConfiguration {
                     listenerExecutionFailedExceptionInterceptor
                 );
                 abstractMessageListenerContainer.setStatefulRetryFatalWithNullMessageId(false);
+                abstractMessageListenerContainer.setErrorHandler(conditionalRejectingErrorHandler);
             }
         };
     }
