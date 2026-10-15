@@ -40,14 +40,14 @@ jobs:
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@f2ba011b2bd8bee8d7418b046541ce2f75d1fbed # v19.4.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: "dependabot[bot]"
           label: github_actions
       - name: Check skip tests
         id: check-skip-tests
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@f2ba011b2bd8bee8d7418b046541ce2f75d1fbed # v19.4.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           label: skip-tests
