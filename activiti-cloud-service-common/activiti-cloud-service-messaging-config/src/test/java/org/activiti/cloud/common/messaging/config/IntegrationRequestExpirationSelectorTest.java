@@ -45,7 +45,6 @@ class IntegrationRequestExpirationSelectorTest {
 
     private final IntegrationRequestExpirationSelector selector = new IntegrationRequestExpirationSelector(
         "testConnector",
-        message -> true,
         failingSerializer,
         Clock.fixed(NOW, ZoneOffset.UTC)
     );
@@ -69,46 +68,21 @@ class IntegrationRequestExpirationSelectorTest {
     }
 
     @Test
-    void shouldLogDiscardAtInfoWhenBindingOwnsMessage() {
+    void shouldLogDiscardAtInfo() {
         selector.accept(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO));
 
         assertThat(logEvents.list).extracting(ILoggingEvent::getLevel).containsExactly(Level.INFO);
     }
 
     @Test
-    void shouldLogDiscardAtDebugWhenBindingDoesNotOwnMessage() {
-        IntegrationRequestExpirationSelector foreignSelector = new IntegrationRequestExpirationSelector(
-            "otherConnector",
-            message -> false,
-            failingSerializer,
-            Clock.fixed(NOW, ZoneOffset.UTC)
-        );
-
-        boolean accepted = foreignSelector.accept(
-            jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO)
-        );
-
-        assertThat(accepted).isFalse();
-        assertThat(logEvents.list).extracting(ILoggingEvent::getLevel).containsExactly(Level.DEBUG);
-    }
-
-    @Test
-    void shouldStillDiscardWhenOwnershipCannotBeEvaluated() {
-        IntegrationRequestExpirationSelector failingOwnershipSelector = new IntegrationRequestExpirationSelector(
-            "otherConnector",
-            message -> {
-                throw new IllegalStateException("Cannot evaluate condition");
-            },
-            failingSerializer,
-            Clock.fixed(NOW, ZoneOffset.UTC)
-        );
-
-        boolean accepted = failingOwnershipSelector.accept(
-            jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO)
-        );
-
-        assertThat(accepted).isFalse();
-        assertThat(logEvents.list).extracting(ILoggingEvent::getLevel).containsOnly(Level.DEBUG);
+    void shouldReportExpirationWithoutLogging() {
+        assertThat(
+            selector.isExpired(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":60}", ONE_HOUR_AGO))
+        ).isTrue();
+        assertThat(
+            selector.isExpired(jsonMessage("{\"requestDate\":\"%s\",\"ttlSeconds\":10800}", ONE_HOUR_AGO))
+        ).isFalse();
+        assertThat(logEvents.list).isEmpty();
     }
 
     @Test
@@ -216,7 +190,6 @@ class IntegrationRequestExpirationSelectorTest {
         Map<String, Object> payload = Map.of("requestDate", ONE_HOUR_AGO, "ttlSeconds", 60);
         IntegrationRequestExpirationSelector objectSelector = new IntegrationRequestExpirationSelector(
             "testConnector",
-            message -> true,
             value -> {
                 serializedPayload.set(value);
                 return ("{\"requestDate\":\"" + ONE_HOUR_AGO + "\",\"ttlSeconds\":60}").getBytes(

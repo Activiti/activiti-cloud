@@ -21,13 +21,13 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.core.MessageSelector;
 import org.springframework.messaging.Message;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
+import tools.jackson.core.ObjectReadContext;
 import tools.jackson.core.json.JsonFactory;
 import tools.jackson.databind.util.StdDateFormat;
 
@@ -43,52 +43,46 @@ public class IntegrationRequestExpirationSelector implements MessageSelector {
     private static final StdDateFormat DATE_FORMAT = new StdDateFormat();
 
     private final String connectorName;
-    private final Predicate<Message<?>> ownsMessage;
     private final Function<Object, byte[]> payloadSerializer;
     private final Clock clock;
 
     public IntegrationRequestExpirationSelector(
         String connectorName,
-        Predicate<Message<?>> ownsMessage,
         Function<Object, byte[]> payloadSerializer,
         Clock clock
     ) {
         this.connectorName = connectorName;
-        this.ownsMessage = ownsMessage;
         this.payloadSerializer = payloadSerializer;
         this.clock = clock;
     }
 
     @Override
     public boolean accept(Message<?> message) {
-        Optional<Expiration> expiration = readExpiration(message.getPayload());
-        Instant now = clock.instant();
-
-        if (expiration.isPresent() && now.isAfter(expiration.get().expiresAt())) {
-            (ownsMessage(message) ? LOGGER.atInfo() : LOGGER.atDebug()).log(
+        Optional<Expiration> expiration = expiredAt(message);
+        expiration.ifPresent(expired ->
+            LOGGER.info(
                 "Discarding expired integration request {} in connector binding {}: requestDate {} plus ttlSeconds {} expired at {}",
                 message.getHeaders().get(INTEGRATION_CONTEXT_ID),
                 connectorName,
-                expiration.get().requestDate(),
-                expiration.get().ttlSeconds(),
-                expiration.get().expiresAt()
-            );
-            return false;
-        }
-        return true;
+                expired.requestDate(),
+                expired.ttlSeconds(),
+                expired.expiresAt()
+            )
+        );
+        return expiration.isEmpty();
     }
 
-    private boolean ownsMessage(Message<?> message) {
-        try {
-            return ownsMessage.test(message);
-        } catch (RuntimeException e) {
-            LOGGER.debug("Cannot evaluate message ownership for connector {}", connectorName, e);
-            return false;
-        }
+    public boolean isExpired(Message<?> message) {
+        return expiredAt(message).isPresent();
+    }
+
+    private Optional<Expiration> expiredAt(Message<?> message) {
+        Instant now = clock.instant();
+        return readExpiration(message.getPayload()).filter(expiration -> now.isAfter(expiration.expiresAt()));
     }
 
     private Optional<Expiration> readExpiration(Object payload) {
-        try (JsonParser parser = JSON_FACTORY.createParser(toJson(payload))) {
+        try (JsonParser parser = JSON_FACTORY.createParser(ObjectReadContext.empty(), toJson(payload))) {
             if (parser.nextToken() != JsonToken.START_OBJECT) {
                 return Optional.empty();
             }

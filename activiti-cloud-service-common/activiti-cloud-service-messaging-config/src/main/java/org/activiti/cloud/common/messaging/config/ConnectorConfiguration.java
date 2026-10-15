@@ -58,7 +58,6 @@ import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
-import org.springframework.integration.core.MessageSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowDefinition;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
@@ -123,7 +122,6 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         BiFunction<Message<?>, ConnectorBinding, Duration> connectorIntegrationResultTimeoutResolver,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
         @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay,
-        @Value("${activiti.connector.skip-expired-requests.enabled:true}") boolean skipExpiredRequests,
         ObjectProvider<JsonMapper> jsonMapperProvider
     ) {
         return new BeanPostProcessor() {
@@ -244,25 +242,17 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             .map(ExpressionEvaluatingSelector::new)
                             .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                        MessageSelector notExpired = skipExpiredRequests
-                            ? new IntegrationRequestExpirationSelector(
-                                  beanName,
-                                  message -> connectorType.accept(message) && selector.accept(message),
-                                  payload -> jsonMapperProvider.getObject().toJson(payload),
-                                  Clock.systemUTC()
-                              )
-                            : message -> true;
+                        IntegrationRequestExpirationSelector notExpired = new IntegrationRequestExpirationSelector(
+                            beanName,
+                            payload -> jsonMapperProvider.getObject().toJson(payload),
+                            Clock.systemUTC()
+                        );
 
                         IntegrationFlow connectorFlow = IntegrationFlow.from(
                             getGatewayInterface(Function.class.isInstance(bean)),
                             gateway -> gateway.replyTimeout(0L)
                         )
                             .log(DEBUG, beanName + ".integrationRequest")
-                            .filter(notExpired, filter ->
-                                filter
-                                    .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
-                                    .throwExceptionOnRejection(false)
-                            )
                             .filter(selector, filter -> {
                                 int retry = connectorBinding.retry() != 0 ? connectorBinding.retry() : defaultMaxRetry;
                                 if (retry > 0) {
@@ -277,7 +267,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         beanName
                                     );
                                     filter
-                                        .discardFlow(flow -> handleRetryDiscardFlow(flow, retry, retryDelay))
+                                        .discardFlow(flow ->
+                                            handleRetryDiscardFlow(flow, retry, retryDelay, notExpired)
+                                        )
                                         .throwExceptionOnRejection(false);
                                 } else {
                                     LOGGER.debug("Configure default discard for bean {}", beanName);
@@ -287,6 +279,11 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 }
                             })
                             .filter(connectorType, filter ->
+                                filter
+                                    .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                    .throwExceptionOnRejection(false)
+                            )
+                            .filter(notExpired, filter ->
                                 filter
                                     .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
                                     .throwExceptionOnRejection(false)
@@ -373,8 +370,25 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                 .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast);
     }
 
-    private void handleRetryDiscardFlow(IntegrationFlowDefinition<?> flow, int maxRetry, long retryDelay) {
-        flow.handle((payload, headers) -> {
+    private void handleRetryDiscardFlow(
+        IntegrationFlowDefinition<?> flow,
+        int maxRetry,
+        long retryDelay,
+        IntegrationRequestExpirationSelector notExpired
+    ) {
+        flow.handle(Message.class, (message, headers) -> {
+            Object payload = message.getPayload();
+            Message<?> request =
+                payload instanceof MessagingException exception && exception.getFailedMessage() != null
+                    ? exception.getFailedMessage()
+                    : message;
+            if (notExpired.isExpired(request)) {
+                LOGGER.debug(
+                    "Not retrying expired integration request {}",
+                    request.getHeaders().get(IntegrationRequestExpirationSelector.INTEGRATION_CONTEXT_ID)
+                );
+                return null;
+            }
             Message<?> newMessage = handleMessagingExceptionIfPossible(payload, headers).orElse(
                 buildNewMessage(headers, payload)
             );
