@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.config;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import java.lang.reflect.Type;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -238,6 +239,11 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             .map(ExpressionEvaluatingSelector::new)
                             .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
+                        IntegrationRequestExpirationSelector notExpired = new IntegrationRequestExpirationSelector(
+                            beanName,
+                            Clock.systemUTC()
+                        );
+
                         IntegrationFlow connectorFlow = IntegrationFlow.from(
                             getGatewayInterface(Function.class.isInstance(bean)),
                             gateway -> gateway.replyTimeout(0L)
@@ -257,7 +263,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         beanName
                                     );
                                     filter
-                                        .discardFlow(flow -> handleRetryDiscardFlow(flow, retry, retryDelay))
+                                        .discardFlow(flow ->
+                                            handleRetryDiscardFlow(flow, retry, retryDelay, notExpired)
+                                        )
                                         .throwExceptionOnRejection(false);
                                 } else {
                                     LOGGER.debug("Configure default discard for bean {}", beanName);
@@ -267,6 +275,11 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 }
                             })
                             .filter(connectorType, filter ->
+                                filter
+                                    .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                    .throwExceptionOnRejection(false)
+                            )
+                            .filter(notExpired, filter ->
                                 filter
                                     .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
                                     .throwExceptionOnRejection(false)
@@ -353,8 +366,25 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                 .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast);
     }
 
-    private void handleRetryDiscardFlow(IntegrationFlowDefinition<?> flow, int maxRetry, long retryDelay) {
-        flow.handle((payload, headers) -> {
+    private void handleRetryDiscardFlow(
+        IntegrationFlowDefinition<?> flow,
+        int maxRetry,
+        long retryDelay,
+        IntegrationRequestExpirationSelector notExpired
+    ) {
+        flow.handle(Message.class, (message, headers) -> {
+            Object payload = message.getPayload();
+            Message<?> request =
+                payload instanceof MessagingException exception && exception.getFailedMessage() != null
+                    ? exception.getFailedMessage()
+                    : message;
+            if (notExpired.isExpired(request)) {
+                LOGGER.debug(
+                    "Not retrying expired integration request {}",
+                    request.getHeaders().get(IntegrationRequestExpirationSelector.INTEGRATION_CONTEXT_ID)
+                );
+                return null;
+            }
             Message<?> newMessage = handleMessagingExceptionIfPossible(payload, headers).orElse(
                 buildNewMessage(headers, payload)
             );

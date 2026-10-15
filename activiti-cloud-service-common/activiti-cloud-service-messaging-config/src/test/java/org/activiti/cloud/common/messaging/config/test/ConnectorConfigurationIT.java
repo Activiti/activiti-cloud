@@ -23,6 +23,7 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
@@ -32,6 +33,7 @@ import static org.springframework.cloud.function.context.FunctionRegistration.RE
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -115,11 +117,14 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_TIMEOUT = "connectorWithTimeout";
     private static final String FUNCTION_NAME_INTERRUPT = "connectorWithInterrupt";
     private static final String FUNCTION_NAME_TIMEOUT_HEADER = "connectorWithTimeoutHeader";
+    private static final String FUNCTION_NAME_EXPIRATION = "connectorWithExpiration";
+    private static final String EXPIRATION_RESULT = "ExpirationResult";
 
     private static final String FUNCTION_NAME_D = "auditProcessorVersionHandler";
     public static final String MY_ERROR_HANDLER = "myErrorHandler";
     private static final AtomicInteger connectorTestMyErrorHandlerCounter = new AtomicInteger(0);
     private static final AtomicInteger connectorTimeoutCounter = new AtomicInteger(0);
+    private static final AtomicInteger connectorExpirationCounter = new AtomicInteger(0);
     private static final AtomicReference<Thread> connectorWorkerThread = new AtomicReference<>();
 
     @Autowired
@@ -340,6 +345,20 @@ public class ConnectorConfigurationIT {
                 }
             };
         }
+
+        @Bean(FUNCTION_NAME_EXPIRATION)
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "script.EXECUTE",
+            condition = "headers['type']=='TestExpiration'"
+        )
+        public Connector<?, ?> connectorWithExpiration() {
+            return payload -> {
+                connectorExpirationCounter.incrementAndGet();
+                return EXPIRATION_RESULT;
+            };
+        }
     }
 
     @BeforeEach
@@ -347,6 +366,7 @@ public class ConnectorConfigurationIT {
         expression = resolveExpression(condition);
         output.clear();
         connectorWorkerThread.set(null);
+        connectorExpirationCounter.set(0);
         clearInvocations(myErrorHandler);
         myErrorHandler.reset();
     }
@@ -725,6 +745,86 @@ public class ConnectorConfigurationIT {
     }
 
     @Test
+    void shouldDiscardExpiredIntegrationRequest() {
+        // given
+        Message<byte[]> message = expirationTestMessage(Instant.now().minus(Duration.ofHours(1)), 60);
+
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
+        assertThat(reply).isNull();
+        assertThat(connectorExpirationCounter.get()).isZero();
+        assertThat(myErrorHandler.getReference().get()).isNull();
+    }
+
+    @Test
+    void shouldNotRetryExpiredIntegrationRequestRejectedByRetryEnabledConnector() {
+        // given
+        String integrationContextId = "expired-with-retry-destination";
+        Message<byte[]> message = MessageBuilder.fromMessage(
+            expirationTestMessage(Instant.now().minus(Duration.ofHours(1)), 60)
+        )
+            .setHeader("integrationContextId", integrationContextId)
+            .setHeader("spring.cloud.function.destination", "script.EXECUTE")
+            .build();
+
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        await()
+            .during(Duration.ofSeconds(3))
+            .atMost(Duration.ofSeconds(5))
+            .untilAsserted(() ->
+                verify(streamBridge, never()).send(
+                    eq("script.EXECUTE"),
+                    argThat(
+                        sent ->
+                            sent instanceof Message<?> sentMessage &&
+                            integrationContextId.equals(sentMessage.getHeaders().get("integrationContextId"))
+                    )
+                )
+            );
+        assertThat(connectorExpirationCounter.get()).isZero();
+    }
+
+    @Test
+    void shouldHandleIntegrationRequestWhichHasNotExpired() {
+        // given
+        Message<byte[]> message = expirationTestMessage(Instant.now(), 3600);
+
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
+        assertThat(reply)
+            .isNotNull()
+            .extracting(Message::getPayload)
+            .isEqualTo(EXPIRATION_RESULT.getBytes(StandardCharsets.UTF_8));
+        assertThat(connectorExpirationCounter.get()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldHandleIntegrationRequestWithoutExpirationFields() {
+        // given
+        Message<byte[]> message = expirationTestMessage();
+
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
+        assertThat(reply)
+            .isNotNull()
+            .extracting(Message::getPayload)
+            .isEqualTo(EXPIRATION_RESULT.getBytes(StandardCharsets.UTF_8));
+        assertThat(connectorExpirationCounter.get()).isEqualTo(1);
+    }
+
+    @Test
     void shouldUseCaseInsensitiveMatchForBindingsProperties() {
         assertThat(bindingServiceProperties.getBindings().get("integrationRequests")).isEqualTo(
             bindingServiceProperties.getBindings().get("integrationrequests")
@@ -799,6 +899,25 @@ public class ConnectorConfigurationIT {
             resolvedValue = (String) resolver.evaluate(resolvedValue, expressionContext);
         }
         return resolvedValue;
+    }
+
+    private static Message<byte[]> expirationTestMessage(Instant requestDate, int ttlSeconds) {
+        return MessageBuilder.fromMessage(expirationTestMessage())
+            .setHeader("requestDate", requestDate.toEpochMilli())
+            .setHeader("ttlSeconds", ttlSeconds)
+            .build();
+    }
+
+    private static Message<byte[]> expirationTestMessage() {
+        return MessageBuilder.withPayload(
+            "{\"resultDestination\":\"integrationResults\"}".getBytes(StandardCharsets.UTF_8)
+        )
+            .setHeader("integrationContextId", "expiration-test")
+            .setHeader("type", "TestExpiration")
+            .setHeader("appVersion", "1")
+            .setHeader("connectorType", "script.EXECUTE")
+            .setHeader("resultDestination", INTEGRATION_RESULTS)
+            .build();
     }
 
     private Boolean getExpressionValue(Message<?> message) {
