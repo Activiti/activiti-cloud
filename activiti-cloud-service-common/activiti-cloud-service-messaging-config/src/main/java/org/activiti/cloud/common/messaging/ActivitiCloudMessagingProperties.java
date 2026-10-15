@@ -478,7 +478,14 @@ public class ActivitiCloudMessagingProperties {
     @Validated
     public static class FunctionRouterProperties {
 
+        public enum RouterType {
+            LEGACY,
+            GATEWAY,
+        }
+
         private boolean enabled;
+
+        private RouterType type = RouterType.LEGACY;
 
         private final Map<String, BindingFunctionRouterProperties> routes = new LinkedCaseInsensitiveMap<>();
 
@@ -575,6 +582,14 @@ public class ActivitiCloudMessagingProperties {
 
         public void setConsumer(ConsumerProperties consumer) {
             this.consumer = consumer;
+        }
+
+        public RouterType getType() {
+            return type;
+        }
+
+        public void setType(RouterType type) {
+            this.type = type;
         }
 
         public boolean isExcludeRequiredProducerGroup(String bindingName) {

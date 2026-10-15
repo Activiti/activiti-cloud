@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties.FunctionRouterProperties.RouterType.GATEWAY;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 
@@ -195,6 +196,13 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_ANONYMOUS_INPUT, bindingProperties);
 
+                    if (GATEWAY.equals(functionRouter.getType())) {
+                        functionBindingPropertySource.register("functionRouterAnonymousConsumer");
+                        streamFunctionProperties
+                            .getBindings()
+                            .put("functionRouterAnonymousConsumer-in-0", FUNCTION_ROUTER_ANONYMOUS_INPUT);
+                    }
+
                     log.warn("Configured anonymous function router binding '{}'", bindingProperties);
                 } else {
                     log.warn("Skipping anonymous function router configuration with empty destinations");
@@ -214,6 +222,13 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     bindingProperties.setErrorHandlerDefinition(functionRouter.getErrorHandlerDefinition());
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, bindingProperties);
+
+                    if (GATEWAY.equals(functionRouter.getType())) {
+                        functionBindingPropertySource.register("functionRouterConsumer");
+                        streamFunctionProperties
+                            .getBindings()
+                            .put("functionRouterConsumer-in-0", FUNCTION_ROUTER_INPUT);
+                    }
 
                     log.warn("Configured function router binding '{}'", bindingProperties);
                 } else {
