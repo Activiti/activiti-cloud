@@ -162,7 +162,6 @@
           <execution>
             <configuration>
               <failOnError>true</failOnError>
-              <enableLazyInitialization>true</enableLazyInitialization>
             </configuration>
             <goals>
               <goal>enhance</goal>
