@@ -10,7 +10,7 @@ Modules include runtime bundles, query/audit services, acceptance test stories (
 
 ```sh
 # Maven build (from repo root)
-mvn clean install -DskipTests
+mvn clean install -DskipTests -DskipITs
 
 # Playwright acceptance tests (requires preview cluster — see activiti-cloud-acceptance-tests-playwright/README.md)
 cd activiti-cloud-acceptance-tests-playwright

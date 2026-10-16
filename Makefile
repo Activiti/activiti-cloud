@@ -141,7 +141,7 @@ version:
 	mvn ${MAVEN_CLI_OPTS} versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$(RELEASE_VERSION)
 
 deploy:
-	mvn ${MAVEN_CLI_OPTS} deploy -DskipTests
+	mvn ${MAVEN_CLI_OPTS} deploy -DskipTests -DskipITs -P '!attach-sources'
 
 tag:
 	git add -u

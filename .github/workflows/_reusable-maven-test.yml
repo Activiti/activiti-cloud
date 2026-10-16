@@ -17,6 +17,9 @@ on:
       NEXUS_PASSWORD:
         required: true
 
+env:
+  MAVEN_VERSION: "3.10.0"
+
 jobs:
   test:
     name: maven-test (${{ matrix.short-name }})
@@ -38,6 +41,7 @@ jobs:
         with:
           java-version: '25'
           java-distribution: 'corretto'
+          maven-version: ${{ env.MAVEN_VERSION }}
           reuse-testcontainers: 'true'
           maven-command: >-
             verify -Dskip.common.tests=true -Dmaven.install.skip=true -Dswagger.skip

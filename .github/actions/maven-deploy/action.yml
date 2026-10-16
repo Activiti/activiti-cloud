@@ -5,6 +5,9 @@ inputs:
   version:
     description: Version being deployed.
     required: true
+  maven-version:
+    description: Maven version to set up.
+    required: true
   nexus-username:
     description: Nexus username used for deployment.
     required: true
@@ -22,8 +25,9 @@ runs:
       with:
         java-version: '25'
         java-distribution: 'corretto'
+        maven-version: ${{ inputs.maven-version }}
         maven-command: >-
-          deploy -DskipTests -Dskip.common.tests=true
+          deploy -DskipTests -DskipITs -Dskip.common.tests=true -P '!attach-sources'
           -Dhttp.keepAlive=false
           -Dmaven.wagon.http.pool=false
           -Dmaven.wagon.httpconnectionManager.ttlSeconds=120

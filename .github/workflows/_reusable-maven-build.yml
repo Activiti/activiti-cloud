@@ -21,6 +21,9 @@ on:
       DOCKERHUB_PASSWORD:
         required: true
 
+env:
+  MAVEN_VERSION: "3.10.0"
+
 jobs:
   build:
     name: maven-build (${{ matrix.short-name }})
@@ -42,6 +45,7 @@ jobs:
         with:
           java-version: '25'
           java-distribution: 'corretto'
+          maven-version: ${{ env.MAVEN_VERSION }}
           reuse-testcontainers: 'true'
           maven-command: >-
             install -T 1C -Dskip.common.tests=true -DskipTests=true -DskipITs=true -Dswagger.skip
