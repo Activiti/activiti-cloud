@@ -108,8 +108,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private String businessKey;
     private String taskDefinitionKey;
 
-    @Column(name = "allow_self_service", nullable = false)
-    private boolean allowSelfService;
+    @Column(name = "allow_self_service")
+    private Boolean allowSelfService;
 
     private String completedBy;
 
@@ -547,11 +547,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     @Override
-    public boolean isAllowSelfService() {
+    public Boolean isAllowSelfService() {
         return allowSelfService;
     }
 
-    public void setAllowSelfService(boolean allowSelfService) {
+    public void setAllowSelfService(Boolean allowSelfService) {
         this.allowSelfService = allowSelfService;
     }
 

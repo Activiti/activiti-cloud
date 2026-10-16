@@ -21,16 +21,19 @@ import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface ProcessInstanceRepository
     extends
@@ -61,4 +64,18 @@ public interface ProcessInstanceRepository
 
     @EntityGraph(value = "ProcessInstances.withVariables", type = EntityGraph.EntityGraphType.LOAD)
     List<ProcessInstanceEntity> findByIdIsIn(Collection<String> ids, Sort sort);
+
+    @Query(
+        "select pi.initiator as userId, pi.id as processInstanceId from ProcessInstance pi " +
+            "where pi.initiator in :userIds and pi.status = :status"
+    )
+    List<InitiatorProcess> findRunningByInitiatorIn(
+        @Param("userIds") Collection<String> userIds,
+        @Param("status") ProcessInstance.ProcessInstanceStatus status
+    );
+
+    interface InitiatorProcess {
+        String getUserId();
+        String getProcessInstanceId();
+    }
 }

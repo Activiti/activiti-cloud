@@ -452,7 +452,7 @@ class QueryTasksIT {
 
             ResponseEntity<QueryCloudTask> defaultResponse = executeRequestGetTasksById(defaultTask.getId());
             assertThat(defaultResponse.getBody()).isNotNull();
-            assertThat(defaultResponse.getBody().isAllowSelfService()).isFalse();
+            assertThat(defaultResponse.getBody().isAllowSelfService()).isNull();
         });
 
         await().untilAsserted(() -> {

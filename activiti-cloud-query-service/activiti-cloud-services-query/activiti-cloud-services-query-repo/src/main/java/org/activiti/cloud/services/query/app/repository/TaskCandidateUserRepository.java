@@ -19,15 +19,19 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.QTaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserId;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface TaskCandidateUserRepository
     extends
@@ -39,6 +43,20 @@ public interface TaskCandidateUserRepository
     Set<TaskCandidateUserEntity> findByTaskIdIn(Collection<String> taskIds);
 
     Set<TaskCandidateUserEntity> findByTask_ProcessInstanceIdIn(Collection<String> processInstanceIds);
+
+    @Query(
+        "select tcu.userId as userId, tcu.task.processInstanceId as processInstanceId " +
+            "from TaskCandidateUser tcu where tcu.userId in :userIds and tcu.task.processInstance.status = :status"
+    )
+    List<CandidateProcess> findRunningProcessesByCandidateUserIn(
+        @Param("userIds") Collection<String> userIds,
+        @Param("status") ProcessInstance.ProcessInstanceStatus status
+    );
+
+    interface CandidateProcess {
+        String getUserId();
+        String getProcessInstanceId();
+    }
 
     @Override
     default void customize(QuerydslBindings bindings, QTaskCandidateUserEntity root) {

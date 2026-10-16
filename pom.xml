@@ -199,7 +199,7 @@
          Remove when upgrading to Spring AMQP 4.0.5+ or 4.1.1+ which contains the fix. -->
     <spring-amqp.version>4.0.3</spring-amqp.version>
     <!-- AAE-51380 temporary Tomcat version override. Remove when upgrading to Spring Boot 4.1.x -->
-    <tomcat.version>11.0.25</tomcat.version>
+    <tomcat.version>11.0.27</tomcat.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
@@ -210,10 +210,10 @@
     <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
-    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
     <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
     <third-party-license-maven-plugin.version>2.7.0</third-party-license-maven-plugin.version>
-    <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
@@ -233,7 +233,7 @@
     <org-json.version>20260814</org-json.version>
 
     <!-- dependencies versions -->
-    <hibernate.version>7.4.11.Final</hibernate.version>
+    <hibernate.version>7.4.13.Final</hibernate.version>
     <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
     <byte-buddy.version>1.17.8</byte-buddy.version>
     <!-- End Temporary Dependency -->
@@ -242,7 +242,7 @@
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
-    <swagger-annotations.version>2.2.41</swagger-annotations.version>
+    <swagger-annotations.version>2.2.55</swagger-annotations.version>
     <mockito.agent.arg>-javaagent:"${org.mockito:mockito-core:jar}"</mockito.agent.arg>
   </properties>
   <repositories>
