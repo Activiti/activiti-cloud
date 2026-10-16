@@ -88,7 +88,7 @@ public class IntegrationRequestExpirationSelector implements MessageSelector {
         if (value instanceof String text) {
             try {
                 return Long.valueOf(text.trim());
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException _) {
                 return null;
             }
         }

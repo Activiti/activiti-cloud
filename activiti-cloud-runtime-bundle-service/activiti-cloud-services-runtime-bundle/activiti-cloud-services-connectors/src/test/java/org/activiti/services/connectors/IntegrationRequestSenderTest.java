@@ -18,7 +18,7 @@ package org.activiti.services.connectors;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 import static org.activiti.cloud.common.messaging.config.IntegrationRequestExpirationSelector.REQUEST_DATE;
 import static org.activiti.cloud.common.messaging.config.IntegrationRequestExpirationSelector.TTL_SECONDS;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -195,8 +195,7 @@ public class IntegrationRequestSenderTest {
             CONNECTOR_TYPE
         );
         assertThat(integrationRequestMessage.getHeaders().get(FUNCTION_DESTINATION)).isEqualTo(CONNECTOR_TYPE);
-        assertThat(integrationRequestMessage.getHeaders().containsKey(REQUEST_DATE)).isFalse();
-        assertThat(integrationRequestMessage.getHeaders().containsKey(TTL_SECONDS)).isFalse();
+        assertThat(integrationRequestMessage.getHeaders()).doesNotContainKeys(REQUEST_DATE, TTL_SECONDS);
 
         TransactionSynchronizationManager.clear();
     }
@@ -218,8 +217,9 @@ public class IntegrationRequestSenderTest {
         verify(streamBridge).send(eq(CONNECTOR_TYPE), integrationRequestMessageCaptor.capture());
         Message<IntegrationRequest> integrationRequestMessage = integrationRequestMessageCaptor.getValue();
 
-        assertThat(integrationRequestMessage.getHeaders().get(REQUEST_DATE)).isEqualTo(requestDate.getTime());
-        assertThat(integrationRequestMessage.getHeaders().get(TTL_SECONDS)).isEqualTo(10800);
+        assertThat(integrationRequestMessage.getHeaders())
+            .containsEntry(REQUEST_DATE, requestDate.getTime())
+            .containsEntry(TTL_SECONDS, 10800);
 
         TransactionSynchronizationManager.clear();
     }
