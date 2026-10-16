@@ -17,11 +17,15 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
@@ -54,6 +58,7 @@ class FunctionRouterExecutorFactoryTest {
 
         assertThatThrownBy(() -> executor.submit(() -> {}))
             .isInstanceOf(RejectedExecutionException.class)
+            .hasRootCauseInstanceOf(IllegalStateException.class)
             .hasMessage("Executor has been shutdown");
     }
 
@@ -77,6 +82,7 @@ class FunctionRouterExecutorFactoryTest {
 
         assertThatThrownBy(() -> executor.submit(() -> {}))
             .isInstanceOf(RejectedExecutionException.class)
+            .hasRootCauseInstanceOf(TimeoutException.class)
             .hasMessageContaining("queue is full");
 
         releaseTask.countDown();
@@ -121,8 +127,79 @@ class FunctionRouterExecutorFactoryTest {
         releaseTask.countDown();
         submitter.join();
 
-        assertThat(thrown.get()).isInstanceOf(RejectedExecutionException.class);
+        assertThat(thrown.get())
+            .isInstanceOf(RejectedExecutionException.class)
+            .hasRootCauseInstanceOf(InterruptedException.class);
         assertThat(interrupted.get()).isTrue();
+    }
+
+    @Test
+    void shouldShutdownNowGracefully() {
+        // Arrange
+        factory.start();
+        ExecutorService executor = factory.apply("foo-registration");
+
+        // Act
+        factory.shutdownNow();
+
+        // Assert
+        assertThat(executor.isShutdown()).isTrue();
+        assertThatThrownBy(() -> executor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
+    }
+
+    @Test
+    void shouldBeInactiveInitially() {
+        assertThat(factory.isRunning()).isFalse();
+        assertThat(factory.isAutoStartup()).isTrue();
+        assertThat(factory.getPhase()).isEqualTo(Integer.MIN_VALUE + 100);
+    }
+
+    @Test
+    void shouldStartSuccessfully() {
+        // Act
+        factory.start();
+
+        // Assert
+        assertThat(factory.isRunning()).isTrue();
+        assertThat(factory.getTimeout()).isEqualTo(Duration.ofSeconds(300));
+
+        ExecutorService executor = factory.apply("foo-registration");
+        assertThat(executor).isNotNull();
+        assertThat(executor.isShutdown()).isFalse();
+        assertThat(executor.isTerminated()).isFalse();
+    }
+
+    @Test
+    void shouldShutdownGracefully() {
+        // Arrange
+        factory.start();
+        final var shutdownCallback = mock(Runnable.class);
+        ExecutorService executor = factory.apply("foo-registration");
+
+        // Act
+        factory.stop(shutdownCallback);
+
+        // Assert
+        assertThat(factory.isRunning()).isFalse();
+        assertThat(executor.isShutdown()).isTrue();
+        assertThatThrownBy(() -> executor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
+
+        // Verify that Spring's lifecycle coordinator was notified of completion
+        verify(shutdownCallback).run();
+    }
+
+    @Test
+    void shouldHandleSynchronousStop() {
+        // Arrange
+        factory.start();
+        ExecutorService executor = factory.apply("foo-registration");
+
+        // Act
+        factory.stop();
+
+        // Assert
+        assertThat(factory.isRunning()).isFalse();
+        assertThat(executor.isShutdown()).isTrue();
     }
 
     private static void await(CountDownLatch latch) {
