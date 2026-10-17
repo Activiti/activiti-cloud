@@ -80,6 +80,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -136,6 +137,9 @@ class QueryTasksIT {
 
     @Autowired
     private ProcessVariablesMigrationHelper processVariablesMigrationHelper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private EventsAggregator eventsAggregator;
 
@@ -455,6 +459,9 @@ class QueryTasksIT {
             assertThat(defaultResponse.getBody().isAllowSelfService()).isNull();
         });
 
+        assertThat(selectLegacyAllowSelfService(allowSelfServiceTask.getId())).isTrue();
+        assertThat(selectLegacyAllowSelfService(defaultTask.getId())).isFalse();
+
         await().untilAsserted(() -> {
             ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasksWithProcessVariables(
                 "someProcessDefinitionKey/someVariableName"
@@ -466,6 +473,29 @@ class QueryTasksIT {
                 .extracting(QueryCloudTask::isAllowSelfService)
                 .containsExactly(true);
         });
+    }
+
+    @Test
+    void shouldReturnAllowSelfServiceWrittenOnlyToLegacyColumnByPreviousRuntimeVersion() {
+        //given
+        Task task = taskEventContainedBuilder.aCreatedTask("Task written by previous version", runningProcessInstance);
+        eventsAggregator.sendAll();
+        await().untilAsserted(() -> assertThat(taskRepository.findById(task.getId())).isPresent());
+
+        //when
+        jdbcTemplate.update(
+            "UPDATE task SET allow_self_service = true, allow_self_service_declared = null WHERE id = ?",
+            task.getId()
+        );
+
+        //then
+        ResponseEntity<QueryCloudTask> response = executeRequestGetTasksById(task.getId());
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().isAllowSelfService()).isTrue();
+    }
+
+    private Boolean selectLegacyAllowSelfService(String taskId) {
+        return jdbcTemplate.queryForObject("SELECT allow_self_service FROM task WHERE id = ?", Boolean.class, taskId);
     }
 
     private ResponseEntity<QueryCloudTask> ensureRetrievesTaskByIdSuccessfully(

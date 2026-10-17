@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.query.model.StringUtils.truncate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import jakarta.persistence.CascadeType;
@@ -108,8 +109,17 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private String businessKey;
     private String taskDefinitionKey;
 
-    @Column(name = "allow_self_service")
+    @Column(name = "allow_self_service_declared")
     private Boolean allowSelfService;
+
+    /**
+     * Runtime versions we can roll back to map {@code allow_self_service} as a non-null primitive,
+     * so it must never hold null. Drop it once no supported rollback target reads it.
+     */
+    @Column(name = "allow_self_service", nullable = false)
+    @QueryType(PropertyType.NONE)
+    @GraphQLIgnore
+    private boolean legacyAllowSelfService;
 
     private String completedBy;
 
@@ -274,7 +284,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         this.processDefinitionVersion = taskCreatedEvent.getProcessDefinitionVersion();
         this.businessKey = taskCreatedEvent.getBusinessKey();
         this.taskDefinitionKey = task.getTaskDefinitionKey();
-        this.allowSelfService = task.isAllowSelfService();
+        setAllowSelfService(task.isAllowSelfService());
         this.rootProcessInstanceId = task.getTaskProcessRootProcessInstanceId();
     }
 
@@ -548,11 +558,24 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
 
     @Override
     public Boolean isAllowSelfService() {
+        if (allowSelfService == null && legacyAllowSelfService) {
+            // written by a runtime version that only knows the legacy column
+            return Boolean.TRUE;
+        }
         return allowSelfService;
     }
 
     public void setAllowSelfService(Boolean allowSelfService) {
         this.allowSelfService = allowSelfService;
+        this.legacyAllowSelfService = Boolean.TRUE.equals(allowSelfService);
+    }
+
+    /**
+     * GraphQL schema introspection only sees JPA attributes that have a getter; keep it non-public so it
+     * stays out of the REST payload.
+     */
+    boolean isLegacyAllowSelfService() {
+        return legacyAllowSelfService;
     }
 
     @Override
