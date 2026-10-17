@@ -166,7 +166,8 @@ create table task
     process_definition_name    varchar(255),
     completed_by               varchar(255),
     root_process_instance_id   varchar(255),
-    allow_self_service         boolean,
+    allow_self_service         boolean default false not null,
+    allow_self_service_declared boolean,
     primary key (id)
 );
 create table task_candidate_group

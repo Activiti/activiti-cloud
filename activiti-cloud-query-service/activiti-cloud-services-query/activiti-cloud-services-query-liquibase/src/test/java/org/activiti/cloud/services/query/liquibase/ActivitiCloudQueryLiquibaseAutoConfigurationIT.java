@@ -117,33 +117,37 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
     }
 
     @Test
-    void shouldCreateAllowSelfServiceColumnOnTask() throws Exception {
-        boolean foundColumn = false;
-
-        try (
-            Connection connection = dataSource.getConnection();
-            ResultSet columns = connection.getMetaData().getColumns(null, null, "TASK", "ALLOW_SELF_SERVICE")
-        ) {
-            if (columns.next()) {
-                foundColumn = true;
+    void shouldCreateAllowSelfServiceColumnsOnTask() throws Exception {
+        try (Connection connection = dataSource.getConnection()) {
+            try (ResultSet columns = connection.getMetaData().getColumns(null, null, "TASK", "ALLOW_SELF_SERVICE")) {
+                assertThat(columns.next()).isTrue();
+                assertThat(columns.getString("IS_NULLABLE")).isEqualTo("NO");
+            }
+            try (
+                ResultSet columns = connection
+                    .getMetaData()
+                    .getColumns(null, null, "TASK", "ALLOW_SELF_SERVICE_DECLARED")
+            ) {
+                assertThat(columns.next()).isTrue();
+                assertThat(columns.getString("IS_NULLABLE")).isEqualTo("YES");
             }
         }
-
-        assertThat(foundColumn).isTrue();
     }
 
     @Test
-    void shouldDefaultAllowSelfServiceToNullWhenColumnOmitted() throws Exception {
+    void shouldDefaultLegacyAllowSelfServiceToFalseAndDeclaredToNullWhenColumnsOmitted() throws Exception {
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
             statement.executeUpdate("INSERT INTO task (id, priority) VALUES ('task-allow-self-service-default', 0)");
 
             try (
                 ResultSet result = statement.executeQuery(
-                    "SELECT allow_self_service FROM task WHERE id = 'task-allow-self-service-default'"
+                    "SELECT allow_self_service, allow_self_service_declared FROM task WHERE id = 'task-allow-self-service-default'"
                 )
             ) {
                 assertThat(result.next()).isTrue();
-                result.getBoolean("allow_self_service");
+                assertThat(result.getBoolean("allow_self_service")).isFalse();
+                assertThat(result.wasNull()).isFalse();
+                result.getBoolean("allow_self_service_declared");
                 assertThat(result.wasNull()).isTrue();
             }
         }
