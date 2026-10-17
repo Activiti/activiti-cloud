@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.query.model.StringUtils.truncate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.introproventures.graphql.jpa.query.annotation.GraphQLIgnore;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import jakarta.persistence.CascadeType;
@@ -117,6 +118,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
      */
     @Column(name = "allow_self_service", nullable = false)
     @QueryType(PropertyType.NONE)
+    @GraphQLIgnore
     private boolean legacyAllowSelfService;
 
     private String completedBy;
@@ -566,6 +568,14 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     public void setAllowSelfService(Boolean allowSelfService) {
         this.allowSelfService = allowSelfService;
         this.legacyAllowSelfService = Boolean.TRUE.equals(allowSelfService);
+    }
+
+    /**
+     * GraphQL schema introspection only sees JPA attributes that have a getter; keep it non-public so it
+     * stays out of the REST payload.
+     */
+    boolean isLegacyAllowSelfService() {
+        return legacyAllowSelfService;
     }
 
     @Override
