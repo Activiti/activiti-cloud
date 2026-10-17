@@ -71,6 +71,7 @@ import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHan
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @AutoConfiguration
 public class EventHandlersAutoConfiguration {
@@ -282,20 +283,29 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BPMNActivityStartedEventHandler bpmnActivityStartedEventHandler(EntityManager entityManager) {
-        return new BPMNActivityStartedEventHandler(entityManager);
+    public BPMNActivityStartedEventHandler bpmnActivityStartedEventHandler(
+        EntityManager entityManager,
+        PlatformTransactionManager transactionManager
+    ) {
+        return new BPMNActivityStartedEventHandler(entityManager, transactionManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public BPMNActivityCompletedEventHandler bpmnActivityCompletedEventHandler(EntityManager entityManager) {
-        return new BPMNActivityCompletedEventHandler(entityManager);
+    public BPMNActivityCompletedEventHandler bpmnActivityCompletedEventHandler(
+        EntityManager entityManager,
+        PlatformTransactionManager transactionManager
+    ) {
+        return new BPMNActivityCompletedEventHandler(entityManager, transactionManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public BPMNActivityCancelledEventHandler bpmnActivityCancelledEventHandler(EntityManager entityManager) {
-        return new BPMNActivityCancelledEventHandler(entityManager);
+    public BPMNActivityCancelledEventHandler bpmnActivityCancelledEventHandler(
+        EntityManager entityManager,
+        PlatformTransactionManager transactionManager
+    ) {
+        return new BPMNActivityCancelledEventHandler(entityManager, transactionManager);
     }
 
     @Bean
