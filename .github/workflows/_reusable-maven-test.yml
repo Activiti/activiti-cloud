@@ -17,6 +17,9 @@ on:
       NEXUS_PASSWORD:
         required: true
 
+env:
+  MAVEN_VERSION: "3.10.0"
+
 jobs:
   test:
     name: maven-test (${{ matrix.short-name }})
@@ -31,13 +34,14 @@ jobs:
           ref: ${{ inputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@c176315c6b0b3e3bbf022ea444944fb903c47e0e # v19.2.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@f2ba011b2bd8bee8d7418b046541ce2f75d1fbed # v19.4.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
           java-version: '25'
           java-distribution: 'corretto'
+          maven-version: ${{ env.MAVEN_VERSION }}
           reuse-testcontainers: 'true'
           maven-command: >-
             verify -Dskip.common.tests=true -Dmaven.install.skip=true -Dswagger.skip
