@@ -22,7 +22,7 @@
     <jackson2.version>2.22.3</jackson2.version>
     <rest-assured.version>6.0.0</rest-assured.version>
     <!-- AAE-43864 temporary update for security issue -->
-    <plexus-utils.version>4.0.3</plexus-utils.version>
+    <plexus-utils.version>4.1.0</plexus-utils.version>
     <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
     <spring-kafka.version>4.0.6</spring-kafka.version>
     <!-- Security fix AAE-49996: hibernate-platform pins micrometer-core below the version Spring Boot manages. -->
