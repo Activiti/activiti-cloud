@@ -209,15 +209,15 @@
     <assertj-assertions-generator-maven-plugin.version>2.0.0</assertj-assertions-generator-maven-plugin.version>
     <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
-    <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
+    <git-commit-id-maven-plugin.version>10.0.1</git-commit-id-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
     <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
     <third-party-license-maven-plugin.version>2.7.0</third-party-license-maven-plugin.version>
     <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
-    <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
-    <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
-    <maven-failsafe-plugin.version>3.5.6</maven-failsafe-plugin.version>
+    <maven-deploy-plugin.version>3.2.0</maven-deploy-plugin.version>
+    <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+    <maven-failsafe-plugin.version>3.6.0</maven-failsafe-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <maven-install-plugin.version>3.2.0</maven-install-plugin.version>
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
@@ -225,7 +225,7 @@
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
-    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <checkstyle.version>13.8.0</checkstyle.version>
     <maven-sonar-plugin.version>5.8.0.7211</maven-sonar-plugin.version>
@@ -359,9 +359,9 @@
           <version>${maven-site-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>pl.project13.maven</groupId>
-          <artifactId>git-commit-id-plugin</artifactId>
-          <version>${git-commit-id-plugin.version}</version>
+          <groupId>io.github.git-commit-id</groupId>
+          <artifactId>git-commit-id-maven-plugin</artifactId>
+          <version>${git-commit-id-maven-plugin.version}</version>
           <executions>
             <execution>
               <goals>
@@ -371,6 +371,8 @@
           </executions>
           <configuration>
             <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+            <!-- git.build.time: keep the real build time instead of project.build.outputTimestamp (Maven 3.10+ Super POM default) -->
+            <projectBuildOutputTimestamp>${maven.build.timestamp}</projectBuildOutputTimestamp>
             <generateGitPropertiesFile>true</generateGitPropertiesFile>
             <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
             </generateGitPropertiesFilename>
@@ -439,6 +441,10 @@
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
           <version>${spring-boot.version}</version>
+          <configuration>
+            <!-- build-info: keep the real build time instead of project.build.outputTimestamp (Maven 3.10+ Super POM default) -->
+            <time>${maven.build.timestamp}</time>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>com.mycila</groupId>
@@ -542,8 +548,7 @@ limitations under the License.]]>
         <configuration>
           <showDeprecation>true</showDeprecation>
           <showWarnings>true</showWarnings>
-          <optimize>true</optimize>
-          <forceJavacCompilerUse>true</forceJavacCompilerUse>
+          <forceLegacyJavacApi>true</forceLegacyJavacApi>
           <compilerArgs>
             <arg>-parameters</arg>
           </compilerArgs>

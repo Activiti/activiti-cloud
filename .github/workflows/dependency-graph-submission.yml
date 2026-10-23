@@ -3,6 +3,10 @@ name: "Dependency Graph Submission of Transitive Dependencies"
 on:
   push:
     branches: ["develop"]
+
+env:
+  MAVEN_VERSION: "3.10.0"
+
 jobs:
   submit:
     name: Submit
@@ -11,15 +15,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up JDK 25
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: "25"
           distribution: "corretto"
       - name: Submit Dependency Graph
-        uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@f1bae5a4bdb3b12030a350e52b8f661dbcb2f849 # v18.28.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@5d33aec6cf9ffd70982c404ebf5ebadedd7405d9 # v19.5.0
         with:
           java-version: '25'
-          maven-version: '3.9.9'
+          maven-version: ${{ env.MAVEN_VERSION }}
           maven-args: -Dmaven.wagon.http.pool=false
           maven-username: ${{ secrets.NEXUS_USERNAME }}
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
