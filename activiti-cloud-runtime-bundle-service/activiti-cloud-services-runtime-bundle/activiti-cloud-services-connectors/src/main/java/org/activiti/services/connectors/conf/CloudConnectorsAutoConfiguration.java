@@ -16,6 +16,7 @@
 package org.activiti.services.connectors.conf;
 
 import java.time.Clock;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.ConnectorIncidentEvent;
@@ -47,6 +48,7 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEvent
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.activiti.services.connectors.mtc.MtcIntegrationRequestInterceptor;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -155,9 +157,10 @@ public class CloudConnectorsAutoConfiguration {
     public IntegrationRequestSender integrationRequestSender(
         StreamBridge streamBridge,
         IntegrationContextMessageBuilderFactory messageBuilderFactory,
-        FunctionBindingConfiguration.BindingResolver bindingResolver
+        FunctionBindingConfiguration.BindingResolver bindingResolver,
+        Optional<MtcIntegrationRequestInterceptor> mtcInterceptor
     ) {
-        return new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver);
+        return new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver, mtcInterceptor);
     }
 
     @Bean
