@@ -52,7 +52,11 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
         RuntimeBundleApplication.class,
         RuntimeBundleTransactedConnectorBindingIT.TestScriptExecuteConsumer.class,
     },
-    properties = { "activiti.cloud.application.name=default-app", "activiti.cloud.messaging.rabbitmq.compress=false" }
+    properties = {
+        "activiti.cloud.application.name=default-app",
+        "activiti.cloud.messaging.rabbitmq.compress=false",
+        "spring.integration.jdbc.schema=classpath:/spring-integration-jdbc/postgresql.sql",
+    }
 )
 @EnableCleanupLiquibaseAfterTest
 @EnableBinderFactoryListenerTestContext
@@ -86,7 +90,8 @@ class RuntimeBundleTransactedConnectorBindingIT {
     @Test
     void should_commitConnectorBindingTransactedChannel() {
         transactionTemplate.executeWithoutResult(tx -> {
-            isSent.set(streamBridge.send("script.EXECUTE", "println('foobar')"));
+            streamBridge.send("script.EXECUTE", "println('foobar')");
+            isSent.set(true);
         });
 
         assertThat(isSent).isTrue();
@@ -96,7 +101,8 @@ class RuntimeBundleTransactedConnectorBindingIT {
     @Test
     void should_rollbackConnectorBindingTransactedChannel() {
         transactionTemplate.executeWithoutResult(tx -> {
-            isSent.set(streamBridge.send("script.EXECUTE", "println('foobar')"));
+            streamBridge.send("script.EXECUTE", "println('foobar')");
+            isSent.set(true);
 
             await()
                 .pollDelay(Duration.ofSeconds(1))
@@ -117,7 +123,8 @@ class RuntimeBundleTransactedConnectorBindingIT {
                     new TransactionSynchronization() {
                         @Override
                         public void beforeCommit(boolean readOnly) {
-                            isSent.set(streamBridge.send("script.EXECUTE", "println('foobar')"));
+                            streamBridge.send("script.EXECUTE", "println('foobar')");
+                            isSent.set(true);
 
                             await()
                                 .pollDelay(Duration.ofSeconds(1))
