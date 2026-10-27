@@ -35,7 +35,7 @@ import org.springframework.cloud.function.context.config.SmartCompositeMessageCo
 import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.cloud.function.utils.PrimitiveTypesFromStringMessageConverter;
 import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.GenericApplicationContext;
@@ -63,8 +63,8 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         this.applicationContext = applicationContext;
     }
 
-    protected StreamBridge getStreamBridge() {
-        return this.applicationContext.getBean(StreamBridge.class);
+    protected StreamOperations getStreamBridge() {
+        return this.applicationContext.getBean(StreamOperations.class);
     }
 
     public static String getOutBinding(String bindingName) {
