@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.common.messaging.config;
+package org.activiti.cloud.common.messaging.config.outbox;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
@@ -21,31 +21,35 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.util.MimeType;
 
-public class StreamBridgeOperations implements StreamOperations {
+public class OutboxStreamBridge implements StreamOperations {
 
     private final ObjectProvider<StreamBridge> streamBridge;
 
-    public StreamBridgeOperations(ObjectProvider<StreamBridge> streamBridge) {
+    public OutboxStreamBridge(ObjectProvider<StreamBridge> streamBridge) {
         this.streamBridge = streamBridge;
     }
 
     @Override
     public boolean send(String bindingName, Object data) {
-        return streamBridge.getObject().send(bindingName, data);
+        return streamBridge().send(bindingName, data);
     }
 
     @Override
     public boolean send(String bindingName, Object data, MimeType outputContentType) {
-        return streamBridge.getObject().send(bindingName, data, outputContentType);
+        return streamBridge().send(bindingName, data, outputContentType);
     }
 
     @Override
     public boolean send(String bindingName, @Nullable String binderName, Object data) {
-        return streamBridge.getObject().send(bindingName, binderName, data);
+        return streamBridge().send(bindingName, binderName, data);
     }
 
     @Override
     public boolean send(String bindingName, @Nullable String binderName, Object data, MimeType outputContentType) {
-        return streamBridge.getObject().send(bindingName, binderName, data, outputContentType);
+        return streamBridge().send(bindingName, binderName, data, outputContentType);
+    }
+
+    private StreamOperations streamBridge() {
+        return streamBridge.getObject();
     }
 }

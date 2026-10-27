@@ -19,7 +19,6 @@ import java.sql.DatabaseMetaData;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
-import org.activiti.cloud.common.messaging.config.StreamBridgeOperations;
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -34,8 +33,10 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.binding.NewDestinationBindingCallback;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
@@ -70,6 +71,12 @@ import tools.jackson.databind.module.SimpleModule;
 @AutoConfiguration(before = OutputBindingConfiguration.class, after = MessagesCoreAutoConfiguration.class)
 @ConditionalOnProperty(name = "alresco.process.runtime.outbox.enabled", matchIfMissing = true)
 public class OutboxAutoConfiguration {
+
+    @Bean
+    @Primary
+    StreamOperations outboxStreamBridge(ObjectProvider<StreamBridge> streamBridgeProvider) {
+        return new OutboxStreamBridge(streamBridgeProvider);
+    }
 
     @Bean
     OutboxChannelInterceptorFactory outboxChannelInterceptorFactory(
@@ -112,7 +119,7 @@ public class OutboxAutoConfiguration {
         return new BeanPostProcessor() {
             @Override
             public @Nullable Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof StreamBridgeOperations) {
+                if (bean instanceof OutboxStreamBridge) {
                     final var channelInterceptor = outboxChannelInterceptorFactory.apply("streamBridge", (m, c) ->
                         m.getHeaders().get("streamBridgeOutbox", String.class)
                     );

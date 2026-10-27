@@ -52,11 +52,7 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
         RuntimeBundleApplication.class,
         RuntimeBundleTransactedConnectorBindingIT.TestScriptExecuteConsumer.class,
     },
-    properties = {
-        "activiti.cloud.application.name=default-app",
-        "activiti.cloud.messaging.rabbitmq.compress=false",
-        "spring.integration.jdbc.schema=classpath:/spring-integration-jdbc/postgresql.sql",
-    }
+    properties = { "activiti.cloud.application.name=default-app", "activiti.cloud.messaging.rabbitmq.compress=false" }
 )
 @EnableCleanupLiquibaseAfterTest
 @EnableBinderFactoryListenerTestContext
