@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
@@ -31,9 +31,9 @@ public class OutboxMessageHandler implements MessageHandler {
     private static final Logger log = LoggerFactory.getLogger(OutboxMessageHandler.class);
 
     private final String partitionKey;
-    private final ObjectProvider<StreamBridge> streamBridgeProvider;
+    private final ObjectProvider<StreamOperations> streamBridgeProvider;
 
-    public OutboxMessageHandler(String partitionKey, ObjectProvider<StreamBridge> streamBridgeProvider) {
+    public OutboxMessageHandler(String partitionKey, ObjectProvider<StreamOperations> streamBridgeProvider) {
         this.partitionKey = partitionKey;
         this.streamBridgeProvider = streamBridgeProvider;
     }
@@ -53,7 +53,7 @@ public class OutboxMessageHandler implements MessageHandler {
         );
     }
 
-    private StreamBridge streamBridge() {
+    private StreamOperations streamBridge() {
         return streamBridgeProvider.getObject();
     }
 }

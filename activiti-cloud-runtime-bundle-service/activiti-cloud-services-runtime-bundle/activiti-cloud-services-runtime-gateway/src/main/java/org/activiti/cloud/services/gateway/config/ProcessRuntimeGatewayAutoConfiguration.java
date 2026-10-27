@@ -30,7 +30,7 @@ import org.activiti.cloud.services.gateway.channels.ProcessRuntimeGatewayChannel
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
@@ -57,7 +57,7 @@ public class ProcessRuntimeGatewayAutoConfiguration {
     @Bean
     IntegrationFlow processRuntimeGatewayProducerFlow(
         ProcessRuntimeGatewayProperties properties,
-        StreamBridge streamBridge,
+        StreamOperations streamBridge,
         BindingServiceProperties bindingServiceProperties,
         HeaderChannelRegistry headerChannelRegistry,
         FunctionBindingConfiguration.BindingResolver bindingResolver

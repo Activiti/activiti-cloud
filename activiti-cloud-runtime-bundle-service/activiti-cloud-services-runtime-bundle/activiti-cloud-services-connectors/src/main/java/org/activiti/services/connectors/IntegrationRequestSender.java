@@ -23,7 +23,7 @@ import java.util.Optional;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -34,12 +34,12 @@ public class IntegrationRequestSender {
 
     public static final String CONNECTOR_TYPE = "connectorType";
 
-    private final StreamBridge streamBridge;
+    private final StreamOperations streamBridge;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
     private final FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     public IntegrationRequestSender(
-        StreamBridge streamBridge,
+        StreamOperations streamBridge,
         IntegrationContextMessageBuilderFactory messageBuilderFactory,
         FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {

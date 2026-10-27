@@ -33,7 +33,7 @@ import org.activiti.cloud.connectors.starter.channels.IntegrationResultSenderImp
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import tools.jackson.databind.json.JsonMapper;
@@ -86,7 +86,7 @@ public class ActivitiCloudConnectorAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public IntegrationResultSender integrationResultSender(
-        StreamBridge streamBridge,
+        StreamOperations streamBridge,
         IntegrationResultChannelResolver integrationChannelResolver
     ) {
         return new IntegrationResultSenderImpl(streamBridge, integrationChannelResolver);
@@ -111,7 +111,7 @@ public class ActivitiCloudConnectorAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public IntegrationErrorSender integrationErrorSender(
-        StreamBridge streamBridge,
+        StreamOperations streamBridge,
         IntegrationErrorChannelResolver integrationChannelResolver
     ) {
         return new IntegrationErrorSenderImpl(streamBridge, integrationChannelResolver);

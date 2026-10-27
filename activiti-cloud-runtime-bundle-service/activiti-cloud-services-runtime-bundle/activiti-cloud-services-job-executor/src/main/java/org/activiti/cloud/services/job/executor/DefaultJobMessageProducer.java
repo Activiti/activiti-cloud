@@ -22,7 +22,7 @@ import org.activiti.engine.runtime.Job;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.Message;
@@ -36,13 +36,13 @@ public class DefaultJobMessageProducer implements JobMessageProducer {
 
     private static final String ROUTING_KEY = "routingKey";
 
-    private final StreamBridge streamBridge;
+    private final StreamOperations streamBridge;
     private final ApplicationEventPublisher eventPublisher;
     private final JobMessageBuilderFactory jobMessageBuilderFactory;
     private final FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     public DefaultJobMessageProducer(
-        StreamBridge streamBridge,
+        StreamOperations streamBridge,
         ApplicationEventPublisher eventPublisher,
         JobMessageBuilderFactory jobMessageBuilderFactory,
         FunctionBindingConfiguration.BindingResolver bindingResolver

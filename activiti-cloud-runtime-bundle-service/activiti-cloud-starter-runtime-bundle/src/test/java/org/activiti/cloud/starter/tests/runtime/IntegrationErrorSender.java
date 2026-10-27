@@ -18,16 +18,16 @@ package org.activiti.cloud.starter.tests.runtime;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 @TestComponent
 public class IntegrationErrorSender {
 
-    private final StreamBridge streamBridge;
+    private final StreamOperations streamBridge;
 
-    public IntegrationErrorSender(StreamBridge streamBridge) {
+    public IntegrationErrorSender(StreamOperations streamBridge) {
         this.streamBridge = streamBridge;
     }
 

@@ -27,7 +27,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,7 +74,7 @@ public class MessageBasedJobManagerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public JobMessageProducer jobMessageProducer(
-        StreamBridge streamBridge,
+        StreamOperations streamBridge,
         ApplicationEventPublisher eventPublisher,
         JobMessageBuilderFactory jobMessageBuilderFactory,
         FunctionBindingConfiguration.BindingResolver bindingResolver
