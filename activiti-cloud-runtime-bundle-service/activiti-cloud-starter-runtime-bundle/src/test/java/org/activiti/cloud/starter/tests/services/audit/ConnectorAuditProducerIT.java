@@ -61,7 +61,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
@@ -116,7 +116,7 @@ public class ConnectorAuditProducerIT {
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
     @Autowired
-    private StreamBridge streamBridge;
+    private StreamOperations streamBridge;
 
     @Autowired
     private TaskRestTemplate taskRestTemplate;

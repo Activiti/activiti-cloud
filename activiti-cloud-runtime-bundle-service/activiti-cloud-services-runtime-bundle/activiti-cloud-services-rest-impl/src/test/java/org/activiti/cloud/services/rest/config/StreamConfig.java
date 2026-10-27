@@ -16,12 +16,12 @@
 package org.activiti.cloud.services.rest.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @TestConfiguration
 public class StreamConfig {
 
     @MockitoBean
-    public StreamBridge streamBridge;
+    public StreamOperations streamBridge;
 }
