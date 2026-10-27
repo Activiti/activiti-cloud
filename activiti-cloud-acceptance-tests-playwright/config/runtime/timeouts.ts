@@ -16,7 +16,7 @@ function envMs(name: string, fallback: number): number {
 
 export const timeouts = {
     test: envMs('PLAYWRIGHT_TEST_TIMEOUT_MS', 60_000),
-    expect: envMs('PLAYWRIGHT_EXPECT_TIMEOUT_MS', 15_000),
+    expect: envMs('PLAYWRIGHT_EXPECT_TIMEOUT_MS', 10_000),
     action: envMs('PLAYWRIGHT_ACTION_TIMEOUT_MS', 15_000),
     navigation: envMs('PLAYWRIGHT_NAVIGATION_TIMEOUT_MS', 30_000),
 
