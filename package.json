@@ -50,9 +50,9 @@
   "author": "michal.fidor@hyland.com",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@michalfidor/playswag": "^2.0.1",
+    "@michalfidor/playswag": "^2.1.0",
     "@reportportal/agent-js-playwright": "^5.5.0",
-    "@playwright/test": "^1.64.0",
+    "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
     "@types/ws": "^8.18.2",
     "tsx": "^4.23.15",
@@ -64,7 +64,7 @@
   "dependencies": {
     "chalk": "^6.0.1",
     "date-fns": "^4.4.0",
-    "dotenv": "^18.0.7",
+    "dotenv": "^18.0.8",
     "jwt-decode": "^4.0.0",
     "winston": "^3.19.0",
     "ws": "^8.22.0"
