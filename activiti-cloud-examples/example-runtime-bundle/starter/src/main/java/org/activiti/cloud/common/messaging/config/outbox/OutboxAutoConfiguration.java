@@ -126,10 +126,7 @@ public class OutboxAutoConfiguration {
                             @Override
                             public Object invoke(MethodInvocation invocation) throws Throwable {
                                 // Filter exclusively for the "send" method
-                                if (
-                                    "send".equals(invocation.getMethod().getName()) &&
-                                    invocation.getArguments().length == 2
-                                ) {
+                                if ("send".equals(invocation.getMethod().getName())) {
                                     final var channelName = (String) invocation.getArguments()[0];
                                     final var message =
                                         invocation.getArguments()[1] instanceof Message<?> arg1
