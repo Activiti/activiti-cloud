@@ -67,7 +67,7 @@ import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -157,7 +157,7 @@ public class ConnectorConfigurationIT {
     private MyErrorHandler myErrorHandler;
 
     @MockitoSpyBean
-    private StreamBridge streamBridge;
+    private StreamOperations streamBridge;
 
     @Value("${application.min.version}")
     private String minVersion;
