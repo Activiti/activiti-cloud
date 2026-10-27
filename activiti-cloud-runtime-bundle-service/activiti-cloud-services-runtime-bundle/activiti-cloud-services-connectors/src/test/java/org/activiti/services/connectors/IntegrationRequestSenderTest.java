@@ -54,7 +54,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -78,7 +78,7 @@ public class IntegrationRequestSenderTest {
     private IntegrationRequestSender integrationRequestSender;
 
     @Mock
-    private StreamBridge streamBridge;
+    private StreamOperations streamBridge;
 
     @Spy
     private RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties() {
