@@ -167,7 +167,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                         })
                         .orTimeout(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS)
                         .exceptionally(cause -> {
-                            if (cause instanceof TimeoutException || cause.getCause() instanceof TimeoutException) {
+                            if (cause instanceof TimeoutException) {
                                 functions
                                     .stream()
                                     .filter(Predicate.not(CompletableFuture::isDone))
