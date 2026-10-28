@@ -218,7 +218,9 @@ jobs:
             -Dtransitive=false
 
           origin_file="$trial_repository/org/activiti/activiti-engine/$activiti_version/_remote.repositories"
-          if ! grep -Eq '^activiti-engine-[^>]+\.jar>cloudsmith-activiti-snapshots=' "$origin_file"; then
+          # Maven 3.10 / Resolver 2 appends a SHA-1 repository key to the mirror id.
+          if ! grep -Eq '^activiti-engine-[^>]+\.jar>cloudsmith-activiti-snapshots(-[0-9a-f]{40})?=' "$origin_file"; then
+            cat "$origin_file"
             echo "::error::The Activiti preview JAR was not resolved from cloudsmith-activiti-snapshots."
             exit 1
           fi
