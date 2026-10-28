@@ -15,16 +15,10 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.bind.Bindable;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 /**
  * Validates that the combined serialized size of non-whitelisted variable values
@@ -33,34 +27,14 @@ import org.springframework.stereotype.Component;
  * Whitelisted variable names (e.g. {@code batchState}) are exempt from the limit
  * and may be as large as the overall request body size allows.
  */
-@Component
 public class VariableValueSizeValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VariableValueSizeValidator.class);
 
-    private static final long DEFAULT_MAX_VARIABLE_VALUE_LENGTH = 8000;
-
     private final long maxNonWhitelistedBytes;
     private final Set<String> whitelistedVariableNames;
 
-    public VariableValueSizeValidator(
-        @Value(
-            "${activiti.cloud.services.variables.max-variable-value-length:" + DEFAULT_MAX_VARIABLE_VALUE_LENGTH + "}"
-        ) long maxNonWhitelistedBytes,
-        Environment environment
-    ) {
-        this(
-            maxNonWhitelistedBytes,
-            Binder.get(environment)
-                .bind("activiti.cloud.services.variables.whitelisted-variables", Bindable.setOf(String.class))
-                .orElse(Collections.emptySet())
-        );
-    }
-
-    /**
-     * Constructor for direct instantiation (e.g. in tests).
-     */
-    VariableValueSizeValidator(long maxNonWhitelistedBytes, Set<String> whitelistedVariableNames) {
+    public VariableValueSizeValidator(long maxNonWhitelistedBytes, Set<String> whitelistedVariableNames) {
         this.maxNonWhitelistedBytes = maxNonWhitelistedBytes;
         this.whitelistedVariableNames = whitelistedVariableNames;
     }
