@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.common.messaging.config.outbox;
+package org.activiti.cloud.common.messaging.outbox;
 
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
-import org.activiti.spring.AbstractActivitiSmartLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -41,13 +41,14 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 
 public class OutboxChannelInterceptorFactory
-    extends AbstractActivitiSmartLifeCycle
-    implements BiFunction<String, BiFunction<Message<?>, DirectChannel, String>, ChannelInterceptor>
+    implements BiFunction<String, BiFunction<Message<?>, DirectChannel, String>, ChannelInterceptor>, SmartLifecycle
 {
 
     public static final String OUTBOX_ROLE = "Outbox";
 
     private static final Logger log = LoggerFactory.getLogger(OutboxChannelInterceptorFactory.class);
+
+    private volatile boolean running = false;
 
     private final ChannelMessageStore channelMessageStore;
     private final PlatformTransactionManager transactionManager;
@@ -70,18 +71,6 @@ public class OutboxChannelInterceptorFactory
         this.integrationFlowContext = integrationFlowContext;
         this.streamBridgeProvider = streamBridgeProvider;
         this.lockRegistry = lockRegistry;
-    }
-
-    @Override
-    public void doStart() {
-        log.info("Start outbox partitions: {} ", flowRegistrationsMap.keySet());
-        flowRegistrationsMap.values().forEach(IntegrationFlowRegistration::start);
-    }
-
-    @Override
-    public void doStop() {
-        log.info("Stop outbox partitions: {} ", flowRegistrationsMap.keySet());
-        flowRegistrationsMap.values().forEach(IntegrationFlowRegistration::stop);
     }
 
     @Override
@@ -135,5 +124,24 @@ public class OutboxChannelInterceptorFactory
                 Thread.ofPlatform().name(partitionKey.concat("Poller")).factory()
             )
         );
+    }
+
+    @Override
+    public void start() {
+        running = true;
+        log.info("Start outbox partitions: {} ", flowRegistrationsMap.keySet());
+        flowRegistrationsMap.values().forEach(IntegrationFlowRegistration::start);
+    }
+
+    @Override
+    public void stop() {
+        running = false;
+        log.info("Stop outbox partitions: {} ", flowRegistrationsMap.keySet());
+        flowRegistrationsMap.values().forEach(IntegrationFlowRegistration::stop);
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
     }
 }

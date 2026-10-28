@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.common.messaging.config.outbox;
+package org.activiti.cloud.common.messaging.outbox;
 
 import java.util.function.BiFunction;
 import org.springframework.integration.channel.DirectChannel;
