@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.conf;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
