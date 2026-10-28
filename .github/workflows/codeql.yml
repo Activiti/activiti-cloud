@@ -26,6 +26,7 @@ concurrency:
 
 env:
   MAVEN_VERSION: "3.10.0"
+  CLOUDSMITH_NAMESPACE: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
 jobs:
   analyze:
@@ -40,6 +41,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      id-token: write
       security-events: write
 
     strategy:
@@ -54,6 +56,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - name: Authenticate with Cloudsmith
+      uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+      with:
+        oidc-namespace: ${{ env.CLOUDSMITH_NAMESPACE }}
+        verify-auth: "true"
     - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
           path: ~/.m2/repository

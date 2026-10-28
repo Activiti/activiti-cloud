@@ -19,11 +19,16 @@ on:
 
 env:
   MAVEN_VERSION: "3.10.0"
+  CLOUDSMITH_NAMESPACE: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
 jobs:
   test:
     name: maven-test (${{ matrix.short-name }})
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -33,6 +38,12 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - name: Authenticate with Cloudsmith
+        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+        with:
+          oidc-namespace: ${{ env.CLOUDSMITH_NAMESPACE }}
+          verify-auth: "true"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
         env:
