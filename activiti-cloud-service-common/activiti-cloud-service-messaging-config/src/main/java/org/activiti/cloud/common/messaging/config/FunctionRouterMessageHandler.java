@@ -117,6 +117,17 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                                 )
                                 .toList();
 
+                            // A request timeout must not depend on which timer fires first (per-function vs. orTimeout),
+                            // so timeouts always bypass the binding error handlers and surface as a TimeoutException
+                            errors
+                                .stream()
+                                .map(Map.Entry::getValue)
+                                .filter(TimeoutException.class::isInstance)
+                                .findFirst()
+                                .ifPresent(timeout -> {
+                                    throw new CompletionException(timeout);
+                                });
+
                             if (!errors.isEmpty()) {
                                 log.debug("Errors handling function route message request {}", errors);
                                 final Function<ErrorMessage, Consumer<ErrorMessage>> fallbackErrorHandler =
@@ -156,7 +167,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                         })
                         .orTimeout(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS)
                         .exceptionally(cause -> {
-                            if (cause instanceof TimeoutException) {
+                            if (cause instanceof TimeoutException || cause.getCause() instanceof TimeoutException) {
                                 functions
                                     .stream()
                                     .filter(Predicate.not(CompletableFuture::isDone))
