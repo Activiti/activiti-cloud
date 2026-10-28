@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.common.messaging.config.outbox;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
+import java.util.List;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
@@ -50,7 +52,6 @@ import org.springframework.integration.support.json.AdviceMessageJsonDeserialize
 import org.springframework.integration.support.json.ErrorMessageJsonDeserializer;
 import org.springframework.integration.support.json.GenericMessageJsonDeserializer;
 import org.springframework.integration.support.json.JacksonJsonObjectMapper;
-import org.springframework.integration.support.json.JacksonMessagingUtils;
 import org.springframework.integration.support.json.MessageHeadersJsonSerializer;
 import org.springframework.integration.support.json.MimeTypeJsonSerializer;
 import org.springframework.integration.support.json.MutableMessageJsonDeserializer;
@@ -60,7 +61,12 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.transaction.PlatformTransactionManager;
+import tools.jackson.databind.DefaultTyping;
 import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import tools.jackson.databind.jsontype.impl.DefaultTypeResolverBuilder;
 import tools.jackson.databind.module.SimpleModule;
 
 @AutoConfiguration(before = OutputBindingConfiguration.class, after = MessagesCoreAutoConfiguration.class)
@@ -78,7 +84,7 @@ public class OutboxAutoConfiguration {
         ChannelMessageStore outboxChannelMessageStore,
         PlatformTransactionManager transactionManager,
         IntegrationFlowContext integrationFlowContext,
-        ObjectProvider<StreamOperations> streamBridgeProvider,
+        ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry lockRegistry
     ) {
         return new OutboxChannelInterceptorFactory(
@@ -132,14 +138,15 @@ public class OutboxAutoConfiguration {
     Supplier<JacksonJsonObjectMapper> outboxJsonObjectMapperProvider(
         @Value(
             "${alresco.process.runtime.outbox.json.trusted-packages:org.activiti.api,org.activiti.cloud.api,com.alfresco,tools.jackson.databind.node,java.math,java.time}"
-        ) String[] trustedPackages
+        ) String[] trustedPackages,
+        List<JacksonModule> jacksonModules
     ) {
         final var genericMessageDeserializer = new GenericMessageJsonDeserializer();
         final var errorMessageDeserializer = new ErrorMessageJsonDeserializer();
         final var adviceMessageDeserializer = new AdviceMessageJsonDeserializer();
         final var mutableMessageDeserializer = new MutableMessageJsonDeserializer();
 
-        final var messageModule = new SimpleModule()
+        final var messageModule = new SimpleModule("MessageModule")
             .addSerializer(new MessageHeadersJsonSerializer())
             .addSerializer(new MimeTypeJsonSerializer())
             .addDeserializer(GenericMessage.class, genericMessageDeserializer)
@@ -147,12 +154,30 @@ public class OutboxAutoConfiguration {
             .addDeserializer(AdviceMessage.class, adviceMessageDeserializer)
             .addDeserializer(MutableMessage.class, mutableMessageDeserializer);
 
-        final var mapper = JacksonMessagingUtils.messagingAwareMapper(trustedPackages)
-            .rebuild()
-            .removeAllModules()
-            .findAndAddModules(JacksonMessagingUtils.class.getClassLoader())
+        // temporary fix
+        List<JacksonModule> activitiModules = jacksonModules
+            .stream()
+            .filter(it -> it.getModuleName().startsWith("map"))
+            .toList();
+
+        //        ArrayList<JacksonModule> activitiModules = new ArrayList<>();
+        //        ServiceLoader<ActivitiJacksonModule> loader = ServiceLoader.load(
+        //            ActivitiJacksonModule.class,
+        //            OutputBindingConfiguration.class.getClassLoader()
+        //        );
+        //        loader.forEach(activitiModules::add);
+
+        JsonMapper mapper = JsonMapper.builder()
+            .setDefaultTyping(
+                new DefaultTypeResolverBuilder(
+                    BasicPolymorphicTypeValidator.builder().allowIfSubType(Object.class).build(),
+                    DefaultTyping.NON_FINAL,
+                    JsonTypeInfo.As.PROPERTY
+                )
+            )
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
+            .addModules(activitiModules)
             .addModules(messageModule)
             .build();
 
