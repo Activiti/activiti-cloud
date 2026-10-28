@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
@@ -64,6 +66,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import tools.jackson.databind.DefaultTyping;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.cfg.JsonNodeFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import tools.jackson.databind.jsontype.impl.DefaultTypeResolverBuilder;
@@ -134,12 +137,26 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
+    Supplier<List<JacksonModule>> trustedOutboxJacksonModulesProvider(
+        List<JacksonModule> jacksonModules,
+        @Value("${alresco.process.runtime.outbox.json.trusted-modules:^map.*}") Pattern[] trustedModules
+    ) {
+        return () ->
+            jacksonModules
+                .stream()
+                .filter(it ->
+                    Stream.of(trustedModules).anyMatch(pattern -> pattern.matcher(it.getModuleName()).matches())
+                )
+                .toList();
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     Supplier<JacksonJsonObjectMapper> outboxJsonObjectMapperProvider(
         @Value(
             "${alresco.process.runtime.outbox.json.trusted-packages:org.activiti.api,org.activiti.cloud.api,com.alfresco,tools.jackson.databind.node,java.math,java.time}"
         ) String[] trustedPackages,
-        List<JacksonModule> jacksonModules
+        Supplier<List<JacksonModule>> trustedOutboxJacksonModulesProvider
     ) {
         final var genericMessageDeserializer = new GenericMessageJsonDeserializer();
         final var errorMessageDeserializer = new ErrorMessageJsonDeserializer();
@@ -154,19 +171,6 @@ public class OutboxAutoConfiguration {
             .addDeserializer(AdviceMessage.class, adviceMessageDeserializer)
             .addDeserializer(MutableMessage.class, mutableMessageDeserializer);
 
-        // temporary fix
-        List<JacksonModule> activitiModules = jacksonModules
-            .stream()
-            .filter(it -> it.getModuleName().startsWith("map"))
-            .toList();
-
-        //        ArrayList<JacksonModule> activitiModules = new ArrayList<>();
-        //        ServiceLoader<ActivitiJacksonModule> loader = ServiceLoader.load(
-        //            ActivitiJacksonModule.class,
-        //            OutputBindingConfiguration.class.getClassLoader()
-        //        );
-        //        loader.forEach(activitiModules::add);
-
         JsonMapper mapper = JsonMapper.builder()
             .setDefaultTyping(
                 new DefaultTypeResolverBuilder(
@@ -177,7 +181,9 @@ public class OutboxAutoConfiguration {
             )
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
-            .addModules(activitiModules)
+            .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
+            .configure(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES, false)
+            .addModules(trustedOutboxJacksonModulesProvider.get())
             .addModules(messageModule)
             .build();
 
