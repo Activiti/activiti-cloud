@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.common.messaging.config.outbox;
+package org.activiti.cloud.common.messaging.outbox;
 
-import static org.activiti.cloud.common.messaging.config.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
+import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
 
 import java.util.Map;
 import java.util.stream.Collectors;
