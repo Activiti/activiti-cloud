@@ -24,7 +24,7 @@ import org.activiti.spring.AbstractActivitiSmartLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.cloud.stream.function.StreamOperations;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -52,7 +52,7 @@ public class OutboxChannelInterceptorFactory
     private final ChannelMessageStore channelMessageStore;
     private final PlatformTransactionManager transactionManager;
     private final IntegrationFlowContext integrationFlowContext;
-    private final ObjectProvider<StreamOperations> streamBridgeProvider;
+    private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry lockRegistry;
 
     private final Map<String, ChannelInterceptor> interceptorsMap = new ConcurrentHashMap<>();
@@ -62,7 +62,7 @@ public class OutboxChannelInterceptorFactory
         ChannelMessageStore channelMessageStore,
         PlatformTransactionManager transactionManager,
         IntegrationFlowContext integrationFlowContext,
-        ObjectProvider<StreamOperations> streamBridgeProvider,
+        ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry lockRegistry
     ) {
         this.channelMessageStore = channelMessageStore;
