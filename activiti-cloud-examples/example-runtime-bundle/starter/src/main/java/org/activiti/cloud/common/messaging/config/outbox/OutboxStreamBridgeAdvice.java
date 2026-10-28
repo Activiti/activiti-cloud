@@ -29,8 +29,6 @@ public class OutboxStreamBridgeAdvice implements MethodInterceptor {
         if ("send".equals(invocation.getMethod().getName())) {
             return Boolean.TRUE.equals(invocation.proceed()) || isNewOutboxDestination(invocation);
         }
-
-        // Route all other interface methods natively
         return invocation.proceed();
     }
 
