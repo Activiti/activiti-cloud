@@ -334,6 +334,9 @@ public class QueryAdminProcessServiceTasksIT {
                 .contains(tuple(SERVICE_TASK_TYPE, SERVICE_TASK_IMPLEMENTATION));
         });
     }
+
+    @Test
+    void shouldReturn400WhenGetServiceTasksByStatusWithInvalidStatus() {
         ResponseEntity<PagedModel<CloudServiceTask>> running = testRestTemplate.exchange(
             "/admin/v1/service-tasks?status={status}",
             HttpMethod.GET,
