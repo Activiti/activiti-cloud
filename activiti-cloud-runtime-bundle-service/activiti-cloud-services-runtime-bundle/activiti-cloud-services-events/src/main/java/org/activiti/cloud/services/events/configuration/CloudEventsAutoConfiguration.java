@@ -78,6 +78,7 @@ import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFac
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.engine.ManagementService;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.spring.process.ProcessExtensionService;
@@ -160,9 +161,14 @@ public class CloudEventsAutoConfiguration {
     @ConditionalOnMissingBean
     public ToCloudProcessRuntimeEventConverter toCloudProcessRuntimeEventConverter(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        ProcessAuditServiceInfoAppender processAuditServiceInfoAppender
+        ProcessAuditServiceInfoAppender processAuditServiceInfoAppender,
+        RepositoryService repositoryService
     ) {
-        return new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, processAuditServiceInfoAppender);
+        return new ToCloudProcessRuntimeEventConverter(
+            runtimeBundleInfoAppender,
+            processAuditServiceInfoAppender,
+            repositoryService
+        );
     }
 
     @Bean

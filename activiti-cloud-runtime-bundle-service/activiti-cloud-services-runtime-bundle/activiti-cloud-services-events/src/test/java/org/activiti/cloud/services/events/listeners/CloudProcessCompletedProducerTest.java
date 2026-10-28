@@ -29,6 +29,7 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.runtime.api.event.impl.ProcessCompletedImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,11 @@ class CloudProcessCompletedProducerTest {
     );
 
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
-        new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, processAuditServiceInfoAppender)
+        new ToCloudProcessRuntimeEventConverter(
+            runtimeBundleInfoAppender,
+            processAuditServiceInfoAppender,
+            mock(RepositoryService.class)
+        )
     );
 
     private ProcessEngineEventsAggregator eventsAggregator = spy(

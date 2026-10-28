@@ -21,6 +21,8 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
 
     private Integer integrationContextCounter;
 
+    private String type;
+
     @Override
     public Integer getIntegrationContextCounter() {
         return integrationContextCounter;
@@ -28,6 +30,15 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
 
     public void setIntegrationContextCounter(Integer integrationContextCounter) {
         this.integrationContextCounter = integrationContextCounter;
+    }
+
+    @Override
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
@@ -55,6 +66,8 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
         builder
             .append("CloudServiceTaskImpl [integrationContextCounter=")
             .append(integrationContextCounter)
+            .append(", type=")
+            .append(type)
             .append(", toString()=")
             .append(super.toString())
             .append("]");

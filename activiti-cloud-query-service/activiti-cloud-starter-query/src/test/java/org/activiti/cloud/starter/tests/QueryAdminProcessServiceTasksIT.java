@@ -95,6 +95,8 @@ public class QueryAdminProcessServiceTasksIT {
 
     private static final String SERVICE_TASK_TYPE = "serviceTask";
 
+    private static final String SERVICE_TASK_IMPLEMENTATION = "rest-connector.GET";
+
     private static final String PROC_URL = "/admin/v1/process-instances";
 
     private static final ParameterizedTypeReference<PagedModel<CloudServiceTask>> PAGED_TASKS_RESPONSE_TYPE =
@@ -310,7 +312,28 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    void shouldReturn400WhenGetServiceTasksByStatusWithInvalidStatus() {
+    public void shouldReturnServiceTaskType() {
+        //given
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+
+        //then
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                SERVICE_TASKS_URL,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .hasSize(1)
+                .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getType)
+                .contains(tuple(SERVICE_TASK_TYPE, SERVICE_TASK_IMPLEMENTATION));
+        });
+    }
         ResponseEntity<PagedModel<CloudServiceTask>> running = testRestTemplate.exchange(
             "/admin/v1/service-tasks?status={status}",
             HttpMethod.GET,
@@ -978,13 +1001,20 @@ public class QueryAdminProcessServiceTasksIT {
 
         BPMNActivityImpl activity = buildServiceTask(executionId, process);
 
+        CloudBPMNActivityStartedEventImpl serviceTaskStartedEvent = new CloudBPMNActivityStartedEventImpl(
+            activity,
+            processDefinitionId,
+            process.getId()
+        );
+        serviceTaskStartedEvent.setServiceTaskType(SERVICE_TASK_IMPLEMENTATION);
+
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(process),
             new CloudProcessStartedEventImpl(process),
             new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudSequenceFlowTakenEventImpl(sequenceFlow),
-            new CloudBPMNActivityStartedEventImpl(activity, processDefinitionId, process.getId())
+            serviceTaskStartedEvent
         );
 
         return process;
