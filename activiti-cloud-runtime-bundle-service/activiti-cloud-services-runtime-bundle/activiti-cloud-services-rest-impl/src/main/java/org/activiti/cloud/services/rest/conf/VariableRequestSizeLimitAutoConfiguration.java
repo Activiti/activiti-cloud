@@ -25,9 +25,8 @@ import org.springframework.context.annotation.Bean;
  * Auto-configuration that registers a {@link VariableRequestSizeLimitFilter} for process
  * and task variable endpoints.
  * <p>
- * The per-variable value size validation is handled by {@link VariableValueSizeValidationAdvice}
- * (a {@code @ControllerAdvice}) and {@link VariableValueSizeValidator} (a {@code @Component}),
- * which are picked up via component scanning.
+ * The per-variable value size validation is handled by {@link VariableValueSizeValidationAdvice},
+ * a self-contained {@code @ControllerAdvice} picked up via component scanning.
  * <p>
  * Configuration properties:
  * <ul>
