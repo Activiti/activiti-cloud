@@ -156,8 +156,9 @@ class VariableValueSizeValidatorTest {
 
         String largeValue = "x".repeat((int) MAX_NON_WHITELISTED_BYTES + 1);
 
-        assertThatThrownBy(() -> validator.validateSingle("var1", largeValue))
-            .isInstanceOf(VariableValueTooLargeException.class);
+        assertThatThrownBy(() -> validator.validateSingle("var1", largeValue)).isInstanceOf(
+            VariableValueTooLargeException.class
+        );
     }
 
     @Test
