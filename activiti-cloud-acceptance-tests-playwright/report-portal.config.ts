@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { reportPortalAbortController } from './rp-request-controller';
+
 const { env } = process;
 const environmentVariables = [
     'GITHUB_SERVER_URL',
@@ -87,6 +89,7 @@ export const getReportPortalConfig = () => {
             // Fail fast: with the client default (6 retries) a slow/unavailable ReportPortal can block the run for minutes
             timeout: 30 * 1000,
             retry: 2,
+            signal: reportPortalAbortController.signal,
         },
         attributes,
         description: `[${title}](${url})`,

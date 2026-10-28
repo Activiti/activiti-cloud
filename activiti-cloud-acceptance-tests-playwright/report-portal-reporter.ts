@@ -16,6 +16,8 @@
 
 import RPReporter from '@reportportal/agent-js-playwright';
 import type { TestCase, TestResult } from '@playwright/test/reporter';
+import { parseReportPortalOutput } from './rp-output-parser';
+import { reportPortalAbortController } from './rp-request-controller';
 
 const DEFAULT_FINISH_TIMEOUT_MS = 60 * 1000;
 
@@ -35,6 +37,7 @@ export default class ReportPortalReporter extends RPReporter {
     private readonly sendAllLogs = process.env.RP_SEND_ALL_LOGS === 'true';
     private readonly finishTimeoutMs = Number(process.env.RP_FINISH_TIMEOUT_MS) || DEFAULT_FINISH_TIMEOUT_MS;
     private readonly bufferedLogs = new Map<string, BufferedLog[]>();
+    private readonly stdoutCarry = new Map<string, string>();
 
     onTestBegin(test: TestCase): void {
         this.bufferedLogs.set(test.id, []);
@@ -42,12 +45,24 @@ export default class ReportPortalReporter extends RPReporter {
     }
 
     onStdOut(chunk: string | Buffer, test?: TestCase): void {
-        // ReportingApi events (attributes, description, status...) are sent through stdout as JSON and must not be buffered
-        if (!this.shouldBuffer(test) || isReportingApiEvent(chunk)) {
+        if (!this.shouldBuffer(test)) {
             super.onStdOut(chunk, test);
             return;
         }
-        this.bufferLog(test, 'INFO', String(chunk));
+
+        const output = `${this.stdoutCarry.get(test.id) ?? ''}${String(chunk)}`;
+        this.stdoutCarry.delete(test.id);
+        const parsed = parseReportPortalOutput(output);
+        for (const part of parsed.parts) {
+            if (part.type === 'event') {
+                super.onStdOut(part.value, test);
+            } else {
+                this.bufferLog(test, 'INFO', part.value);
+            }
+        }
+        if (parsed.carry) {
+            this.stdoutCarry.set(test.id, parsed.carry);
+        }
     }
 
     onStdErr(chunk: string | Buffer, test?: TestCase): void {
@@ -60,6 +75,11 @@ export default class ReportPortalReporter extends RPReporter {
     }
 
     async onTestEnd(test: TestCase, result: TestResult): Promise<void> {
+        const unfinishedOutput = this.stdoutCarry.get(test.id);
+        if (unfinishedOutput) {
+            this.bufferLog(test, 'INFO', unfinishedOutput);
+        }
+        this.stdoutCarry.delete(test.id);
         const logs = this.bufferedLogs.get(test.id) ?? [];
         this.bufferedLogs.delete(test.id);
         if (result.status !== test.expectedStatus) {
@@ -77,6 +97,7 @@ export default class ReportPortalReporter extends RPReporter {
         const outcome = await Promise.race([finish, timeout]);
         clearTimeout(timer);
         if (outcome === 'timeout') {
+            reportPortalAbortController.abort();
             console.warn(
                 `[ReportPortal] Launch was not finished within ${this.finishTimeoutMs}ms, not waiting any longer. The launch in ReportPortal may be incomplete.`,
             );
@@ -90,13 +111,5 @@ export default class ReportPortalReporter extends RPReporter {
     private bufferLog(test: TestCase, level: string, message: string): void {
         // Keep the original timestamp so the log timeline in ReportPortal matches the test execution
         this.bufferedLogs.get(test.id)?.push({ level, message, time: Date.now() });
-    }
-}
-
-function isReportingApiEvent(chunk: string | Buffer): boolean {
-    try {
-        return typeof JSON.parse(String(chunk))?.type === 'string';
-    } catch {
-        return false;
     }
 }
