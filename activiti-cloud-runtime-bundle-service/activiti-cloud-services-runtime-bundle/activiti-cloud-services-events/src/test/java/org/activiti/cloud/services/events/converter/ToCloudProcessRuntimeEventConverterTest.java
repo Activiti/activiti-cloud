@@ -23,16 +23,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.activiti.api.runtime.event.impl.BPMNActivityStartedEventImpl;
 import org.activiti.api.runtime.event.impl.BPMNSignalReceivedEventImpl;
+import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
+import org.activiti.cloud.api.process.model.events.ServiceTaskTypeAware;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.events.ActorConstants;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
@@ -65,6 +72,9 @@ class ToCloudProcessRuntimeEventConverterTest {
 
     @Mock
     private ExecutionEntity executionEntity;
+
+    @Mock
+    private RepositoryService repositoryService;
 
     private ProcessAuditServiceInfoAppender processAuditServiceInfoAppender = spy(
         new ProcessAuditServiceInfoAppender(() -> commandContext)
@@ -160,5 +170,58 @@ class ToCloudProcessRuntimeEventConverterTest {
         verify(this.processAuditServiceInfoAppender, never()).appendAuditServiceInfoTo(
             any(CloudProcessCompletedEventImpl.class)
         );
+    }
+
+    @Test
+    void should_setServiceTaskType_when_convertingStartedServiceTaskActivity() {
+        BPMNActivityImpl bpmnActivity = new BPMNActivityImpl("serviceTask1", "Service Task", "serviceTask");
+        bpmnActivity.setProcessDefinitionId("procDefId");
+        bpmnActivity.setProcessInstanceId("procInstId");
+        BPMNActivityStartedEventImpl startedEvent = new BPMNActivityStartedEventImpl(bpmnActivity);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        Process process = new Process();
+        ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setId("serviceTask1");
+        serviceTask.setImplementation("rest-connector.GET");
+        process.addFlowElement(serviceTask);
+        bpmnModel.addProcess(process);
+        when(repositoryService.getBpmnModel("procDefId")).thenReturn(bpmnModel);
+
+        ServiceTaskTypeAware cloudEvent = (ServiceTaskTypeAware) converter.from(startedEvent);
+
+        assertThat(cloudEvent.getServiceTaskType()).isEqualTo("rest-connector.GET");
+    }
+
+    @Test
+    void should_notSetServiceTaskType_when_activityIsNotServiceTask() {
+        BPMNActivityImpl bpmnActivity = new BPMNActivityImpl("userTask1", "User Task", "userTask");
+        bpmnActivity.setProcessDefinitionId("procDefId");
+        bpmnActivity.setProcessInstanceId("procInstId");
+        BPMNActivityStartedEventImpl startedEvent = new BPMNActivityStartedEventImpl(bpmnActivity);
+
+        ServiceTaskTypeAware cloudEvent = (ServiceTaskTypeAware) converter.from(startedEvent);
+
+        assertThat(cloudEvent.getServiceTaskType()).isNull();
+    }
+
+    @Test
+    void should_setNullServiceTaskType_when_serviceTaskHasNoImplementation() {
+        BPMNActivityImpl bpmnActivity = new BPMNActivityImpl("serviceTask1", "Service Task", "serviceTask");
+        bpmnActivity.setProcessDefinitionId("procDefId");
+        bpmnActivity.setProcessInstanceId("procInstId");
+        BPMNActivityStartedEventImpl startedEvent = new BPMNActivityStartedEventImpl(bpmnActivity);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        Process process = new Process();
+        ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setId("serviceTask1");
+        process.addFlowElement(serviceTask);
+        bpmnModel.addProcess(process);
+        when(repositoryService.getBpmnModel("procDefId")).thenReturn(bpmnModel);
+
+        ServiceTaskTypeAware cloudEvent = (ServiceTaskTypeAware) converter.from(startedEvent);
+
+        assertThat(cloudEvent.getServiceTaskType()).isNull();
     }
 }

@@ -21,7 +21,9 @@ import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.ServiceTaskTypeAware;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
@@ -39,6 +41,13 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
         bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));
         bpmnActivityEntity.setCompletedDate(null);
         bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
+
+        if (
+            bpmnActivityEntity instanceof ServiceTaskEntity serviceTaskEntity &&
+            event instanceof ServiceTaskTypeAware serviceTaskTypeAware
+        ) {
+            serviceTaskEntity.setType(serviceTaskTypeAware.getServiceTaskType());
+        }
 
         entityManager.persist(bpmnActivityEntity);
     }
