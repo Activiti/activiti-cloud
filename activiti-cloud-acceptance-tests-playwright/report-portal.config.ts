@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { timeouts } from './config/runtime/timeouts';
-
 const { env } = process;
 const environmentVariables = [
     'GITHUB_SERVER_URL',
@@ -86,7 +84,9 @@ export const getReportPortalConfig = () => {
         launch: `${env.REPORT_PORTAL_LAUNCH_KEY}`,
         includeTestSteps: false,
         restClientConfig: {
-            timeout: timeouts.test,
+            // Fail fast: with the client default (6 retries) a slow/unavailable ReportPortal can block the run for minutes
+            timeout: 30 * 1000,
+            retry: 2,
         },
         attributes,
         description: `[${title}](${url})`,
