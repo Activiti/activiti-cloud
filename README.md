@@ -32,6 +32,37 @@ Requires the following secrets to be set:
 | RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
 | SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
 
+## Consuming Activiti previews from Cloudsmith
+
+The Cloudsmith consumption trial uses Activiti `0.0.1-PR-5629-SNAPSHOT`, published
+by [Activiti PR #5629](https://github.com/Activiti/Activiti/pull/5629). All four
+`activiti.version` properties select this version. Keep the trial PR unmerged
+while these temporary preview dependencies are selected.
+
+Set the GitHub Actions variable `CLOUDSMITH_NAMESPACE` to `hyland`, either on this
+repository or at organization level with access granted to this repository.
+The existing `cloudsmith-auth` action derives the `activiti-activiti-cloud` OIDC
+service account, which needs read access to `activiti-snapshots`. It exports
+`CLOUDSMITH_USERNAME` and a short-lived `CLOUDSMITH_API_KEY` for subsequent Maven
+steps; no static Cloudsmith credential is required in GitHub secrets.
+
+The `cloudsmith-activiti-snapshots` mirror in `settings.xml` redirects the
+`activiti-snapshots` repository to
+`https://dl.cloudsmith.io/basic/${CLOUDSMITH_NAMESPACE}/activiti-snapshots/maven/`.
+Its server entry uses the exported credentials. Every CI job that runs Maven
+authenticates separately, including reusable build/test jobs, CodeQL, and
+dependency submission.
+
+The common Maven build also checks snapshot consumption with an empty local
+repository. It downloads `org.activiti:activiti-engine` at the configured Activiti
+version and verifies that Maven records `cloudsmith-activiti-snapshots` as the JAR's
+origin. This provides evidence of a Cloudsmith download even when the same preview
+exists in Nexus. Successful verification is written to the job summary.
+
+Consuming an Activiti preview does not require the `preview` label on this
+repository's PR. That label publishes an activiti-cloud preview for downstream
+consumers.
+
 ## Preview Propagation
 
 This repository includes an automated **Preview Propagation** mechanism for testing cross-module integration with downstream repositories like hxp-common-libraries. When working on features that span multiple modules:
