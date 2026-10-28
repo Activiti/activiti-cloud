@@ -15,20 +15,19 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
-import java.util.Collections;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.Environment;
 
 /**
  * Auto-configuration that registers a {@link VariableRequestSizeLimitFilter} for process
- * and task variable endpoints, and a {@link VariableValueSizeValidationAdvice} that validates
- * per-variable value sizes after deserialization.
+ * and task variable endpoints.
+ * <p>
+ * The per-variable value size validation is handled by {@link VariableValueSizeValidationAdvice}
+ * (a {@code @ControllerAdvice}) and {@link VariableValueSizeValidator} (a {@code @Component}),
+ * which are picked up via component scanning.
  * <p>
  * Configuration properties:
  * <ul>
@@ -49,11 +48,6 @@ public class VariableRequestSizeLimitAutoConfiguration {
      */
     private static final long DEFAULT_MAX_REQUEST_SIZE_BYTES = 5L * 1024 * 1024;
 
-    /**
-     * Default maximum combined size of non-whitelisted variable values: 8000 bytes.
-     */
-    private static final long DEFAULT_MAX_VARIABLE_VALUE_LENGTH = 8000;
-
     @Bean
     public FilterRegistrationBean<VariableRequestSizeLimitFilter> variableRequestSizeLimitFilterRegistration(
         @Value(
@@ -66,24 +60,5 @@ public class VariableRequestSizeLimitAutoConfiguration {
         registration.setOrder(1);
         registration.setName("variableRequestSizeLimitFilter");
         return registration;
-    }
-
-    @Bean
-    public VariableValueSizeValidator variableValueSizeValidator(
-        @Value(
-            "${activiti.cloud.services.variables.max-variable-value-length:" + DEFAULT_MAX_VARIABLE_VALUE_LENGTH + "}"
-        ) long maxVariableValueLength,
-        Environment environment
-    ) {
-        Set<String> whitelistedVariables = Binder.get(environment)
-            .bind("activiti.cloud.services.variables.whitelisted-variables", Set.class)
-            .orElse(Collections.emptySet());
-
-        return new VariableValueSizeValidator(maxVariableValueLength, whitelistedVariables);
-    }
-
-    @Bean
-    public VariableValueSizeValidationAdvice variableValueSizeValidationAdvice(VariableValueSizeValidator validator) {
-        return new VariableValueSizeValidationAdvice(validator);
     }
 }
