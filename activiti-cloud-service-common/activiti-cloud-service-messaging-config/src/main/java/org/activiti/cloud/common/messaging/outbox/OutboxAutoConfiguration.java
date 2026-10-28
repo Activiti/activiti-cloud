@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.common.messaging.config.outbox;
+package org.activiti.cloud.common.messaging.outbox;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
-import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
@@ -31,13 +30,17 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cloud.stream.binding.NewDestinationBindingCallback;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
@@ -45,6 +48,7 @@ import org.springframework.integration.jdbc.store.channel.ChannelMessageStoreQue
 import org.springframework.integration.jdbc.store.channel.H2ChannelMessageStoreQueryProvider;
 import org.springframework.integration.jdbc.store.channel.JsonChannelMessageStorePreparedStatementSetter;
 import org.springframework.integration.jdbc.store.channel.JsonMessageRowMapper;
+import org.springframework.integration.jdbc.store.channel.OracleChannelMessageStoreQueryProvider;
 import org.springframework.integration.jdbc.store.channel.PostgresChannelMessageStoreQueryProvider;
 import org.springframework.integration.message.AdviceMessage;
 import org.springframework.integration.store.ChannelMessageStore;
@@ -72,8 +76,9 @@ import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import tools.jackson.databind.jsontype.impl.DefaultTypeResolverBuilder;
 import tools.jackson.databind.module.SimpleModule;
 
-@AutoConfiguration(before = OutputBindingConfiguration.class, after = MessagesCoreAutoConfiguration.class)
-@ConditionalOnProperty(name = "alresco.process.runtime.outbox.enabled", matchIfMissing = true)
+@AutoConfiguration(before = OutputBindingConfiguration.class)
+@ConditionalOnProperty(name = "activiti.cloud.messaging.outbox.enabled")
+@ConditionalOnClass({ DataSource.class, JdbcChannelMessageStore.class })
 public class OutboxAutoConfiguration {
 
     @Bean
@@ -154,7 +159,7 @@ public class OutboxAutoConfiguration {
     @ConditionalOnMissingBean
     Supplier<JacksonJsonObjectMapper> outboxJsonObjectMapperProvider(
         @Value(
-            "${alresco.process.runtime.outbox.json.trusted-packages:org.activiti.api,org.activiti.cloud.api,com.alfresco,tools.jackson.databind.node,java.math,java.time}"
+            "${activiti.cloud.messaging.outbox.json.trusted-packages:org.activiti.api,org.activiti.cloud.api,com.alfresco,tools.jackson.databind.node,java.math,java.time}"
         ) String[] trustedPackages,
         Supplier<List<JacksonModule>> trustedOutboxJacksonModulesProvider
     ) {
@@ -199,7 +204,8 @@ public class OutboxAutoConfiguration {
     JdbcChannelMessageStore outboxChannelMessageStore(
         DataSource dataSource,
         Supplier<JacksonJsonObjectMapper> outboxJsonObjectMapperProvider,
-        ChannelMessageStoreQueryProvider channelMessageStoreQueryProvider
+        ChannelMessageStoreQueryProvider channelMessageStoreQueryProvider,
+        @Value("${activiti.cloud.messaging.outbox.region:${spring.application.name:default}}") String region
     ) {
         final var messageStore = new JdbcChannelMessageStore(dataSource);
         final var jsonObjectMapper = outboxJsonObjectMapperProvider.get();
@@ -209,7 +215,7 @@ public class OutboxAutoConfiguration {
         messageStore.setCheckDatabaseOnStart(true);
         messageStore.setPreparedStatementSetter(new JsonChannelMessageStorePreparedStatementSetter(jsonObjectMapper));
         messageStore.setMessageRowMapper(new JsonMessageRowMapper(jsonObjectMapper));
-        messageStore.setRegion("rb");
+        messageStore.setRegion(region);
 
         return messageStore;
     }
@@ -226,17 +232,9 @@ public class OutboxAutoConfiguration {
         return switch (databaseName.toLowerCase()) {
             case "postgresql" -> new PostgresChannelMessageStoreQueryProvider();
             case "h2" -> new H2ChannelMessageStoreQueryProvider();
+            case "oracle" -> new OracleChannelMessageStoreQueryProvider();
             default -> throw new IllegalArgumentException("Unsupported database type: " + databaseName);
         };
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "alresco.process.runtime.outbox.health.enabled", matchIfMissing = true)
-    OutboxHealthIndicator outboxHealthIndicator(
-        JdbcChannelMessageStore outboxQueueChannelMessageStore,
-        SmartLifecycleRoleController smartLifecycleRoleController
-    ) {
-        return new OutboxHealthIndicator(outboxQueueChannelMessageStore, smartLifecycleRoleController);
     }
 
     @Bean
@@ -244,9 +242,28 @@ public class OutboxAutoConfiguration {
         return new OutboxManager(smartLifecycleRoleController);
     }
 
-    @Bean
-    @ConditionalOnProperty(name = "alresco.process.runtime.outbox.actuator.enabled", matchIfMissing = true)
-    OutboxActuatorEndpoint outboxActuatorEndpoint(SmartLifecycleRoleController smartLifecycleRoleController) {
-        return new OutboxActuatorEndpoint(smartLifecycleRoleController);
+    @Configuration
+    @ConditionalOnClass({ Endpoint.class })
+    @ConditionalOnProperty(name = "activiti.cloud.messaging.outbox.actuator.enabled", matchIfMissing = true)
+    static class OutboxActuatorConfiguration {
+
+        @Bean
+        OutboxActuatorEndpoint outboxActuatorEndpoint(SmartLifecycleRoleController smartLifecycleRoleController) {
+            return new OutboxActuatorEndpoint(smartLifecycleRoleController);
+        }
+    }
+
+    @Configuration
+    @ConditionalOnClass({ HealthIndicator.class })
+    @ConditionalOnProperty(name = "activiti.cloud.messaging.outbox.health.enabled", matchIfMissing = true)
+    static class OutboxHealthIndicatorConfiguration {
+
+        @Bean
+        OutboxHealthIndicator outboxHealthIndicator(
+            JdbcChannelMessageStore outboxQueueChannelMessageStore,
+            SmartLifecycleRoleController smartLifecycleRoleController
+        ) {
+            return new OutboxHealthIndicator(outboxQueueChannelMessageStore, smartLifecycleRoleController);
+        }
     }
 }
