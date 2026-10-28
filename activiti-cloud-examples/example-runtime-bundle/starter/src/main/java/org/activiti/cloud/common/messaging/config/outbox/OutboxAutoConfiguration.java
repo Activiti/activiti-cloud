@@ -20,8 +20,6 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
@@ -37,7 +35,6 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
 import org.springframework.integration.jdbc.store.channel.ChannelMessageStoreQueryProvider;
@@ -60,10 +57,8 @@ import org.springframework.integration.support.json.MutableMessageJsonDeserializ
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.module.SimpleModule;
@@ -95,7 +90,7 @@ public class OutboxAutoConfiguration {
         );
     }
 
-    //@Bean
+    @Bean
     NewDestinationBindingCallback<Object> outboxDestinationBindingCallback(
         OutboxChannelInterceptorFactory outboxChannelInterceptorFactory
     ) {
@@ -120,46 +115,10 @@ public class OutboxAutoConfiguration {
             @Override
             public @Nullable Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (bean instanceof OutboxStreamBridge) {
-                    final var channelInterceptor = outboxChannelInterceptorFactory.apply("streamBridge", (m, c) ->
-                        m.getHeaders().get("streamBridgeOutbox", String.class)
-                    );
-
-                    final var messageChannel = new DirectChannel();
-
                     ProxyFactory factory = new ProxyFactory(bean);
                     factory.setProxyTargetClass(true); // Forces CGLIB subclass proxy
-                    factory.addAdvice(
-                        new MethodInterceptor() {
-                            @Override
-                            public Object invoke(MethodInvocation invocation) throws Throwable {
-                                // Filter exclusively for the "send" method
-                                if ("send".equals(invocation.getMethod().getName())) {
-                                    final var channelName = (String) invocation.getArguments()[0];
-                                    final var message =
-                                        invocation.getArguments()[1] instanceof Message<?> arg1
-                                            ? arg1
-                                            : MessageBuilder.withPayload(invocation.getArguments()[1]).build();
+                    factory.addAdvice(new OutboxStreamBridgeAdvice());
 
-                                    final var result = channelInterceptor.preSend(
-                                        MessageBuilder.fromMessage(message)
-                                            .setHeader("streamBridgeOutbox", channelName)
-                                            .build(),
-                                        messageChannel
-                                    );
-
-                                    if (result == null) {
-                                        return true;
-                                    } else {
-                                        // Execute the real send() method
-                                        return invocation.proceed();
-                                    }
-                                }
-
-                                // Route all other interface methods natively
-                                return invocation.proceed();
-                            }
-                        }
-                    );
                     return factory.getProxy();
                 }
 
