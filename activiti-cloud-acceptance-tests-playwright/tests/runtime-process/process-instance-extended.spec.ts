@@ -73,22 +73,26 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
                 processInstanceId,
                 ProcessInstanceStatus.COMPLETED
             );
+            console.log(`expect(${instance.status}).toBe(ProcessInstanceStatus.COMPLETED)`);
             expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
 
+        console.log(`for (const variableName of ${CONNECTOR_RESULT_VARIABLES})`);
         for (const variableName of CONNECTOR_RESULT_VARIABLES) {
             await activiti.step(`And a variable was created with name ${variableName}`, async () => {
                 const variable = await queryServiceTestUser.waitForVariable(processInstanceId, variableName);
+                console.log(`expect(${variable.name}).toBe(${variableName})`);
                 expect(variable.name).toBe(variableName);
             });
         }
 
         await activiti.step('And query process instance variable test_bigdecimal_variable_result has value 12345678.90', async () => {
-            const variable = await queryServiceTestUser.waitForProcessInstanceVariableValue(
+            const variable = await queryServiceTestUser.waitForVariable(
                 processInstanceId,
-                'test_bigdecimal_variable_result',
-                '12345678.90'
+                'test_bigdecimal_variable_result'
             );
+            console.log(`got ${variable}`);
+            console.log(`expect(String(${variable.value})).toBe('12345678.90')`);
             expect(String(variable.value)).toBe('12345678.90');
         });
     });
