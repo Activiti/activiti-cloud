@@ -16,7 +16,9 @@
 package org.activiti.services.connectors;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.activiti.cloud.common.messaging.config.IntegrationRequestExpirationSelector.REQUEST_DATE;
+import static org.activiti.cloud.common.messaging.config.IntegrationRequestExpirationSelector.TTL_SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -24,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -192,6 +195,31 @@ public class IntegrationRequestSenderTest {
             CONNECTOR_TYPE
         );
         assertThat(integrationRequestMessage.getHeaders().get(FUNCTION_DESTINATION)).isEqualTo(CONNECTOR_TYPE);
+        assertThat(integrationRequestMessage.getHeaders()).doesNotContainKeys(REQUEST_DATE, TTL_SECONDS);
+
+        TransactionSynchronizationManager.clear();
+    }
+
+    @Test
+    public void shouldSendExpirationHeaders() {
+        // given
+        Date requestDate = new Date(1_791_000_000_000L);
+        integrationRequest.setRequestDate(requestDate);
+        integrationRequest.setTtlSeconds(10800);
+        TransactionSynchronizationManager.initSynchronization();
+
+        //when
+        integrationRequestSender.sendIntegrationRequest(integrationRequest);
+
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+
+        //then
+        verify(streamBridge).send(eq(CONNECTOR_TYPE), integrationRequestMessageCaptor.capture());
+        Message<IntegrationRequest> integrationRequestMessage = integrationRequestMessageCaptor.getValue();
+
+        assertThat(integrationRequestMessage.getHeaders())
+            .containsEntry(REQUEST_DATE, requestDate.getTime())
+            .containsEntry(TTL_SECONDS, 10800);
 
         TransactionSynchronizationManager.clear();
     }
