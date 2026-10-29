@@ -672,6 +672,9 @@ limitations under the License.]]>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <deployAtEnd>false</deployAtEnd>
+            </configuration>
             <executions>
               <execution>
                 <id>deploy-cloudsmith</id>
