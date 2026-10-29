@@ -59,6 +59,7 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ErrorMessage;
@@ -217,9 +218,15 @@ public class FunctionRouterConfiguration {
                             new MessageTimeoutException(originalMessage, cause.getMessage(), cause)
                         )
                     )
-                    .ifPresentOrElse(ThrowingConsumer.of(this::throwException), () ->
-                        log.warn("Unresolved function router error message: {}", errorMessage)
-                    );
+                    .ifPresentOrElse(ThrowingConsumer.of(this::throwException), () -> {
+                        log.warn("Unresolved function router error message: {}", errorMessage);
+
+                        throw new MessageHandlingException(
+                            originalMessage,
+                            "Function router failed to deliver message to destination",
+                            errorMessage.getPayload()
+                        );
+                    });
             }
 
             @SuppressWarnings("java:S112")
