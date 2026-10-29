@@ -16,17 +16,13 @@
 package org.activiti.cloud.services.rest.conf;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.Set;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.bind.Bindable;
-import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -38,11 +34,14 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAd
  * <p>
  * This complements {@link VariableRequestSizeLimitFilter} (which enforces total request body
  * size at the servlet level) by adding per-variable content inspection at the application level.
+ * <p>
+ * Registered by {@link VariableRequestSizeLimitAutoConfiguration}. It enables its own
+ * {@link VariableSizeLimitProperties} so it can also start when picked up by component scanning
+ * (e.g. in {@code @WebMvcTest} slices) without that auto-configuration being present.
  */
 @ControllerAdvice
+@EnableConfigurationProperties(VariableSizeLimitProperties.class)
 public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter {
-
-    private static final long DEFAULT_MAX_VARIABLE_VALUE_LENGTH = 8000;
 
     private static final Set<Class<?>> SUPPORTED_PAYLOAD_TYPES = Set.of(
         SetProcessVariablesPayload.class,
@@ -53,23 +52,11 @@ public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter 
 
     private final VariableValueSizeValidator validator;
 
-    public VariableValueSizeValidationAdvice(
-        @Value(
-            "${activiti.cloud.services.variables.max-variable-value-length:" + DEFAULT_MAX_VARIABLE_VALUE_LENGTH + "}"
-        ) long maxVariableValueLength,
-        Environment environment
-    ) {
-        Set<String> whitelistedVariables = Binder.get(environment)
-            .bind("activiti.cloud.services.variables.whitelisted-variables", Bindable.setOf(String.class))
-            .orElse(Collections.emptySet());
-        this.validator = new VariableValueSizeValidator(maxVariableValueLength, whitelistedVariables);
-    }
-
-    /**
-     * Constructor for direct instantiation (e.g. in tests).
-     */
-    VariableValueSizeValidationAdvice(VariableValueSizeValidator validator) {
-        this.validator = validator;
+    public VariableValueSizeValidationAdvice(VariableSizeLimitProperties properties) {
+        this.validator = new VariableValueSizeValidator(
+            properties.getMaxVariableValueLength(),
+            properties.getWhitelistedVariables()
+        );
     }
 
     @Override
