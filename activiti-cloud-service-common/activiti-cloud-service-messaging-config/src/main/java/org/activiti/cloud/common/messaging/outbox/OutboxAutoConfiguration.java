@@ -15,11 +15,15 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import static org.springframework.integration.support.json.JacksonMessagingUtils.DEFAULT_TRUSTED_PACKAGES;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
-import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
@@ -50,30 +54,21 @@ import org.springframework.integration.jdbc.store.channel.JsonChannelMessageStor
 import org.springframework.integration.jdbc.store.channel.JsonMessageRowMapper;
 import org.springframework.integration.jdbc.store.channel.OracleChannelMessageStoreQueryProvider;
 import org.springframework.integration.jdbc.store.channel.PostgresChannelMessageStoreQueryProvider;
-import org.springframework.integration.message.AdviceMessage;
 import org.springframework.integration.store.ChannelMessageStore;
-import org.springframework.integration.support.MutableMessage;
 import org.springframework.integration.support.SmartLifecycleRoleController;
-import org.springframework.integration.support.json.AdviceMessageJsonDeserializer;
-import org.springframework.integration.support.json.ErrorMessageJsonDeserializer;
-import org.springframework.integration.support.json.GenericMessageJsonDeserializer;
 import org.springframework.integration.support.json.JacksonJsonObjectMapper;
 import org.springframework.integration.support.json.MessageHeadersJsonSerializer;
 import org.springframework.integration.support.json.MimeTypeJsonSerializer;
-import org.springframework.integration.support.json.MutableMessageJsonDeserializer;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.messaging.support.ErrorMessage;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.transaction.PlatformTransactionManager;
 import tools.jackson.databind.DefaultTyping;
 import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.JacksonModule;
-import tools.jackson.databind.cfg.JsonNodeFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import tools.jackson.databind.jsontype.impl.DefaultTypeResolverBuilder;
 import tools.jackson.databind.module.SimpleModule;
 
 @AutoConfiguration(before = OutputBindingConfiguration.class)
@@ -142,60 +137,37 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    Supplier<List<JacksonModule>> trustedOutboxJacksonModulesProvider(
-        List<JacksonModule> jacksonModules,
-        @Value("${alresco.process.runtime.outbox.json.trusted-modules:^map.*}") Pattern[] trustedModules
-    ) {
-        return () ->
-            jacksonModules
-                .stream()
-                .filter(it ->
-                    Stream.of(trustedModules).anyMatch(pattern -> pattern.matcher(it.getModuleName()).matches())
-                )
-                .toList();
-    }
-
-    @Bean
     @ConditionalOnMissingBean
     Supplier<JacksonJsonObjectMapper> outboxJsonObjectMapperProvider(
         @Value(
             "${activiti.cloud.messaging.outbox.json.trusted-packages:org.activiti.api,org.activiti.cloud.api,com.alfresco,tools.jackson.databind.node,java.math,java.time}"
-        ) String[] trustedPackages,
-        Supplier<List<JacksonModule>> trustedOutboxJacksonModulesProvider
+        ) String[] trustedPackages
     ) {
-        final var genericMessageDeserializer = new GenericMessageJsonDeserializer();
-        final var errorMessageDeserializer = new ErrorMessageJsonDeserializer();
-        final var adviceMessageDeserializer = new AdviceMessageJsonDeserializer();
-        final var mutableMessageDeserializer = new MutableMessageJsonDeserializer();
-
         final var messageModule = new SimpleModule("MessageModule")
             .addSerializer(new MessageHeadersJsonSerializer())
-            .addSerializer(new MimeTypeJsonSerializer())
-            .addDeserializer(GenericMessage.class, genericMessageDeserializer)
-            .addDeserializer(ErrorMessage.class, errorMessageDeserializer)
-            .addDeserializer(AdviceMessage.class, adviceMessageDeserializer)
-            .addDeserializer(MutableMessage.class, mutableMessageDeserializer);
+            .addSerializer(new MimeTypeJsonSerializer());
 
-        JsonMapper mapper = JsonMapper.builder()
-            .setDefaultTyping(
-                new DefaultTypeResolverBuilder(
-                    BasicPolymorphicTypeValidator.builder().allowIfSubType(Object.class).build(),
-                    DefaultTyping.NON_FINAL,
-                    JsonTypeInfo.As.PROPERTY
-                )
+        final var basicPolymorphicTypeValidator = BasicPolymorphicTypeValidator.builder()
+            .allowIfBaseType(Message.class)
+            .allowIfSubTypeIsArray()
+            .allowSubTypesWithExplicitDeserializer();
+
+        Stream.concat(DEFAULT_TRUSTED_PACKAGES.stream(), Stream.of(trustedPackages)).forEach(
+            basicPolymorphicTypeValidator::allowIfSubType
+        );
+
+        var mapper = JsonMapper.builder()
+            .activateDefaultTyping(
+                basicPolymorphicTypeValidator.build(),
+                DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
             )
+            .changeDefaultVisibility(v -> v.withCreatorVisibility(JsonAutoDetect.Visibility.NON_PRIVATE))
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
-            .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
-            .configure(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES, false)
-            .addModules(trustedOutboxJacksonModulesProvider.get())
+            .addMixIn(GenericMessage.class, OutboxAutoConfiguration.GenericMessageMixIn.class)
             .addModules(messageModule)
             .build();
-
-        genericMessageDeserializer.setMapper(mapper);
-        errorMessageDeserializer.setMapper(mapper);
-        adviceMessageDeserializer.setMapper(mapper);
-        mutableMessageDeserializer.setMapper(mapper);
 
         return () -> new JacksonJsonObjectMapper(mapper);
     }
@@ -265,5 +237,14 @@ public class OutboxAutoConfiguration {
         ) {
             return new OutboxHealthIndicator(outboxQueueChannelMessageStore, smartLifecycleRoleController);
         }
+    }
+
+    public abstract static class GenericMessageMixIn {
+
+        @JsonCreator
+        public GenericMessageMixIn(
+            @JsonProperty("payload") Object payload,
+            @JsonProperty("headers") Map<String, Object> headers
+        ) {}
     }
 }
