@@ -47,6 +47,50 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet id="spring-integration" author="runtime-bundle" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <not>
+        <and>
+          <!-- Tables -->
+          <tableExists tableName="INT_MESSAGE"/>
+          <tableExists tableName="INT_GROUP_TO_MESSAGE"/>
+          <tableExists tableName="INT_MESSAGE_GROUP"/>
+          <tableExists tableName="INT_LOCK"/>
+          <tableExists tableName="INT_CHANNEL_MESSAGE"/>
+          <tableExists tableName="INT_METADATA_STORE"/>
+          <!-- Sequence -->
+          <sequenceExists sequenceName="INT_MESSAGE_SEQ"/>
+          <!-- Indexes -->
+          <indexExists tableName="INT_MESSAGE" indexName="INT_MESSAGE_IX1"/>
+          <indexExists tableName="INT_CHANNEL_MESSAGE" indexName="INT_CHANNEL_MSG_DELETE_IDX"/>
+        </and>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/spring-integration.pg.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet id="spring-integration-7-upgrade" author="runtime-bundle" dbms="postgresql">
+    <preConditions onFail="CONTINUE">
+      <and>
+        <tableExists tableName="INT_LOCK"/>
+        <not>
+          <columnExists tableName="INT_LOCK" columnName="EXPIRED_AFTER"/>
+        </not>
+      </and>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/spring-integration-7-upgrade.pg.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
   <changeSet id="alter-int-channel-message-jsonb" author="runtime-bundle" dbms="postgresql">
     <sqlFile dbms="postgresql"
              encoding="utf8"
