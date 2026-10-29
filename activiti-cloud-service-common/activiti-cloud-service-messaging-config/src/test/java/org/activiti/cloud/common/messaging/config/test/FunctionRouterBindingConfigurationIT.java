@@ -315,9 +315,9 @@ public class FunctionRouterBindingConfigurationIT {
                                 .until(() -> Thread.currentThread().isInterrupted());
                         } catch (ConditionTimeoutException e) {
                             throw new IllegalStateException(new TimeoutException("timeout waiting for interrupt"));
+                        } finally {
+                            isInterrupted.set(Thread.currentThread().isInterrupted());
                         }
-
-                        isInterrupted.set(Thread.currentThread().isInterrupted());
                     },
                     () -> {
                         throw new RuntimeException("optimistic locking exception");
