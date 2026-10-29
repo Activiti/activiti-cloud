@@ -18,14 +18,11 @@ package org.activiti.cloud.api.process.model.impl.events;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
-import org.activiti.cloud.api.process.model.events.ServiceTaskTypeAware;
 
 public class CloudBPMNActivityStartedEventImpl
     extends CloudBPMNActivityEventImpl
-    implements CloudBPMNActivityStartedEvent, ServiceTaskTypeAware
+    implements CloudBPMNActivityStartedEvent
 {
-
-    private String serviceTaskType;
 
     public CloudBPMNActivityStartedEventImpl() {}
 
@@ -45,15 +42,6 @@ public class CloudBPMNActivityStartedEventImpl
         String processInstanceId
     ) {
         super(id, timestamp, entity, processDefinitionId, processInstanceId);
-    }
-
-    @Override
-    public String getServiceTaskType() {
-        return serviceTaskType;
-    }
-
-    public void setServiceTaskType(String serviceTaskType) {
-        this.serviceTaskType = serviceTaskType;
     }
 
     @Override

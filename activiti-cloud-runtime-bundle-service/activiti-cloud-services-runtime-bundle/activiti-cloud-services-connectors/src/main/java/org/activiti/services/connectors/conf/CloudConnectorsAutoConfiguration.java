@@ -46,8 +46,10 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationCompletion
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
+import org.activiti.services.connectors.enricher.ServiceTaskTypeIntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -233,5 +235,13 @@ public class CloudConnectorsAutoConfiguration {
             integrationRequestBuilder,
             integrationContextEnrichers
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceTaskTypeIntegrationContextEnricher serviceTaskTypeIntegrationContextEnricher(
+        ProcessExtensionService processExtensionService
+    ) {
+        return new ServiceTaskTypeIntegrationContextEnricher(processExtensionService);
     }
 }

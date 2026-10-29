@@ -95,7 +95,9 @@ public class QueryAdminProcessServiceTasksIT {
 
     private static final String SERVICE_TASK_TYPE = "serviceTask";
 
-    private static final String SERVICE_TASK_IMPLEMENTATION = "rest-connector.GET";
+    private static final String SERVICE_TASK_TYPE_LABEL = "Rest Connector: GET";
+
+    private static final String DEFAULT_SERVICE_TASK_TYPE = "ServiceTask";
 
     private static final String PROC_URL = "/admin/v1/process-instances";
 
@@ -312,7 +314,7 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    public void shouldReturnServiceTaskType() {
+    public void shouldReturnDefaultServiceTaskTypeWhenNoTypeInformation() {
         //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
@@ -330,8 +332,41 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
                 .hasSize(1)
-                .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getType)
-                .contains(tuple(SERVICE_TASK_TYPE, SERVICE_TASK_IMPLEMENTATION));
+                .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getServiceTaskType)
+                .contains(tuple(SERVICE_TASK_TYPE, DEFAULT_SERVICE_TASK_TYPE));
+        });
+    }
+
+    @Test
+    public void shouldReturnServiceTaskTypeFromIntegrationRequest() {
+        //given
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        CloudServiceTask serviceTask = waitForServiceTask(BPMNActivityStatus.STARTED);
+
+        IntegrationContextImpl integrationContext = buildIntegrationContext(
+            process,
+            serviceTask.getProcessInstanceId(),
+            serviceTask
+        );
+        integrationContext.setServiceTaskType(SERVICE_TASK_TYPE_LABEL);
+        sendIntegrationRequestedEvent(integrationContext);
+
+        //then
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                SERVICE_TASKS_URL,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .hasSize(1)
+                .extracting(CloudServiceTask::getServiceTaskType)
+                .containsExactly(SERVICE_TASK_TYPE_LABEL);
         });
     }
 
@@ -1004,20 +1039,13 @@ public class QueryAdminProcessServiceTasksIT {
 
         BPMNActivityImpl activity = buildServiceTask(executionId, process);
 
-        CloudBPMNActivityStartedEventImpl serviceTaskStartedEvent = new CloudBPMNActivityStartedEventImpl(
-            activity,
-            processDefinitionId,
-            process.getId()
-        );
-        serviceTaskStartedEvent.setServiceTaskType(SERVICE_TASK_IMPLEMENTATION);
-
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(process),
             new CloudProcessStartedEventImpl(process),
             new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudSequenceFlowTakenEventImpl(sequenceFlow),
-            serviceTaskStartedEvent
+            new CloudBPMNActivityStartedEventImpl(activity, processDefinitionId, process.getId())
         );
 
         return process;

@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.events.converter;
 
-import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
 import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
 import org.activiti.api.process.model.events.BPMNActivityStartedEvent;
@@ -41,9 +40,6 @@ import org.activiti.api.process.runtime.events.ProcessResumedEvent;
 import org.activiti.api.process.runtime.events.ProcessStartedEvent;
 import org.activiti.api.process.runtime.events.ProcessSuspendedEvent;
 import org.activiti.api.process.runtime.events.ProcessUpdatedEvent;
-import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowElement;
-import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
@@ -94,7 +90,6 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
-import org.activiti.engine.RepositoryService;
 
 public class ToCloudProcessRuntimeEventConverter {
 
@@ -102,16 +97,12 @@ public class ToCloudProcessRuntimeEventConverter {
 
     private final ProcessAuditServiceInfoAppender processAuditServiceInfoAppender;
 
-    private final RepositoryService repositoryService;
-
     public ToCloudProcessRuntimeEventConverter(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        ProcessAuditServiceInfoAppender processAuditServiceInfoAppender,
-        RepositoryService repositoryService
+        ProcessAuditServiceInfoAppender processAuditServiceInfoAppender
     ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.processAuditServiceInfoAppender = processAuditServiceInfoAppender;
-        this.repositoryService = repositoryService;
     }
 
     public CloudProcessStartedEvent from(ProcessStartedEvent event) {
@@ -172,24 +163,8 @@ public class ToCloudProcessRuntimeEventConverter {
             event.getEntity().getProcessDefinitionId(),
             event.getEntity().getProcessInstanceId()
         );
-        cloudEvent.setServiceTaskType(resolveServiceTaskType(event.getEntity()));
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
-    }
-
-    private String resolveServiceTaskType(BPMNActivity bpmnActivity) {
-        if (!"serviceTask".equals(bpmnActivity.getActivityType())) {
-            return null;
-        }
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(bpmnActivity.getProcessDefinitionId());
-        if (bpmnModel == null) {
-            return null;
-        }
-        FlowElement flowElement = bpmnModel.getFlowElement(bpmnActivity.getElementId());
-        if (flowElement instanceof ServiceTask serviceTask) {
-            return serviceTask.getImplementation();
-        }
-        return null;
     }
 
     public CloudBPMNActivityCompletedEvent from(BPMNActivityCompletedEvent event) {

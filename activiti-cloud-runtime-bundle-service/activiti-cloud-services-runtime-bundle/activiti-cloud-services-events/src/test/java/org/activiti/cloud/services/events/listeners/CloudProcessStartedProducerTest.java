@@ -32,7 +32,6 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
@@ -67,11 +66,7 @@ class CloudProcessStartedProducerTest {
     );
 
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
-        new ToCloudProcessRuntimeEventConverter(
-            runtimeBundleInfoAppender,
-            processAuditServiceInfoAppender,
-            mock(RepositoryService.class)
-        )
+        new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, processAuditServiceInfoAppender)
     );
 
     private ProcessEngineEventsAggregator eventsAggregator = spy(
