@@ -194,7 +194,7 @@
     <project.year>2026</project.year>
     <jacoco-report-dir-suffix></jacoco-report-dir-suffix>
 
-    <spring-boot.version>4.0.7</spring-boot.version>
+    <spring-boot.version>4.0.8</spring-boot.version>
     <!-- Pin spring-amqp to 4.0.3 to avoid x-queue-leader-locator regression (spring-projects/spring-amqp#3478).
          Remove when upgrading to Spring AMQP 4.0.5+ or 4.1.1+ which contains the fix. -->
     <spring-amqp.version>4.0.3</spring-amqp.version>
