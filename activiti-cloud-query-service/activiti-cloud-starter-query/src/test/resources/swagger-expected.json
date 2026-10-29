@@ -5208,7 +5208,7 @@
             "format" : "int32"
           }
         }, {
-          "name" : "type",
+          "name" : "serviceTaskType",
           "in" : "query",
           "schema" : {
             "type" : "string"
@@ -6167,7 +6167,7 @@
             "format" : "int32"
           }
         }, {
-          "name" : "type",
+          "name" : "serviceTaskType",
           "in" : "query",
           "schema" : {
             "type" : "string"
@@ -9273,7 +9273,7 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "type" : {
+          "serviceTaskType" : {
             "type" : "string"
           },
           "id" : {
@@ -9442,6 +9442,9 @@
             "type" : "string"
           },
           "connectorType" : {
+            "type" : "string"
+          },
+          "serviceTaskType" : {
             "type" : "string"
           },
           "outBoundVariables" : {
