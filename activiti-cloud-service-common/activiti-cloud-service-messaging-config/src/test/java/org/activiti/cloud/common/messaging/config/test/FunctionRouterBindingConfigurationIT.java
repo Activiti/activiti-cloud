@@ -69,6 +69,7 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -307,10 +308,14 @@ public class FunctionRouterBindingConfigurationIT {
             return message -> {
                 Optional.ofNullable(message.getHeaders().get("timeout", Duration.class)).ifPresentOrElse(
                     timeout -> {
-                        await()
-                            .atMost(timeout)
-                            .pollInSameThread()
-                            .until(() -> Thread.currentThread().isInterrupted());
+                        try {
+                            await()
+                                .atMost(timeout)
+                                .pollInSameThread()
+                                .until(() -> Thread.currentThread().isInterrupted());
+                        } catch (ConditionTimeoutException e) {
+                            throw new IllegalStateException(new TimeoutException("timeout waiting for interrupt"));
+                        }
 
                         isInterrupted.set(Thread.currentThread().isInterrupted());
                     },
@@ -678,6 +683,33 @@ public class FunctionRouterBindingConfigurationIT {
             assertThat(errorMessageCaptor.getValue()).extracting(ErrorMessage::getOriginalMessage).isNotNull();
             assertThat(exceptionCaptor.getException()).isInstanceOf(MessageTimeoutException.class);
             assertThat(isInterrupted.get()).isTrue();
+
+            verify(errorMessageConsumer, never()).accept(any(ErrorMessage.class));
+        });
+    }
+
+    @Test
+    void messageTimeoutExceptionBeforeInterrupt() {
+        withRequestTimeout(Duration.ofSeconds(2), () -> {
+            // given
+            Message<String> message = MessageBuilder.withPayload("Test")
+                .setHeader(FUNCTION_DESTINATION, "integration-requests")
+                .setHeader("timeout", Duration.ofSeconds(1))
+                .build();
+
+            ExceptionCaptor<RuntimeException> exceptionCaptor = new ExceptionCaptor<>();
+            ArgumentCaptor<ErrorMessage> errorMessageCaptor = ArgumentCaptor.forClass(ErrorMessage.class);
+            doAnswer(exceptionCaptor).when(functionRouterErrorMessageHandler).accept(errorMessageCaptor.capture());
+
+            // when
+            assertThatThrownBy(() -> input.send(message, "integration-requests"))
+                .isInstanceOf(MessageTimeoutException.class)
+                .hasCauseInstanceOf(TimeoutException.class)
+                .isNotNull();
+
+            assertThat(errorMessageCaptor.getValue()).extracting(ErrorMessage::getOriginalMessage).isNotNull();
+            assertThat(exceptionCaptor.getException()).isInstanceOf(MessageTimeoutException.class);
+            assertThat(isInterrupted.get()).isFalse();
 
             verify(errorMessageConsumer, never()).accept(any(ErrorMessage.class));
         });
