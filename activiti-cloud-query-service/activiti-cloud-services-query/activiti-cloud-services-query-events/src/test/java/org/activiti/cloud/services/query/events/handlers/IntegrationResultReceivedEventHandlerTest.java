@@ -152,6 +152,14 @@ class IntegrationResultReceivedEventHandlerTest {
         assertThat(handler.getHandledEvent()).isEqualTo(INTEGRATION_RESULT_RECEIVED.name());
     }
 
+    @Test
+    void should_exposeServiceTaskType_when_setOnIntegrationContextEntity() {
+        IntegrationContextEntity entity = buildIntegrationContextEntity();
+        entity.setServiceTaskType("Rest Connector: GET");
+
+        assertThat(entity.getServiceTaskType()).isEqualTo("Rest Connector: GET");
+    }
+
     private IntegrationContextImpl buildIntegrationContext() {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setId(INTEGRATION_CONTEXT_ID);

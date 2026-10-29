@@ -315,31 +315,13 @@ public class QueryAdminProcessServiceTasksIT {
 
     @Test
     public void shouldReturnDefaultServiceTaskTypeWhenNoTypeInformation() {
-        //given
-        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        sendEventsForStartSimpleProcessInstance();
 
-        //then
-        await().untilAsserted(() -> {
-            //when
-            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                SERVICE_TASKS_URL,
-                HttpMethod.GET,
-                identityTokenProducer.entityWithAuthorizationHeader(),
-                PAGED_TASKS_RESPONSE_TYPE
-            );
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isNotNull();
-            assertThat(responseEntity.getBody().getContent())
-                .hasSize(1)
-                .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getServiceTaskType)
-                .contains(tuple(SERVICE_TASK_TYPE, DEFAULT_SERVICE_TASK_TYPE));
-        });
+        awaitServiceTaskType(DEFAULT_SERVICE_TASK_TYPE);
     }
 
     @Test
     public void shouldReturnServiceTaskTypeFromIntegrationRequest() {
-        //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
         CloudServiceTask serviceTask = waitForServiceTask(BPMNActivityStatus.STARTED);
 
@@ -351,22 +333,23 @@ public class QueryAdminProcessServiceTasksIT {
         integrationContext.setServiceTaskType(SERVICE_TASK_TYPE_LABEL);
         sendIntegrationRequestedEvent(integrationContext);
 
-        //then
+        awaitServiceTaskType(SERVICE_TASK_TYPE_LABEL);
+    }
+
+    private void awaitServiceTaskType(String expectedServiceTaskType) {
         await().untilAsserted(() -> {
-            //when
             ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
                 SERVICE_TASKS_URL,
                 HttpMethod.GET,
                 identityTokenProducer.entityWithAuthorizationHeader(),
                 PAGED_TASKS_RESPONSE_TYPE
             );
-            //then
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
                 .hasSize(1)
                 .extracting(CloudServiceTask::getServiceTaskType)
-                .containsExactly(SERVICE_TASK_TYPE_LABEL);
+                .containsExactly(expectedServiceTaskType);
         });
     }
 
