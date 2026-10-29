@@ -392,6 +392,10 @@ jobs:
       && needs.maven-build-common.result == 'success'
       && needs.maven-build.result == 'success'
       && needs.maven-build-dependencies-bom.result == 'success'
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -404,6 +408,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+          cloudsmith-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
   publish:
     runs-on: ubuntu-latest
@@ -432,6 +437,10 @@ jobs:
         )
         || needs.pre-checks.outputs.skip-tests == 'true'
       )
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -444,6 +453,7 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+          cloudsmith-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
   propagate-maven:
     runs-on: ubuntu-latest

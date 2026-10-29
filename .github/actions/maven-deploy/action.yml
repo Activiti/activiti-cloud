@@ -1,5 +1,5 @@
 name: Maven deploy
-description: Deploys Maven artifacts to Nexus for the checked-out project.
+description: Deploys Maven artifacts to Nexus and Cloudsmith for the checked-out project.
 
 inputs:
   version:
@@ -14,11 +14,15 @@ inputs:
   nexus-password:
     description: Nexus password used for deployment.
     required: true
+  cloudsmith-namespace:
+    description: Cloudsmith organization namespace.
+    required: true
 
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+    - name: Deploy to Nexus
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
       env:
         MAVEN_USERNAME: ${{ inputs.nexus-username }}
         MAVEN_PASSWORD: ${{ inputs.nexus-password }}
@@ -32,9 +36,29 @@ runs:
           -Dmaven.wagon.http.pool=false
           -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
 
+    - name: Authenticate with Cloudsmith
+      uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+      with:
+        oidc-namespace: ${{ inputs.cloudsmith-namespace }}
+        verify-auth: "true"
+
+    - name: Deploy to Cloudsmith
+      shell: bash
+      run: >-
+        mvn --batch-mode deploy '-Pcloudsmith,!alfresco,!attach-sources'
+        -Daether.connector.basic.upstreamThreads.cloudsmith=10
+        -DskipTests -DskipITs -Dskip.common.tests=true -Ddocker.skip
+        ${{ env.MAVEN_CLI_OPTS }}
+      env:
+        MAVEN_ARGS: ""
+        MAVEN_CLI_OPTS: --show-version --settings settings.xml
+        MAVEN_USERNAME: ${{ inputs.nexus-username }}
+        MAVEN_PASSWORD: ${{ inputs.nexus-password }}
+        CLOUDSMITH_NAMESPACE: ${{ inputs.cloudsmith-namespace }}
+
     - name: Publish deployed version to job summary
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
       run: |
-        echo "## Built version: $VERSION" >> "$GITHUB_STEP_SUMMARY"
+        echo "## Published version: $VERSION" >> "$GITHUB_STEP_SUMMARY"
