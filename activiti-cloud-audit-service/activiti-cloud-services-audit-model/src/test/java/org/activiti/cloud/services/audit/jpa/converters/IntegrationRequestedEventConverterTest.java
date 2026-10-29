@@ -38,4 +38,12 @@ class IntegrationRequestedEventConverterTest {
         CloudRuntimeEventImpl<?, ?> apiEvent = integrationRequestedEventConverter.createAPIEvent(eventEntity);
         assertThat(apiEvent.getTimestamp()).isEqualTo(event.getTimestamp());
     }
+
+    @Test
+    void should_exposeServiceTaskType_when_setOnIntegrationContext() {
+        CloudIntegrationContextImpl integrationContext = new CloudIntegrationContextImpl();
+        integrationContext.setServiceTaskType("Rest Connector: GET");
+
+        assertThat(integrationContext.getServiceTaskType()).isEqualTo("Rest Connector: GET");
+    }
 }
