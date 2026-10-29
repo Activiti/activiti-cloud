@@ -21,25 +21,29 @@ import static org.mockito.Mockito.mock;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 class TaskControllerLoggingHelperTest {
 
+    private LoggerContext loggerContext;
     private Logger testLogger;
     private ListAppender<ILoggingEvent> listAppender;
 
     @BeforeEach
     void setUp() {
-        testLogger = (Logger) LoggerFactory.getLogger("test." + TaskControllerLoggingHelperTest.class.getName());
+        loggerContext = new LoggerContext();
+        loggerContext.start();
+        testLogger = loggerContext.getLogger("test." + TaskControllerLoggingHelperTest.class.getName());
         testLogger.setAdditive(false);
         listAppender = new ListAppender<>();
+        listAppender.setContext(loggerContext);
         listAppender.start();
         testLogger.addAppender(listAppender);
     }
@@ -47,6 +51,8 @@ class TaskControllerLoggingHelperTest {
     @AfterEach
     void tearDown() {
         testLogger.detachAppender(listAppender);
+        listAppender.stop();
+        loggerContext.stop();
         SecurityContextHolder.clearContext();
     }
 
