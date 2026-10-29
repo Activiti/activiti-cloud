@@ -17,18 +17,22 @@ package org.activiti.services.connectors;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 
+import java.util.Optional;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.IllegalTransactionStateException;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public class IntegrationRequestSender {
 
     public static final String CONNECTOR_TYPE = "connectorType";
+    private static final Logger log = LoggerFactory.getLogger(IntegrationRequestSender.class);
 
     private final StreamOperations streamBridge;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
@@ -49,17 +53,14 @@ public class IntegrationRequestSender {
             throw new IllegalTransactionStateException("Transaction synchronization must be active.");
         }
 
-        TransactionSynchronizationManager.registerSynchronization(
-            new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    streamBridge.send(
-                        event.getIntegrationContext().getConnectorType(),
-                        buildIntegrationRequestMessage(event)
-                    );
+        Optional.ofNullable(event.getIntegrationContext())
+            .map(IntegrationContext::getConnectorType)
+            .ifPresentOrElse(
+                connectorType -> streamBridge.send(connectorType, buildIntegrationRequestMessage(event)),
+                () -> {
+                    log.warn("Unresolved connectorType for integration request {}", event);
                 }
-            }
-        );
+            );
     }
 
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
