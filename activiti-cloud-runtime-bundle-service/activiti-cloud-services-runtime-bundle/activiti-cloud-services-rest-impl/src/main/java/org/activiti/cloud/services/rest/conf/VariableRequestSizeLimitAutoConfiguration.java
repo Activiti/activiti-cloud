@@ -15,46 +15,41 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 /**
- * Auto-configuration that registers a {@link VariableRequestSizeLimitFilter} for process
- * and task variable endpoints.
+ * Auto-configuration for variable size limits on process and task variable endpoints.
  * <p>
- * The per-variable value size validation is handled by {@link VariableValueSizeValidationAdvice},
- * a self-contained {@code @ControllerAdvice} picked up via component scanning.
+ * Registers a {@link VariableRequestSizeLimitFilter}, which enforces the total request body size,
+ * and imports {@link VariableValueSizeValidationAdvice}, which enforces the combined size of
+ * non-whitelisted variable values after deserialization.
  * <p>
- * Configuration properties:
+ * Configured through {@link VariableSizeLimitProperties} ({@code activiti.cloud.services.variables.*}):
  * <ul>
- *   <li>{@code activiti.cloud.services.variables.max-request-size-bytes} — maximum total
- *       request body size (default: 5 MB)</li>
- *   <li>{@code activiti.cloud.services.variables.max-variable-value-length} — maximum combined
- *       size of non-whitelisted variable values (default: 8000 bytes)</li>
- *   <li>{@code activiti.cloud.services.variables.whitelisted-variables} — comma-separated list
- *       of variable names exempt from the per-variable size limit</li>
+ *   <li>{@code max-request-size-bytes} — maximum total request body size (default: 5 MB)</li>
+ *   <li>{@code max-variable-value-length} — maximum combined size of non-whitelisted variable
+ *       values (default: 8000 bytes)</li>
+ *   <li>{@code whitelisted-variables} — comma-separated list of variable names exempt from the
+ *       per-variable size limit</li>
  * </ul>
  */
 @AutoConfiguration
 @ConditionalOnWebApplication
+@EnableConfigurationProperties(VariableSizeLimitProperties.class)
+@Import(VariableValueSizeValidationAdvice.class)
 public class VariableRequestSizeLimitAutoConfiguration {
-
-    /**
-     * Default maximum request body size: 5 MB.
-     */
-    private static final long DEFAULT_MAX_REQUEST_SIZE_BYTES = 5L * 1024 * 1024;
 
     @Bean
     public FilterRegistrationBean<VariableRequestSizeLimitFilter> variableRequestSizeLimitFilterRegistration(
-        @Value(
-            "${activiti.cloud.services.variables.max-request-size-bytes:" + DEFAULT_MAX_REQUEST_SIZE_BYTES + "}"
-        ) long maxRequestSizeBytes
+        VariableSizeLimitProperties properties
     ) {
         FilterRegistrationBean<VariableRequestSizeLimitFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new VariableRequestSizeLimitFilter(maxRequestSizeBytes));
+        registration.setFilter(new VariableRequestSizeLimitFilter(properties.getMaxRequestSizeBytes()));
         registration.addUrlPatterns("/*");
         registration.setOrder(1);
         registration.setName("variableRequestSizeLimitFilter");
