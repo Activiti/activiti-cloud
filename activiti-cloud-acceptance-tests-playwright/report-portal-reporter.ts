@@ -21,7 +21,7 @@ import { reportPortalAbortController } from './rp-request-controller';
 import { gateReportPortalRequests, type RestClientLike } from './rp-request-gate';
 
 const DEFAULT_FINISH_TIMEOUT_MS = 60 * 1000;
-const DEFAULT_MAX_CONCURRENT_REQUESTS = 10;
+const DEFAULT_MAX_CONCURRENT_REQUESTS = 50;
 const DEFAULT_START_JITTER_MS = 5000;
 const MAX_LISTED_TESTS = 50;
 const MAX_REASON_LENGTH = 120;
@@ -54,7 +54,7 @@ interface BufferedLog {
  * - sends console output (stdout/stderr) only for tests that did not end with their expected status,
  *   so passing tests do not flood ReportPortal with log requests (set RP_SEND_ALL_LOGS=true to send everything),
  * - does not block the run for longer than RP_FINISH_TIMEOUT_MS (default 60s) when ReportPortal is slow or unavailable,
- * - limits concurrent requests to RP_MAX_CONCURRENT_REQUESTS (default 10) and delays the first one by a random
+ * - limits concurrent requests to RP_MAX_CONCURRENT_REQUESTS (default 50) and delays the first one by a random
  *   0..RP_START_JITTER_MS (default 5s), so parallel CI jobs do not hit ReportPortal with simultaneous bursts,
  * - prints a single summary with the affected tests instead of a stack trace for every failed request.
  */
