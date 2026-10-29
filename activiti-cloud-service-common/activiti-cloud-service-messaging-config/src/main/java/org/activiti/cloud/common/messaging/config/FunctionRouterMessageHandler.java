@@ -286,7 +286,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                     final var future = task.get(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS);
 
                     return future.get();
-                } catch (Throwable cause) {
+                } catch (Exception cause) {
                     if (cause instanceof InterruptedException) {
                         Thread.currentThread().interrupt();
                     }

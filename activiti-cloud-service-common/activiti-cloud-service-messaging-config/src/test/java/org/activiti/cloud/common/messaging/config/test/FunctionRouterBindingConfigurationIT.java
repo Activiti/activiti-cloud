@@ -313,8 +313,11 @@ public class FunctionRouterBindingConfigurationIT {
                                 .atMost(timeout)
                                 .pollInSameThread()
                                 .until(() -> Thread.currentThread().isInterrupted());
-                        } catch (ConditionTimeoutException e) {
-                            throw new IllegalStateException(new TimeoutException("timeout waiting for interrupt"));
+                        } catch (ConditionTimeoutException cause) {
+                            throw new IllegalStateException(
+                                cause.getMessage(),
+                                new TimeoutException("timeout waiting for interrupt")
+                            );
                         } finally {
                             isInterrupted.set(Thread.currentThread().isInterrupted());
                         }
