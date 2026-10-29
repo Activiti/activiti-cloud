@@ -34,34 +34,17 @@ Requires the following secrets to be set:
 
 ## Consuming Activiti previews from Cloudsmith
 
-The Cloudsmith consumption trial uses Activiti `0.0.1-PR-5629-SNAPSHOT`, published
-by [Activiti PR #5629](https://github.com/Activiti/Activiti/pull/5629). All four
-`activiti.version` properties select this version. Keep the trial PR unmerged
-while these temporary preview dependencies are selected.
+The trial uses Activiti `0.0.1-PR-5629-SNAPSHOT` from [Activiti PR #5629](https://github.com/Activiti/Activiti/pull/5629). Keep the trial PR unmerged while these preview dependencies are selected.
 
-Set the GitHub Actions variable `CLOUDSMITH_NAMESPACE` to `hyland`, either on this
-repository or at organization level with access granted to this repository.
-The existing `cloudsmith-auth` action derives the `activiti-activiti-cloud` OIDC
-service account, which needs read access to `activiti-snapshots`. It exports
-`CLOUDSMITH_USERNAME` and a short-lived `CLOUDSMITH_API_KEY` for subsequent Maven
-steps; no static Cloudsmith credential is required in GitHub secrets.
+Activiti snapshots use the public Cloudsmith repository and require no Cloudsmith credentials or environment variables for local builds. With Java 25, compile and package from the repository root without running tests or Swagger generation using:
 
-The `cloudsmith-activiti-snapshots` mirror in `settings.xml` redirects the
-`activiti-snapshots` repository to
-`https://dl.cloudsmith.io/basic/${CLOUDSMITH_NAMESPACE}/activiti-snapshots/maven/`.
-Its server entry uses the exported credentials. Every CI job that runs Maven
-authenticates separately, including reusable build/test jobs, CodeQL, and
-dependency submission.
+```sh
+mvn --settings settings.xml clean install -DskipTests -DskipITs -Dskip.common.tests=true -Dswagger.skip
+```
 
-The common Maven build also checks snapshot consumption with an empty local
-repository. It downloads `org.activiti:activiti-engine` at the configured Activiti
-version and verifies that Maven records `cloudsmith-activiti-snapshots` as the JAR's
-origin. This provides evidence of a Cloudsmith download even when the same preview
-exists in Nexus. Successful verification is written to the job summary.
+The settings mirror also redirects Nexus snapshot references inherited from dependency POMs to Cloudsmith. Release dependencies and artifact publishing continue to use the existing Nexus configuration.
 
-Consuming an Activiti preview does not require the `preview` label on this
-repository's PR. That label publishes an activiti-cloud preview for downstream
-consumers.
+CI uses `CLOUDSMITH_NAMESPACE=hyland` and the existing `cloudsmith-auth` OIDC action. Its empty-cache check verifies that the Activiti engine JAR came from Cloudsmith.
 
 ## Preview Propagation
 
