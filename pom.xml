@@ -667,16 +667,27 @@ limitations under the License.]]>
   <profiles>
     <profile>
       <id>cloudsmith</id>
-      <distributionManagement>
-        <repository>
-          <id>cloudsmith</id>
-          <url>https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-releases/</url>
-        </repository>
-        <snapshotRepository>
-          <id>cloudsmith</id>
-          <url>https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-snapshots/</url>
-        </snapshotRepository>
-      </distributionManagement>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>deploy-cloudsmith</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>deploy</goal>
+                </goals>
+                <configuration>
+                  <altReleaseDeploymentRepository>cloudsmith::https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-releases/</altReleaseDeploymentRepository>
+                  <altSnapshotDeploymentRepository>cloudsmith::https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-snapshots/</altSnapshotDeploymentRepository>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
     <profile>
       <id>attach-sources</id>

@@ -21,40 +21,30 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Deploy to Nexus
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
-      env:
-        MAVEN_USERNAME: ${{ inputs.nexus-username }}
-        MAVEN_PASSWORD: ${{ inputs.nexus-password }}
-      with:
-        java-version: '25'
-        java-distribution: 'corretto'
-        maven-version: ${{ inputs.maven-version }}
-        maven-command: >-
-          deploy -DskipTests -DskipITs -Dskip.common.tests=true -P '!attach-sources'
-          -Dhttp.keepAlive=false
-          -Dmaven.wagon.http.pool=false
-          -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
-
     - name: Authenticate with Cloudsmith
       uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
       with:
         oidc-namespace: ${{ inputs.cloudsmith-namespace }}
         verify-auth: "true"
 
-    - name: Deploy to Cloudsmith
-      shell: bash
-      run: >-
-        mvn --batch-mode deploy '-Pcloudsmith,!alfresco,!attach-sources'
-        -Daether.connector.basic.upstreamThreads.cloudsmith=10
-        -DskipTests -DskipITs -Dskip.common.tests=true -Ddocker.skip
-        ${{ env.MAVEN_CLI_OPTS }}
+    - name: Deploy to Nexus and Cloudsmith
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
       env:
         MAVEN_ARGS: ""
-        MAVEN_CLI_OPTS: --show-version --settings settings.xml
         MAVEN_USERNAME: ${{ inputs.nexus-username }}
         MAVEN_PASSWORD: ${{ inputs.nexus-password }}
         CLOUDSMITH_NAMESPACE: ${{ inputs.cloudsmith-namespace }}
+      with:
+        java-version: '25'
+        java-distribution: 'corretto'
+        maven-version: ${{ inputs.maven-version }}
+        verbose: "true"
+        maven-command: >-
+          --batch-mode deploy -DskipTests -DskipITs -Dskip.common.tests=true -P 'cloudsmith,!attach-sources'
+          -Daether.connector.basic.upstreamThreads.cloudsmith=10
+          -Dhttp.keepAlive=false
+          -Dmaven.wagon.http.pool=false
+          -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
 
     - name: Publish deployed version to job summary
       shell: bash
