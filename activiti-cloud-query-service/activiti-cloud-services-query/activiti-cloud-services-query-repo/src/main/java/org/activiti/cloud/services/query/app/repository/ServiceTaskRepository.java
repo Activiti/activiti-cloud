@@ -46,7 +46,7 @@ public interface ServiceTaskRepository
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.loe(value));
         bindings
             .bind(root.serviceTaskType)
-            .first((path, value) -> path.coalesce(ServiceTaskEntity.DEFAULT_SERVICE_TASK_TYPE).asString().eq(value));
+            .first((path, value) -> path.coalesce(ServiceTaskEntity.DEFAULT_SERVICE_TASK_TYPE).eq(value));
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 

@@ -169,6 +169,26 @@ class IntegrationResultReceivedEventHandlerTest {
         assertThat(entity.getServiceTaskType()).isNull();
     }
 
+    @Test
+    void should_propagateServiceTaskType_when_recoveringMissingEntityWithTypedPayload() {
+        IntegrationContextImpl resultIntegrationContext = buildIntegrationContext();
+        resultIntegrationContext.setServiceTaskType("Rest Connector: GET");
+
+        ServiceTaskEntity serviceTaskEntity = buildServiceTaskEntity();
+
+        when(entityManager.find(IntegrationContextEntity.class, INTEGRATION_CONTEXT_ID)).thenReturn(null);
+        when(
+            entityManager.find(
+                ServiceTaskEntity.class,
+                IntegrationContextEntity.IdBuilderHelper.from(resultIntegrationContext)
+            )
+        ).thenReturn(serviceTaskEntity);
+
+        handler.handle(buildResultEvent(resultIntegrationContext));
+
+        assertThat(serviceTaskEntity.getServiceTaskType()).isEqualTo("Rest Connector: GET");
+    }
+
     private IntegrationContextImpl buildIntegrationContext() {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setId(INTEGRATION_CONTEXT_ID);
