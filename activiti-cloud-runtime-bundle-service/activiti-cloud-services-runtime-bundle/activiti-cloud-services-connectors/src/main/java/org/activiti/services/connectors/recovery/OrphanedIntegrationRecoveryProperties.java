@@ -15,6 +15,8 @@
  */
 package org.activiti.services.connectors.recovery;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
@@ -23,9 +25,23 @@ public class OrphanedIntegrationRecoveryProperties {
 
     public static final String DEFAULT_CRON = "0 */5 * * * *";
 
+    public static final String DEFAULT_PROJECT_RELEASE_DIR = "/home/alfresco/.activiti/project-release-volume/";
+
     private int thresholdSeconds = 10800; // 3 hours
 
     private String cron = DEFAULT_CRON;
+
+    /**
+     * Thresholds in seconds by connector template, overriding {@link #thresholdSeconds}.
+     * A negative value excludes the template from the recovery.
+     */
+    private Map<String, Integer> connectorThresholds = new HashMap<>();
+
+    /**
+     * Directory containing a sub-directory for each project release version,
+     * the connector definitions are read from {@code <projectReleaseDir>/<version>/connectors/}.
+     */
+    private String projectReleaseDir = DEFAULT_PROJECT_RELEASE_DIR;
 
     public int getThresholdSeconds() {
         return thresholdSeconds;
@@ -41,6 +57,22 @@ public class OrphanedIntegrationRecoveryProperties {
 
     public void setCron(String cron) {
         this.cron = cron;
+    }
+
+    public Map<String, Integer> getConnectorThresholds() {
+        return connectorThresholds;
+    }
+
+    public void setConnectorThresholds(Map<String, Integer> connectorThresholds) {
+        this.connectorThresholds = connectorThresholds;
+    }
+
+    public String getProjectReleaseDir() {
+        return projectReleaseDir;
+    }
+
+    public void setProjectReleaseDir(String projectReleaseDir) {
+        this.projectReleaseDir = projectReleaseDir;
     }
 
     public boolean isActive() {

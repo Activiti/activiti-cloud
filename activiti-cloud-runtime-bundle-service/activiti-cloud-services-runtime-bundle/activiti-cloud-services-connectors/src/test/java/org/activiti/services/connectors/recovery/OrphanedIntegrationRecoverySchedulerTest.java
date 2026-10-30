@@ -27,7 +27,10 @@ import static org.mockito.Mockito.verify;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
@@ -65,6 +68,11 @@ class OrphanedIntegrationRecoverySchedulerTest {
     @Mock
     IntegrationContextQuery query;
 
+    @Mock
+    ConnectorTemplateResolver connectorTemplateResolver;
+
+    private static final String AGENTIC_TEMPLATE = "agenticTaskConnector";
+
     OrphanedIntegrationRecoveryScheduler scheduler;
 
     @BeforeEach
@@ -74,7 +82,9 @@ class OrphanedIntegrationRecoverySchedulerTest {
             integrationRequestBuilder,
             errorEventHandler,
             0,
-            featureToggle
+            Map.of(),
+            featureToggle,
+            connectorTemplateResolver
         );
         given(featureToggle.isEnabled(RuntimeBundleFeatureToggles.ORPHANED_INTEGRATION_RECOVERY)).willReturn(true);
     }
@@ -157,7 +167,9 @@ class OrphanedIntegrationRecoverySchedulerTest {
             integrationRequestBuilder,
             errorEventHandler,
             300,
-            featureToggle
+            Map.of(),
+            featureToggle,
+            connectorTemplateResolver
         );
         givenQuery(List.of());
 
@@ -167,6 +179,149 @@ class OrphanedIntegrationRecoverySchedulerTest {
         var dateCaptor = ArgumentCaptor.forClass(Date.class);
         verify(query).createdBefore(dateCaptor.capture());
         assertThat(dateCaptor.getValue()).isCloseTo(expectedThreshold, TimeUnit.SECONDS.toMillis(1));
+    }
+
+    @Test
+    void should_queryWithLowestThreshold_when_connectorThresholdIsLowerThanGlobalOne() {
+        var customScheduler = schedulerWithConnectorThresholds(
+            10800,
+            Map.of(AGENTIC_TEMPLATE, 600, "excludedConnector", -1)
+        );
+        givenQuery(List.of());
+
+        var expectedThreshold = Date.from(Instant.now().minus(600, ChronoUnit.SECONDS));
+        customScheduler.recoverOrphanedIntegrations();
+
+        var dateCaptor = ArgumentCaptor.forClass(Date.class);
+        verify(query).createdBefore(dateCaptor.capture());
+        assertThat(dateCaptor.getValue()).isCloseTo(expectedThreshold, TimeUnit.SECONDS.toMillis(1));
+    }
+
+    @Test
+    void should_skipContext_when_connectorThresholdIsNegative() {
+        var customScheduler = schedulerWithConnectorThresholds(0, Map.of(AGENTIC_TEMPLATE, -1));
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask")));
+        given(connectorTemplateResolver.resolveTemplate("procDef-1", "agenticTask")).willReturn(
+            Optional.of(AGENTIC_TEMPLATE)
+        );
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        verify(integrationRequestBuilder, never()).build(any());
+        verify(errorEventHandler, never()).receive(any());
+    }
+
+    @Test
+    void should_sendCloudBpmnError_when_elapsedTimeReachesConnectorThreshold() {
+        var customScheduler = schedulerWithConnectorThresholds(10800, Map.of(AGENTIC_TEMPLATE, 600));
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask", 700)));
+        given(connectorTemplateResolver.resolveTemplate("procDef-1", "agenticTask")).willReturn(
+            Optional.of(AGENTIC_TEMPLATE)
+        );
+        givenBuilderReturnsRealRequest();
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
+        verify(errorEventHandler).receive(errorCaptor.capture());
+        assertThat(errorCaptor.getValue().getErrorMessage()).contains("(threshold: 10 min)");
+    }
+
+    @Test
+    void should_skipContext_when_elapsedTimeIsLowerThanConnectorThreshold() {
+        var customScheduler = schedulerWithConnectorThresholds(0, Map.of(AGENTIC_TEMPLATE, 600));
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask", 300)));
+        given(connectorTemplateResolver.resolveTemplate("procDef-1", "agenticTask")).willReturn(
+            Optional.of(AGENTIC_TEMPLATE)
+        );
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        verify(errorEventHandler, never()).receive(any());
+    }
+
+    @Test
+    void should_applyGlobalThreshold_when_templateHasNoConnectorThreshold() {
+        var customScheduler = schedulerWithConnectorThresholds(10800, Map.of(AGENTIC_TEMPLATE, 600));
+        givenQuery(
+            List.of(
+                entity("ctx-1", "exec-1", "proc-1", "procDef-1", "restTask", 700),
+                entity("ctx-2", "exec-2", "proc-2", "procDef-2", "unknownTask", 10800)
+            )
+        );
+        given(connectorTemplateResolver.resolveTemplate("procDef-1", "restTask")).willReturn(
+            Optional.of("restConnector")
+        );
+        given(connectorTemplateResolver.resolveTemplate("procDef-2", "unknownTask")).willReturn(Optional.empty());
+        givenBuilderReturnsRealRequest();
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        var contextCaptor = ArgumentCaptor.forClass(IntegrationContext.class);
+        verify(integrationRequestBuilder).build(contextCaptor.capture());
+        assertThat(contextCaptor.getValue().getId()).isEqualTo("ctx-2");
+        verify(errorEventHandler).receive(any());
+    }
+
+    @Test
+    void should_applyGlobalThreshold_when_connectorThresholdKeyDiffersInCase() {
+        var customScheduler = schedulerWithConnectorThresholds(0, Map.of("agentictaskconnector", -1));
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask")));
+        given(connectorTemplateResolver.resolveTemplate("procDef-1", "agenticTask")).willReturn(
+            Optional.of(AGENTIC_TEMPLATE)
+        );
+        givenBuilderReturnsRealRequest();
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        verify(errorEventHandler).receive(any());
+    }
+
+    @Test
+    void should_ignoreConnectorThreshold_when_valueIsNull() {
+        var connectorThresholds = new HashMap<String, Integer>();
+        connectorThresholds.put(AGENTIC_TEMPLATE, null);
+        var customScheduler = schedulerWithConnectorThresholds(300, connectorThresholds);
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask", 300)));
+        given(connectorTemplateResolver.resolveTemplate("procDef-1", "agenticTask")).willReturn(
+            Optional.of(AGENTIC_TEMPLATE)
+        );
+        givenBuilderReturnsRealRequest();
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        verify(errorEventHandler).receive(any());
+    }
+
+    @Test
+    void should_applyGlobalThreshold_when_templateResolutionFails() {
+        var customScheduler = schedulerWithConnectorThresholds(300, Map.of(AGENTIC_TEMPLATE, -1));
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask", 300)));
+        given(connectorTemplateResolver.resolveTemplate("procDef-1", "agenticTask")).willThrow(
+            new RuntimeException("model not found")
+        );
+        givenBuilderReturnsRealRequest();
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
+        verify(errorEventHandler).receive(errorCaptor.capture());
+        assertThat(errorCaptor.getValue().getErrorMessage()).contains("(threshold: 5 min)");
+    }
+
+    private OrphanedIntegrationRecoveryScheduler schedulerWithConnectorThresholds(
+        int thresholdSeconds,
+        Map<String, Integer> connectorThresholds
+    ) {
+        return new OrphanedIntegrationRecoveryScheduler(
+            integrationContextService,
+            integrationRequestBuilder,
+            errorEventHandler,
+            thresholdSeconds,
+            connectorThresholds,
+            featureToggle,
+            connectorTemplateResolver
+        );
     }
 
     private void givenQuery(List<IntegrationContextEntity> entities) {
@@ -188,12 +343,24 @@ class OrphanedIntegrationRecoverySchedulerTest {
         String processDefinitionId,
         String flowNodeId
     ) {
+        return entity(id, executionId, processInstanceId, processDefinitionId, flowNodeId, 0);
+    }
+
+    private IntegrationContextEntityImpl entity(
+        String id,
+        String executionId,
+        String processInstanceId,
+        String processDefinitionId,
+        String flowNodeId,
+        int startedSecondsAgo
+    ) {
         var e = new IntegrationContextEntityImpl();
         e.setId(id);
         e.setExecutionId(executionId);
         e.setProcessInstanceId(processInstanceId);
         e.setProcessDefinitionId(processDefinitionId);
         e.setFlowNodeId(flowNodeId);
+        e.setCreatedDate(Date.from(Instant.now().minus(startedSecondsAgo, ChronoUnit.SECONDS)));
         return e;
     }
 }

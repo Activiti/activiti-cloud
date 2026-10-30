@@ -16,6 +16,7 @@
 package org.activiti.services.connectors.recovery;
 
 import org.activiti.cloud.common.feature.FeatureToggle;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
@@ -25,6 +26,8 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @Import(RuntimeBundleShedLockConfiguration.class)
@@ -33,19 +36,37 @@ import org.springframework.context.annotation.Import;
 public class OrphanedIntegrationRecoveryConfiguration {
 
     @Bean
+    ConnectorTemplateResolver connectorTemplateResolver(
+        RepositoryService repositoryService,
+        JsonMapper jsonMapper,
+        ResourcePatternResolver resourceLoader,
+        OrphanedIntegrationRecoveryProperties properties
+    ) {
+        return new ConnectorTemplateResolver(
+            repositoryService,
+            jsonMapper,
+            resourceLoader,
+            properties.getProjectReleaseDir()
+        );
+    }
+
+    @Bean
     OrphanedIntegrationRecoveryScheduler orphanedIntegrationRecoveryScheduler(
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
         OrphanedIntegrationRecoveryProperties properties,
-        FeatureToggle featureToggle
+        FeatureToggle featureToggle,
+        ConnectorTemplateResolver connectorTemplateResolver
     ) {
         return new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
             integrationRequestBuilder,
             errorEventHandler,
             properties.getThresholdSeconds(),
-            featureToggle
+            properties.getConnectorThresholds(),
+            featureToggle,
+            connectorTemplateResolver
         );
     }
 }
