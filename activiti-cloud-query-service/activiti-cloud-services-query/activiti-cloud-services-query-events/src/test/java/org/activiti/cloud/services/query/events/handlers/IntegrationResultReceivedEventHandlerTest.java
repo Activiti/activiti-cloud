@@ -153,11 +153,20 @@ class IntegrationResultReceivedEventHandlerTest {
     }
 
     @Test
-    void should_exposeServiceTaskType_when_setOnIntegrationContextEntity() {
+    void should_deriveServiceTaskType_fromLinkedServiceTask() {
+        ServiceTaskEntity serviceTaskEntity = buildServiceTaskEntity();
+        serviceTaskEntity.setServiceTaskType("Rest Connector: GET");
         IntegrationContextEntity entity = buildIntegrationContextEntity();
-        entity.setServiceTaskType("Rest Connector: GET");
+        entity.setServiceTask(serviceTaskEntity);
 
         assertThat(entity.getServiceTaskType()).isEqualTo("Rest Connector: GET");
+    }
+
+    @Test
+    void should_returnNullServiceTaskType_when_noLinkedServiceTask() {
+        IntegrationContextEntity entity = buildIntegrationContextEntity();
+
+        assertThat(entity.getServiceTaskType()).isNull();
     }
 
     private IntegrationContextImpl buildIntegrationContext() {
