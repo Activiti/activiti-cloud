@@ -18,6 +18,7 @@ package org.activiti.services.connectors.enricher;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.spring.process.ProcessExtensionService;
+import org.activiti.spring.process.model.Extension;
 
 public class ServiceTaskTypeIntegrationContextEnricher implements IntegrationContextEnricher {
 
@@ -32,9 +33,11 @@ public class ServiceTaskTypeIntegrationContextEnricher implements IntegrationCon
         if (!(integrationContext instanceof IntegrationContextImpl mutableContext)) {
             return;
         }
-        String serviceTaskType = processExtensionService
-            .getExtensionsForId(integrationContext.getProcessDefinitionId())
-            .getServiceTaskType(integrationContext.getClientId());
+        Extension extensions = processExtensionService.getExtensionsForId(integrationContext.getProcessDefinitionId());
+        if (extensions == null) {
+            return;
+        }
+        String serviceTaskType = extensions.getServiceTaskType(integrationContext.getClientId());
         if (serviceTaskType != null) {
             mutableContext.setServiceTaskType(serviceTaskType);
         }
