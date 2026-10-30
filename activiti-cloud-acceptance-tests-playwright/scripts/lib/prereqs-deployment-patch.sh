@@ -8,7 +8,7 @@ resolve_keycloak_patch_for_deployment() {
   PATCH_JWT_JWK_SET_URI="${JWT_JWK_SET_URI}"
   PATCH_KEYCLOAK_CLIENT_TOKEN_URI="${KEYCLOAK_CLIENT_TOKEN_URI}"
 
-  if [[ -n "${JWT_JWK_SET_URI}" && "${dep}" == "${IDENTITY_DEP}" ]]; then
+  if [[ -n "${JWT_JWK_SET_URI}" ]]; then
     PATCH_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
     PATCH_JWT_ISSUER_URI="https://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}"
   fi

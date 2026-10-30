@@ -23,8 +23,12 @@ import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KeycloakUserGroupManager implements UserGroupManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakUserGroupManager.class);
 
     private final KeycloakClient keycloakClient;
 
@@ -45,6 +49,13 @@ public class KeycloakUserGroupManager implements UserGroupManager {
                 groups.add(groupRepresentation.getName());
             }
         }
+
+        LOGGER.debug(
+            "Resolved group membership for requested username [{}]: resolved user id present [{}], membership count [{}]",
+            username,
+            user.getId() != null,
+            groups != null ? groups.size() : 0
+        );
 
         return groups;
     }
@@ -84,11 +95,26 @@ public class KeycloakUserGroupManager implements UserGroupManager {
         List<KeycloakUser> users = keycloakClient.searchUsers(username, 0, 2);
 
         if (users.size() > 1) {
+            LOGGER.warn(
+                "User resolution for requested username [{}] is ambiguous: broad search returned [{}] candidates",
+                username,
+                users.size()
+            );
             throw new UnsupportedOperationException("User id " + username + " is not unique");
         }
         if (users.size() == 0) {
+            LOGGER.warn("User resolution for requested username [{}] found no candidates from broad search", username);
             throw new UnsupportedOperationException("User id " + username + " not found");
         }
-        return users.getFirst();
+
+        KeycloakUser resolved = users.getFirst();
+        if (!username.equals(resolved.getUsername())) {
+            LOGGER.warn(
+                "User resolution for requested username [{}] matched a single user with a different username; " +
+                    "broad search is not an exact match",
+                username
+            );
+        }
+        return resolved;
     }
 }
