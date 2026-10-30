@@ -17,7 +17,10 @@ package org.activiti.services.connectors.recovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 class OrphanedIntegrationRecoveryPropertiesTest {
@@ -30,9 +33,37 @@ class OrphanedIntegrationRecoveryPropertiesTest {
     }
 
     @Test
+    void should_useProjectReleaseVolume_byDefault() {
+        assertThat(properties.getProjectReleaseDir()).isEqualTo("/home/alfresco/.activiti/project-release-volume/");
+    }
+
+    @Test
     void should_beInactive_when_cronIsDisabled() {
         properties.setCron(ScheduledTaskRegistrar.CRON_DISABLED);
 
         assertThat(properties.isActive()).isFalse();
+    }
+
+    @Test
+    void should_bindConnectorThresholdsAndProjectReleaseDir() {
+        var source = new MapConfigurationPropertySource(
+            Map.of(
+                "activiti.orphaned-integration-recovery.connector-thresholds[agenticTaskConnector]",
+                "-1",
+                "activiti.orphaned-integration-recovery.connector-thresholds[restConnector]",
+                "600",
+                "activiti.orphaned-integration-recovery.project-release-dir",
+                "/opt/project-release/"
+            )
+        );
+
+        var bound = new Binder(source)
+            .bind("activiti.orphaned-integration-recovery", OrphanedIntegrationRecoveryProperties.class)
+            .get();
+
+        assertThat(bound.getConnectorThresholds()).containsExactlyInAnyOrderEntriesOf(
+            Map.of("agenticTaskConnector", -1, "restConnector", 600)
+        );
+        assertThat(bound.getProjectReleaseDir()).isEqualTo("/opt/project-release/");
     }
 }
