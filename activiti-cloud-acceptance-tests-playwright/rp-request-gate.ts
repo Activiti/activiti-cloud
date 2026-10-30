@@ -46,7 +46,7 @@ export function gateReportPortalRequests(restClient: RestClientLike, { maxConcur
     signal.addEventListener('abort', () => waiting.splice(0).forEach((wake) => wake()), { once: true });
 
     const run = async (args: unknown[]): Promise<unknown> => {
-        startDelay ??= delay(Math.floor(Math.random() * startJitterMs));
+        startDelay ??= delay(Math.floor(Math.random() * startJitterMs), signal);
         await startDelay;
         while (active >= maxConcurrent && !signal.aborted) {
             await new Promise<void>((resolve) => waiting.push(resolve));
@@ -87,6 +87,17 @@ function silenceReportPortalRequestErrors(): void {
     };
 }
 
-function delay(ms: number): Promise<void> {
-    return ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms).unref()) : Promise.resolve();
+function delay(ms: number, signal: AbortSignal): Promise<void> {
+    if (ms <= 0 || signal.aborted) {
+        return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+        const done = () => {
+            clearTimeout(timer);
+            signal.removeEventListener('abort', done);
+            resolve();
+        };
+        const timer = setTimeout(done, ms);
+        signal.addEventListener('abort', done, { once: true });
+    });
 }

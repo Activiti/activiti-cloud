@@ -60,7 +60,7 @@ interface BufferedLog {
  */
 export default class ReportPortalReporter extends RPReporter {
     private readonly sendAllLogs = process.env.RP_SEND_ALL_LOGS === 'true';
-    private readonly finishTimeoutMs = Number(process.env.RP_FINISH_TIMEOUT_MS) || DEFAULT_FINISH_TIMEOUT_MS;
+    private readonly finishTimeoutMs = readEnvNumber('RP_FINISH_TIMEOUT_MS', DEFAULT_FINISH_TIMEOUT_MS, 1);
     private readonly bufferedLogs = new Map<string, BufferedLog[]>();
     private readonly stdoutCarry = new Map<string, string>();
     private readonly testTitles = new Map<string, string>();
@@ -72,8 +72,8 @@ export default class ReportPortalReporter extends RPReporter {
         super(config);
         const client = this.client as unknown as ReportPortalClientInternals;
         gateReportPortalRequests(client.restClient, {
-            maxConcurrent: Number(process.env.RP_MAX_CONCURRENT_REQUESTS) || DEFAULT_MAX_CONCURRENT_REQUESTS,
-            startJitterMs: Number(process.env.RP_START_JITTER_MS ?? DEFAULT_START_JITTER_MS) || 0,
+            maxConcurrent: readEnvNumber('RP_MAX_CONCURRENT_REQUESTS', DEFAULT_MAX_CONCURRENT_REQUESTS, 1),
+            startJitterMs: readEnvNumber('RP_START_JITTER_MS', DEFAULT_START_JITTER_MS, 0),
             signal: reportPortalAbortController.signal,
         });
         this.trackItemRequests(client);
@@ -228,4 +228,10 @@ function describeError(error: unknown): string {
     const message = error instanceof Error ? error.message : String(error);
     // RestClient appends the response body, URL and method - keep only the reason so failures can be grouped
     return message.split('\n')[0].split(': {')[0].slice(0, MAX_REASON_LENGTH);
+}
+
+/** Reads an integer from the environment, falling back to the default when it is missing, invalid or below `min`. */
+function readEnvNumber(name: string, defaultValue: number, min: number): number {
+    const value = Math.floor(Number(process.env[name]));
+    return Number.isFinite(value) && value >= min && process.env[name]?.trim() ? value : defaultValue;
 }
