@@ -24,6 +24,7 @@ create table bpmn_activity
     started_date               timestamp,
     status                     varchar(255),
     integration_context_counter INTEGER DEFAULT 0,
+    service_task_type          varchar(255),
 
     primary key (id)
 );
