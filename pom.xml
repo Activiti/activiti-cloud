@@ -666,6 +666,33 @@ limitations under the License.]]>
   </build>
   <profiles>
     <profile>
+      <id>cloudsmith</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <deployAtEnd>false</deployAtEnd>
+            </configuration>
+            <executions>
+              <execution>
+                <id>deploy-cloudsmith</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>deploy</goal>
+                </goals>
+                <configuration>
+                  <altReleaseDeploymentRepository>cloudsmith::https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-releases/</altReleaseDeploymentRepository>
+                  <altSnapshotDeploymentRepository>cloudsmith::https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-snapshots/</altSnapshotDeploymentRepository>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>attach-sources</id>
       <activation>
         <activeByDefault>true</activeByDefault>

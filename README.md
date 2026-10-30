@@ -32,6 +32,10 @@ Requires the following secrets to be set:
 | RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
 | SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
 
+Maven artifacts are built once and published to both Nexus and Cloudsmith: preview snapshots go to `activiti-snapshots`, and develop alpha releases go to `activiti-releases`.
+
+Set the GitHub Actions variable `CLOUDSMITH_NAMESPACE` to `hyland`. Cloudsmith authentication uses GitHub OIDC as `activiti-activiti-cloud`; no additional Cloudsmith secret is required.
+
 ## Preview Propagation
 
 This repository includes an automated **Preview Propagation** mechanism for testing cross-module integration with downstream repositories like hxp-common-libraries. When working on features that span multiple modules:
