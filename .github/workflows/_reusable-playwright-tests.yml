@@ -160,6 +160,19 @@ jobs:
           rp-trigger: ${{ github.event_name == 'pull_request' && 'PR' || 'CI' }}
           rp-environment: activiti
 
+      - name: Collect runtime bundle logs (${{ matrix.profile }})
+        if: always()
+        run: bash scripts/ci/collect-runtime-bundle-logs.sh
+
+      - name: Upload runtime bundle logs (${{ matrix.profile }})
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: runtime-bundle-logs-${{ matrix.profile }}
+          path: activiti-cloud-acceptance-tests-playwright/rb-logs
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Delete Helm release (${{ matrix.profile }})
         if: always()
         run: make delete
