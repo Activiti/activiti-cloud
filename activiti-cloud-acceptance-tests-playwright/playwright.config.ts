@@ -29,7 +29,7 @@ const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' :
 const isCi = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
 
 const reportPortalReporter = isCi
-    ? ([['@reportportal/agent-js-playwright', getReportPortalConfig()], ['github']] as const)
+    ? ([[require.resolve('./report-portal-reporter.ts'), getReportPortalConfig()], ['github']] as const)
     : ([] as const);
 
 /** Serial projects (subscriptions, admin bulk-delete). */
