@@ -93,9 +93,6 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private String clientType;
     private String connectorType;
 
-    @Transient
-    private String serviceTaskType;
-
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Temporal(TIMESTAMP)
     private Date requestDate;
@@ -211,11 +208,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @Override
     public String getServiceTaskType() {
-        return serviceTaskType;
-    }
-
-    public void setServiceTaskType(String serviceTaskType) {
-        this.serviceTaskType = serviceTaskType;
+        return serviceTask != null ? serviceTask.getServiceTaskType() : null;
     }
 
     @Override

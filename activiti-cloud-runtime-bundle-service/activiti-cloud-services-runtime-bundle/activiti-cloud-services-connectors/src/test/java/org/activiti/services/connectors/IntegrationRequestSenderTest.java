@@ -43,6 +43,8 @@ import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.test.DelegateExecutionBuilder;
+import org.activiti.spring.process.ProcessExtensionService;
+import org.activiti.spring.process.model.Extension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -104,6 +106,9 @@ public class IntegrationRequestSenderTest {
     private ExpressionManager expressionManager;
 
     @Mock
+    private ProcessExtensionService processExtensionService;
+
+    @Mock
     private FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     private DelegateExecution delegateExecution;
@@ -129,9 +134,12 @@ public class IntegrationRequestSenderTest {
         IntegrationContextEntity contextEntity = mock(IntegrationContextEntity.class);
         given(contextEntity.getId()).willReturn(INTEGRATION_CONTEXT_ID);
 
+        given(processExtensionService.getExtensionsForId(PROC_DEF_ID)).willReturn(new Extension());
+
         IntegrationContext integrationContext = new IntegrationContextBuilder(
             inboundVariablesProvider,
-            expressionManager
+            expressionManager,
+            processExtensionService
         ).from(contextEntity, delegateExecution);
 
         integrationRequest = new IntegrationRequestImpl(integrationContext);

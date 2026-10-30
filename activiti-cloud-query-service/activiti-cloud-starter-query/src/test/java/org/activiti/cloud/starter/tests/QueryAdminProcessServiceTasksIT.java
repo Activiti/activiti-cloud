@@ -334,6 +334,12 @@ public class QueryAdminProcessServiceTasksIT {
         sendIntegrationRequestedEvent(integrationContext);
 
         awaitServiceTaskType(SERVICE_TASK_TYPE_LABEL);
+
+        await().untilAsserted(() ->
+            assertThat(retrieveIntegrationContext(serviceTask.getId()).getServiceTaskType()).isEqualTo(
+                SERVICE_TASK_TYPE_LABEL
+            )
+        );
     }
 
     private void awaitServiceTaskType(String expectedServiceTaskType) {
