@@ -39,27 +39,40 @@ let consoleDirPatched = false;
 export function gateReportPortalRequests(restClient: RestClientLike, { maxConcurrent, startJitterMs, signal }: RequestGateOptions): void {
     silenceReportPortalRequestErrors();
     const request = restClient.request.bind(restClient);
-    const waiting: Array<() => void> = [];
+    // A finishing request hands its slot straight to the oldest waiter (true), so new requests cannot overtake the queue.
+    // Abort wakes all waiters with false.
+    const waiting: Array<(granted: boolean) => void> = [];
     let active = 0;
     let startDelay: Promise<void> | undefined;
 
-    signal.addEventListener('abort', () => waiting.splice(0).forEach((wake) => wake()), { once: true });
+    signal.addEventListener('abort', () => waiting.splice(0).forEach((wake) => wake(false)), { once: true });
+
+    const acquireSlot = (): Promise<boolean> => {
+        if (signal.aborted) {
+            return Promise.resolve(false);
+        }
+        if (active < maxConcurrent) {
+            active++;
+            return Promise.resolve(true);
+        }
+        return new Promise<boolean>((resolve) => waiting.push(resolve));
+    };
 
     const run = async (args: unknown[]): Promise<unknown> => {
         startDelay ??= delay(Math.floor(Math.random() * startJitterMs), signal);
         await startDelay;
-        while (active >= maxConcurrent && !signal.aborted) {
-            await new Promise<void>((resolve) => waiting.push(resolve));
-        }
-        if (signal.aborted) {
+        if (!(await acquireSlot())) {
             throw new Error('canceled');
         }
-        active++;
         try {
             return await request(...args);
         } finally {
-            active--;
-            waiting.shift()?.();
+            const next = waiting.shift();
+            if (next) {
+                next(true);
+            } else {
+                active--;
+            }
         }
     };
 
@@ -70,6 +83,11 @@ export function gateReportPortalRequests(restClient: RestClientLike, { maxConcur
             }
             throw error;
         });
+}
+
+/** Marks an error as already tracked by the reporter, so the ReportPortal client does not print it. */
+export function markReportPortalErrorAsTracked(error: object): void {
+    silencedErrors.add(error);
 }
 
 /** The ReportPortal client prints every failed request with console.dir - skip the ones the reporter already tracks. */

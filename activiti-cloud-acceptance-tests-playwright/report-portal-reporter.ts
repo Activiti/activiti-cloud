@@ -18,7 +18,7 @@ import RPReporter from '@reportportal/agent-js-playwright';
 import type { TestCase, TestResult } from '@playwright/test/reporter';
 import { parseReportPortalOutput } from './rp-output-parser';
 import { reportPortalAbortController } from './rp-request-controller';
-import { gateReportPortalRequests, type RestClientLike } from './rp-request-gate';
+import { gateReportPortalRequests, markReportPortalErrorAsTracked, type RestClientLike } from './rp-request-gate';
 
 const DEFAULT_FINISH_TIMEOUT_MS = 60 * 1000;
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 50;
@@ -36,6 +36,7 @@ interface ReportPortalClientInternals {
     startTestItem: (...args: unknown[]) => ClientResponse;
     finishTestItem: (itemTempId: string, ...args: unknown[]) => ClientResponse;
     sendLog: (itemTempId: string, ...args: unknown[]) => ClientResponse;
+    getRequestLogWithFile: (...args: unknown[]) => Promise<unknown>;
 }
 
 interface FailedRequest {
@@ -179,6 +180,18 @@ export default class ReportPortalReporter extends RPReporter {
                 return response;
             };
         }
+        // The client swallows attachment upload errors (it only prints them), so turn them into a rejected log request
+        // that ends up in the delivery summary together with its test.
+        const getRequestLogWithFile = client.getRequestLogWithFile.bind(client);
+        client.getRequestLogWithFile = async (...args) => {
+            const response = await getRequestLogWithFile(...args);
+            if (response === undefined) {
+                const error = new Error('Attachment upload failed');
+                markReportPortalErrorAsTracked(error);
+                throw error;
+            }
+            return response;
+        };
     }
 
     private printDeliverySummary(timedOut: boolean): void {
