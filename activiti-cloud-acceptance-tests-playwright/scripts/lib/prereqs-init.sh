@@ -92,7 +92,7 @@ prereqs_setup_gateway_and_keycloak() {
   JWT_JWK_SET_URI=""
   KEYCLOAK_CLIENT_TOKEN_URI=""
   if [[ "${GITHUB_ACTIONS:-}" == "true" || "${CI:-}" == "true" ]]; then
-    ACT_KEYCLOAK_URL="https://${IDENTITY_HOST}/auth"
+    ACT_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
     JWT_JWK_SET_URI="http://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}/protocol/openid-connect/certs"
     KEYCLOAK_CLIENT_TOKEN_URI="http://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}/protocol/openid-connect/token"
   fi
