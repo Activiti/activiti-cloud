@@ -37,18 +37,18 @@ public class OutboxChannelInterceptorAdvice implements MethodInterceptor {
     public Object invoke(MethodInvocation invocation) throws Throwable {
         // Filter exclusively for the "send" method
         if ("send".equals(invocation.getMethod().getName())) {
-            Message<?> message = (Message<?>) invocation.getArguments()[0];
+            final var message = (Message<?>) invocation.getArguments()[0];
 
             log.debug("Outbox proxy intercepted send message {} on channel: {}", message, beanName);
 
             final var result = invocation.proceed();
 
-            if (result == null && !message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
+            if (Boolean.FALSE.equals(result) && !message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
                 log.debug("Outbox proxy message {} sent successfully via outbox: {}", message, beanName);
                 return true;
             } else {
                 // Execute the real send() method
-                log.debug("Outbox proxy message {} sent to channel: {}", message, beanName);
+                log.debug("Outbox proxy message {} sent to channel {} with result: {}", message, beanName, result);
                 return result;
             }
         }
