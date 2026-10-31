@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.common.messaging.outbox;
+package org.activiti.cloud.common.messaging.config;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
@@ -21,11 +21,11 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.util.MimeType;
 
-public class OutboxStreamBridge implements StreamOperations {
+public class StreamBridgeOperations implements StreamOperations {
 
     private final ObjectProvider<StreamBridge> streamBridge;
 
-    public OutboxStreamBridge(ObjectProvider<StreamBridge> streamBridge) {
+    public StreamBridgeOperations(ObjectProvider<StreamBridge> streamBridge) {
         this.streamBridge = streamBridge;
     }
 
