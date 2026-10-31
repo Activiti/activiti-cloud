@@ -15,12 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
-import static org.springframework.integration.support.json.JacksonMessagingUtils.DEFAULT_TRUSTED_PACKAGES;
-
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
 import org.activiti.cloud.common.messaging.config.StreamBridgeOperations;
@@ -41,36 +36,62 @@ import org.springframework.cloud.stream.binding.NewDestinationBindingCallback;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.serializer.support.SerializingConverter;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
+import org.springframework.integration.jdbc.store.channel.ChannelMessageStorePreparedStatementSetter;
 import org.springframework.integration.jdbc.store.channel.ChannelMessageStoreQueryProvider;
 import org.springframework.integration.jdbc.store.channel.H2ChannelMessageStoreQueryProvider;
-import org.springframework.integration.jdbc.store.channel.JsonChannelMessageStorePreparedStatementSetter;
-import org.springframework.integration.jdbc.store.channel.JsonMessageRowMapper;
+import org.springframework.integration.jdbc.store.channel.MessageRowMapper;
 import org.springframework.integration.jdbc.store.channel.OracleChannelMessageStoreQueryProvider;
 import org.springframework.integration.jdbc.store.channel.PostgresChannelMessageStoreQueryProvider;
 import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.support.SmartLifecycleRoleController;
-import org.springframework.integration.support.json.GenericMessageJsonDeserializer;
-import org.springframework.integration.support.json.JacksonJsonObjectMapper;
-import org.springframework.integration.support.json.MessageHeadersJsonSerializer;
-import org.springframework.integration.support.json.MimeTypeJsonSerializer;
+import org.springframework.integration.support.converter.AllowListDeserializingConverter;
+import org.springframework.integration.support.json.EmbeddedHeadersJsonMessageMapper;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.transaction.PlatformTransactionManager;
-import tools.jackson.databind.DefaultTyping;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import tools.jackson.databind.module.SimpleModule;
 
 @AutoConfiguration(after = OutputBindingConfiguration.class)
 @ConditionalOnProperty(name = "activiti.cloud.messaging.outbox.enabled")
 @ConditionalOnClass({ DataSource.class, JdbcChannelMessageStore.class })
 public class OutboxAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper() {
+        return new EmbeddedHeadersJsonMessageMapper();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    AllowListDeserializingConverter allowListDeserializingConverter(
+        EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper
+    ) {
+        return new AllowListDeserializingConverter(new OutboxMessageDeserializer(embeddedHeadersJsonMessageMapper));
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    MessageRowMapper messageRowMapperProvider(AllowListDeserializingConverter allowListDeserializingConverter) {
+        return new MessageRowMapper(allowListDeserializingConverter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    SerializingConverter serializingConverter(EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper) {
+        return new SerializingConverter(new OutboxMessageSerializer(embeddedHeadersJsonMessageMapper));
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ChannelMessageStorePreparedStatementSetter channelMessageStorePreparedStatementSetterProvider(
+        SerializingConverter serializingConverter
+    ) {
+        return new ChannelMessageStorePreparedStatementSetter(serializingConverter);
+    }
 
     @Bean
     OutboxChannelInterceptorFactory outboxChannelInterceptorFactory(
@@ -127,59 +148,20 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    Supplier<JacksonJsonObjectMapper> outboxJsonObjectMapperProvider(
-        @Value(
-            "${activiti.cloud.messaging.outbox.json.trusted-packages:org.activiti.api,org.activiti.cloud.api,com.alfresco,tools.jackson.databind.node,java.math,java.time}"
-        ) String[] trustedPackages
-    ) {
-        final var genericMessageDeserializer = new GenericMessageJsonDeserializer();
-
-        final var messageModule = new SimpleModule("MessageModule")
-            .addSerializer(new MessageHeadersJsonSerializer())
-            .addSerializer(new MimeTypeJsonSerializer())
-            .addDeserializer(GenericMessage.class, genericMessageDeserializer);
-
-        final var basicPolymorphicTypeValidator = BasicPolymorphicTypeValidator.builder()
-            .allowIfBaseType(Message.class)
-            .allowIfSubTypeIsArray()
-            .allowSubTypesWithExplicitDeserializer();
-
-        Stream.concat(DEFAULT_TRUSTED_PACKAGES.stream(), Stream.of(trustedPackages)).forEach(
-            basicPolymorphicTypeValidator::allowIfSubType
-        );
-
-        var mapper = JsonMapper.builder()
-            .activateDefaultTyping(
-                basicPolymorphicTypeValidator.build(),
-                DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-            )
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
-            .addModules(messageModule)
-            .build();
-
-        genericMessageDeserializer.setMapper(mapper);
-
-        return () -> new JacksonJsonObjectMapper(mapper);
-    }
-
-    @Bean
     JdbcChannelMessageStore outboxChannelMessageStore(
         DataSource dataSource,
-        Supplier<JacksonJsonObjectMapper> outboxJsonObjectMapperProvider,
+        ChannelMessageStorePreparedStatementSetter channelMessageStorePreparedStatementSetter,
+        MessageRowMapper messageRowMapper,
         ChannelMessageStoreQueryProvider channelMessageStoreQueryProvider,
         @Value("${activiti.cloud.messaging.outbox.region:${spring.application.name:default}}") String region
     ) {
         final var messageStore = new JdbcChannelMessageStore(dataSource);
-        final var jsonObjectMapper = outboxJsonObjectMapperProvider.get();
 
         messageStore.setUsingIdCache(true);
         messageStore.setChannelMessageStoreQueryProvider(channelMessageStoreQueryProvider);
         messageStore.setCheckDatabaseOnStart(true);
-        messageStore.setPreparedStatementSetter(new JsonChannelMessageStorePreparedStatementSetter(jsonObjectMapper));
-        messageStore.setMessageRowMapper(new JsonMessageRowMapper(jsonObjectMapper));
+        messageStore.setPreparedStatementSetter(channelMessageStorePreparedStatementSetter);
+        messageStore.setMessageRowMapper(messageRowMapper);
         messageStore.setRegion(region);
 
         return messageStore;
