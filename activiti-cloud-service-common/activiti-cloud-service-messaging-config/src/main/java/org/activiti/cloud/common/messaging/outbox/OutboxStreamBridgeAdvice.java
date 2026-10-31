@@ -39,6 +39,6 @@ public class OutboxStreamBridgeAdvice implements MethodInterceptor {
                 ? arg1
                 : MessageBuilder.withPayload(invocation.getArguments()[index]).build();
 
-        return message.getHeaders().get(OUTBOX_DESTINATION) == null;
+        return !message.getHeaders().containsKey(OUTBOX_DESTINATION);
     }
 }
