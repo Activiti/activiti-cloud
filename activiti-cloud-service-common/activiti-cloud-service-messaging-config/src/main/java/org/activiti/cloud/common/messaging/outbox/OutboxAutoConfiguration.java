@@ -17,13 +17,13 @@ package org.activiti.cloud.common.messaging.outbox;
 
 import static org.springframework.integration.support.json.JacksonMessagingUtils.DEFAULT_TRUSTED_PACKAGES;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
+import org.activiti.cloud.common.messaging.config.StreamBridgeOperations;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
@@ -39,10 +39,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cloud.stream.binding.NewDestinationBindingCallback;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
 import org.springframework.integration.jdbc.store.channel.ChannelMessageStoreQueryProvider;
@@ -65,21 +63,14 @@ import org.springframework.messaging.support.GenericMessage;
 import org.springframework.transaction.PlatformTransactionManager;
 import tools.jackson.databind.DefaultTyping;
 import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.cfg.JsonNodeFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import tools.jackson.databind.module.SimpleModule;
 
-@AutoConfiguration(before = OutputBindingConfiguration.class)
+@AutoConfiguration(after = OutputBindingConfiguration.class)
 @ConditionalOnProperty(name = "activiti.cloud.messaging.outbox.enabled")
 @ConditionalOnClass({ DataSource.class, JdbcChannelMessageStore.class })
 public class OutboxAutoConfiguration {
-
-    @Bean
-    @Primary
-    StreamOperations outboxStreamBridge(ObjectProvider<StreamBridge> streamBridgeProvider) {
-        return new OutboxStreamBridge(streamBridgeProvider);
-    }
 
     @Bean
     OutboxChannelInterceptorFactory outboxChannelInterceptorFactory(
@@ -118,11 +109,11 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    BeanPostProcessor outboxStreamBridgePostProcessor(OutboxChannelInterceptorFactory outboxChannelInterceptorFactory) {
+    BeanPostProcessor outboxStreamBridgeOperationsPostProcessor() {
         return new BeanPostProcessor() {
             @Override
             public @Nullable Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof OutboxStreamBridge) {
+                if (bean instanceof StreamBridgeOperations) {
                     ProxyFactory factory = new ProxyFactory(bean);
                     factory.setProxyTargetClass(true); // Forces CGLIB subclass proxy
                     factory.addAdvice(new OutboxStreamBridgeAdvice());
@@ -164,11 +155,8 @@ public class OutboxAutoConfiguration {
                 DefaultTyping.NON_FINAL,
                 JsonTypeInfo.As.PROPERTY
             )
-            .changeDefaultVisibility(v -> v.withCreatorVisibility(JsonAutoDetect.Visibility.NON_PRIVATE))
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
-            .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
-            .configure(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES, false)
             .addModules(messageModule)
             .build();
 

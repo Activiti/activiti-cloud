@@ -39,16 +39,14 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        if (channel instanceof DirectChannel directChannel) {
-            if (message.getHeaders().get(OUTBOX_DESTINATION) == null) {
-                final var outboxMessage = MessageBuilder.fromMessage(message)
-                    .setHeader(OUTBOX_DESTINATION, destinationProvider.apply(message, directChannel))
-                    .build();
+        if (!message.getHeaders().containsKey(OUTBOX_DESTINATION) && channel instanceof DirectChannel directChannel) {
+            final var outboxMessage = MessageBuilder.fromMessage(message)
+                .setHeader(OUTBOX_DESTINATION, destinationProvider.apply(message, directChannel))
+                .build();
 
-                outboxChannel.send(outboxMessage);
+            outboxChannel.send(outboxMessage);
 
-                return null;
-            }
+            return null;
         }
 
         return message;
