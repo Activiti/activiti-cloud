@@ -91,13 +91,4 @@
              stripComments="true"/>
   </changeSet>
 
-  <changeSet id="alter-int-channel-message-jsonb" author="runtime-bundle" dbms="postgresql">
-    <sqlFile dbms="postgresql"
-             encoding="utf8"
-             path="changelog/alter-int-channel-message-jsonb.pg.sql"
-             relativeToChangelogFile="true"
-             splitStatements="true"
-             stripComments="true"/>
-  </changeSet>
-
 </databaseChangeLog>
