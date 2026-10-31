@@ -25,7 +25,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.support.ChannelInterceptor;
 
 public class OutboxOutputBindingPostProcessor implements BeanPostProcessor {
 
@@ -49,26 +48,24 @@ public class OutboxOutputBindingPostProcessor implements BeanPostProcessor {
         if (bean instanceof DirectChannel messageChannel) {
             return Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class))
                 .map(outputBinding -> {
-                    final ChannelInterceptor outboxOutputBindingChannelInterceptor =
-                        outboxChannelInterceptorFactory.apply(beanName, beanNameDestinationResolver);
+                    final var channelInterceptor = outboxChannelInterceptorFactory.apply(
+                        beanName,
+                        beanNameDestinationResolver
+                    );
 
-                    // Configure Spring's ProxyFactory
+                    messageChannel.addInterceptor(channelInterceptor);
+
+                    log.info("Added outbox channel interceptor advice to {} message channel", beanName);
+
                     ProxyFactory proxyFactory = new ProxyFactory();
                     proxyFactory.setTarget(messageChannel);
 
-                    // Forces Spring to use CGLIB subclassing instead of a JDK Dynamic Proxy
                     proxyFactory.setProxyTargetClass(true);
 
-                    // Add the method interceptor to execute custom logic on .send()
                     proxyFactory.addAdvice(
-                        new OutboxChannelInterceptorAdvice(
-                            outboxOutputBindingChannelInterceptor,
-                            messageChannel,
-                            beanName
-                        )
+                        new OutboxChannelInterceptorAdvice(channelInterceptor, messageChannel, beanName)
                     );
 
-                    // Return the JDK Dynamic Proxy to the container
                     return proxyFactory;
                 })
                 .map(ProxyFactory::getProxy)
