@@ -40,7 +40,7 @@ public class ActivitiCloudMessagingAutoConfiguration {
 
     @Bean
     @Primary
-    StreamOperations streamOperations(ObjectProvider<StreamBridge> streamBridgeProvider) {
+    StreamOperations streamBridge(ObjectProvider<StreamBridge> streamBridgeProvider) {
         return new StreamBridgeOperations(streamBridgeProvider);
     }
 
