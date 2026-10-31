@@ -22,24 +22,14 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.ChannelInterceptor;
 
 public class OutboxChannelInterceptorAdvice implements MethodInterceptor {
 
-    private final ChannelInterceptor channelInterceptor;
-    private final MessageChannel messageChannel;
     private final String beanName;
 
     private static final Logger log = LoggerFactory.getLogger(OutboxChannelInterceptorAdvice.class);
 
-    public OutboxChannelInterceptorAdvice(
-        ChannelInterceptor channelInterceptor,
-        MessageChannel messageChannel,
-        String beanName
-    ) {
-        this.channelInterceptor = channelInterceptor;
-        this.messageChannel = messageChannel;
+    public OutboxChannelInterceptorAdvice(String beanName) {
         this.beanName = beanName;
     }
 
