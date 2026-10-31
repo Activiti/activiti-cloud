@@ -62,9 +62,7 @@ public class OutboxOutputBindingPostProcessor implements BeanPostProcessor {
 
                     proxyFactory.setProxyTargetClass(true);
 
-                    proxyFactory.addAdvice(
-                        new OutboxChannelInterceptorAdvice(channelInterceptor, messageChannel, beanName)
-                    );
+                    proxyFactory.addAdvice(new OutboxChannelInterceptorAdvice(beanName));
 
                     return proxyFactory;
                 })
