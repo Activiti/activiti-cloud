@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptor.OUTBOX_DESTINATION;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -49,15 +51,15 @@ public class OutboxChannelInterceptorAdvice implements MethodInterceptor {
 
             log.debug("Outbox proxy intercepted send message {} on channel: {}", message, beanName);
 
-            final var result = channelInterceptor.preSend(message, messageChannel);
+            final var result = invocation.proceed();
 
-            if (result == null) {
+            if (result == null && !message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
                 log.debug("Outbox proxy message {} sent successfully via outbox: {}", message, beanName);
                 return true;
             } else {
                 // Execute the real send() method
-                log.debug("Outbox proxy message {} sent to: {}", message, beanName);
-                return invocation.proceed();
+                log.debug("Outbox proxy message {} sent to channel: {}", message, beanName);
+                return result;
             }
         }
 
