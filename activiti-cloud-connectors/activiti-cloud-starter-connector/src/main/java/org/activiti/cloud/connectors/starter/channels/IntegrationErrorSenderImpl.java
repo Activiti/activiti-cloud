@@ -19,16 +19,16 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
-    private final StreamBridge streamBridge;
+    private final StreamOperations streamBridge;
     private final IntegrationErrorChannelResolver resolver;
 
-    public IntegrationErrorSenderImpl(StreamBridge streamBridge, IntegrationErrorChannelResolver resolver) {
+    public IntegrationErrorSenderImpl(StreamOperations streamBridge, IntegrationErrorChannelResolver resolver) {
         this.streamBridge = streamBridge;
         this.resolver = resolver;
     }

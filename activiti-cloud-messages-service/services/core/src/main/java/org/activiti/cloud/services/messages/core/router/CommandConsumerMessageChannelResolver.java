@@ -22,7 +22,7 @@ import java.util.function.Function;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorSource;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.core.DestinationResolver;
@@ -32,12 +32,12 @@ public class CommandConsumerMessageChannelResolver implements DestinationResolve
     private final Map<String, MessageChannel> bindingChannelCache = new ConcurrentHashMap<>();
     private final BindingService bindingService;
     private final Function<String, String> destinationMapper;
-    private final StreamBridge streamBridge;
+    private final StreamOperations streamBridge;
 
     public CommandConsumerMessageChannelResolver(
         Function<String, String> destinationMapper,
         BindingService bindingService,
-        StreamBridge streamBridge
+        StreamOperations streamBridge
     ) {
         this.destinationMapper = destinationMapper;
         this.streamBridge = streamBridge;

@@ -36,7 +36,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
@@ -69,7 +69,7 @@ class RuntimeBundleTransactedConnectorBindingIT {
         .waitingFor(Wait.forListeningPort());
 
     @Autowired
-    private StreamBridge streamBridge;
+    private StreamOperations streamBridge;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
