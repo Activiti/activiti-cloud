@@ -20,12 +20,16 @@ import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
 @AutoConfiguration
@@ -33,6 +37,12 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:config/activiti-cloud-messaging.properties")
 @PropertySource(value = "file:config/activiti-cloud-messaging.properties", ignoreResourceNotFound = true)
 public class ActivitiCloudMessagingAutoConfiguration {
+
+    @Bean
+    @Primary
+    StreamOperations streamOperations(ObjectProvider<StreamBridge> streamBridgeProvider) {
+        return new StreamBridgeOperations(streamBridgeProvider);
+    }
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass({ ConnectionFactory.class, MessageListenerContainer.class })
