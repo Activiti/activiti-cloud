@@ -39,7 +39,7 @@ public class TokenExpiryGraphQlWebSocketHandler extends GraphQlWebSocketHandler 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenExpiryGraphQlWebSocketHandler.class);
 
-    static final CloseStatus TOKEN_EXPIRED_STATUS = new CloseStatus(4401, "Unauthorized");
+    static final CloseStatus TOKEN_EXPIRED_STATUS = new CloseStatus(4403, "Forbidden");
 
     private final Map<String, Disposable> expiryTimers = new ConcurrentHashMap<>();
 

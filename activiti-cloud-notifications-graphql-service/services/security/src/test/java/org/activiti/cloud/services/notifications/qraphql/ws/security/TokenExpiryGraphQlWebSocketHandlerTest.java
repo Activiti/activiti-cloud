@@ -67,7 +67,7 @@ class TokenExpiryGraphQlWebSocketHandlerTest {
     }
 
     @Test
-    void should_closeWithUnauthorized_when_messageArrivesAfterTokenExpiry() throws Exception {
+    void should_closeWithForbidden_when_messageArrivesAfterTokenExpiry() throws Exception {
         attributes.put(SecurityWebSocketInterceptor.TOKEN_EXPIRES_AT_ATTRIBUTE, Instant.now().minusSeconds(1));
 
         handler.handleMessage(session, PING);
@@ -77,7 +77,7 @@ class TokenExpiryGraphQlWebSocketHandlerTest {
     }
 
     @Test
-    void should_closeWithUnauthorized_when_tokenExpiresWhileConnectionIsOpen() throws Exception {
+    void should_closeWithForbidden_when_tokenExpiresWhileConnectionIsOpen() throws Exception {
         attributes.put(SecurityWebSocketInterceptor.TOKEN_EXPIRES_AT_ATTRIBUTE, Instant.now().plusMillis(300));
 
         handler.handleMessage(session, PING);
