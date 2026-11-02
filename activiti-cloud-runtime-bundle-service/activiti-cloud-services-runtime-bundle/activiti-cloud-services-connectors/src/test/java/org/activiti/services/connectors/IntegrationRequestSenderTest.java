@@ -73,6 +73,7 @@ public class IntegrationRequestSenderTest {
     private static final String BUSINESS_KEY = "my-business-key";
     private static final String INTEGRATION_CONTEXT_ID = "intContextId";
     private static final String APP_NAME = "appName";
+    private static final int TTL_SECONDS_VALUE = 10800;
 
     private IntegrationRequestSender integrationRequestSender;
 
@@ -205,7 +206,7 @@ public class IntegrationRequestSenderTest {
         // given
         Date requestDate = new Date(1_791_000_000_000L);
         integrationRequest.setRequestDate(requestDate);
-        integrationRequest.setTtlSeconds(10800);
+        integrationRequest.setTtlSeconds(TTL_SECONDS_VALUE);
         TransactionSynchronizationManager.initSynchronization();
 
         //when
@@ -219,7 +220,7 @@ public class IntegrationRequestSenderTest {
 
         assertThat(integrationRequestMessage.getHeaders())
             .containsEntry(REQUEST_DATE, requestDate.getTime())
-            .containsEntry(TTL_SECONDS, 10800);
+            .containsEntry(TTL_SECONDS, TTL_SECONDS_VALUE);
 
         TransactionSynchronizationManager.clear();
     }
