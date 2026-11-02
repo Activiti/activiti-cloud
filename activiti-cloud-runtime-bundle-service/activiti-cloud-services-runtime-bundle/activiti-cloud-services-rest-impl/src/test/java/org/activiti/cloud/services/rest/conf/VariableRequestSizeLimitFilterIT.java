@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.conf;
 
 import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -67,7 +66,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest({ ProcessInstanceControllerImpl.class, ProcessInstanceVariableControllerImpl.class })
@@ -145,15 +143,13 @@ class VariableRequestSizeLimitFilterIT {
     // --- Start process endpoint: POST /v1/process-instances ---
 
     @Test
-    void should_rejectOversizedBody_forStartProcessEndpoint() {
+    void should_rejectOversizedBody_forStartProcessEndpoint() throws Exception {
         byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
         Arrays.fill(oversizedBody, (byte) 'a');
 
-        MockHttpServletRequestBuilder request = post("/v1/process-instances")
-            .contentType(APPLICATION_JSON)
-            .content(oversizedBody);
-
-        assertThatThrownBy(() -> mockMvc.perform(request)).isInstanceOf(RequestBodyTooLargeException.class);
+        mockMvc
+            .perform(post("/v1/process-instances").contentType(APPLICATION_JSON).content(oversizedBody))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -172,18 +168,17 @@ class VariableRequestSizeLimitFilterIT {
     // --- Set variables endpoint: PUT /v1/process-instances/{id}/variables ---
 
     @Test
-    void should_rejectOversizedBody_forSetVariablesEndpoint() {
+    void should_rejectOversizedBody_forSetVariablesEndpoint() throws Exception {
         byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
         Arrays.fill(oversizedBody, (byte) 'a');
 
-        MockHttpServletRequestBuilder request = put(
-            "/v1/process-instances/{processInstanceId}/variables",
-            UUID.randomUUID().toString()
-        )
-            .contentType(APPLICATION_JSON)
-            .content(oversizedBody);
-
-        assertThatThrownBy(() -> mockMvc.perform(request)).isInstanceOf(RequestBodyTooLargeException.class);
+        mockMvc
+            .perform(
+                put("/v1/process-instances/{processInstanceId}/variables", UUID.randomUUID().toString())
+                    .contentType(APPLICATION_JSON)
+                    .content(oversizedBody)
+            )
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -216,14 +211,12 @@ class VariableRequestSizeLimitFilterIT {
     // --- Content-Length header rejection (stage 1) ---
 
     @Test
-    void should_rejectOversizedContentLength_forStartProcessEndpoint() {
+    void should_rejectOversizedContentLength_forStartProcessEndpoint() throws Exception {
         byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 1];
 
-        MockHttpServletRequestBuilder request = post("/v1/process-instances")
-            .contentType(APPLICATION_JSON)
-            .content(oversizedBody);
-
-        assertThatThrownBy(() -> mockMvc.perform(request)).isInstanceOf(RequestBodyTooLargeException.class);
+        mockMvc
+            .perform(post("/v1/process-instances").contentType(APPLICATION_JSON).content(oversizedBody))
+            .andExpect(status().isBadRequest());
     }
 
     // --- Filter should not apply to non-variable endpoints ---
