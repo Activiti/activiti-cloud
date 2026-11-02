@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
@@ -52,7 +51,7 @@ class VariableRequestSizeLimitFilterTest {
     // --- Content-Length up-front rejection ---
 
     @Test
-    void should_throwException_when_contentLengthExceedsLimit() {
+    void should_rejectWithBadRequest_when_contentLengthExceedsLimit() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
         request.setContentType("application/json");
         // MockHttpServletRequest derives getContentLengthLong() from setContent(),
@@ -61,9 +60,12 @@ class VariableRequestSizeLimitFilterTest {
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain))
-            .isInstanceOf(RequestBodyTooLargeException.class)
-            .hasMessageContaining("exceeds the maximum allowed size of 256 bytes");
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentType()).isEqualTo("application/json");
+        assertThat(response.getContentAsString()).contains("exceeds the maximum allowed size of 256 bytes");
+        Mockito.verifyNoInteractions(filterChain);
     }
 
     @Test
@@ -84,7 +86,7 @@ class VariableRequestSizeLimitFilterTest {
     // --- Body draining: actual body size checks ---
 
     @Test
-    void should_throwException_when_actualBodyExceedsLimit() {
+    void should_rejectWithBadRequest_when_actualBodyExceedsLimit() throws Exception {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
         request.setContentType("application/json");
@@ -92,9 +94,11 @@ class VariableRequestSizeLimitFilterTest {
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain))
-            .isInstanceOf(RequestBodyTooLargeException.class)
-            .hasMessageContaining("exceeds the maximum allowed size of 256 bytes");
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("exceeds the maximum allowed size of 256 bytes");
+        Mockito.verifyNoInteractions(filterChain);
     }
 
     @Test
@@ -213,7 +217,7 @@ class VariableRequestSizeLimitFilterTest {
         "POST, /v1/process-instances",
         "PUT, /admin/v1/process-instances/789/variables",
     })
-    void should_throwException_forOversizedBody(String method, String path) {
+    void should_rejectWithBadRequest_forOversizedBody(String method, String path) throws Exception {
         byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
         MockHttpServletRequest request = new MockHttpServletRequest(method, path);
         request.setContentType("application/json");
@@ -221,9 +225,10 @@ class VariableRequestSizeLimitFilterTest {
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        assertThatThrownBy(() -> filter.doFilter(request, response, filterChain)).isInstanceOf(
-            RequestBodyTooLargeException.class
-        );
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        Mockito.verifyNoInteractions(filterChain);
     }
 
     @Test

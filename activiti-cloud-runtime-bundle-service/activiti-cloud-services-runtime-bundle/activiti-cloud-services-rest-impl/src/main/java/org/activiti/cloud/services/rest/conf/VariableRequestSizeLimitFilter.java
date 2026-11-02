@@ -72,9 +72,17 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
-        rejectIfContentLengthExceedsLimit(request);
-        byte[] body = readAndValidateBody(request);
-        filterChain.doFilter(new SizeLimitedRequestWrapper(request, body), response);
+        try {
+            rejectIfContentLengthExceedsLimit(request);
+            byte[] body = readAndValidateBody(request);
+            filterChain.doFilter(new SizeLimitedRequestWrapper(request, body), response);
+        } catch (RequestBodyTooLargeException ex) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            response
+                .getWriter()
+                .write("{\"status\":400,\"error\":\"Bad Request\",\"message\":\"" + ex.getMessage() + "\"}");
+        }
     }
 
     /**
