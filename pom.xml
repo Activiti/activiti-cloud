@@ -195,8 +195,6 @@
     <jacoco-report-dir-suffix></jacoco-report-dir-suffix>
 
     <spring-boot.version>4.0.9</spring-boot.version>
-    <!-- AAE-51380 temporary Tomcat version override. Remove when upgrading to Spring Boot 4.1.x -->
-    <tomcat.version>11.0.27</tomcat.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
