@@ -89,6 +89,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Verifies the crash-recovery contract for service tasks: when a connector crashes mid-execution,
@@ -440,6 +441,16 @@ class OrphanedIntegrationRecoveryIT {
         @Bean
         ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler() {
             return mock(ServiceTaskIntegrationErrorEventHandler.class);
+        }
+
+        @Bean
+        RepositoryService repositoryService() {
+            return mock(RepositoryService.class);
+        }
+
+        @Bean
+        JsonMapper jsonMapper() {
+            return JsonMapper.builder().build();
         }
     }
 
