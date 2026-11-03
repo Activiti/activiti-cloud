@@ -566,6 +566,48 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         );
     });
 
+    activiti('current assignee of a task can reassign it to a candidate group member', async ({
+        runtimeBundleServiceTestUser,
+        taskServiceTestUser,
+        taskServiceHrUser,
+        queryServiceTestUser,
+    }) => {
+        let taskId: string;
+
+        await activiti.step('When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES', async () => {
+            const { task } = await startCatalogProcessWithFirstTask(
+                runtimeBundleServiceTestUser,
+                taskServiceTestUser,
+                'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES'
+            );
+            taskId = task.id;
+        });
+
+        await activiti.step('And the task has candidate group hr but not candidate user hruser in Query', async () => {
+            const groups = await queryServiceTestUser.waitForCandidateGroups(taskId, ['hr']);
+            expect.soft(groups).toContain('hr');
+            const users = await queryServiceTestUser.tasks.getCandidateUsers(taskId);
+            expect(users).not.toContain('hruser');
+        });
+
+        await activiti.step('And the user claims the task', async () => {
+            await taskServiceTestUser.tasks.claimTask(taskId);
+        });
+
+        await activiti.step('And the user assign the task to hruser', async () => {
+            await taskServiceTestUser.tasks.assignTask(taskId, 'hruser');
+        });
+
+        await activiti.step(
+            'And another user is authenticated as hruser ' +
+                'Then the assignee is hruser',
+            async () => {
+                const task = await taskServiceHrUser.waitForTaskAssignee(taskId, 'hruser');
+                expect(task.assignee).toBe('hruser');
+            }
+        );
+    });
+
     activiti('current assignee of a task cannot reassign it to a user that is not a candidate', async ({
         runtimeBundleServiceTestUser,
         taskServiceTestUser,
