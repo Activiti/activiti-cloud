@@ -31,6 +31,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A {@link org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice} that
@@ -56,10 +57,11 @@ public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter 
 
     private final VariableValueSizeValidator validator;
 
-    public VariableValueSizeValidationAdvice(VariableSizeLimitProperties properties) {
+    public VariableValueSizeValidationAdvice(VariableSizeLimitProperties properties, ObjectMapper objectMapper) {
         this.validator = new VariableValueSizeValidator(
             properties.getMaxVariableValueLength(),
-            properties.getWhitelistedVariables()
+            properties.getWhitelistedVariables(),
+            objectMapper
         );
     }
 

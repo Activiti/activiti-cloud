@@ -23,10 +23,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 class VariableValueSizeValidatorTest {
 
     private static final long MAX_NON_WHITELISTED_BYTES = 8000;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     // --- Map validation (SetProcessVariablesPayload / StartProcessPayload) ---
 
@@ -34,7 +36,8 @@ class VariableValueSizeValidatorTest {
     void should_allowVariables_when_nonWhitelistedTotalWithinLimit() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet()
+            Collections.emptySet(),
+            MAPPER
         );
 
         Map<String, Object> variables = Map.of("var1", "small value", "var2", "another small value");
@@ -46,7 +49,8 @@ class VariableValueSizeValidatorTest {
     void should_rejectVariables_when_nonWhitelistedTotalExceedsLimit() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet()
+            Collections.emptySet(),
+            MAPPER
         );
 
         String largeValue = "x".repeat(5000);
@@ -61,7 +65,8 @@ class VariableValueSizeValidatorTest {
     void should_allowLargeWhitelistedVariable_with_smallNonWhitelisted() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Set.of("batchState")
+            Set.of("batchState"),
+            MAPPER
         );
 
         String hugeValue = "x".repeat(100_000);
@@ -76,7 +81,8 @@ class VariableValueSizeValidatorTest {
     void should_rejectVariables_when_onlyNonWhitelistedExceedLimit_withWhitelistedPresent() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Set.of("batchState")
+            Set.of("batchState"),
+            MAPPER
         );
 
         String hugeValue = "x".repeat(100_000);
@@ -90,13 +96,31 @@ class VariableValueSizeValidatorTest {
     }
 
     @Test
+    void should_rejectVariables_when_multiByteCharactersExceedByteLimit() {
+        // 4000 'é' characters = 4000 UTF-16 code units but 8000 UTF-8 bytes (2 bytes each).
+        // With JSON quoting overhead the serialized size exceeds the 8000-byte limit.
+        VariableValueSizeValidator validator = new VariableValueSizeValidator(
+            MAX_NON_WHITELISTED_BYTES,
+            Collections.emptySet(),
+            MAPPER
+        );
+
+        String multiByteValue = "é".repeat(4000);
+        Map<String, Object> variables = Map.of("var1", multiByteValue);
+
+        assertThatThrownBy(() -> validator.validate(variables)).isInstanceOf(VariableValueTooLargeException.class);
+    }
+
+    @Test
     void should_allowVariables_when_exactlyAtLimit() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet()
+            Collections.emptySet(),
+            MAPPER
         );
 
-        String exactValue = "x".repeat((int) MAX_NON_WHITELISTED_BYTES);
+        // JSON serialization adds 2 bytes for the enclosing quotes: "xxx..." = length + 2
+        String exactValue = "x".repeat((int) MAX_NON_WHITELISTED_BYTES - 2);
         Map<String, Object> variables = Map.of("var1", exactValue);
 
         assertThatNoException().isThrownBy(() -> validator.validate(variables));
@@ -106,7 +130,8 @@ class VariableValueSizeValidatorTest {
     void should_allowEmptyVariables() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet()
+            Collections.emptySet(),
+            MAPPER
         );
 
         assertThatNoException().isThrownBy(() -> validator.validate(Collections.emptyMap()));
@@ -116,7 +141,8 @@ class VariableValueSizeValidatorTest {
     void should_allowNullVariables() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet()
+            Collections.emptySet(),
+            MAPPER
         );
 
         assertThatNoException().isThrownBy(() -> validator.validate(null));
@@ -126,7 +152,8 @@ class VariableValueSizeValidatorTest {
     void should_handleNullVariableValue() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet()
+            Collections.emptySet(),
+            MAPPER
         );
 
         Map<String, Object> variables = new HashMap<>();
@@ -141,7 +168,8 @@ class VariableValueSizeValidatorTest {
     void should_allowSingleVariable_when_withinLimit() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet()
+            Collections.emptySet(),
+            MAPPER
         );
 
         assertThatNoException().isThrownBy(() -> validator.validateSingle("var1", "small value"));
@@ -151,7 +179,8 @@ class VariableValueSizeValidatorTest {
     void should_rejectSingleVariable_when_exceedsLimit() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet()
+            Collections.emptySet(),
+            MAPPER
         );
 
         String largeValue = "x".repeat((int) MAX_NON_WHITELISTED_BYTES + 1);
@@ -165,7 +194,8 @@ class VariableValueSizeValidatorTest {
     void should_allowSingleWhitelistedVariable_when_exceedsLimit() {
         VariableValueSizeValidator validator = new VariableValueSizeValidator(
             MAX_NON_WHITELISTED_BYTES,
-            Set.of("batchState")
+            Set.of("batchState"),
+            MAPPER
         );
 
         String largeValue = "x".repeat(100_000);

@@ -27,6 +27,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
+import tools.jackson.databind.ObjectMapper;
 
 class VariableValueSizeValidationAdviceTest {
 
@@ -37,11 +38,13 @@ class VariableValueSizeValidationAdviceTest {
         RequestContextHolder.resetRequestAttributes();
     }
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     private VariableValueSizeValidationAdvice createAdvice(Set<String> whitelisted) {
         VariableSizeLimitProperties properties = new VariableSizeLimitProperties();
         properties.setMaxVariableValueLength(MAX_VALUE_LENGTH);
         properties.setWhitelistedVariables(whitelisted);
-        return new VariableValueSizeValidationAdvice(properties);
+        return new VariableValueSizeValidationAdvice(properties, MAPPER);
     }
 
     private void setRequestWithVariableName(String variableName) {
