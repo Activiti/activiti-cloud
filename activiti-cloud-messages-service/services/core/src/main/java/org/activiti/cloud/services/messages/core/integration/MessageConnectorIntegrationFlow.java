@@ -74,6 +74,9 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
+        var payloadTransformer = Transformers.fromJson(MessageEventPayload.class);
+        payloadTransformer.setTrustedPackages(MessageEventPayload.class.getPackageName());
+
         return this.from(MESSAGE_CONNECTOR_INTEGRATION_FLOW_INPUT)
             .headerFilter(properties.getInputHeadersToRemove())
             .gateway(
@@ -89,7 +92,7 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
                         .enrichHeaders(enricher ->
                             enricher.id(ENRICH_HEADERS).headerFunction(CORRELATION_ID, this::enrichHeaders)
                         )
-                        .transform(Transformers.fromJson(MessageEventPayload.class))
+                        .transform(payloadTransformer)
                         .handle(this.aggregator(), handlerSpec -> handlerSpec.id(AGGREGATOR).advice(advices))
                         .route(this.output()),
                 flowSpec ->
