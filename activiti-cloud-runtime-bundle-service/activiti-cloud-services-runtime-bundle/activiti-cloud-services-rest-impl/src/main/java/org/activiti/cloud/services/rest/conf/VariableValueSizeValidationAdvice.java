@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.rest.conf;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.Set;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
@@ -26,6 +27,9 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
 /**
@@ -86,8 +90,28 @@ public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter 
         } else if (body instanceof CreateTaskVariablePayload payload) {
             validator.validateSingle(payload.getName(), payload.getValue());
         } else if (body instanceof UpdateTaskVariablePayload payload) {
-            validator.validateSingle(payload.getName(), payload.getValue());
+            // The controller overwrites payload.name with the URI's {variableName} AFTER
+            // this advice runs, so we must validate against the URI variable name to prevent
+            // bypass (body claims a whitelisted name while the URI targets a non-whitelisted one).
+            String resolvedName = extractVariableNameFromUri();
+            validator.validateSingle(resolvedName != null ? resolvedName : payload.getName(), payload.getValue());
         }
         return body;
+    }
+
+    /**
+     * Extracts the {@code {variableName}} path variable from Spring's resolved URI template
+     * variables for the current request.
+     */
+    private String extractVariableNameFromUri() {
+        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attrs != null) {
+            Object uriVars = attrs.getRequest().getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+            if (uriVars instanceof Map<?, ?> map) {
+                Object value = map.get("variableName");
+                return value instanceof String s ? s : null;
+            }
+        }
+        return null;
     }
 }
