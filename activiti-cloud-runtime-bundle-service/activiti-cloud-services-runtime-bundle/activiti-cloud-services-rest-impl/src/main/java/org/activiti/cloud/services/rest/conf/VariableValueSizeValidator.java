@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Validates that the combined serialized size of non-whitelisted variable values
@@ -33,10 +34,16 @@ public class VariableValueSizeValidator {
 
     private final long maxNonWhitelistedBytes;
     private final Set<String> whitelistedVariableNames;
+    private final ObjectMapper objectMapper;
 
-    public VariableValueSizeValidator(long maxNonWhitelistedBytes, Set<String> whitelistedVariableNames) {
+    public VariableValueSizeValidator(
+        long maxNonWhitelistedBytes,
+        Set<String> whitelistedVariableNames,
+        ObjectMapper objectMapper
+    ) {
         this.maxNonWhitelistedBytes = maxNonWhitelistedBytes;
         this.whitelistedVariableNames = whitelistedVariableNames;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -98,10 +105,20 @@ public class VariableValueSizeValidator {
         }
     }
 
+    /**
+     * Returns the size in UTF-8 bytes of the JSON-serialized value, using the application's
+     * configured {@link ObjectMapper}. This ensures maps, lists and multi-byte characters
+     * are measured consistently with how they appear on the wire.
+     */
     private long serializedSize(Object value) {
         if (value == null) {
             return 0;
         }
-        return String.valueOf(value).length();
+        try {
+            return objectMapper.writeValueAsBytes(value).length;
+        } catch (Exception e) {
+            LOGGER.warn("Failed to serialize variable value for size check, falling back to string length", e);
+            return String.valueOf(value).getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+        }
     }
 }
