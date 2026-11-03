@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { timeouts } from './config/runtime/timeouts';
+import { reportPortalAbortController } from './rp-request-controller';
 
 const { env } = process;
 const environmentVariables = [
@@ -86,7 +86,10 @@ export const getReportPortalConfig = () => {
         launch: `${env.REPORT_PORTAL_LAUNCH_KEY}`,
         includeTestSteps: false,
         restClientConfig: {
-            timeout: timeouts.test,
+            // Fail fast: with the client default (6 retries) a slow/unavailable ReportPortal can block the run for minutes
+            timeout: 30 * 1000,
+            retry: 2,
+            signal: reportPortalAbortController.signal,
         },
         attributes,
         description: `[${title}](${url})`,
