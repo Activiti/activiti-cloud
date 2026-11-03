@@ -49,18 +49,24 @@ class ServiceTaskIntegrationCompletionHandlerTest {
     @Mock
     private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
+    @Mock
+    private EphemeralMappingResolver ephemeralMappingResolver;
+
     @Test
     void handlePropagationFailure_shouldExecuteCompositeCommand() {
         ServiceTaskIntegrationCompletionHandler handler = new ServiceTaskIntegrationCompletionHandler(
             runtimeBundleProperties,
             managementService,
-            processEngineEventsAggregator
+            processEngineEventsAggregator,
+            ephemeralMappingResolver
         );
 
         IntegrationErrorImpl error = mock(IntegrationErrorImpl.class);
         IntegrationContextEntity ctxEntity = mock(IntegrationContextEntity.class);
 
         handler.handlePropagationFailure(error, ctxEntity);
+
+        verify(ephemeralMappingResolver).isEphemeral(ctxEntity);
 
         ArgumentCaptor<Command<?>> cmdCaptor = ArgumentCaptor.forClass(Command.class);
         verify(managementService, times(1)).executeCommand(cmdCaptor.capture());

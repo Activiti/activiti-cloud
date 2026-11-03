@@ -33,6 +33,9 @@ import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregato
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -40,6 +43,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AggregateIntegrationErrorReceivedEventCmdTest {
+
+    private static final Map<String, Object> OUTBOUND_VARIABLES = Map.of(
+        "outboundKey",
+        "outboundValue",
+        "outboundKey2",
+        "outboundValue2"
+    );
 
     private final RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties();
 
@@ -60,14 +70,9 @@ class AggregateIntegrationErrorReceivedEventCmdTest {
         when(integrationError.getErrorClassName()).thenReturn("className");
         final List<StackTraceElement> stackTraceElements = Collections.singletonList(mock(StackTraceElement.class));
         when(integrationError.getStackTraceElements()).thenReturn(stackTraceElements);
-        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
-            integrationError,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
-        );
 
         //when
-        command.execute(mock(CommandContext.class));
+        buildCommand(integrationError, false).execute(mock(CommandContext.class));
 
         //then
         verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
@@ -83,91 +88,78 @@ class AggregateIntegrationErrorReceivedEventCmdTest {
     @Test
     void should_clearInBoundVariables_when_integrationAuditEventIsSent() {
         //given
-        final IntegrationError integrationError = mock(IntegrationError.class);
-
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.addInBoundVariables(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
-        integrationContext.addOutBoundVariables(
-            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
-        );
-
-        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
-
-        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
-            integrationError,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
-        );
+        IntegrationError integrationError = buildIntegrationError(null);
 
         //when
-        command.execute(mock(CommandContext.class));
+        buildCommand(integrationError, false).execute(mock(CommandContext.class));
 
         //then
-        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
-        final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
-        IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
-        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
+        assertThat(captureSentContext().getInBoundVariables()).isEmpty();
     }
 
-    @Test
-    void should_notRetainInboundAndOutboundVariables_when_integrationContextHasEphemeralVariables() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(booleans = { true, false })
+    void should_notRetainInboundAndOutboundVariables_when_mappingIsEphemeral_regardlessOfConnectorFlag(
+        Boolean connectorEphemeralFlag
+    ) {
         //given
-        final IntegrationError integrationError = mock(IntegrationError.class);
-
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.setEphemeralVariables(true);
-        integrationContext.addInBoundVariables(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
-        integrationContext.addOutBoundVariables(
-            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
-        );
-
-        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
-
-        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
-            integrationError,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
-        );
+        IntegrationError integrationError = buildIntegrationError(connectorEphemeralFlag);
 
         //when
-        command.execute(mock(CommandContext.class));
+        buildCommand(integrationError, true).execute(mock(CommandContext.class));
 
-        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
-        final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
-        IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
+        //then
+        IntegrationContext sanitizedContext = captureSentContext();
         assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
         assertThat(sanitizedContext.getOutBoundVariables()).isEmpty();
+        assertThat(sanitizedContext.hasEphemeralVariables()).isTrue();
     }
 
-    @Test
-    void should_retainOutboundVariables_when_integrationContextDoesNotHaveEphemeralVariables() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(booleans = { true, false })
+    void should_retainOutboundVariables_when_mappingIsNotEphemeral_regardlessOfConnectorFlag(
+        Boolean connectorEphemeralFlag
+    ) {
         //given
-        final IntegrationError integrationError = mock(IntegrationError.class);
-
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.setEphemeralVariables(false);
-        integrationContext.addInBoundVariables(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
-        integrationContext.addOutBoundVariables(
-            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
-        );
-
-        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
-
-        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
-            integrationError,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
-        );
+        IntegrationError integrationError = buildIntegrationError(connectorEphemeralFlag);
 
         //when
-        command.execute(mock(CommandContext.class));
+        buildCommand(integrationError, false).execute(mock(CommandContext.class));
 
-        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
-        final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
-        IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
+        //then
+        IntegrationContext sanitizedContext = captureSentContext();
         assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
-        assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(
-            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
+        assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(OUTBOUND_VARIABLES);
+        assertThat(sanitizedContext.hasEphemeralVariables()).isFalse();
+    }
+
+    private AggregateIntegrationErrorReceivedEventCmd buildCommand(
+        IntegrationError integrationError,
+        boolean ephemeralMapping
+    ) {
+        return new AggregateIntegrationErrorReceivedEventCmd(
+            integrationError,
+            runtimeBundleProperties,
+            processEngineEventsAggregator,
+            ephemeralMapping
         );
+    }
+
+    private IntegrationError buildIntegrationError(Boolean connectorEphemeralFlag) {
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setEphemeralVariables(connectorEphemeralFlag);
+        integrationContext.addInBoundVariables(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
+        integrationContext.addOutBoundVariables(OUTBOUND_VARIABLES);
+
+        IntegrationError integrationError = mock(IntegrationError.class);
+        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
+        return integrationError;
+    }
+
+    private IntegrationContext captureSentContext() {
+        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
+        return ((CloudIntegrationErrorReceivedEvent) cloudRuntimeEventArgumentCaptor.getValue()).getEntity();
     }
 }

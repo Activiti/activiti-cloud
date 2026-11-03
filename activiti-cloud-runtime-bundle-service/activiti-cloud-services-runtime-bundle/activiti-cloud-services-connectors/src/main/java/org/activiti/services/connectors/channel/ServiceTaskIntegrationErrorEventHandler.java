@@ -45,19 +45,22 @@ public class ServiceTaskIntegrationErrorEventHandler {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private final EphemeralMappingResolver ephemeralMappingResolver;
 
     public ServiceTaskIntegrationErrorEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
         ManagementService managementService,
         RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        EphemeralMappingResolver ephemeralMappingResolver
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
+        this.ephemeralMappingResolver = ephemeralMappingResolver;
     }
 
     @Retryable(
@@ -72,6 +75,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
         );
 
         if (integrationContextEntity != null) {
+            boolean ephemeralMapping = ephemeralMappingResolver.isEphemeral(integrationContextEntity);
             List<Command<?>> commands = new ArrayList<>();
 
             commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
@@ -108,7 +112,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
                                     new AggregateIntegrationErrorReceivedEventCmd(
                                         integrationError,
                                         runtimeBundleProperties,
-                                        processEngineEventsAggregator
+                                        processEngineEventsAggregator,
+                                        ephemeralMapping
                                     )
                                 )
                             );
@@ -152,7 +157,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
                 new AggregateIntegrationErrorReceivedEventCmd(
                     integrationError,
                     runtimeBundleProperties,
-                    processEngineEventsAggregator
+                    processEngineEventsAggregator,
+                    ephemeralMapping
                 )
             );
 

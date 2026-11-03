@@ -39,6 +39,7 @@ import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.ConnectorIncidentEventHandler;
+import org.activiti.services.connectors.channel.EphemeralMappingResolver;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
@@ -48,6 +49,7 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEven
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -77,7 +79,8 @@ public class CloudConnectorsAutoConfiguration {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
+        EphemeralMappingResolver ephemeralMappingResolver
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
@@ -86,8 +89,15 @@ public class CloudConnectorsAutoConfiguration {
             managementService,
             processEngineEventsAggregator,
             variablesPropagator,
-            serviceTaskIntegrationCompletionHandler
+            serviceTaskIntegrationCompletionHandler,
+            ephemeralMappingResolver
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EphemeralMappingResolver ephemeralMappingResolver(ProcessExtensionService processExtensionService) {
+        return new EphemeralMappingResolver(processExtensionService);
     }
 
     @Bean
@@ -95,12 +105,14 @@ public class CloudConnectorsAutoConfiguration {
     public ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler(
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        EphemeralMappingResolver ephemeralMappingResolver
     ) {
         return new ServiceTaskIntegrationCompletionHandler(
             runtimeBundleProperties,
             managementService,
-            processEngineEventsAggregator
+            processEngineEventsAggregator,
+            ephemeralMappingResolver
         );
     }
 
@@ -119,14 +131,16 @@ public class CloudConnectorsAutoConfiguration {
         IntegrationContextService integrationContextService,
         ManagementService managementService,
         RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        EphemeralMappingResolver ephemeralMappingResolver
     ) {
         return new ServiceTaskIntegrationErrorEventHandler(
             runtimeService,
             integrationContextService,
             managementService,
             runtimeBundleProperties,
-            processEngineEventsAggregator
+            processEngineEventsAggregator,
+            ephemeralMappingResolver
         );
     }
 

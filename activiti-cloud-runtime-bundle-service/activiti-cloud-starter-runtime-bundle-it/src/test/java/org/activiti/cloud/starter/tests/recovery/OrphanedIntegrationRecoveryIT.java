@@ -51,6 +51,7 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.integration.IntegrationContextService;
+import org.activiti.services.connectors.channel.EphemeralMappingResolver;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryConfiguration;
@@ -467,7 +468,8 @@ class OrphanedIntegrationRecoveryIT {
             IntegrationContextService integrationContextService,
             ManagementService managementService,
             RuntimeBundleProperties runtimeBundleProperties,
-            ProcessEngineEventsAggregator processEngineEventsAggregator
+            ProcessEngineEventsAggregator processEngineEventsAggregator,
+            EphemeralMappingResolver ephemeralMappingResolver
         ) {
             return spy(
                 new ServiceTaskIntegrationErrorEventHandler(
@@ -475,7 +477,8 @@ class OrphanedIntegrationRecoveryIT {
                     integrationContextService,
                     managementService,
                     runtimeBundleProperties,
-                    processEngineEventsAggregator
+                    processEngineEventsAggregator,
+                    ephemeralMappingResolver
                 )
             );
         }
