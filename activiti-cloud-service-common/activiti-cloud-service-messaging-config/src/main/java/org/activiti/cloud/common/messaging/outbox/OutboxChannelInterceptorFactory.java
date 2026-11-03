@@ -97,7 +97,7 @@ public class OutboxChannelInterceptorFactory
                         .taskScheduler(taskScheduler(partitionKey))
                         .poller(
                             Pollers.fixedDelay(Duration.ofMillis(50))
-                                .maxMessagesPerPoll(10)
+                                .maxMessagesPerPoll(1)
                                 .receiveTimeout(Duration.ofSeconds(1).toMillis())
                                 .advice(new PollLockAdvice(lockRegistry, partitionKey))
                                 .transactional(transactionManager)
