@@ -1,7 +1,7 @@
 /** Parse surefire XML reports and post/update a PR comment with slow test results. */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 /**
  * @param {string} dir
@@ -27,15 +27,15 @@ function findXmlFiles(dir) {
  */
 function parseTestCases(xmlContent) {
   const testCases = [];
-  const regex = /<testcase\s+([^>]*)[\/]?>|<testcase\s+([^>]*)>/g;
+  const regex = /<testcase(?=\s)([^<>]*)>/g;
   for (const match of xmlContent.matchAll(regex)) {
-    const attrs = match[1] || match[2];
-    const nameMatch = attrs.match(/name="([^"]*)"/);
-    const classMatch = attrs.match(/classname="([^"]*)"/);
-    const timeMatch = attrs.match(/time="([^"]*)"/);
+    const attrs = match[1];
+    const nameMatch = /name="([^"]*)"/.exec(attrs);
+    const classMatch = /classname="([^"]*)"/.exec(attrs);
+    const timeMatch = /time="([^"]*)"/.exec(attrs);
     if (nameMatch && classMatch && timeMatch) {
-      const time = parseFloat(timeMatch[1]);
-      if (!isNaN(time)) {
+      const time = Number.parseFloat(timeMatch[1]);
+      if (!Number.isNaN(time)) {
         testCases.push({ name: nameMatch[1], classname: classMatch[1], time });
       }
     }
@@ -125,12 +125,12 @@ function formatSlowClassesTable(classes, slowTestThreshold) {
 }
 
 function escapeMarkdown(value) {
-  return value.replace(/[|`\\]/g, '\\$&');
+  return value.replace(/[|`\\]/g, String.raw`\$&`);
 }
 
 async function postSlowTestsReport({ github, context, core }) {
-  const SLOW_THRESHOLD_SECONDS = parseInt(process.env.SLOW_THRESHOLD || '5', 10);
-  const SLOW_CLASS_THRESHOLD_SECONDS = parseInt(process.env.SLOW_CLASS_THRESHOLD || '30', 10);
+  const SLOW_THRESHOLD_SECONDS = Number.parseInt(process.env.SLOW_THRESHOLD || '5', 10);
+  const SLOW_CLASS_THRESHOLD_SECONDS = Number.parseInt(process.env.SLOW_CLASS_THRESHOLD || '30', 10);
   const reportsDir = process.env.REPORTS_DIR || 'reports';
   const { unit: unitTests, integration: integrationTests } = collectTestsByType(reportsDir);
 
@@ -191,7 +191,7 @@ async function postSlowTestsReport({ github, context, core }) {
     issue_number: issueNumber,
     per_page: 100,
   });
-  const existing = comments.find(comment => comment.body && comment.body.includes(marker));
+  const existing = comments.find(comment => comment.body?.includes(marker));
 
   if (existing) {
     await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
@@ -205,3 +205,4 @@ async function postSlowTestsReport({ github, context, core }) {
 module.exports = postSlowTestsReport;
 module.exports.buildSlowClassesTable = buildSlowClassesTable;
 module.exports.formatSlowClassesTable = formatSlowClassesTable;
+module.exports.parseTestCases = parseTestCases;

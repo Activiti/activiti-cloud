@@ -5,7 +5,29 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const postSlowTestsReport = require('./comment-slow-tests');
-const { buildSlowClassesTable, formatSlowClassesTable } = postSlowTestsReport;
+const { buildSlowClassesTable, formatSlowClassesTable, parseTestCases } = postSlowTestsReport;
+
+assert.deepEqual(
+  parseTestCases(
+    '<testsuite>' +
+      '<testcase name="self-closing" classname="Example" time="6.25" />' +
+      '<testcase\nname="paired" classname="Example" time="7"></testcase>' +
+      '<testcase name="invalid" classname="Example" time="not-a-number" />' +
+      '<testcase name="missing" classname="Example" />' +
+      '<testcases name="not-a-test" classname="Example" time="8" />' +
+      '</testsuite>',
+  ),
+  [
+    { name: 'self-closing', classname: 'Example', time: 6.25 },
+    { name: 'paired', classname: 'Example', time: 7 },
+  ],
+);
+assert.deepEqual(parseTestCases('<testcase' + ' '.repeat(100_000)), []);
+assert.deepEqual(parseTestCases('<testcase name="unterminated" '.repeat(10_000)), []);
+assert.deepEqual(
+  parseTestCases('<testcase name="unterminated" <testcase name="valid" classname="Example" time="6" />'),
+  [{ name: 'valid', classname: 'Example', time: 6 }],
+);
 
 const tests = [
   { classname: 'CumulativeClass', name: 'first', time: 4 },
@@ -21,6 +43,10 @@ assert.deepEqual(classes.map(testClass => testClass.classname), ['CumulativeClas
 const table = formatSlowClassesTable(classes, 5);
 assert.match(table, /\| Total Time \| # \| All Tests \| Time > 5s \| Tests > 5s \| Class \|/);
 assert.match(table, /\| 12\.00s \| 1 \| 3 \| 0\.00s \| 0 \| `CumulativeClass` \|/);
+assert.ok(
+  formatSlowClassesTable([{ ...classes[0], classname: 'Pipe|Tick`Slash\\' }], 5)
+    .includes('Pipe\\|Tick\\`Slash\\\\'),
+);
 
 async function verifyGeneratedCommentUsesAllTestCases() {
   const reportsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'slow-tests-report-'));
@@ -39,7 +65,7 @@ async function verifyGeneratedCommentUsesAllTestCases() {
   const github = {
     rest: {
       issues: {
-        listComments: async () => ({ data: [] }),
+        listComments: async () => ({ data: [{}, { body: null }, { body: 'Unrelated comment' }] }),
         createComment: async (/** @type {{ body: string }} */ comment) => { commentBody = comment.body; },
       },
     },
