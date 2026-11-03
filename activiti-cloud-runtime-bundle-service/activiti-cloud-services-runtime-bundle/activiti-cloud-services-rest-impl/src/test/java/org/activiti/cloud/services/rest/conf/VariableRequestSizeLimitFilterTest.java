@@ -215,6 +215,7 @@ class VariableRequestSizeLimitFilterTest {
     @CsvSource({
         "POST, /v1/tasks/456/variables",
         "POST, /v1/process-instances",
+        "POST, /v1/process-instances/123/start",
         "PUT, /admin/v1/process-instances/789/variables",
     })
     void should_rejectWithBadRequest_forOversizedBody(String method, String path) throws Exception {
@@ -234,6 +235,12 @@ class VariableRequestSizeLimitFilterTest {
     @Test
     void should_applyFilter_forStartProcessEndpoint() {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/process-instances");
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
+    @Test
+    void should_applyFilter_forStartCreatedProcessEndpoint() {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/process-instances/123/start");
         assertThat(filter.shouldNotFilter(request)).isFalse();
     }
 

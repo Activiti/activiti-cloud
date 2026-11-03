@@ -195,6 +195,67 @@ class VariableValueSizeValidationIT {
             .andExpect(status().isOk());
     }
 
+    // --- StartProcessPayload: POST /v1/process-instances/{id}/start ---
+
+    @Test
+    void should_rejectStartCreatedProcess_when_nonWhitelistedVariablesExceedLimit() throws Exception {
+        String largeValue = "x".repeat(MAX_VARIABLE_VALUE_LENGTH + 1);
+
+        StartProcessPayload cmd = ProcessPayloadBuilder.start()
+            .withProcessDefinitionId("1")
+            .withVariable("bigVar", largeValue)
+            .build();
+
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{processInstanceId}/start", "123")
+                    .contentType(APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd))
+            )
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_allowStartCreatedProcess_when_variablesWithinLimit() throws Exception {
+        when(processRuntime.startCreatedProcess(any(), any(StartProcessPayload.class))).thenReturn(
+            defaultProcessInstance()
+        );
+
+        StartProcessPayload cmd = ProcessPayloadBuilder.start()
+            .withProcessDefinitionId("1")
+            .withVariable("smallVar", "ok")
+            .build();
+
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{processInstanceId}/start", "123")
+                    .contentType(APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd))
+            )
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_allowStartCreatedProcess_when_whitelistedVariableExceedsLimit() throws Exception {
+        when(processRuntime.startCreatedProcess(any(), any(StartProcessPayload.class))).thenReturn(
+            defaultProcessInstance()
+        );
+
+        String hugeValue = "x".repeat(1000);
+        StartProcessPayload cmd = ProcessPayloadBuilder.start()
+            .withProcessDefinitionId("1")
+            .withVariable("batchState", hugeValue)
+            .build();
+
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{processInstanceId}/start", "123")
+                    .contentType(APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd))
+            )
+            .andExpect(status().isOk());
+    }
+
     // --- SetProcessVariablesPayload: PUT /v1/process-instances/{id}/variables ---
 
     @Test
