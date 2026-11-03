@@ -277,4 +277,36 @@ class VariableRequestSizeLimitFilterIT {
             .perform(put("/v1/process-instances/{processInstanceId}", "1").contentType(APPLICATION_JSON).content(body))
             .andExpect(status().isOk());
     }
+
+    // --- Percent-encoded URI bypass prevention ---
+
+    @Test
+    void should_rejectOversizedBody_forPercentEncodedVariableEndpoint() throws Exception {
+        byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
+        Arrays.fill(oversizedBody, (byte) 'a');
+
+        // "process-%69nstances" decodes to "process-instances" — filter must still apply
+        mockMvc
+            .perform(
+                put("/v1/process-%69nstances/{processInstanceId}/variables", "123")
+                    .contentType(APPLICATION_JSON)
+                    .content(oversizedBody)
+            )
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_rejectOversizedBody_forPercentEncodedStartEndpoint() throws Exception {
+        byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
+        Arrays.fill(oversizedBody, (byte) 'a');
+
+        // "%73tart" decodes to "start" — filter must still apply
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{processInstanceId}/%73tart", "123")
+                    .contentType(APPLICATION_JSON)
+                    .content(oversizedBody)
+            )
+            .andExpect(status().isBadRequest());
+    }
 }
