@@ -74,6 +74,9 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     @Mock
     private ManagementService managementService;
 
+    @Mock
+    private EphemeralMappingResolver ephemeralMappingResolver;
+
     @BeforeEach
     public void setUp() {
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
@@ -145,6 +148,8 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         assertThat(compositeCommand.getCommands()).hasSize(2);
         assertThat(compositeCommand.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
+        // ephemeral flag is resolved from the runtime bundle's own integration context (mapping), not the error payload
+        verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
     }
 
     @Test

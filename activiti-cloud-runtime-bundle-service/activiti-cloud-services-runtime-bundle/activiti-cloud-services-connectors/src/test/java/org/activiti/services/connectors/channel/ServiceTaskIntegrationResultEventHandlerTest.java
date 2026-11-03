@@ -77,6 +77,9 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
 
+    @Mock
+    private EphemeralMappingResolver ephemeralMappingResolver;
+
     @Test
     void receive_should_skipTriggerWhenActivityIdMismatch() {
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
@@ -99,6 +102,8 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(composite.getCommands()).hasSize(2);
         assertThat(composite.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(composite.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        // ephemeral flag is resolved from the runtime bundle's own integration context (mapping), not the reply
+        verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
     }
 
     @Test

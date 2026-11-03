@@ -31,15 +31,18 @@ public class ServiceTaskIntegrationCompletionHandler {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private final EphemeralMappingResolver ephemeralMappingResolver;
 
     public ServiceTaskIntegrationCompletionHandler(
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        EphemeralMappingResolver ephemeralMappingResolver
     ) {
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
+        this.ephemeralMappingResolver = ephemeralMappingResolver;
     }
 
     @Transactional(propagation = REQUIRES_NEW)
@@ -51,7 +54,8 @@ public class ServiceTaskIntegrationCompletionHandler {
             new AggregateIntegrationErrorReceivedEventCmd(
                 integrationError,
                 runtimeBundleProperties,
-                processEngineEventsAggregator
+                processEngineEventsAggregator,
+                ephemeralMappingResolver.isEphemeral(integrationContextEntity)
             ),
             new DeleteIntegrationContextCmd(integrationContextEntity)
         );

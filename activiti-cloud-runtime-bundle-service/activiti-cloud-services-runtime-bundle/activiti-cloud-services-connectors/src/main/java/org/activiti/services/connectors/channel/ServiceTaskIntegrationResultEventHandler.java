@@ -52,6 +52,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
     private final ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
+    private final EphemeralMappingResolver ephemeralMappingResolver;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -60,7 +61,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
+        EphemeralMappingResolver ephemeralMappingResolver
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -69,6 +71,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
         this.serviceTaskIntegrationCompletionHandler = serviceTaskIntegrationCompletionHandler;
+        this.ephemeralMappingResolver = ephemeralMappingResolver;
     }
 
     @Retryable(
@@ -125,7 +128,8 @@ public class ServiceTaskIntegrationResultEventHandler {
                 new AggregateIntegrationResultReceivedEventCmd(
                     integrationContext,
                     runtimeBundleProperties,
-                    processEngineEventsAggregator
+                    processEngineEventsAggregator,
+                    ephemeralMappingResolver.isEphemeral(integrationContextEntity)
                 )
             );
 
