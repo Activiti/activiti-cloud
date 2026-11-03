@@ -165,6 +165,39 @@ class VariableRequestSizeLimitFilterIT {
             .andExpect(status().isOk());
     }
 
+    // --- Start created process endpoint: POST /v1/process-instances/{id}/start ---
+
+    @Test
+    void should_rejectOversizedBody_forStartCreatedProcessEndpoint() throws Exception {
+        byte[] oversizedBody = new byte[MAX_SIZE_BYTES + 100];
+        Arrays.fill(oversizedBody, (byte) 'a');
+
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{processInstanceId}/start", "123")
+                    .contentType(APPLICATION_JSON)
+                    .content(oversizedBody)
+            )
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_allowWithinLimitBody_forStartCreatedProcessEndpoint() throws Exception {
+        when(processRuntime.startCreatedProcess(any(), any(StartProcessPayload.class))).thenReturn(
+            defaultProcessInstance()
+        );
+
+        StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
+
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{processInstanceId}/start", "123")
+                    .contentType(APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd))
+            )
+            .andExpect(status().isOk());
+    }
+
     // --- Set variables endpoint: PUT /v1/process-instances/{id}/variables ---
 
     @Test

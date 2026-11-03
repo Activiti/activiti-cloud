@@ -57,6 +57,7 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
 
     private static final List<String> VARIABLE_ENDPOINT_PATTERNS = List.of(
         "/**/v1/process-instances",
+        "/**/v1/process-instances/*/start",
         "/**/v1/process-instances/*/variables",
         "/**/v1/process-instances/*/variables/**",
         "/**/v1/tasks/*/variables",
