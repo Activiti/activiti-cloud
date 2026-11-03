@@ -87,10 +87,14 @@ class VariableRequestSizeLimitFilterTest {
 
     @Test
     void should_rejectWithBadRequest_when_actualBodyExceedsLimit() throws Exception {
-        byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
+        // Use valid JSON followed by excess whitespace so the body exceeds the limit.
+        // Content-Length is set to -1 (unknown) to ensure stage 1 does NOT reject;
+        // only the stage-2 body-draining check should catch this.
+        byte[] oversizedBody = ("{}" + " ".repeat((int) MAX_SIZE_BYTES)).getBytes();
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-instances/123/variables");
         request.setContentType("application/json");
         request.setContent(oversizedBody);
+        request.addHeader("Content-Length", -1);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -209,6 +213,29 @@ class VariableRequestSizeLimitFilterTest {
         assertThat(filter.shouldNotFilter(request)).isTrue();
     }
 
+    // --- Percent-encoded URI bypass prevention ---
+
+    @Test
+    void should_applyFilter_forPercentEncodedVariableEndpoint() {
+        // "process-%69nstances" decodes to "process-instances"
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/v1/process-%69nstances/123/variables");
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
+    @Test
+    void should_applyFilter_forPercentEncodedStartEndpoint() {
+        // "%73tart" decodes to "start"
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/process-instances/123/%73tart");
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
+    @Test
+    void should_applyFilter_forPercentEncodedTaskVariableEndpoint() {
+        // "%76ariables" decodes to "variables"
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/tasks/456/%76ariables");
+        assertThat(filter.shouldNotFilter(request)).isFalse();
+    }
+
     // --- Endpoint coverage ---
 
     @ParameterizedTest(name = "{0} {1}")
@@ -219,10 +246,13 @@ class VariableRequestSizeLimitFilterTest {
         "PUT, /admin/v1/process-instances/789/variables",
     })
     void should_rejectWithBadRequest_forOversizedBody(String method, String path) throws Exception {
-        byte[] oversizedBody = new byte[(int) MAX_SIZE_BYTES + 100];
+        // Valid JSON padded with whitespace beyond the limit; Content-Length hidden
+        // so that stage 1 (Content-Length check) is bypassed and stage 2 (body draining) is exercised.
+        byte[] oversizedBody = ("{}" + " ".repeat((int) MAX_SIZE_BYTES)).getBytes();
         MockHttpServletRequest request = new MockHttpServletRequest(method, path);
         request.setContentType("application/json");
         request.setContent(oversizedBody);
+        request.addHeader("Content-Length", -1);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 

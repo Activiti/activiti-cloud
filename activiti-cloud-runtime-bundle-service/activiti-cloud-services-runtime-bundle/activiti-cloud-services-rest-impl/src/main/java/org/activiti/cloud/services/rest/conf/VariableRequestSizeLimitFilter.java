@@ -20,6 +20,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,7 +133,9 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
         if (!PUT.equalsIgnoreCase(method) && !POST.equalsIgnoreCase(method)) {
             return true;
         }
-        String uri = request.getRequestURI();
+        // Decode percent-encoded URIs so that e.g. /v1/process-%69nstances matches
+        // the same patterns that Spring MVC's decoded path matching would reach.
+        String uri = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
         return VARIABLE_ENDPOINT_PATTERNS.stream().noneMatch(pattern -> PATH_MATCHER.match(pattern, uri));
     }
 }
