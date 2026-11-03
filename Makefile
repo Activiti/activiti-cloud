@@ -40,6 +40,7 @@ install: release
 			--values $(MESSAGING_PARTITIONED)-values.yaml \
 			--values $(MESSAGING_DESTINATIONS)-values.yaml \
 			$(if $(LOCAL_VALUES_FILE),--values $(LOCAL_VALUES_FILE)) \
+			$(foreach f,$(EXTRA_VALUES_FILES),--values $(f)) \
 			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
 			--atomic \

@@ -124,7 +124,7 @@ jobs:
 
       - name: Install release (${{ matrix.profile }})
         env:
-          LOCAL_VALUES_FILE: ${{ github.workspace }}/scripts/ci/preview-values/pushed-counts.yaml
+          EXTRA_VALUES_FILES: ${{ github.workspace }}/scripts/ci/preview-values/pushed-counts.yaml
         run: bash scripts/ci/install-preview-release.sh
 
       - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
