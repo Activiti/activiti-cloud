@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
+import org.activiti.cloud.common.messaging.config.QueueSizeBasedTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -96,7 +97,7 @@ public class OutboxChannelInterceptorFactory
                         .autoStartup(false)
                         .taskScheduler(taskScheduler(partitionKey))
                         .poller(
-                            Pollers.fixedDelay(Duration.ofMillis(50))
+                            Pollers.trigger(queueSizeBasedTrigger(queueChannel))
                                 .maxMessagesPerPoll(1)
                                 .receiveTimeout(Duration.ofSeconds(1).toMillis())
                                 .advice(new PollLockAdvice(lockRegistry, partitionKey))
@@ -124,6 +125,10 @@ public class OutboxChannelInterceptorFactory
                 Thread.ofPlatform().name(partitionKey.concat("Poller")).factory()
             )
         );
+    }
+
+    private QueueSizeBasedTrigger queueSizeBasedTrigger(QueueChannel queueChannel) {
+        return new QueueSizeBasedTrigger(queueChannel, Duration.ofMillis(50), Duration.ofMillis(1));
     }
 
     @Override
