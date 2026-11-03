@@ -219,7 +219,7 @@ public class OutboxAutoConfiguration {
     ) {
         final var messageStore = new JdbcChannelMessageStore(dataSource);
 
-        messageStore.setUsingIdCache(true);
+        messageStore.setUsingIdCache(false);
         messageStore.setChannelMessageStoreQueryProvider(channelMessageStoreQueryProvider);
         messageStore.setCheckDatabaseOnStart(true);
         messageStore.setPreparedStatementSetter(channelMessageStorePreparedStatementSetter);
