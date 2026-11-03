@@ -89,14 +89,16 @@ prereqs_setup_gateway_and_keycloak() {
   export TRAEFIK_IP
 
   ACT_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
+  KEYCLOAK_ADMIN_URL=""
   JWT_JWK_SET_URI=""
   KEYCLOAK_CLIENT_TOKEN_URI=""
   if [[ "${GITHUB_ACTIONS:-}" == "true" || "${CI:-}" == "true" ]]; then
     ACT_KEYCLOAK_URL="https://${IDENTITY_HOST}/auth"
+    KEYCLOAK_ADMIN_URL="http://${IDENTITY_HOST}/auth"
     JWT_JWK_SET_URI="http://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}/protocol/openid-connect/certs"
     KEYCLOAK_CLIENT_TOKEN_URI="http://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}/protocol/openid-connect/token"
   fi
-  export ACT_KEYCLOAK_URL JWT_JWK_SET_URI KEYCLOAK_CLIENT_TOKEN_URI
+  export ACT_KEYCLOAK_URL KEYCLOAK_ADMIN_URL JWT_JWK_SET_URI KEYCLOAK_CLIENT_TOKEN_URI
 }
 
 prereqs_setup_paths_and_flags() {
@@ -131,6 +133,9 @@ prereqs_log_configuration() {
   prereqs_set_actor connector && prereqs_log "Connector deploy:       ${CONNECTOR_DEP}"
   prereqs_set_actor traefik && prereqs_log "Gateway host:           ${GATEWAY_HOST}"
   prereqs_set_actor identity && prereqs_log "Identity host:          ${IDENTITY_HOST} → ${ACT_KEYCLOAK_URL}"
+  if [[ -n "${KEYCLOAK_ADMIN_URL}" ]]; then
+    prereqs_log "Keycloak admin (in-cluster): ${KEYCLOAK_ADMIN_URL}"
+  fi
   if [[ -n "${JWT_JWK_SET_URI}" ]]; then
     prereqs_log "JWT JWKS (in-cluster):  ${JWT_JWK_SET_URI}"
     prereqs_log "Client token (in-cluster): ${KEYCLOAK_CLIENT_TOKEN_URI}"

@@ -126,7 +126,7 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
     public KeycloakClient keycloakClient(
-        @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
+        @Value("${keycloak.admin-url:${keycloak.auth-server-url}}/admin/realms/${keycloak.realm}/") String url,
         ObjectProvider<FeignHttpMessageConverters> messageConverters
     ) {
         ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration =

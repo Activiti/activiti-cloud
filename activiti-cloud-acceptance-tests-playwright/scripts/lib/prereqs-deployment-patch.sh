@@ -2,17 +2,12 @@
 # Combined deployment patches: hostAliases, Keycloak env, policy mounts.
 
 resolve_keycloak_patch_for_deployment() {
-  local dep=$1
   PATCH_KEYCLOAK_URL="${ACT_KEYCLOAK_URL}"
+  PATCH_ADMIN_URL="${KEYCLOAK_ADMIN_URL}"
   PATCH_JWT_ISSUER_URI=""
   PATCH_JWT_JWK_SET_URI="${JWT_JWK_SET_URI}"
   PATCH_KEYCLOAK_CLIENT_TOKEN_URI="${KEYCLOAK_CLIENT_TOKEN_URI}"
-
-  if [[ -n "${JWT_JWK_SET_URI}" && "${dep}" == "${IDENTITY_DEP}" ]]; then
-    PATCH_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
-    PATCH_JWT_ISSUER_URI="https://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}"
-  fi
-  export PATCH_KEYCLOAK_URL PATCH_JWT_ISSUER_URI PATCH_JWT_JWK_SET_URI PATCH_KEYCLOAK_CLIENT_TOKEN_URI
+  export PATCH_KEYCLOAK_URL PATCH_ADMIN_URL PATCH_JWT_ISSUER_URI PATCH_JWT_JWK_SET_URI PATCH_KEYCLOAK_CLIENT_TOKEN_URI
 }
 
 deployment_needs_host_patch() {
@@ -21,11 +16,15 @@ deployment_needs_host_patch() {
     return 0
   fi
   resolve_keycloak_patch_for_deployment "${dep}"
-  local current_kc_url current_kc_realm current_issuer current_jwks current_client_token
+  local current_kc_url current_kc_realm current_issuer current_jwks current_client_token current_admin_url
   current_kc_url="$(deployment_env_value "${dep}" "ACT_KEYCLOAK_URL")"
   current_kc_realm="$(deployment_env_value "${dep}" "ACT_KEYCLOAK_REALM")"
   [[ "${current_kc_url}" != "${PATCH_KEYCLOAK_URL}" ]] && return 0
   [[ "${current_kc_realm}" != "${KEYCLOAK_REALM:-activiti}" ]] && return 0
+  if [[ -n "${PATCH_ADMIN_URL}" ]]; then
+    current_admin_url="$(deployment_env_value "${dep}" "KEYCLOAK_ADMIN_URL")"
+    [[ "${current_admin_url}" != "${PATCH_ADMIN_URL}" ]] && return 0
+  fi
   if [[ -n "${PATCH_JWT_JWK_SET_URI}" ]]; then
     current_jwks="$(deployment_env_value "${dep}" "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI")"
     current_client_token="$(deployment_env_value "${dep}" "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI")"
@@ -84,7 +83,7 @@ apply_acceptance_deployment_patch() {
   export DEP_KIND="$(workload_kind "${dep}")"
   export INCLUDE_POLICY="${include_policy}" INCLUDE_HOST="${include_host}"
   export HOST_ALIASES="[{\"ip\":\"${TRAEFIK_IP}\",\"hostnames\":[\"${IDENTITY_HOST}\",\"${GATEWAY_HOST}\"]}]"
-  export PATCH_KEYCLOAK_URL PATCH_JWT_ISSUER_URI PATCH_JWT_JWK_SET_URI PATCH_KEYCLOAK_CLIENT_TOKEN_URI
+  export PATCH_KEYCLOAK_URL PATCH_ADMIN_URL PATCH_JWT_ISSUER_URI PATCH_JWT_JWK_SET_URI PATCH_KEYCLOAK_CLIENT_TOKEN_URI
   patch_json="$(
     python3 -c "
 import json, os
@@ -97,6 +96,8 @@ if os.environ.get('INCLUDE_HOST') == '1':
     patch['hostAliases'] = json.loads(os.environ['HOST_ALIASES'])
     patch['keycloakUrl'] = os.environ['PATCH_KEYCLOAK_URL']
     patch['keycloakRealm'] = os.environ['KEYCLOAK_REALM']
+    if os.environ.get('PATCH_ADMIN_URL'):
+        patch['adminUrl'] = os.environ['PATCH_ADMIN_URL']
     if os.environ.get('PATCH_JWT_ISSUER_URI'):
         patch['jwtIssuerUri'] = os.environ['PATCH_JWT_ISSUER_URI']
     if os.environ.get('PATCH_JWT_JWK_SET_URI'):
