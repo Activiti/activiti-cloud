@@ -42,6 +42,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     private String clientName;
     private String clientType;
     private String connectorType;
+    private String serviceTaskType;
     private Date requestDate;
     private Date resultDate;
     private Date errorDate;
@@ -189,6 +190,15 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
 
     public void setConnectorType(String connectorType) {
         this.connectorType = connectorType;
+    }
+
+    @Override
+    public String getServiceTaskType() {
+        return serviceTaskType;
+    }
+
+    public void setServiceTaskType(String serviceTaskType) {
+        this.serviceTaskType = serviceTaskType;
     }
 
     @Override

@@ -43,12 +43,17 @@ import org.springframework.format.annotation.DateTimeFormat;
 @JsonView(JsonViews.General.class)
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
+    public static final String DEFAULT_SERVICE_TASK_TYPE = "ServiceTask";
+
     @JsonView(JsonViews.IntegrationContexts.class)
     @OneToMany(mappedBy = "serviceTask", fetch = FetchType.LAZY)
     private List<IntegrationContextEntity> integrationContexts;
 
     @Column(name = "integration_context_counter")
     private Integer integrationContextCounter = 0;
+
+    @Column(name = "service_task_type")
+    private String serviceTaskType;
 
     @QueryType(PropertyType.DATE)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -98,6 +103,15 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
 
     public void setIntegrationContextCounter(Integer integrationContextCounter) {
         this.integrationContextCounter = integrationContextCounter;
+    }
+
+    @Override
+    public String getServiceTaskType() {
+        return serviceTaskType != null ? serviceTaskType : DEFAULT_SERVICE_TASK_TYPE;
+    }
+
+    public void setServiceTaskType(String serviceTaskType) {
+        this.serviceTaskType = serviceTaskType;
     }
 
     /**

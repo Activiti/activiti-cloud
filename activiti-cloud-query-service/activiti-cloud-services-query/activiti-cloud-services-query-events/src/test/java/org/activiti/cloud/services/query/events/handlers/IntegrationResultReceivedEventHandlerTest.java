@@ -152,6 +152,43 @@ class IntegrationResultReceivedEventHandlerTest {
         assertThat(handler.getHandledEvent()).isEqualTo(INTEGRATION_RESULT_RECEIVED.name());
     }
 
+    @Test
+    void should_deriveServiceTaskType_fromLinkedServiceTask() {
+        ServiceTaskEntity serviceTaskEntity = buildServiceTaskEntity();
+        serviceTaskEntity.setServiceTaskType("Rest Connector: GET");
+        IntegrationContextEntity entity = buildIntegrationContextEntity();
+        entity.setServiceTask(serviceTaskEntity);
+
+        assertThat(entity.getServiceTaskType()).isEqualTo("Rest Connector: GET");
+    }
+
+    @Test
+    void should_returnNullServiceTaskType_when_noLinkedServiceTask() {
+        IntegrationContextEntity entity = buildIntegrationContextEntity();
+
+        assertThat(entity.getServiceTaskType()).isNull();
+    }
+
+    @Test
+    void should_propagateServiceTaskType_when_recoveringMissingEntityWithTypedPayload() {
+        IntegrationContextImpl resultIntegrationContext = buildIntegrationContext();
+        resultIntegrationContext.setServiceTaskType("Rest Connector: GET");
+
+        ServiceTaskEntity serviceTaskEntity = buildServiceTaskEntity();
+
+        when(entityManager.find(IntegrationContextEntity.class, INTEGRATION_CONTEXT_ID)).thenReturn(null);
+        when(
+            entityManager.find(
+                ServiceTaskEntity.class,
+                IntegrationContextEntity.IdBuilderHelper.from(resultIntegrationContext)
+            )
+        ).thenReturn(serviceTaskEntity);
+
+        handler.handle(buildResultEvent(resultIntegrationContext));
+
+        assertThat(serviceTaskEntity.getServiceTaskType()).isEqualTo("Rest Connector: GET");
+    }
+
     private IntegrationContextImpl buildIntegrationContext() {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setId(INTEGRATION_CONTEXT_ID);

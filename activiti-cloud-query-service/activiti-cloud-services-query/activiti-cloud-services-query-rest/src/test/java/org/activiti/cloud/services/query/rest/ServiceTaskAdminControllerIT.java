@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -116,6 +117,56 @@ class ServiceTaskAdminControllerIT {
             .statusCode(200)
             .body(ENTRIES_ROOT, hasSize(2))
             .body(SERVICE_TASKS_ID_ROOT, containsInAnyOrder("1", "2"));
+    }
+
+    @Test
+    void should_returnServiceTasks_filteredByNamedServiceTaskType() {
+        queryTestUtils.buildServiceTask().withId("1").withServiceTaskType("Rest Connector: GET").save();
+
+        queryTestUtils.buildServiceTask().withId("2").withServiceTaskType("Email Connector: SEND").save();
+
+        queryTestUtils.buildServiceTask().withId("3").save();
+
+        given()
+            .param("serviceTaskType", "Rest Connector: GET")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(ENTRIES_ROOT, hasSize(1))
+            .body(SERVICE_TASKS_ID_ROOT, containsInAnyOrder("1"));
+    }
+
+    @Test
+    void should_returnServiceTasksWithNullType_filteredByDefaultServiceTaskType() {
+        queryTestUtils.buildServiceTask().withId("1").save();
+
+        queryTestUtils.buildServiceTask().withId("2").withServiceTaskType("Rest Connector: GET").save();
+
+        given()
+            .param("serviceTaskType", ServiceTaskEntity.DEFAULT_SERVICE_TASK_TYPE)
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(ENTRIES_ROOT, hasSize(1))
+            .body(SERVICE_TASKS_ID_ROOT, containsInAnyOrder("1"));
+    }
+
+    @Test
+    void should_returnNoServiceTasks_filteredByNonMatchingServiceTaskType() {
+        queryTestUtils.buildServiceTask().withId("1").withServiceTaskType("Rest Connector: GET").save();
+
+        given()
+            .param("serviceTaskType", "Nonexistent Connector")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(ENTRIES_ROOT, hasSize(0));
     }
 
     @Test

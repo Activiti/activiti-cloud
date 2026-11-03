@@ -5208,6 +5208,12 @@
             "format" : "int32"
           }
         }, {
+          "name" : "serviceTaskType",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
           "name" : "startedFrom",
           "in" : "query",
           "schema" : {
@@ -6159,6 +6165,12 @@
           "schema" : {
             "type" : "integer",
             "format" : "int32"
+          }
+        }, {
+          "name" : "serviceTaskType",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
           }
         }, {
           "name" : "startedFrom",
@@ -9261,6 +9273,9 @@
             "type" : "integer",
             "format" : "int32"
           },
+          "serviceTaskType" : {
+            "type" : "string"
+          },
           "id" : {
             "type" : "string"
           },
@@ -9427,6 +9442,9 @@
             "type" : "string"
           },
           "connectorType" : {
+            "type" : "string"
+          },
+          "serviceTaskType" : {
             "type" : "string"
           },
           "outBoundVariables" : {
