@@ -23,6 +23,7 @@ import { EngineEventBuffer } from '../events/engine-event-buffer';
 import type { EngineEventNotification, EngineEventType } from '../events/engine-event.model';
 import { GraphQlWebSocketClient } from '../ws/graphql-websocket.client';
 import { ENGINE_EVENTS_SUBSCRIPTION } from './engine-events.queries';
+import { normalizeBearer, settleAfterSubscribe } from './subscription-utils';
 
 export interface OpenEngineEventsSubscriptionOptions {
     accessToken: string;
@@ -99,14 +100,6 @@ export async function openEngineEventsSubscription(
     };
 }
 
-async function settleAfterSubscribe(): Promise<void> {
-    const settleMs = timeouts.engineEvents.subscriptionSettle;
-    if (settleMs <= 0) {
-        return;
-    }
-    await new Promise((resolve) => setTimeout(resolve, settleMs));
-}
-
 function buildSubscriptionVariables(options: {
     serviceName: string;
     eventTypes: EngineEventType[];
@@ -123,6 +116,3 @@ function buildSubscriptionVariables(options: {
     };
 }
 
-function normalizeBearer(accessToken: string): string {
-    return accessToken.startsWith('Bearer ') ? accessToken : `Bearer ${accessToken}`;
-}
