@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
 import org.activiti.cloud.common.messaging.config.QueueSizeBasedTrigger;
+import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -58,6 +59,7 @@ public class OutboxChannelInterceptorFactory
     private final IntegrationFlowContext integrationFlowContext;
     private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry lockRegistry;
+    private final Advice outboxMessageHandlerErrorAdvice;
 
     private final Map<String, ChannelInterceptor> interceptorsMap = new ConcurrentHashMap<>();
     private final Map<String, IntegrationFlowRegistration> flowRegistrationsMap = new ConcurrentHashMap<>();
@@ -67,13 +69,15 @@ public class OutboxChannelInterceptorFactory
         PlatformTransactionManager transactionManager,
         IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
-        LockRegistry lockRegistry
+        LockRegistry lockRegistry,
+        Advice outboxMessageHandlerErrorAdvice
     ) {
         this.channelMessageStore = channelMessageStore;
         this.transactionManager = transactionManager;
         this.integrationFlowContext = integrationFlowContext;
         this.streamBridgeProvider = streamBridgeProvider;
         this.lockRegistry = lockRegistry;
+        this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice;
     }
 
     @Override
@@ -107,7 +111,9 @@ public class OutboxChannelInterceptorFactory
                         )
                 )
                 // Strict DB transaction boundary per loop
-                .handle(new OutboxMessageHandler(partitionKey, streamBridgeProvider))
+                .handle(new OutboxMessageHandler(partitionKey, streamBridgeProvider), endpoint ->
+                    endpoint.advice(outboxMessageHandlerErrorAdvice)
+                )
                 .get();
 
             flowRegistrationsMap.put(
