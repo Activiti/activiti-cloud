@@ -56,6 +56,8 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
         with:
           skip_checkout: true
+      - name: Test Maven artifact publishing
+        run: python3 -m unittest discover -s .github/actions/maven-deploy -p 'test_*.py'
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
       - name: Ensure all actions are covered by Dependabot
