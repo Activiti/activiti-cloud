@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import static org.springframework.beans.factory.config.BeanDefinition.ROLE_INFRASTRUCTURE;
 import static org.springframework.integration.support.json.JacksonMessagingUtils.DEFAULT_TRUSTED_PACKAGES;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -41,6 +42,7 @@ import org.springframework.cloud.stream.binding.NewDestinationBindingCallback;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.core.serializer.support.SerializingConverter;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
@@ -189,6 +191,7 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
+    @Role(ROLE_INFRASTRUCTURE)
     BeanPostProcessor outboxOutputBindingPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         OutboxChannelInterceptorFactory outboxChannelInterceptorFactory,
@@ -202,6 +205,7 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
+    @Role(ROLE_INFRASTRUCTURE)
     BeanPostProcessor outboxStreamBridgeOperationsPostProcessor() {
         return new BeanPostProcessor() {
             @Override
