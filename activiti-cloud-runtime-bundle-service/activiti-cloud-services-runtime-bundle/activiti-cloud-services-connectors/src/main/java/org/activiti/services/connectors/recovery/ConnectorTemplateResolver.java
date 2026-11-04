@@ -91,7 +91,7 @@ public class ConnectorTemplateResolver {
         }
         try {
             return Optional.of(Integer.parseInt(parts[1]));
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return Optional.empty();
         }
     }
