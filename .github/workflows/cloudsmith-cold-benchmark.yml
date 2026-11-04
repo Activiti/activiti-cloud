@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: cloudsmith-cold-benchmark-${{ github.event.pull_request.number }}
@@ -22,34 +23,23 @@ jobs:
       && github.head_ref == 'codex/aae-55154-cloudsmith-cold-benchmark'
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    env:
-      MAVEN_ARGS: ""
-      CLOUDSMITH_NAMESPACE: ${{ vars.CLOUDSMITH_NAMESPACE }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: benchmark
 
-      - name: Check out the same source used for the upload benchmark
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download completed benchmark measurements
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          ref: b93967ebdface9c8dbab7920d94bf4a9b7acb0b1
-          path: project
+          name: cloudsmith-cold-build-benchmark
+          run-id: 41805201512
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/cloudsmith-cold-benchmark
 
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
-        with:
-          java-version: '25'
-          distribution: corretto
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
-        with:
-          version: '3.10.0'
-
-      - name: Compare current repositories with Cloudsmith using empty Maven caches
+      - name: Validate the archived Maven repository origins
         run: >-
           python3 benchmark/scripts/ci/cloudsmith-cold-benchmark.py
-          --source project
-          --output "$RUNNER_TEMP/cloudsmith-cold-benchmark"
+          --verify-results "$RUNNER_TEMP/cloudsmith-cold-benchmark/results.json"
 
       - name: Upload measurements and Maven logs
         if: always()

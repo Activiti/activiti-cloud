@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import resource
+import re
 import shutil
 import subprocess
 import time
@@ -15,6 +16,41 @@ import xml.etree.ElementTree as ET
 POM_NS = "http://maven.apache.org/POM/4.0.0"
 SETTINGS_NS = "http://maven.apache.org/SETTINGS/1.0.0"
 NS = {"m": POM_NS}
+
+
+def repository_id(key):
+    return re.sub(r"-[0-9a-f]{40}$", "", key)
+
+
+def verify_results(path):
+    results = json.loads(path.read_text())
+    failed = len(results["measurements"]) != 2
+    for result in results["measurements"]:
+        origins = result["origins"]
+        origins["raw_counts"] = origins.get("raw_counts", dict(origins["counts"]))
+        normalized = collections.Counter()
+        for key, count in origins["raw_counts"].items():
+            normalized[repository_id(key)] += count
+        origins["counts"] = dict(normalized)
+        for record in origins["records"]:
+            record["repository_key"] = record.get("repository_key", record["repository"])
+            record["repository"] = repository_id(record["repository_key"])
+        failed |= bool(result["exit_code"]) or not bool(origins["records"])
+        if result["name"] == "cloudsmith-only":
+            result["unexpected_repositories"] = sorted(set(normalized) - {"cloudsmith-dependencies", "cloudsmith-releases"})
+            failed |= bool(result["unexpected_repositories"])
+    results["origin_validation_passed"] = not failed
+    path.write_text(json.dumps(results, indent=2) + "\n")
+    summary = ["## Verified cold build results", "", "Both builds ran in the archived benchmark. Maven 3.10 repository-key hash suffixes are normalized before validating origins.", "", "| Case | Build seconds | Maven CPU seconds | Artifact origins |", "| --- | ---: | ---: | --- |"]
+    for result in results["measurements"]:
+        counts = ", ".join(f"{key}: {value}" for key, value in sorted(result["origins"]["counts"].items()))
+        summary.append(f"| {result['name']} | {result['seconds']} | {result['cpu_seconds']} | {counts} |")
+    summary += ["", f"Origin validation passed: {not failed}.", ""]
+    print("\n".join(summary))
+    if os.environ.get("GITHUB_STEP_SUMMARY"):
+        with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a") as stream:
+            stream.write("\n".join(summary))
+    return int(failed)
 
 
 def cloudsmith_configuration(project, namespace, settings):
@@ -61,8 +97,8 @@ def cache_origins(cache):
             key = line.split("=", 1)[0]
             artifact, repository = key.rsplit(">", 1)
             if repository:
-                origins[repository] += 1
-                records.append({"artifact": str(tracking.parent.relative_to(cache) / artifact), "repository": repository})
+                origins[repository_id(repository)] += 1
+                records.append({"artifact": str(tracking.parent.relative_to(cache) / artifact), "repository": repository_id(repository), "repository_key": repository})
     return {"counts": dict(origins), "records": records}
 
 
@@ -89,9 +125,14 @@ def build(command, project, log_file):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--source", type=Path)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--verify-results", type=Path)
     args = parser.parse_args()
+    if args.verify_results:
+        return verify_results(args.verify_results)
+    if not args.source or not args.output:
+        parser.error("--source and --output are required for a build benchmark")
     source, output = args.source.resolve(), args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     global_settings = output / "global-settings.xml"
