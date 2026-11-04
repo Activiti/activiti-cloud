@@ -208,7 +208,6 @@
     <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
     <license-maven-plugin.version>5.1.2</license-maven-plugin.version>
     <third-party-license-maven-plugin.version>2.7.0</third-party-license-maven-plugin.version>
-    <maven-artifact-plugin.version>3.7.0</maven-artifact-plugin.version>
     <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>3.2.0</maven-deploy-plugin.version>
@@ -294,11 +293,6 @@
   <build>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-artifact-plugin</artifactId>
-          <version>${maven-artifact-plugin.version}</version>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
@@ -684,18 +678,21 @@ limitations under the License.]]>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-artifact-plugin</artifactId>
+            <artifactId>maven-deploy-plugin</artifactId>
             <configuration>
-              <attach>false</attach>
-              <ignoreJavadoc>false</ignoreJavadoc>
+              <deployAtEnd>false</deployAtEnd>
             </configuration>
             <executions>
               <execution>
-                <id>record-published-artifacts</id>
+                <id>deploy-cloudsmith</id>
                 <phase>deploy</phase>
                 <goals>
-                  <goal>buildinfo</goal>
+                  <goal>deploy</goal>
                 </goals>
+                <configuration>
+                  <altReleaseDeploymentRepository>cloudsmith::https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-releases/</altReleaseDeploymentRepository>
+                  <altSnapshotDeploymentRepository>cloudsmith::https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-snapshots/</altSnapshotDeploymentRepository>
+                </configuration>
               </execution>
             </executions>
           </plugin>

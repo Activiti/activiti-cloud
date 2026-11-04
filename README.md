@@ -34,7 +34,7 @@ Requires the following secrets to be set:
 | RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
 | SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
 
-CI builds and deploys Maven artifacts to Nexus with the existing end-of-build configuration, then uploads the same files to Cloudsmith without rebuilding: preview snapshots go to `activiti-snapshots`, and develop alpha releases go to `activiti-releases`.
+Maven artifacts are built once and published to both Nexus and Cloudsmith: preview snapshots go to `activiti-snapshots`, and develop alpha releases go to `activiti-releases`.
 
 Set the GitHub Actions variable `CLOUDSMITH_NAMESPACE` to `hyland`. Cloudsmith authentication uses GitHub OIDC as `activiti-activiti-cloud`; no additional Cloudsmith secret is required.
 
