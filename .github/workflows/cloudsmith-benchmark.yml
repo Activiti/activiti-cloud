@@ -1,4 +1,4 @@
-name: Cloudsmith file upload trial
+name: Cloudsmith upload benchmark
 
 on:
   pull_request:
@@ -7,7 +7,6 @@ on:
     paths:
       - .github/workflows/cloudsmith-benchmark.yml
       - scripts/ci/cloudsmith-benchmark.py
-      - scripts/ci/cloudsmith-file-upload-trial.py
 
 permissions:
   contents: read
@@ -22,12 +21,14 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
       && github.head_ref == 'codex/aae-55154-cloudsmith-benchmark'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 90
     permissions:
       contents: read
       id-token: write
     env:
       MAVEN_ARGS: ""
+      MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       CLOUDSMITH_NAMESPACE: ${{ vars.CLOUDSMITH_NAMESPACE }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -37,7 +38,7 @@ jobs:
       - name: Check out the publishing PR revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: 59319400551e0981fae432d41272cfcffc51ac84
+          ref: b93967ebdface9c8dbab7920d94bf4a9b7acb0b1
           path: project
 
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
@@ -49,36 +50,28 @@ jobs:
         with:
           version: '3.10.0'
 
-      - name: Build isolated fixtures with Nexus end-of-build deployment
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: >-
-          python3 benchmark/scripts/ci/cloudsmith-file-upload-trial.py build
-          --source project
-          --output "$RUNNER_TEMP/cloudsmith-file-trial"
-          --version "0.0.1-PR-${PR_NUMBER}-ISOLATED-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-SNAPSHOT"
-
       - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
           verify-auth: "true"
 
-      - name: Upload the exact files and verify anonymous Cloudsmith downloads
+      - name: Measure Cloudsmith-only publishing with deferred deployment
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: >-
-          python3 benchmark/scripts/ci/cloudsmith-file-upload-trial.py upload
+          python3 benchmark/scripts/ci/cloudsmith-benchmark.py
           --source project
-          --output "$RUNNER_TEMP/cloudsmith-file-trial"
-          --version "0.0.1-PR-${PR_NUMBER}-ISOLATED-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-SNAPSHOT"
+          --output "$RUNNER_TEMP/cloudsmith-benchmark"
+          --version "0.0.1-PR-${PR_NUMBER}-BENCH-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-SNAPSHOT"
+          --deferred-only
 
       - name: Upload measurements and Maven logs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: cloudsmith-isolated-publish-trial
+          name: cloudsmith-upload-benchmark
           path: |
-            ${{ runner.temp }}/cloudsmith-file-trial/*.json
-            ${{ runner.temp }}/cloudsmith-file-trial/*.log
+            ${{ runner.temp }}/cloudsmith-benchmark/*.json
+            ${{ runner.temp }}/cloudsmith-benchmark/*.log
           retention-days: 7
           if-no-files-found: warn
