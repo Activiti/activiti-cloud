@@ -17,6 +17,7 @@ package org.activiti.cloud.common.messaging.outbox;
 
 import static org.springframework.beans.factory.config.BeanDefinition.ROLE_INFRASTRUCTURE;
 import static org.springframework.integration.support.json.JacksonMessagingUtils.DEFAULT_TRUSTED_PACKAGES;
+import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
@@ -25,10 +26,7 @@ import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.FunctionAnnotationService;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
-import org.activiti.cloud.common.messaging.config.StreamBridgeOperations;
-import org.jspecify.annotations.Nullable;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.BeansException;
+import org.aopalliance.aop.Advice;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -45,6 +43,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.serializer.support.SerializingConverter;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
+import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
 import org.springframework.integration.jdbc.store.channel.ChannelMessageStorePreparedStatementSetter;
 import org.springframework.integration.jdbc.store.channel.ChannelMessageStoreQueryProvider;
@@ -163,15 +162,31 @@ public class OutboxAutoConfiguration {
         PlatformTransactionManager transactionManager,
         IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
-        LockRegistry lockRegistry
+        LockRegistry lockRegistry,
+        Advice outboxMessageHandlerErrorAdvice
     ) {
         return new OutboxChannelInterceptorFactory(
             outboxChannelMessageStore,
             transactionManager,
             integrationFlowContext,
             streamBridgeProvider,
-            lockRegistry
+            lockRegistry,
+            outboxMessageHandlerErrorAdvice
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public Advice outboxMessageHandlerErrorAdvice() {
+        final var advice = new ExpressionEvaluatingRequestHandlerAdvice();
+        // Route to this channel on failure
+        advice.setFailureChannelName(ERROR_CHANNEL);
+        // Evaluate the root cause / original payload to pass to the error channel
+        advice.setOnFailureExpressionString("#exception");
+        // CRITICAL: Return true so the flow considers it "handled" and commits the transaction
+        advice.setTrapException(true);
+
+        return advice;
     }
 
     @Bean
@@ -207,20 +222,7 @@ public class OutboxAutoConfiguration {
     @Bean
     @Role(ROLE_INFRASTRUCTURE)
     BeanPostProcessor outboxStreamBridgeOperationsPostProcessor() {
-        return new BeanPostProcessor() {
-            @Override
-            public @Nullable Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof StreamBridgeOperations) {
-                    ProxyFactory factory = new ProxyFactory(bean);
-                    factory.setProxyTargetClass(true); // Forces CGLIB subclass proxy
-                    factory.addAdvice(new OutboxStreamBridgeAdvice());
-
-                    return factory.getProxy();
-                }
-
-                return bean;
-            }
-        };
+        return new OutboxStreamBridgeOperationsPostProcessor();
     }
 
     @Bean
