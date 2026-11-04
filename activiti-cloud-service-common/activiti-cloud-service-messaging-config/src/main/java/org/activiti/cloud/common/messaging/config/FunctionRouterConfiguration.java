@@ -36,7 +36,6 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -254,31 +253,31 @@ public class FunctionRouterConfiguration {
 
     @Bean
     public BeanPostProcessor outputBindingChannelPostProcessor(
-        @Autowired DefaultListableBeanFactory beanFactory,
+        @Autowired FunctionAnnotationService functionAnnotationService,
         @Autowired BindingServiceProperties bindingServiceProperties
     ) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) {
                 if (bean instanceof DirectChannel messageChannel) {
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class)).ifPresent(
-                        outputBinding -> {
-                            messageChannel.addInterceptor(
-                                new ChannelInterceptor() {
-                                    @Override
-                                    public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                                        return Optional.ofNullable(bindingServiceProperties.getBindings().get(beanName))
-                                            .<Message<?>>map(binding ->
-                                                MessageBuilder.fromMessage(message)
-                                                    .setHeader(FUNCTION_DESTINATION, binding.getDestination())
-                                                    .build()
-                                            )
-                                            .orElse(message);
-                                    }
+                    Optional.ofNullable(
+                        functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class)
+                    ).ifPresent(outputBinding -> {
+                        messageChannel.addInterceptor(
+                            new ChannelInterceptor() {
+                                @Override
+                                public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                                    return Optional.ofNullable(bindingServiceProperties.getBindings().get(beanName))
+                                        .<Message<?>>map(binding ->
+                                            MessageBuilder.fromMessage(message)
+                                                .setHeader(FUNCTION_DESTINATION, binding.getDestination())
+                                                .build()
+                                        )
+                                        .orElse(message);
                                 }
-                            );
-                        }
-                    );
+                            }
+                        );
+                    });
                 }
                 return bean;
             }

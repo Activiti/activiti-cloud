@@ -16,7 +16,9 @@
 package org.activiti.cloud.services.messages.test.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.assertj.core.api.AbstractStringAssert;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.json.JsonToObjectTransformer;
+import org.springframework.integration.mapping.support.JsonHeaders;
+import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(properties = "activiti.cloud.application.name=my-activiti-rb-app")
 @Import(TestChannelBinderConfiguration.class)
@@ -60,6 +65,27 @@ public class MessageCoreAutoConfigurationTest {
     @Test
     void discardChannelSubscriberCount() {
         assertThat(discardChannel.getSubscriberCount()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldDeserializeMessageEventPayloadWithTypeHeader() {
+        var transformer = applicationContext.getBean(JsonToObjectTransformer.class);
+        var message = MessageBuilder.withPayload("{}")
+            .setHeader(JsonHeaders.TYPE_ID, MessageEventPayload.class.getName())
+            .build();
+
+        assertThat(transformer.transform(message).getPayload()).isInstanceOf(MessageEventPayload.class);
+    }
+
+    @Test
+    void shouldRejectUntrustedPayloadTypeHeader() {
+        var transformer = applicationContext.getBean(JsonToObjectTransformer.class);
+        var message = MessageBuilder.withPayload("{}").setHeader(JsonHeaders.TYPE_ID, "java.io.File").build();
+
+        assertThatThrownBy(() -> transformer.transform(message))
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasStackTraceContaining("java.io.File")
+            .hasStackTraceContaining("not in the trusted packages");
     }
 
     private AbstractStringAssert<?> assertProperty(String name) {

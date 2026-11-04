@@ -11,6 +11,8 @@
 
 Activiti Cloud libraries and Spring Boot starters.
 
+Activiti releases and snapshots are downloaded from public Cloudsmith repositories without credentials. Use `mvn --settings settings.xml` so inherited Activiti repository references also resolve through Cloudsmith. Maven Central remains the source for third-party dependencies and plugins.
+
 ## CI/CD
 
 Running on GH Actions.
