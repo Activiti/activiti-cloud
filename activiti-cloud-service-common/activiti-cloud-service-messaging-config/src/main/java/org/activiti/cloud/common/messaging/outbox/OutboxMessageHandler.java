@@ -25,6 +25,7 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.core.DestinationResolutionException;
 
 public class OutboxMessageHandler implements MessageHandler {
 
@@ -47,10 +48,17 @@ public class OutboxMessageHandler implements MessageHandler {
             message
         );
 
-        Optional.ofNullable(message.getHeaders().get(OUTBOX_DESTINATION, String.class)).ifPresentOrElse(
-            outboxBinding -> streamBridge().send(outboxBinding, message),
-            () -> log.warn("Outbox {} message {} dropped", partitionKey, message)
-        );
+        final var result = Optional.ofNullable(message.getHeaders().get(OUTBOX_DESTINATION, String.class))
+            .map(outboxBinding -> streamBridge().send(outboxBinding, message))
+            .orElseThrow(() ->
+                new DestinationResolutionException(
+                    "Cannot resolve %s header in the outbox message %s".formatted(OUTBOX_DESTINATION, message)
+                )
+            );
+
+        if (!result) {
+            log.warn("Outbox {} message {} has been dropped", partitionKey, message);
+        }
     }
 
     private StreamBridge streamBridge() {
