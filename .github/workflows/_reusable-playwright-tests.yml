@@ -65,11 +65,11 @@ jobs:
           - profile: rabbitmq-prefix-pdb
             concurrency-slot: 1
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.ref }}
 
-      - uses: ./.github/actions/load-acceptance-test-env
+      - uses: $/.github/actions/load-acceptance-test-env
         with:
           testuser-username: ${{ vars.ACCEPTANCE_TESTUSER_USERNAME || 'testuser' }}
           testuser-password: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
@@ -83,29 +83,29 @@ jobs:
           testadmin-password: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
 
       - id: pw-profile
-        uses: ./.github/actions/load-playwright-profile-config
+        uses: $/.github/actions/load-playwright-profile-config
         with:
           profile: ${{ matrix.profile }}
 
       - name: Set up kubectl
-        uses: azure/setup-kubectl@bda439f5f36b99b262ebdcd3613869bddb064c8e # v5.2.0
+        uses: azure/setup-kubectl@v5.2.0
         with:
           version: v1.19.6
 
       - name: Set up Helm
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        uses: azure/setup-helm@v5.0.1
         with:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v19.7.1
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           context: ${{ env.CLUSTER_NAME }}
 
-      - uses: ./.github/actions/setup-env-for-broker
+      - uses: $/.github/actions/setup-env-for-broker
         with:
           messaging-broker: ${{ steps.pw-profile.outputs.messaging-broker }}
           messaging-partitioning-option: ${{ steps.pw-profile.outputs.messaging-partitioned }}
@@ -113,7 +113,7 @@ jobs:
           version: ${{ inputs.version }}
 
       - name: Cache Helm chart checkout
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache@v6.1.0
         with:
           path: .git/activiti-cloud-full-chart
           key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ inputs.version }}
@@ -132,24 +132,24 @@ jobs:
           && steps.pw-profile.outputs.messaging-destinations == 'default-destinations'
         run: bash scripts/ci/kafka-partitioned-consumer-check.sh
 
-      - uses: ./.github/actions/check-service-health
+      - uses: $/.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
-      - uses: ./.github/actions/prepare-preview-for-playwright
+      - uses: $/.github/actions/prepare-preview-for-playwright
 
-      - uses: ./.github/actions/check-service-health
+      - uses: $/.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
 
-      - uses: ./.github/actions/check-service-health
+      - uses: $/.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
 
       - name: Export Playwright CI environment
         run: bash scripts/ci/export-playwright-ci-env.sh
 
-      - uses: ./.github/actions/playwright-run
+      - uses: $/.github/actions/playwright-run
         with:
           script-command: "npm run test:all"
           diagnostics-artifact-name: playwright-diagnostics-${{ matrix.profile }}

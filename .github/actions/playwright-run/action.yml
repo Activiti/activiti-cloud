@@ -42,7 +42,7 @@ runs:
   using: composite
   steps:
 
-    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+    - uses: actions/setup-node@v7.1.0
       with:
         node-version: '22'
 
@@ -52,14 +52,14 @@ runs:
       run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
 
     - name: Setup cache
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      uses: actions/cache@v6.1.0
       with:
         path: ${{ steps.npm-cache-dir.outputs.dir }}
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v19.7.1
 
     - name: Compute Report Portal Launch key
       id: compute-rp-launch-key
@@ -103,7 +103,7 @@ runs:
 
     - name: Upload Playwright diagnostics on failure
       if: always() && steps.launch-tests.outcome == 'failure'
-      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      uses: actions/upload-artifact@v7.0.2
       with:
         name: ${{ inputs.diagnostics-artifact-name }}
         path: |

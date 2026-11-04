@@ -25,15 +25,15 @@ jobs:
           - rabbitmq-non-partitioned-pdb
           - rabbitmq-prefix-pdb
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
       - name: Set up kubectl
-        uses: azure/setup-kubectl@bda439f5f36b99b262ebdcd3613869bddb064c8e # v5.2.0
+        uses: azure/setup-kubectl@v5.2.0
         with:
           version: v1.19.6
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v19.7.1
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -41,7 +41,7 @@ jobs:
           context: ${{ env.CLUSTER_NAME }}
 
       - id: pw-profile
-        uses: ./.github/actions/load-playwright-profile-config
+        uses: $/.github/actions/load-playwright-profile-config
         with:
           profile: ${{ matrix.profile }}
 
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
 
       - name: Set preview version
         run: echo "0.0.1-PR-${GITHUB_PR_NUMBER}-SNAPSHOT" > VERSION
@@ -86,9 +86,9 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
       - name: Close downstream preview PRs for this source PR only
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-close-orphaned-preview-prs@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-close-orphaned-preview-prs@v19.7.1
         with:
           source-pr-number: ${{ github.event.pull_request.number }}
           source-pr-state: ${{ github.event.pull_request.state }}
