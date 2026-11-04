@@ -10,21 +10,18 @@
         <repositoryOrigin>https://artifacts.alfresco.com</repositoryOrigin>
       </repositoryOrigins>
     </server>
-    <server>
-      <id>cloudsmith-activiti-snapshots</id>
-      <username>${env.CLOUDSMITH_USERNAME}</username>
-      <password>${env.CLOUDSMITH_API_KEY}</password>
-      <repositoryOrigins>
-        <repositoryOrigin>https://dl.cloudsmith.io</repositoryOrigin>
-      </repositoryOrigins>
-    </server>
   </servers>
 
   <mirrors>
     <mirror>
+      <id>cloudsmith-activiti-releases</id>
+      <mirrorOf>activiti-releases</mirrorOf>
+      <url>https://dl.cloudsmith.io/basic/hyland/activiti-releases/maven/</url>
+    </mirror>
+    <mirror>
       <id>cloudsmith-activiti-snapshots</id>
       <mirrorOf>activiti-snapshots</mirrorOf>
-      <url>https://dl.cloudsmith.io/public/hyland/activiti-snapshots/maven/</url>
+      <url>https://dl.cloudsmith.io/basic/hyland/activiti-snapshots/maven/</url>
     </mirror>
   </mirrors>
 

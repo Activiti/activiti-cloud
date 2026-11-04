@@ -24,7 +24,6 @@ env:
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
   MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
   MAVEN_VERSION: "3.10.0"
-  CLOUDSMITH_NAMESPACE: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
 jobs:
   pre-checks:
@@ -39,13 +38,6 @@ jobs:
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "Fork PRs cannot be validated in this repository."
-      - name: Check Cloudsmith namespace
-        shell: bash
-        run: |
-          if [[ -z "$CLOUDSMITH_NAMESPACE" ]]; then
-            echo "::error::Set the CLOUDSMITH_NAMESPACE GitHub Actions variable before consuming snapshots from Cloudsmith."
-            exit 1
-          fi
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
@@ -76,7 +68,6 @@ jobs:
     permissions:
       actions: read
       contents: write
-      id-token: write
     outputs:
       version: ${{ steps.export-version.outputs.version }}
       ref: ${{ steps.export-ref.outputs.ref }}
@@ -84,13 +75,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-      - name: Authenticate with Cloudsmith
-        if: github.event_name == 'push'
-        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
-        with:
-          oidc-namespace: ${{ env.CLOUDSMITH_NAMESPACE }}
-          verify-auth: "true"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
         if: github.event_name == 'push'
@@ -134,10 +118,6 @@ jobs:
 
   maven-build-common:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     needs:
       - pre-checks
       - create-tag
@@ -147,12 +127,6 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-      - name: Authenticate with Cloudsmith
-        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
-        with:
-          oidc-namespace: ${{ env.CLOUDSMITH_NAMESPACE }}
-          verify-auth: "true"
 
       # -pl <aggregator> does NOT include its submodules in a filtered reactor.
       # Enumerate every pom.xml under common parents so leaf modules (and tests) are in the reactor.
@@ -192,40 +166,48 @@ jobs:
           maven-version: ${{ env.MAVEN_VERSION }}
           reuse-testcontainers: 'true'
           maven-command: >-
-            install -U -T 1C -DunitTests.parallel=true
+            install -T 1C -DunitTests.parallel=true
             -pl ${{ steps.common-modules.outputs.modules }} -am
           jacoco-report-name: jacoco-common
           target-folder-upload-name: target-common
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
 
-      - name: Verify Cloudsmith snapshot consumption with an empty Maven cache
+      - name: Verify Activiti consumption from Cloudsmith with an empty Maven cache
         shell: bash
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           activiti_version=$(yq -p=xml -r '.project.properties."activiti.version"' activiti-cloud-api/pom.xml)
-          if [[ "$activiti_version" != *-SNAPSHOT ]]; then
-            echo "Activiti $activiti_version is a release; skipping the snapshot consumption check."
-            exit 0
+          repository_id=cloudsmith-activiti-releases
+          if [[ "$activiti_version" == *-SNAPSHOT ]]; then
+            repository_id=cloudsmith-activiti-snapshots
           fi
 
           trial_repository=$(mktemp -d "$RUNNER_TEMP/cloudsmith-consumption.XXXXXX")
-          mvn --batch-mode --non-recursive --update-snapshots --settings settings.xml \
+          trap 'rm -rf "$trial_repository"' EXIT
+          mvn --batch-mode --no-transfer-progress --non-recursive --settings settings.xml \
             "-Dmaven.repo.local=$trial_repository" \
             dependency:get "-Dartifact=org.activiti:activiti-engine:$activiti_version" \
             -Dtransitive=false
 
           origin_file="$trial_repository/org/activiti/activiti-engine/$activiti_version/_remote.repositories"
-          # Maven 3.10 / Resolver 2 appends a SHA-1 repository key to the mirror id.
-          if ! grep -Eq '^activiti-engine-[^>]+\.jar>cloudsmith-activiti-snapshots(-[0-9a-f]{40})?=' "$origin_file"; then
+          if ! grep -Eq "^activiti-engine-[^>]+\\.jar>${repository_id}(-[0-9a-f]{40})?=" "$origin_file"; then
             cat "$origin_file"
-            echo "::error::The Activiti preview JAR was not resolved from cloudsmith-activiti-snapshots."
+            echo "::error::The Activiti engine JAR was not resolved from $repository_id."
             exit 1
           fi
           printf 'Verified org.activiti:activiti-engine:%s from Cloudsmith using an empty Maven repository.\n' \
             "$activiti_version" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload common module test reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: surefire-reports-common
+          path: |
+            **/target/surefire-reports/TEST-*.xml
+            **/target/failsafe-reports/TEST-*.xml
+          if-no-files-found: ignore
+          retention-days: 7
 
   scan-image-dirs:
     runs-on: ubuntu-latest
@@ -248,10 +230,6 @@ jobs:
         run: bash scripts/ci/transform-docker-image-matrix.sh
 
   maven-build:
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     needs:
       - pre-checks
       - create-tag
@@ -270,10 +248,6 @@ jobs:
 
   maven-build-dependencies-bom:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     needs:
       - pre-checks
       - create-tag
@@ -284,12 +258,6 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - name: Authenticate with Cloudsmith
-        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
-        with:
-          oidc-namespace: ${{ env.CLOUDSMITH_NAMESPACE }}
-          verify-auth: "true"
-
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -299,17 +267,13 @@ jobs:
           java-distribution: 'corretto'
           maven-version: ${{ env.MAVEN_VERSION }}
           maven-command: >-
-            install -U -T 1C -pl activiti-cloud-dependencies -am
+            install -T 1C -pl activiti-cloud-dependencies -am
             -DskipTests=true -DskipITs=true
           m2-current-build-upload-name: m2-dependencies-bom
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
 
   maven-test:
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     needs:
       - pre-checks
       - create-tag
@@ -326,12 +290,42 @@ jobs:
       NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
       NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
+  slow-tests-report:
+    runs-on: ubuntu-latest
+    if: >-
+      always()
+      && github.event_name == 'pull_request'
+      && needs.pre-checks.result == 'success'
+      && needs.pre-checks.outputs.skip != 'true'
+    needs:
+      - pre-checks
+      - maven-build-common
+      - maven-test
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download Maven test reports
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: surefire-reports-*
+          path: reports
+          merge-multiple: false
+
+      - name: Run slow tests report
+        uses: ./.github/actions/slow-tests-report
+        with:
+          slow-threshold: '5'
+          slow-class-threshold: '30'
+          reports-dir: reports
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   sonar:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     needs:
       - pre-checks
       - create-tag
@@ -353,12 +347,6 @@ jobs:
           # Sonar needs the full history to resolve the PR target branch and
           # analyse the diff instead of falling back to a whole-file analysis
           fetch-depth: 0
-
-      - name: Authenticate with Cloudsmith
-        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
-        with:
-          oidc-namespace: ${{ env.CLOUDSMITH_NAMESPACE }}
-          verify-auth: "true"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
         env:
@@ -461,10 +449,6 @@ jobs:
 
   publish-preview:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     needs:
       - pre-checks
       - create-tag
@@ -484,11 +468,6 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-      - name: Authenticate with Cloudsmith
-        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
-        with:
-          oidc-namespace: ${{ env.CLOUDSMITH_NAMESPACE }}
-          verify-auth: "true"
       - uses: ./.github/actions/maven-deploy
         with:
           version: ${{ needs.create-tag.outputs.version }}
@@ -498,10 +477,6 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     needs:
       - pre-checks
       - create-tag
@@ -533,11 +508,6 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-      - name: Authenticate with Cloudsmith
-        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
-        with:
-          oidc-namespace: ${{ env.CLOUDSMITH_NAMESPACE }}
-          verify-auth: "true"
       - uses: ./.github/actions/maven-deploy
         with:
           version: ${{ needs.create-tag.outputs.version }}

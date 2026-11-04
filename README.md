@@ -11,6 +11,8 @@
 
 Activiti Cloud libraries and Spring Boot starters.
 
+Activiti releases and snapshots are downloaded from public Cloudsmith repositories without credentials. Use `mvn --settings settings.xml` so inherited Activiti repository references also resolve through Cloudsmith. Maven Central remains the source for third-party dependencies and plugins.
+
 ## CI/CD
 
 Running on GH Actions.
@@ -31,20 +33,6 @@ Requires the following secrets to be set:
 | RANCHER2_ACCESS_KEY          | Rancher access key for tests       |
 | RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
 | SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
-
-## Consuming Activiti previews from Cloudsmith
-
-The trial uses Activiti `0.0.1-PR-5629-SNAPSHOT` from [Activiti PR #5629](https://github.com/Activiti/Activiti/pull/5629). Keep the trial PR unmerged while these preview dependencies are selected.
-
-Activiti snapshots use the public Cloudsmith repository and require no Cloudsmith credentials or environment variables for local builds. With Java 25, compile and package from the repository root without running tests or Swagger generation using:
-
-```sh
-mvn --settings settings.xml clean install -DskipTests -DskipITs -Dskip.common.tests=true -Dswagger.skip
-```
-
-The settings mirror also redirects Nexus snapshot references inherited from dependency POMs to Cloudsmith. Release dependencies and artifact publishing continue to use the existing Nexus configuration.
-
-CI uses `CLOUDSMITH_NAMESPACE=hyland` and the existing `cloudsmith-auth` OIDC action. Its empty-cache check verifies that the Activiti engine JAR came from Cloudsmith.
 
 ## Preview Propagation
 

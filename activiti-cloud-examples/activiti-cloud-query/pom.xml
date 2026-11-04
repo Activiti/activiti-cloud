@@ -11,10 +11,6 @@
   <artifactId>activiti-cloud-query</artifactId>
   <name>Activiti Cloud :: Query</name>
 
-  <properties>
-    <graphql-java.version>25.0</graphql-java.version>
-  </properties>
-
   <modules>
     <module>liquibase</module>
     <module>starter</module>

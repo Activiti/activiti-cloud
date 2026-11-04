@@ -45,6 +45,7 @@ updates:
     - "/.github/actions/maven-deploy"
     - "/.github/actions/playwright-run"
     - "/.github/actions/prepare-preview-for-playwright"
+    - "/.github/actions/slow-tests-report"
     - "/.github/actions/setup-env-for-broker"
     schedule:
       interval: "weekly"
