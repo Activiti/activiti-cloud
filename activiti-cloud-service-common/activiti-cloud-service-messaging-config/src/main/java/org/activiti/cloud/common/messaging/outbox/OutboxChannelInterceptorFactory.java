@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
@@ -36,13 +35,14 @@ import org.springframework.integration.dsl.context.IntegrationFlowContext.Integr
 import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 
 public class OutboxChannelInterceptorFactory
-    implements BiFunction<String, BiFunction<Message<?>, DirectChannel, String>, ChannelInterceptor>, SmartLifecycle
+    implements BiFunction<String, BiFunction<Message<?>, MessageChannel, String>, ChannelInterceptor>, SmartLifecycle
 {
 
     public static final String OUTBOX_ROLE = "Outbox";
@@ -77,7 +77,7 @@ public class OutboxChannelInterceptorFactory
     @Override
     public ChannelInterceptor apply(
         String partitionKey,
-        BiFunction<Message<?>, DirectChannel, String> destinationProvider
+        BiFunction<Message<?>, MessageChannel, String> destinationProvider
     ) {
         return interceptorsMap.computeIfAbsent(partitionKey, _ -> {
             // 1. Isolate the messages by using the partition key for queue messages group
