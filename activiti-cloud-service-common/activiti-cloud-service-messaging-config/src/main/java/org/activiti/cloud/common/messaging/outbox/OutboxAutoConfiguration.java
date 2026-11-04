@@ -22,6 +22,7 @@ import java.sql.DatabaseMetaData;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
+import org.activiti.cloud.common.messaging.config.FunctionAnnotationService;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
 import org.activiti.cloud.common.messaging.config.StreamBridgeOperations;
 import org.jspecify.annotations.Nullable;
@@ -30,7 +31,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -124,7 +124,7 @@ public class OutboxAutoConfiguration {
     EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper(
         Supplier<JsonMapper> outboxJsonObjectMapperProvider
     ) {
-        return new EmbeddedHeadersJsonMessageMapper(outboxJsonObjectMapperProvider.get());
+        return new EmbeddedHeadersJsonMessageMapper(outboxJsonObjectMapperProvider.get(), "*");
     }
 
     @Bean
@@ -174,21 +174,31 @@ public class OutboxAutoConfiguration {
 
     @Bean
     NewDestinationBindingCallback<Object> outboxDestinationBindingCallback(
-        OutboxChannelInterceptorFactory outboxChannelInterceptorFactory
+        OutboxChannelInterceptorFactory outboxChannelInterceptorFactory,
+        OutboxDestinationProvider outboxDestinationProvider
     ) {
-        final var channelInterceptor = outboxChannelInterceptorFactory.apply("streamBridge", (m, c) ->
-            c.getComponentName()
-        );
+        final var channelInterceptor = outboxChannelInterceptorFactory.apply("streamBridge", outboxDestinationProvider);
 
         return new OutboxDestinationBindingCallback(channelInterceptor);
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    OutboxDestinationProvider outboxDestinationProvider() {
+        return new OutboxDestinationProvider();
+    }
+
+    @Bean
     BeanPostProcessor outboxOutputBindingPostProcessor(
-        DefaultListableBeanFactory beanFactory,
-        OutboxChannelInterceptorFactory outboxChannelInterceptorFactory
+        FunctionAnnotationService functionAnnotationService,
+        OutboxChannelInterceptorFactory outboxChannelInterceptorFactory,
+        OutboxDestinationProvider outboxDestinationProvider
     ) {
-        return new OutboxOutputBindingPostProcessor(beanFactory, outboxChannelInterceptorFactory);
+        return new OutboxOutputBindingPostProcessor(
+            functionAnnotationService,
+            outboxChannelInterceptorFactory,
+            outboxDestinationProvider
+        );
     }
 
     @Bean

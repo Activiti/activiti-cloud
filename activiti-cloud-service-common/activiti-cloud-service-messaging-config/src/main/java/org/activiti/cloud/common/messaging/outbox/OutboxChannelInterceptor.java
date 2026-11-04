@@ -16,7 +16,6 @@
 package org.activiti.cloud.common.messaging.outbox;
 
 import java.util.function.BiFunction;
-import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -27,11 +26,11 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
     public static final String OUTBOX_DESTINATION = "outboxDestination";
 
     private final MessageChannel outboxChannel;
-    private final BiFunction<Message<?>, DirectChannel, String> destinationProvider;
+    private final BiFunction<Message<?>, MessageChannel, String> destinationProvider;
 
     public OutboxChannelInterceptor(
         MessageChannel outboxChannel,
-        BiFunction<Message<?>, DirectChannel, String> destinationProvider
+        BiFunction<Message<?>, MessageChannel, String> destinationProvider
     ) {
         this.outboxChannel = outboxChannel;
         this.destinationProvider = destinationProvider;
@@ -39,9 +38,9 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        if (!message.getHeaders().containsKey(OUTBOX_DESTINATION) && channel instanceof DirectChannel directChannel) {
+        if (!message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
             final var outboxMessage = MessageBuilder.fromMessage(message)
-                .setHeader(OUTBOX_DESTINATION, destinationProvider.apply(message, directChannel))
+                .setHeader(OUTBOX_DESTINATION, destinationProvider.apply(message, channel))
                 .build();
 
             outboxChannel.send(outboxMessage);
