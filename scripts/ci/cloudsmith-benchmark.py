@@ -59,6 +59,7 @@ def main():
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--version", required=True)
+    parser.add_argument("--deferred-only", action="store_true")
     args = parser.parse_args()
     source, output = args.source.resolve(), args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -66,7 +67,7 @@ def main():
     global_settings.write_text('<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"/>\n')
     warm_cache = output / "warm-m2"
 
-    # Hold deferral constant and disable the second execution in every measured run.
+    # Warm-up does not publish; the Cloudsmith profile stays disabled in every run.
     pom = source / "pom.xml"
     pom.write_text(pom.read_text().replace("<deployAtEnd>true</deployAtEnd>", "<deployAtEnd>false</deployAtEnd>"))
     common = [
@@ -81,6 +82,7 @@ def main():
     results = {
         "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip(),
         "version": args.version,
+        "deferred_only": args.deferred_only,
         "setup": [],
         "measurements": [],
     }
@@ -100,10 +102,16 @@ def main():
 
     namespace = os.environ["CLOUDSMITH_NAMESPACE"]
     destination = f"cloudsmith::https://maven.cloudsmith.io/{namespace}/activiti-snapshots/"
-    for name, transfer_options in [("verbose", []), ("quiet", ["--no-transfer-progress"])]:
+    cases = [("verbose", []), ("quiet", ["--no-transfer-progress"])]
+    if args.deferred_only:
+        cases = [("deferred-quiet", ["--no-transfer-progress"])]
+    for name, transfer_options in cases:
         case_project, case_cache = output / "case-project", output / "case-m2"
         shutil.copytree(source, case_project)
         shutil.copytree(warm_cache, case_cache)
+        if args.deferred_only:
+            case_pom = case_project / "pom.xml"
+            case_pom.write_text(case_pom.read_text().replace("<deployAtEnd>false</deployAtEnd>", "<deployAtEnd>true</deployAtEnd>"))
         command = common + [
             f"-Dmaven.repo.local={case_cache}", "deploy",
             f"-DaltDeploymentRepository={destination}",
@@ -124,14 +132,14 @@ def main():
         "## Cloudsmith-only upload benchmark",
         "",
         f"Source: `{results['source_commit']}`. Maven 3.10.0, Java 25; identical copies of a warm Maven cache and built project.",
-        "Both runs upload only to Cloudsmith with immediate deployment. Only transfer logging differs.",
+        "Cloudsmith-only publishing with the normal deferred-deployment configuration; existing module overrides are preserved." if args.deferred_only else "Both runs upload only to Cloudsmith with immediate deployment. Only transfer logging differs.",
         "",
-        "| Transfer logs | Maven deploy seconds | CPU seconds | Log lines |",
+        "| Case | Maven deploy seconds | Maven CPU seconds | Log lines |",
         "| --- | ---: | ---: | ---: |",
     ]
     for result in results["measurements"]:
         summary.append(f"| {result['name']} | {result['seconds']} | {result['cpu_seconds']} | {result['log_lines']} |")
-    summary += ["", "This is one pair of measurements; repeat in reverse order before attributing a small difference to logging.", ""]
+    summary += ["", "Compare this result with the earlier immediate-deployment run; runner and network variation still apply." if args.deferred_only else "This is one pair of measurements; repeat in reverse order before attributing a small difference to logging.", ""]
     print("\n".join(summary))
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a") as stream:

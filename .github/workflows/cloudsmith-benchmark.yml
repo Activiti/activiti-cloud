@@ -55,7 +55,7 @@ jobs:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
           verify-auth: "true"
 
-      - name: Compare Cloudsmith uploads with transfer logs on and off
+      - name: Measure Cloudsmith-only publishing with deferred deployment
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: >-
@@ -63,6 +63,7 @@ jobs:
           --source project
           --output "$RUNNER_TEMP/cloudsmith-benchmark"
           --version "0.0.1-PR-${PR_NUMBER}-BENCH-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-SNAPSHOT"
+          --deferred-only
 
       - name: Upload measurements and Maven logs
         if: always()
