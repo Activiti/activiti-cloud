@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
+
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,8 +91,7 @@ public class OutboxChannelInterceptorFactory
 
             // 2. Build a single-threaded flow dedicated to this partition
             IntegrationFlow partitionFlow = IntegrationFlow.from(queueChannel)
-                // Strict DB transaction boundary per loop
-                .handle(new OutboxMessageHandler(partitionKey, streamBridgeProvider), endpoint ->
+                .bridge(endpoint ->
                     endpoint
                         .id(partitionKey.concat(OUTBOX_ROLE))
                         .role(OUTBOX_ROLE)
@@ -100,10 +101,13 @@ public class OutboxChannelInterceptorFactory
                             Pollers.trigger(queueSizeBasedTrigger(queueChannel))
                                 .maxMessagesPerPoll(1)
                                 .receiveTimeout(Duration.ofSeconds(1).toMillis())
+                                .errorChannel(ERROR_CHANNEL)
                                 .advice(new PollLockAdvice(lockRegistry, partitionKey))
                                 .transactional(transactionManager)
                         )
                 )
+                // Strict DB transaction boundary per loop
+                .handle(new OutboxMessageHandler(partitionKey, streamBridgeProvider))
                 .get();
 
             flowRegistrationsMap.put(
