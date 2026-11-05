@@ -48,15 +48,16 @@ public class OutboxMessageHandler implements MessageHandler {
             message
         );
 
-        final var result = Optional.ofNullable(message.getHeaders().get(OUTBOX_DESTINATION, String.class))
+        final var sent = Optional.ofNullable(message.getHeaders().get(OUTBOX_DESTINATION, String.class))
             .map(outboxBinding -> streamBridge().send(outboxBinding, message))
             .orElseThrow(() ->
                 new DestinationResolutionException(
                     "Cannot resolve %s header in the outbox message %s".formatted(OUTBOX_DESTINATION, message)
                 )
-            );
+            )
+            .booleanValue();
 
-        if (!result) {
+        if (!sent) {
             log.warn("Outbox {} message {} has been dropped", partitionKey, message);
         }
     }
