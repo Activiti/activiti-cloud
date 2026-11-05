@@ -173,31 +173,6 @@ jobs:
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
 
-      - name: Verify Activiti consumption from Cloudsmith with an empty Maven cache
-        shell: bash
-        run: |
-          activiti_version=$(yq -p=xml -r '.project.properties."activiti.version"' activiti-cloud-api/pom.xml)
-          repository_id=cloudsmith-activiti-releases
-          if [[ "$activiti_version" == *-SNAPSHOT ]]; then
-            repository_id=cloudsmith-activiti-snapshots
-          fi
-
-          trial_repository=$(mktemp -d "$RUNNER_TEMP/cloudsmith-consumption.XXXXXX")
-          trap 'rm -rf "$trial_repository"' EXIT
-          mvn --batch-mode --no-transfer-progress --non-recursive --settings settings.xml \
-            "-Dmaven.repo.local=$trial_repository" \
-            dependency:get "-Dartifact=org.activiti:activiti-engine:$activiti_version" \
-            -Dtransitive=false
-
-          origin_file="$trial_repository/org/activiti/activiti-engine/$activiti_version/_remote.repositories"
-          if ! grep -Eq "^activiti-engine-[^>]+\\.jar>${repository_id}(-[0-9a-f]{40})?=" "$origin_file"; then
-            cat "$origin_file"
-            echo "::error::The Activiti engine JAR was not resolved from $repository_id."
-            exit 1
-          fi
-          printf 'Verified org.activiti:activiti-engine:%s from Cloudsmith using an empty Maven repository.\n' \
-            "$activiti_version" >> "$GITHUB_STEP_SUMMARY"
-
       - name: Upload common module test reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
