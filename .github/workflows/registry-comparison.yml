@@ -1,0 +1,104 @@
+name: Nexus and Cloudsmith comparison
+
+on:
+  pull_request:
+    branches: [improvement/AAE-55154-upload-artifacts-cloudsmith]
+    types: [opened, reopened, synchronize]
+    paths:
+      - .github/workflows/registry-comparison.yml
+      - scripts/ci/registry-benchmark/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: registry-comparison-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && github.head_ref == 'codex/aae-55154-nexus-cloudsmith-comparison'
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [upload, build, preview]
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      MAVEN_ARGS: ""
+      MAVEN_OPTS: ""
+      CLOUDSMITH_NAMESPACE: ${{ vars.CLOUDSMITH_NAMESPACE }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: benchmark
+
+      - name: Check out the fixed project revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: 9c02f87b252a737cca4ff7aa39e1af6412597b79
+          path: project
+
+      - name: Check benchmark validation
+        run: python3 -m unittest discover -s benchmark/scripts/ci/registry-benchmark -p 'test_*.py' -v
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: '25'
+          distribution: corretto
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+        with:
+          version: '3.10.0'
+
+      - name: Authenticate publishing with Cloudsmith
+        if: matrix.kind != 'build'
+        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+
+      - name: Compare clean builds with empty dependency caches
+        if: matrix.kind == 'build'
+        run: >-
+          python3 benchmark/scripts/ci/registry-benchmark/compare.py build
+          --source project --output "$RUNNER_TEMP/registry-comparison-build"
+
+      - name: Build completely, then compare publishing identical artifacts
+        if: matrix.kind == 'upload'
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: >-
+          python3 benchmark/scripts/ci/registry-benchmark/compare.py upload
+          --source project --output "$RUNNER_TEMP/registry-comparison-upload"
+          --version-prefix "0.0.1-PR-${PR_NUMBER}-BENCH-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-1"
+
+      - name: Compare the current two complete Maven deployment commands
+        if: matrix.kind == 'preview'
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: >-
+          python3 benchmark/scripts/ci/registry-benchmark/compare.py preview
+          --source project --output "$RUNNER_TEMP/registry-comparison-preview"
+          --version-prefix "0.0.1-PR-${PR_NUMBER}-BENCH-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-2"
+
+      - name: Upload measurements, origin records and logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: registry-comparison-${{ matrix.kind }}
+          path: |
+            ${{ runner.temp }}/registry-comparison-${{ matrix.kind }}/*.json
+            ${{ runner.temp }}/registry-comparison-${{ matrix.kind }}/*.log
+            ${{ runner.temp }}/registry-comparison-${{ matrix.kind }}/*.tsv
+            ${{ runner.temp }}/registry-comparison-${{ matrix.kind }}/summary.md
+          retention-days: 7
+          if-no-files-found: warn
