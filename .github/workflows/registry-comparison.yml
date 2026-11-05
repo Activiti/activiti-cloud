@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kind: [upload, build]
+        kind: [upload, build, preview]
     runs-on: ubuntu-latest
     timeout-minutes: 100
     permissions:
@@ -41,7 +41,7 @@ jobs:
       - name: Check out the fixed project revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ae85ec7e9f242e0383d3ce05ff83a7ae2745f9b1
+          ref: 9c02f87b252a737cca4ff7aa39e1af6412597b79
           path: project
 
       - name: Check benchmark validation
@@ -57,11 +57,10 @@ jobs:
           version: '3.10.0'
 
       - name: Authenticate publishing with Cloudsmith
-        if: matrix.kind == 'upload'
+        if: matrix.kind != 'build'
         uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
-          verify-auth: "true"
 
       - name: Compare clean builds with empty dependency caches
         if: matrix.kind == 'build'
@@ -78,7 +77,18 @@ jobs:
         run: >-
           python3 benchmark/scripts/ci/registry-benchmark/compare.py upload
           --source project --output "$RUNNER_TEMP/registry-comparison-upload"
-          --version-prefix "0.0.1-PR-${PR_NUMBER}-BENCH-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          --version-prefix "0.0.1-PR-${PR_NUMBER}-BENCH-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-1"
+
+      - name: Compare the current two complete Maven deployment commands
+        if: matrix.kind == 'preview'
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: >-
+          python3 benchmark/scripts/ci/registry-benchmark/compare.py preview
+          --source project --output "$RUNNER_TEMP/registry-comparison-preview"
+          --version-prefix "0.0.1-PR-${PR_NUMBER}-BENCH-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-2"
 
       - name: Upload measurements, origin records and logs
         if: always()

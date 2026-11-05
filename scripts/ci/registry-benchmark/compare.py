@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 import resource
+import shlex
 import shutil
 import statistics
 import subprocess
@@ -25,6 +26,14 @@ ORDERS = (("nexus", "cloudsmith"), ("cloudsmith", "nexus"))
 
 def configuration(project, directory, registry, namespace, publishing=False):
     """Select Nexus/Central or Cloudsmith and mirror inherited repositories consistently."""
+    if registry == "cloudsmith":
+        settings = directory / "cloudsmith-settings.xml"
+        tree = ET.parse(project / "settings.xml")
+        if not publishing:
+            for servers in tree.getroot().findall("m:servers", {"m": "http://maven.apache.org/SETTINGS/1.0.0"}):
+                tree.getroot().remove(servers)
+        tree.write(settings, encoding="utf-8", xml_declaration=True)
+        return settings
     if registry == "nexus":
         dependencies = "https://repo.maven.apache.org/maven2/"
         releases = NEXUS + "repositories/activiti-releases/"
@@ -125,10 +134,51 @@ def origins(cache, registry):
     allowed = {f"{registry}-dependencies", f"{registry}-releases"}
     if registry == "nexus":
         allowed.update(("nexus-snapshots", "nexus-public"))
+    else:
+        allowed = {"central", "activiti-releases", "activiti-snapshots", "alfresco-internal-plugin",
+                   "cloudsmith-activiti-releases", "cloudsmith-activiti-snapshots"}
     downloaded = {record["path"] for record in records}
+    core = [record for record in records if record["path"].startswith("org/activiti/")]
+    core_valid = registry == "nexus" or (bool(core) and all(
+        record["repository"] in {"cloudsmith-activiti-releases", "cloudsmith-activiti-snapshots"}
+        for record in core
+    ))
     return {"counts": dict(counts), "records": records,
             "downloaded_bytes": sum((cache / path).stat().st_size for path in downloaded),
-            "valid": bool(records) and not (set(counts) - allowed)}
+            "valid": bool(records) and not (set(counts) - allowed) and core_valid}
+
+
+def production_commands(source):
+    """Read the two deploy commands from the pinned production action without changing its flags."""
+    action = (source / ".github/actions/maven-deploy/action.yml").read_text()
+
+    def folded(key):
+        lines = action.splitlines()
+        matches = [number for number, line in enumerate(lines) if line.strip() == key + ": >-"]
+        if len(matches) != 1:
+            raise ValueError(f"Expected one folded {key} in the production deployment action")
+        number = matches[0]
+        indent = len(lines[number]) - len(lines[number].lstrip())
+        result = []
+        for line in lines[number + 1:]:
+            if line.strip() and len(line) - len(line.lstrip()) <= indent:
+                break
+            if line.strip():
+                result.append(line.strip())
+        return " ".join(result)
+
+    workflow = (source / ".github/workflows/main.yml").read_text()
+    options = re.search(r"^  MAVEN_CLI_OPTS: (.+)$", workflow, re.MULTILINE).group(1)
+    commands = {
+        "nexus": ["mvn", *shlex.split(folded("maven-command")), *shlex.split(options),
+                  "-Dlogging.root.level=off", "-Dspring.main.banner-mode=off", "-Ddocker.skip"],
+        "cloudsmith": shlex.split(folded("run").replace("${{ env.MAVEN_CLI_OPTS }}", options)),
+    }
+    if any(command.count("deploy") != 1 for command in commands.values()):
+        raise ValueError("Expected exactly one deployment lifecycle in each production command")
+    if "-Pcloudsmith,!alfresco,!attach-sources" not in commands["cloudsmith"]:
+        raise ValueError("Cloudsmith deployment must disable the Nexus publishing profile")
+    return commands
 
 
 def manifest_files(manifest):
@@ -181,8 +231,9 @@ def summary(results, directory):
             lines.extend(["", f"{registry}: median wall time {statistics.median(samples):.3f}s ({len(samples)} successful samples)."])
     if "matching_download_paths" in results:
         lines.extend(["", f"All builds downloaded the same artifact paths: {results['matching_download_paths']}."])
+    order_note = "Preview mode keeps the production Nexus-then-Cloudsmith order." if results["kind"] == "preview" else "Order reverses in round 2."
     lines.extend(["", results["scope"], "",
-                  "Order reverses in round 2. Remote server caches are not reset; two samples are exploratory measurements.", ""])
+                  order_note + " Remote server caches are not reset; two samples are exploratory measurements.", ""])
     text = "\n".join(lines)
     (directory / "summary.md").write_text(text)
     print(text)
@@ -193,7 +244,7 @@ def summary(results, directory):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("kind", choices=("build", "upload"))
+    parser.add_argument("kind", choices=("build", "upload", "preview"))
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--version-prefix")
@@ -203,12 +254,12 @@ def main():
     namespace = os.environ["CLOUDSMITH_NAMESPACE"]
     if not re.fullmatch(r"[a-z0-9-]+", namespace):
         parser.error("Invalid Cloudsmith namespace")
-    if args.kind == "upload" and (not args.version_prefix or not re.fullmatch(r"0\.0\.1-PR-\d+-BENCH-[\d-]+", args.version_prefix)):
+    if args.kind != "build" and (not args.version_prefix or not re.fullmatch(r"0\.0\.1-PR-\d+-BENCH-[\d-]+", args.version_prefix)):
         parser.error("Uploads require an isolated PR benchmark version prefix")
     global_settings = output / "global-settings.xml"
     global_settings.write_text('<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"/>\n')
     results = {"kind": args.kind, "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip(),
-               "scope": "Tests and Docker are skipped in every case. Build downloads are anonymous. Nexus means the current Nexus + Maven Central setup; Cloudsmith serves both Activiti and third-party downloads. Inherited repositories are mirrored to prevent cross-registry fallback.",
+               "scope": "Source is the pinned publishing PR revision. Tests and Docker are skipped. Cold-build downloads are anonymous. Nexus uses Nexus for Activiti plus Maven Central; Cloudsmith uses the production POM/settings unchanged, including direct Maven Central for third-party dependencies. Server caches are not reset.",
                "setup": [], "measurements": []}
 
     def save():
@@ -235,7 +286,8 @@ def main():
             samples = [set(record["path"] for record in item["origins"]["records"]) for item in results["measurements"]]
             results["matching_download_paths"] = all(paths == samples[0] for paths in samples)
         else:
-            results["scope"] += " Uploads use ten transfer threads, quiet logs, a single batched deployment execution and identical prebuilt files within each round. No lifecycle build runs during upload timing. Only isolated snapshots are published; no downstream propagation."
+            results["scope"] += " Only isolated benchmark snapshots are published; no downstream propagation."
+            commands = production_commands(source)
             spy = compile_spy(output)
             warm_cache = output / "warm-m2"
             for number, order in enumerate(ORDERS, 1):
@@ -243,9 +295,7 @@ def main():
                 case.mkdir()
                 project = case / "project"
                 shutil.copytree(source, project)
-                settings = configuration(project, case, "nexus", namespace, publishing=True)
-                for pom in project.rglob("pom.xml"):
-                    pom.write_text(pom.read_text().replace("<deployAtEnd>false</deployAtEnd>", "<deployAtEnd>true</deployAtEnd>"))
+                settings = project / "settings.xml"
                 base = command(settings, global_settings, warm_cache)
                 manifest = case / "artifacts.xml"
                 for name, goals in (
@@ -261,34 +311,52 @@ def main():
                 files = manifest_files(manifest)
                 if not files:
                     raise RuntimeError("Completed build manifest is empty")
+                credentials = {name: os.environ[name] for name in (
+                    "MAVEN_USERNAME", "MAVEN_PASSWORD", "CLOUDSMITH_USERNAME", "CLOUDSMITH_API_KEY",
+                )}
+                if args.kind == "preview":
+                    results["scope"] += "" if number != 1 else " Preview mode runs the exact two production Maven commands, Nexus first, with original deployment settings and BOM overrides. Dependencies are warmed outside timing; workspace targets are cleaned before the first command. Both commands share their workspace/cache. Timings exclude checkout, Java/Maven setup, authentication and version preparation."
+                    clean = {"round": number, "name": "clean-workspace", **measure(base + ["clean"], project,
+                             output / f"setup-{number}-clean.log")}
+                    results["setup"].append(clean)
+                    if clean["exit_code"]:
+                        raise RuntimeError("Could not clean the workspace before the preview trial")
+                    pair = []
+                    for registry in ("nexus", "cloudsmith"):
+                        events = output / f"preview-{number}-{registry}.tsv"
+                        options = ["--global-settings", str(global_settings), f"-Dmaven.repo.local={warm_cache}",
+                                   f"-Dmaven.ext.class.path={spy}", "-Dbenchmark.mode=observe", f"-Dbenchmark.events={events}"]
+                        item = {"round": number, "registry": registry,
+                                **measure(commands[registry] + options, project, output / f"preview-{number}-{registry}.log", credentials),
+                                **publish_events(events)}
+                        expected = "alfresco" if registry == "nexus" else "cloudsmith"
+                        item["valid"] = item["exit_code"] == 0 and bool(item["deployed"]) and item["repository_ids"] == [expected]
+                        results["measurements"].append(item)
+                        pair.append(item)
+                        save()
+                    same = pair[0]["base_coordinates"] == pair[1]["base_coordinates"]
+                    for item in pair:
+                        item["matching_deployed_artifacts"] = same
+                        item["valid"] &= same
+                    save()
+                    shutil.rmtree(project)
+                    continue
+                results["scope"] += "" if number != 1 else " Upload mode deploys identical prebuilt files without a lifecycle rebuild. Production commands provide the repository/profile and concurrency settings: Nexus defaults and Cloudsmith's ten threads. Existing deployAtEnd/BOM overrides are preserved. Order reverses for the second round."
                 for registry in order:
                     cache = case / "case-m2"
                     shutil.copytree(warm_cache, cache)
                     events = output / f"upload-{number}-{registry}.tsv"
-                    # Dependency resolution is held constant for both upload cases.
-                    upload_settings = case / f"upload-{registry}-settings.xml"
-                    shutil.copyfile(settings, upload_settings)
-                    if registry == "nexus":
-                        destination = NEXUS + "repositories/activiti-snapshots/"
-                        user, password = os.environ["MAVEN_USERNAME"], os.environ["MAVEN_PASSWORD"]
-                    else:
-                        destination = f"https://maven.cloudsmith.io/{namespace}/activiti-snapshots/"
-                        user, password = os.environ["CLOUDSMITH_USERNAME"], os.environ["CLOUDSMITH_API_KEY"]
-                    target = f"benchmark-upload::{destination}"
-                    options = [DEPLOY_GOAL, f"-Dmaven.ext.class.path={spy}", "-Dbenchmark.mode=restore",
-                               f"-Dbenchmark.manifest={manifest}", f"-Dbenchmark.events={events}",
-                               "-Daether.connector.basic.upstreamThreads.benchmark-upload=10",
-                               f"-DaltDeploymentRepository={target}", f"-DaltReleaseDeploymentRepository={target}",
-                               f"-DaltSnapshotDeploymentRepository={target}"]
+                    upload = [DEPLOY_GOAL if argument == "deploy" else argument for argument in commands[registry]]
+                    options = ["--global-settings", str(global_settings), f"-Dmaven.repo.local={cache}",
+                               f"-Dmaven.ext.class.path={spy}", "-Dbenchmark.mode=restore",
+                               f"-Dbenchmark.manifest={manifest}", f"-Dbenchmark.events={events}"]
                     item = {"round": number, "registry": registry,
-                            **measure(command(upload_settings, global_settings, cache) + options, project,
-                                      output / f"upload-{number}-{registry}.log",
-                                      {"BENCHMARK_USER": user, "BENCHMARK_PASSWORD": password}),
+                            **measure(upload + options, project, output / f"upload-{number}-{registry}.log", credentials),
                             **publish_events(events)}
                     item["artifact_files"] = files
                     item["unchanged_files"] = manifest_files(manifest) == files
                     item["valid"] = (item["exit_code"] == 0 and item["unchanged_files"] and bool(item["deployed"])
-                                     and item["repository_ids"] == ["benchmark-upload"])
+                                     and item["repository_ids"] == ["alfresco" if registry == "nexus" else "cloudsmith"])
                     results["measurements"].append(item)
                     save()
                     shutil.rmtree(cache)
