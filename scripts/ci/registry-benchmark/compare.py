@@ -32,6 +32,7 @@ def configuration(project, directory, registry, namespace, publishing=False):
         if not publishing:
             for servers in tree.getroot().findall("m:servers", {"m": "http://maven.apache.org/SETTINGS/1.0.0"}):
                 tree.getroot().remove(servers)
+        ET.register_namespace("", "http://maven.apache.org/SETTINGS/1.0.0")
         tree.write(settings, encoding="utf-8", xml_declaration=True)
         return settings
     if registry == "nexus":

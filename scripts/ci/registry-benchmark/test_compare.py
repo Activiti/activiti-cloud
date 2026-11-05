@@ -32,6 +32,7 @@ class BenchmarkTest(unittest.TestCase):
                 self.assertFalse(any(item.tag.endswith("servers") for item in ET.parse(settings).getroot()))
                 if registry == "cloudsmith":
                     self.assertEqual((root / "pom.xml").read_bytes(), original)
+                    self.assertIn('<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"', settings.read_text())
                     self.assertEqual(pattern, "activiti-releases")
                     self.assertIn("https://repo.maven.apache.org/maven2/", urls)
                 else:
