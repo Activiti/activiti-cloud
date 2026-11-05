@@ -74,8 +74,6 @@ def main() -> int:
 
     if patch.get("keycloakUrl"):
         upsert_env(container, "ACT_KEYCLOAK_URL", patch["keycloakUrl"])
-    if patch.get("adminUrl"):
-        upsert_env(container, "KEYCLOAK_ADMIN_URL", patch["adminUrl"])
     if patch.get("keycloakRealm"):
         upsert_env(container, "ACT_KEYCLOAK_REALM", patch["keycloakRealm"])
     if patch.get("jwtIssuerUri"):
