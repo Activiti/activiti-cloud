@@ -42,7 +42,7 @@ runs:
 
     - name: Publish Test Report
       id: publish-report
-      uses: dorny/test-reporter@d1b5dff021aa968b288b02285a8bf47471c5928a # v3.2.0
+      uses: dorny/test-reporter@v3.2.0
       with:
         name: Slow Test Results (> ${{ inputs.slow-threshold }}s)
         path: '${{ runner.temp }}/filtered-slow-test-reports/**/TEST-*.xml'
@@ -50,7 +50,7 @@ runs:
         fail-on-empty: false
 
     - name: Comment on PR with slow tests summary
-      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      uses: actions/github-script@v9.0.0
       env:
         SLOW_THRESHOLD: ${{ inputs.slow-threshold }}
         SLOW_CLASS_THRESHOLD: ${{ inputs.slow-class-threshold }}

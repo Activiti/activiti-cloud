@@ -9,7 +9,7 @@ jobs:
   create-prerelease:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
       - name: Resolve activiti version
         id: resolve-versions
         run: |
@@ -20,13 +20,13 @@ jobs:
 
       - run: touch release.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v19.7.1
         with:
           release-descriptor: release.yaml
           project: activiti
           tag: ${{ steps.resolve-versions.outputs.activiti-tag }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v19.7.1
         with:
           release-descriptor: release.yaml
           project: activitiCloud
