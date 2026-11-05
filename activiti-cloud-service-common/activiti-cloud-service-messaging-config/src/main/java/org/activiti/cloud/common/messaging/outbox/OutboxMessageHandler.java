@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.outbox;
 import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptor.OUTBOX_DESTINATION;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -49,10 +50,14 @@ public class OutboxMessageHandler implements MessageHandler {
         );
 
         final var sent = Optional.ofNullable(message.getHeaders().get(OUTBOX_DESTINATION, String.class))
+            .filter(Predicate.not(String::isEmpty))
             .map(outboxBinding -> streamBridge().send(outboxBinding, message))
             .orElseThrow(() ->
                 new DestinationResolutionException(
-                    "Cannot resolve %s header in the outbox message %s".formatted(OUTBOX_DESTINATION, message)
+                    "Cannot resolve %s message header outbox %s partition".formatted(
+                        message.getHeaders().get(OUTBOX_DESTINATION, String.class),
+                        partitionKey
+                    )
                 )
             )
             .booleanValue();
