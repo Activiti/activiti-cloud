@@ -44,8 +44,6 @@ runs:
     - name: Deploy to Cloudsmith
       shell: bash
       env:
-        MAVEN_USERNAME: ${{ inputs.nexus-username }}
-        MAVEN_PASSWORD: ${{ inputs.nexus-password }}
         CLOUDSMITH_NAMESPACE: ${{ inputs.cloudsmith-namespace }}
       run: >-
         mvn --batch-mode deploy '-Pcloudsmith,!alfresco,!attach-sources'
