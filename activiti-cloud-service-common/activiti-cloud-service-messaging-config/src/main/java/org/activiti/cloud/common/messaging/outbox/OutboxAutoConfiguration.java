@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.FunctionAnnotationService;
 import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
-import org.aopalliance.aop.Advice;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -163,7 +162,7 @@ public class OutboxAutoConfiguration {
         IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry lockRegistry,
-        Advice outboxMessageHandlerErrorAdvice
+        ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice
     ) {
         return new OutboxChannelInterceptorFactory(
             outboxChannelMessageStore,
@@ -177,7 +176,7 @@ public class OutboxAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Advice outboxMessageHandlerErrorAdvice() {
+    public ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice() {
         final var advice = new ExpressionEvaluatingRequestHandlerAdvice();
         // Route to this channel on failure
         advice.setFailureChannelName(ERROR_CHANNEL);
