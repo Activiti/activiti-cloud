@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -219,7 +220,12 @@ public class ServiceTaskConsumerHandler {
         return message -> {
             assertIntegrationContextHeaders(message.getPayload(), message.getHeaders());
 
-            IntegrationContext integrationContext = message.getPayload().getIntegrationContext();
+            // Simulate a connector that does not echo the ephemeral flag back: the runtime bundle
+            // must resolve it from the mapping, not from the connector reply
+            IntegrationContextImpl integrationContext = new IntegrationContextImpl(
+                message.getPayload().getIntegrationContext()
+            );
+            integrationContext.setEphemeralVariables(null);
             integrationContext.addOutBoundVariable("restResult", "fromConnector");
 
             integrationResultSender.send(message.getPayload(), integrationContext);

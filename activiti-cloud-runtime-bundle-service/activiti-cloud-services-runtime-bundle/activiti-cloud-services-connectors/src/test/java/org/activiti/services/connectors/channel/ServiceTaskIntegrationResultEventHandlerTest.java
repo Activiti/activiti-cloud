@@ -29,22 +29,29 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
+import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -77,6 +84,60 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
 
+    @Mock
+    private EphemeralMappingResolver ephemeralMappingResolver;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private RuntimeBundleProperties runtimeBundleProperties;
+
+    @Mock
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void receive_should_useEphemeralFlagFromMapping_andIgnoreConnectorFlag(boolean ephemeralMapping) {
+        //given
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of("restResult", "fromConnector"));
+        // the connector reply claims the opposite of the mapping
+        integrationContext.setEphemeralVariables(!ephemeralMapping);
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+        given(ephemeralMappingResolver.isEphemeral(integrationContextEntity)).willReturn(ephemeralMapping);
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(
+            List.of()
+        );
+
+        //when
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        //then
+        ArgumentCaptor<CompositeCommand> commandCaptor = ArgumentCaptor.forClass(CompositeCommand.class);
+        verify(managementService).executeCommand(commandCaptor.capture());
+        Command<?> aggregateCommand = commandCaptor
+            .getValue()
+            .getCommands()
+            .stream()
+            .filter(AggregateIntegrationResultReceivedEventCmd.class::isInstance)
+            .findFirst()
+            .orElseThrow();
+        aggregateCommand.execute(null);
+
+        ArgumentCaptor<CloudIntegrationResultReceivedEventImpl> eventCaptor = ArgumentCaptor.forClass(
+            CloudIntegrationResultReceivedEventImpl.class
+        );
+        verify(processEngineEventsAggregator).add(eventCaptor.capture());
+        IntegrationContext auditedContext = eventCaptor.getValue().getEntity();
+        assertThat(auditedContext.hasEphemeralVariables()).isEqualTo(ephemeralMapping);
+        if (ephemeralMapping) {
+            assertThat(auditedContext.getOutBoundVariables()).isEmpty();
+        } else {
+            assertThat(auditedContext.getOutBoundVariables()).containsExactlyEntriesOf(
+                Map.of("restResult", "fromConnector")
+            );
+        }
+    }
+
     @Test
     void receive_should_skipTriggerWhenActivityIdMismatch() {
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
@@ -99,6 +160,8 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(composite.getCommands()).hasSize(2);
         assertThat(composite.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(composite.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        // ephemeral flag is resolved from the runtime bundle's own integration context (mapping), not the reply
+        verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
     }
 
     @Test
