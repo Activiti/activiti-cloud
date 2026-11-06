@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -39,13 +40,13 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         if (!message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
-            final var outboxMessage = MessageBuilder.fromMessage(message)
-                .setHeader(OUTBOX_DESTINATION, destinationProvider.apply(message, channel))
-                .build();
+            final var result = Optional.ofNullable(destinationProvider.apply(message, channel))
+                .map(outboxDestination ->
+                    MessageBuilder.fromMessage(message).setHeader(OUTBOX_DESTINATION, outboxDestination).build()
+                )
+                .map(outboxChannel::send);
 
-            outboxChannel.send(outboxMessage);
-
-            return null;
+            return result.isPresent() ? null : message;
         }
 
         return message;
