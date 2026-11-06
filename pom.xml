@@ -252,11 +252,23 @@
     </repository>
     <repository>
       <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+      <url>https://dl.cloudsmith.io/basic/hyland/activiti-releases/maven/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
     <repository>
       <id>activiti-snapshots</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
+      <url>https://dl.cloudsmith.io/basic/hyland/activiti-snapshots/maven/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
   <pluginRepositories>
@@ -660,6 +672,19 @@ limitations under the License.]]>
     </plugins>
   </build>
   <profiles>
+    <profile>
+      <id>cloudsmith</id>
+      <distributionManagement>
+        <repository>
+          <id>cloudsmith</id>
+          <url>https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-releases/</url>
+        </repository>
+        <snapshotRepository>
+          <id>cloudsmith</id>
+          <url>https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
     <profile>
       <id>attach-sources</id>
       <activation>
