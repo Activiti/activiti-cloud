@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 import org.springframework.integration.support.context.NamedComponent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -23,10 +25,20 @@ import org.springframework.messaging.core.DestinationResolutionException;
 
 public class OutboxDestinationProvider implements BiFunction<Message<?>, MessageChannel, String> {
 
+    private final OutboxProperties outboxProperties;
+
+    public OutboxDestinationProvider(OutboxProperties outboxProperties) {
+        this.outboxProperties = outboxProperties;
+    }
+
     @Override
     public String apply(Message<?> message, MessageChannel messageChannel) {
         if (messageChannel instanceof NamedComponent component) {
-            return component.getBeanName();
+            return Optional.of(component.getBeanName())
+                .filter(beanName ->
+                    Stream.of(outboxProperties.getExcludes()).noneMatch(pattern -> pattern.matcher(beanName).matches())
+                )
+                .orElse(null);
         }
 
         throw new DestinationResolutionException(
