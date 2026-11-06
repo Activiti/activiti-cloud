@@ -86,6 +86,7 @@ export interface ProcessQueryParams {
 
 export interface ProcessInstanceSearchRequest {
     id?: string[];
+    status?: ProcessInstanceStatus[];
 }
 
 export enum ServiceTaskStatus {
