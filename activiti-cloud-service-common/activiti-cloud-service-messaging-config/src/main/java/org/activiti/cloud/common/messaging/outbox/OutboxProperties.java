@@ -22,7 +22,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class OutboxProperties {
 
     private boolean enabled = false;
-    private Pattern[] excludes = new Pattern[] { Pattern.compile("^$") };
+    private Pattern[] excludes = { Pattern.compile("^$") };
 
     public boolean isEnabled() {
         return enabled;
