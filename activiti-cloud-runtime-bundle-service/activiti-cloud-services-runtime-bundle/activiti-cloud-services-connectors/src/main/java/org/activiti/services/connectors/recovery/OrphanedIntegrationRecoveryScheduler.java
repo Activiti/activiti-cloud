@@ -15,6 +15,7 @@
  */
 package org.activiti.services.connectors.recovery;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -42,19 +43,22 @@ public class OrphanedIntegrationRecoveryScheduler {
     private final ServiceTaskIntegrationErrorEventHandler errorEventHandler;
     private final int thresholdSeconds;
     private final FeatureToggle featureToggle;
+    private final OrphanedIntegrationThresholdResolver thresholdResolver;
 
     OrphanedIntegrationRecoveryScheduler(
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
         int thresholdSeconds,
-        FeatureToggle featureToggle
+        FeatureToggle featureToggle,
+        OrphanedIntegrationThresholdResolver thresholdResolver
     ) {
         this.integrationContextService = integrationContextService;
         this.integrationRequestBuilder = integrationRequestBuilder;
         this.errorEventHandler = errorEventHandler;
         this.thresholdSeconds = thresholdSeconds;
         this.featureToggle = featureToggle;
+        this.thresholdResolver = thresholdResolver;
     }
 
     @Scheduled(
@@ -77,11 +81,7 @@ public class OrphanedIntegrationRecoveryScheduler {
             return;
         }
 
-        LOGGER.warn(
-            "Found {} orphaned integration context(s) older than {} seconds. Sending integration errors.",
-            orphaned.size(),
-            thresholdSeconds
-        );
+        LOGGER.warn("Found {} candidate orphaned integration context(s).", orphaned.size());
 
         orphaned.forEach(this::recoverOrphanedIntegration);
         LOGGER.debug("Orphaned integration recovery job completed. Processed {} context(s).", orphaned.size());
@@ -89,6 +89,30 @@ public class OrphanedIntegrationRecoveryScheduler {
 
     private void recoverOrphanedIntegration(IntegrationContextEntity entity) {
         try {
+            var entityThresholdSeconds = resolveThresholdSeconds(entity);
+            if (entityThresholdSeconds < 0) {
+                return;
+            }
+
+            var elapsed = Duration.between(entity.getCreatedDate().toInstant(), Instant.now());
+            if (elapsed.getSeconds() < entityThresholdSeconds) {
+                LOGGER.debug(
+                    "Skipping integration context {}: started {} seconds ago, threshold is {} seconds.",
+                    entity.getId(),
+                    elapsed.getSeconds(),
+                    entityThresholdSeconds
+                );
+                return;
+            }
+
+            LOGGER.debug(
+                "Integration context {} (flow node {}) is orphaned: started {} seconds ago, threshold is {} seconds. Sending integration error.",
+                entity.getId(),
+                entity.getFlowNodeId(),
+                elapsed.getSeconds(),
+                entityThresholdSeconds
+            );
+
             var integrationContext = new IntegrationContextImpl();
             integrationContext.setId(entity.getId());
             integrationContext.setExecutionId(entity.getExecutionId());
@@ -99,7 +123,7 @@ public class OrphanedIntegrationRecoveryScheduler {
             var integrationRequest = integrationRequestBuilder.build(integrationContext);
             var integrationError = new IntegrationErrorImpl(
                 integrationRequest,
-                new CloudBpmnError(ORPHANED_INTEGRATION_ERROR_CODE, buildErrorMessage())
+                new CloudBpmnError(ORPHANED_INTEGRATION_ERROR_CODE, buildErrorMessage(entityThresholdSeconds))
             );
 
             errorEventHandler.receive(integrationError);
@@ -114,13 +138,43 @@ public class OrphanedIntegrationRecoveryScheduler {
         }
     }
 
-    private String buildErrorMessage() {
+    /**
+     * The query selects the contexts older than the default threshold, so the threshold declared on the
+     * service task can postpone the recovery (or exclude it, when negative) but not anticipate it.
+     */
+    private int resolveThresholdSeconds(IntegrationContextEntity entity) {
+        try {
+            var serviceTaskThreshold = thresholdResolver
+                .resolveThresholdSeconds(entity.getProcessDefinitionId(), entity.getFlowNodeId())
+                .orElse(null);
+            if (serviceTaskThreshold == null) {
+                return thresholdSeconds;
+            }
+            if (serviceTaskThreshold < 0) {
+                LOGGER.debug(
+                    "Integration context {} (flow node {}) will not be recovered: negative threshold declared on the service task.",
+                    entity.getId(),
+                    entity.getFlowNodeId()
+                );
+            }
+            return serviceTaskThreshold;
+        } catch (Exception e) {
+            LOGGER.warn(
+                "Unable to resolve the threshold of integration context {}, using the default threshold.",
+                entity.getId(),
+                e
+            );
+            return thresholdSeconds;
+        }
+    }
+
+    private String buildErrorMessage(int thresholdSeconds) {
         return "Service task did not complete: the integration was not resolved within the expected time (threshold: %s). Possible causes include application shutdown, connector crash, or task interruption.".formatted(
-            formatThreshold()
+            formatThreshold(thresholdSeconds)
         );
     }
 
-    private String formatThreshold() {
+    private static String formatThreshold(int thresholdSeconds) {
         var minutes = thresholdSeconds / 60;
         var seconds = thresholdSeconds % 60;
         if (minutes == 0) return seconds + " sec";

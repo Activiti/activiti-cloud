@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
@@ -65,6 +66,9 @@ class OrphanedIntegrationRecoverySchedulerTest {
     @Mock
     IntegrationContextQuery query;
 
+    @Mock
+    OrphanedIntegrationThresholdResolver thresholdResolver;
+
     OrphanedIntegrationRecoveryScheduler scheduler;
 
     @BeforeEach
@@ -74,7 +78,8 @@ class OrphanedIntegrationRecoverySchedulerTest {
             integrationRequestBuilder,
             errorEventHandler,
             0,
-            featureToggle
+            featureToggle,
+            thresholdResolver
         );
         given(featureToggle.isEnabled(RuntimeBundleFeatureToggles.ORPHANED_INTEGRATION_RECOVERY)).willReturn(true);
     }
@@ -157,7 +162,8 @@ class OrphanedIntegrationRecoverySchedulerTest {
             integrationRequestBuilder,
             errorEventHandler,
             300,
-            featureToggle
+            featureToggle,
+            thresholdResolver
         );
         givenQuery(List.of());
 
@@ -167,6 +173,91 @@ class OrphanedIntegrationRecoverySchedulerTest {
         var dateCaptor = ArgumentCaptor.forClass(Date.class);
         verify(query).createdBefore(dateCaptor.capture());
         assertThat(dateCaptor.getValue()).isCloseTo(expectedThreshold, TimeUnit.SECONDS.toMillis(1));
+    }
+
+    @Test
+    void should_skipContext_when_serviceTaskThresholdIsNegative() {
+        var customScheduler = schedulerWithThreshold(0);
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask")));
+        given(thresholdResolver.resolveThresholdSeconds("procDef-1", "agenticTask")).willReturn(Optional.of(-1));
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        verify(integrationRequestBuilder, never()).build(any());
+        verify(errorEventHandler, never()).receive(any());
+    }
+
+    @Test
+    void should_sendCloudBpmnError_when_elapsedTimeReachesServiceTaskThreshold() {
+        var customScheduler = schedulerWithThreshold(300);
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask", 700)));
+        given(thresholdResolver.resolveThresholdSeconds("procDef-1", "agenticTask")).willReturn(Optional.of(600));
+        givenBuilderReturnsRealRequest();
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
+        verify(errorEventHandler).receive(errorCaptor.capture());
+        assertThat(errorCaptor.getValue().getErrorMessage()).contains("(threshold: 10 min)");
+    }
+
+    @Test
+    void should_skipContext_when_elapsedTimeIsLowerThanServiceTaskThreshold() {
+        var customScheduler = schedulerWithThreshold(300);
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask", 400)));
+        given(thresholdResolver.resolveThresholdSeconds("procDef-1", "agenticTask")).willReturn(Optional.of(600));
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        verify(errorEventHandler, never()).receive(any());
+    }
+
+    @Test
+    void should_applyDefaultThreshold_when_serviceTaskHasNoThreshold() {
+        var customScheduler = schedulerWithThreshold(300);
+        givenQuery(
+            List.of(
+                entity("ctx-1", "exec-1", "proc-1", "procDef-1", "restTask", 300),
+                entity("ctx-2", "exec-2", "proc-2", "procDef-2", "agenticTask", 400)
+            )
+        );
+        given(thresholdResolver.resolveThresholdSeconds("procDef-1", "restTask")).willReturn(Optional.empty());
+        given(thresholdResolver.resolveThresholdSeconds("procDef-2", "agenticTask")).willReturn(Optional.of(600));
+        givenBuilderReturnsRealRequest();
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        var contextCaptor = ArgumentCaptor.forClass(IntegrationContext.class);
+        verify(integrationRequestBuilder).build(contextCaptor.capture());
+        assertThat(contextCaptor.getValue().getId()).isEqualTo("ctx-1");
+        verify(errorEventHandler).receive(any());
+    }
+
+    @Test
+    void should_applyDefaultThreshold_when_thresholdResolutionFails() {
+        var customScheduler = schedulerWithThreshold(300);
+        givenQuery(List.of(entity("ctx-1", "exec-1", "proc-1", "procDef-1", "agenticTask", 300)));
+        given(thresholdResolver.resolveThresholdSeconds("procDef-1", "agenticTask")).willThrow(
+            new RuntimeException("model not found")
+        );
+        givenBuilderReturnsRealRequest();
+
+        customScheduler.recoverOrphanedIntegrations();
+
+        var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
+        verify(errorEventHandler).receive(errorCaptor.capture());
+        assertThat(errorCaptor.getValue().getErrorMessage()).contains("(threshold: 5 min)");
+    }
+
+    private OrphanedIntegrationRecoveryScheduler schedulerWithThreshold(int thresholdSeconds) {
+        return new OrphanedIntegrationRecoveryScheduler(
+            integrationContextService,
+            integrationRequestBuilder,
+            errorEventHandler,
+            thresholdSeconds,
+            featureToggle,
+            thresholdResolver
+        );
     }
 
     private void givenQuery(List<IntegrationContextEntity> entities) {
@@ -188,12 +279,24 @@ class OrphanedIntegrationRecoverySchedulerTest {
         String processDefinitionId,
         String flowNodeId
     ) {
+        return entity(id, executionId, processInstanceId, processDefinitionId, flowNodeId, 0);
+    }
+
+    private IntegrationContextEntityImpl entity(
+        String id,
+        String executionId,
+        String processInstanceId,
+        String processDefinitionId,
+        String flowNodeId,
+        int startedSecondsAgo
+    ) {
         var e = new IntegrationContextEntityImpl();
         e.setId(id);
         e.setExecutionId(executionId);
         e.setProcessInstanceId(processInstanceId);
         e.setProcessDefinitionId(processDefinitionId);
         e.setFlowNodeId(flowNodeId);
+        e.setCreatedDate(Date.from(Instant.now().minus(startedSecondsAgo, ChronoUnit.SECONDS)));
         return e;
     }
 }
