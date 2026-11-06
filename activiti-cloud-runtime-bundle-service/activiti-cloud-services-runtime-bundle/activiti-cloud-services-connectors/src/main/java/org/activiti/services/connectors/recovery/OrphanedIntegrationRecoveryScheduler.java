@@ -73,29 +73,28 @@ public class OrphanedIntegrationRecoveryScheduler {
             LOGGER.debug("Orphaned integration recovery is disabled via feature toggle. Skipping.");
             return;
         }
-        var now = Instant.now();
-        var threshold = Date.from(now.minus(thresholdSeconds, ChronoUnit.SECONDS));
-        var candidates = integrationContextService.createIntegrationContextQuery().createdBefore(threshold).list();
+        var threshold = Date.from(Instant.now().minus(thresholdSeconds, ChronoUnit.SECONDS));
+        var orphaned = integrationContextService.createIntegrationContextQuery().createdBefore(threshold).list();
 
-        if (candidates.isEmpty()) {
+        if (orphaned.isEmpty()) {
             LOGGER.debug("Orphaned integration recovery job completed. No orphaned contexts found.");
             return;
         }
 
-        LOGGER.debug("Found {} candidate orphaned integration context(s).", candidates.size());
+        LOGGER.debug("Found {} candidate orphaned integration context(s).", orphaned.size());
 
-        candidates.forEach(entity -> recoverOrphanedIntegration(entity, now));
-        LOGGER.debug("Orphaned integration recovery job completed. Processed {} context(s).", candidates.size());
+        orphaned.forEach(this::recoverOrphanedIntegration);
+        LOGGER.debug("Orphaned integration recovery job completed. Processed {} context(s).", orphaned.size());
     }
 
-    private void recoverOrphanedIntegration(IntegrationContextEntity entity, Instant now) {
+    private void recoverOrphanedIntegration(IntegrationContextEntity entity) {
         try {
             var entityThresholdSeconds = resolveThresholdSeconds(entity);
             if (entityThresholdSeconds < 0) {
                 return;
             }
 
-            var elapsed = Duration.between(entity.getCreatedDate().toInstant(), now);
+            var elapsed = Duration.between(entity.getCreatedDate().toInstant(), Instant.now());
             if (elapsed.getSeconds() < entityThresholdSeconds) {
                 LOGGER.debug(
                     "Skipping integration context {}: started {} seconds ago, threshold is {} seconds.",
