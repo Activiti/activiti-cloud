@@ -304,13 +304,16 @@ class OrphanedIntegrationRecoveryIT {
         // ctx1's own scheduler is disabled: its lock acquisition below is manual/simulated only,
         // so it never competes with itself for the "orphanedIntegrationRecovery" lock.
         ctx1 = buildLightweightContext(false);
-        ctx2 = buildLightweightContext(true);
 
         var lockConfig = new LockConfiguration(Instant.now(), LOCK_NAME, Duration.ofMinutes(5), Duration.ZERO);
 
         // ctx1 acquires the lock, simulating ctx1's scheduler running
         var ctx1Lock = ctx1.getBean(LockProvider.class).lock(lockConfig);
         assertThat(ctx1Lock).as("ctx1 should acquire the scheduler lock").isPresent();
+
+        // ctx2 is started only after ctx1 holds the lock: otherwise its scheduler (every second) could
+        // grab the lock first and make ctx1's acquisition fail
+        ctx2 = buildLightweightContext(true);
 
         var jdbcTemplate = new JdbcTemplate(ctx2.getBean(DataSource.class));
         var lockUntilBefore = lockUntil(jdbcTemplate);

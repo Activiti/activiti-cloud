@@ -26,8 +26,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @Import(RuntimeBundleShedLockConfiguration.class)
@@ -36,18 +34,8 @@ import tools.jackson.databind.json.JsonMapper;
 public class OrphanedIntegrationRecoveryConfiguration {
 
     @Bean
-    ConnectorTemplateResolver connectorTemplateResolver(
-        RepositoryService repositoryService,
-        JsonMapper jsonMapper,
-        ResourcePatternResolver resourceLoader,
-        OrphanedIntegrationRecoveryProperties properties
-    ) {
-        return new ConnectorTemplateResolver(
-            repositoryService,
-            jsonMapper,
-            resourceLoader,
-            properties.getProjectReleaseDir()
-        );
+    OrphanedIntegrationThresholdResolver orphanedIntegrationThresholdResolver(RepositoryService repositoryService) {
+        return new OrphanedIntegrationThresholdResolver(repositoryService);
     }
 
     @Bean
@@ -57,16 +45,15 @@ public class OrphanedIntegrationRecoveryConfiguration {
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
         OrphanedIntegrationRecoveryProperties properties,
         FeatureToggle featureToggle,
-        ConnectorTemplateResolver connectorTemplateResolver
+        OrphanedIntegrationThresholdResolver thresholdResolver
     ) {
         return new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
             integrationRequestBuilder,
             errorEventHandler,
             properties.getThresholdSeconds(),
-            properties.getConnectorThresholds(),
             featureToggle,
-            connectorTemplateResolver
+            thresholdResolver
         );
     }
 }

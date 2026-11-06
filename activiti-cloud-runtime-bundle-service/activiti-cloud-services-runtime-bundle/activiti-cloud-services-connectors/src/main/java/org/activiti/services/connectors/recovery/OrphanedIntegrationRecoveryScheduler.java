@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.Map;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
@@ -43,27 +42,23 @@ public class OrphanedIntegrationRecoveryScheduler {
     private final IntegrationRequestBuilder integrationRequestBuilder;
     private final ServiceTaskIntegrationErrorEventHandler errorEventHandler;
     private final int thresholdSeconds;
-    /** Thresholds by connector template, matched case-sensitively. */
-    private final Map<String, Integer> connectorThresholds;
     private final FeatureToggle featureToggle;
-    private final ConnectorTemplateResolver connectorTemplateResolver;
+    private final OrphanedIntegrationThresholdResolver thresholdResolver;
 
     OrphanedIntegrationRecoveryScheduler(
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
         int thresholdSeconds,
-        Map<String, Integer> connectorThresholds,
         FeatureToggle featureToggle,
-        ConnectorTemplateResolver connectorTemplateResolver
+        OrphanedIntegrationThresholdResolver thresholdResolver
     ) {
         this.integrationContextService = integrationContextService;
         this.integrationRequestBuilder = integrationRequestBuilder;
         this.errorEventHandler = errorEventHandler;
         this.thresholdSeconds = thresholdSeconds;
-        this.connectorThresholds = connectorThresholds;
         this.featureToggle = featureToggle;
-        this.connectorTemplateResolver = connectorTemplateResolver;
+        this.thresholdResolver = thresholdResolver;
     }
 
     @Scheduled(
@@ -79,7 +74,7 @@ public class OrphanedIntegrationRecoveryScheduler {
             return;
         }
         var now = Instant.now();
-        var threshold = Date.from(now.minus(minThresholdSeconds(), ChronoUnit.SECONDS));
+        var threshold = Date.from(now.minus(thresholdSeconds, ChronoUnit.SECONDS));
         var candidates = integrationContextService.createIntegrationContextQuery().createdBefore(threshold).list();
 
         if (candidates.isEmpty()) {
@@ -91,18 +86,6 @@ public class OrphanedIntegrationRecoveryScheduler {
 
         candidates.forEach(entity -> recoverOrphanedIntegration(entity, now));
         LOGGER.debug("Orphaned integration recovery job completed. Processed {} context(s).", candidates.size());
-    }
-
-    /**
-     * The query must include contexts eligible for the lowest configured threshold,
-     * each context is then checked against the threshold of its own connector template.
-     */
-    private int minThresholdSeconds() {
-        return connectorThresholds
-            .values()
-            .stream()
-            .filter(value -> value != null && value >= 0)
-            .reduce(thresholdSeconds, Math::min);
     }
 
     private void recoverOrphanedIntegration(IntegrationContextEntity entity, Instant now) {
@@ -156,36 +139,34 @@ public class OrphanedIntegrationRecoveryScheduler {
         }
     }
 
+    /**
+     * The query selects the contexts older than the default threshold, so the threshold declared on the
+     * service task can postpone the recovery (or exclude it, when negative) but not anticipate it.
+     */
     private int resolveThresholdSeconds(IntegrationContextEntity entity) {
-        if (connectorThresholds.isEmpty()) {
-            return thresholdSeconds;
-        }
-        String template;
         try {
-            template = connectorTemplateResolver
-                .resolveTemplate(entity.getProcessDefinitionId(), entity.getFlowNodeId())
+            var serviceTaskThreshold = thresholdResolver
+                .resolveThresholdSeconds(entity.getProcessDefinitionId(), entity.getFlowNodeId())
                 .orElse(null);
+            if (serviceTaskThreshold == null) {
+                return thresholdSeconds;
+            }
+            if (serviceTaskThreshold < 0) {
+                LOGGER.debug(
+                    "Integration context {} (flow node {}) will not be recovered: negative threshold declared on the service task.",
+                    entity.getId(),
+                    entity.getFlowNodeId()
+                );
+            }
+            return serviceTaskThreshold;
         } catch (Exception e) {
             LOGGER.warn(
-                "Unable to resolve the connector template of integration context {}, using the default threshold.",
+                "Unable to resolve the threshold of integration context {}, using the default threshold.",
                 entity.getId(),
                 e
             );
             return thresholdSeconds;
         }
-        var connectorThreshold = template == null ? null : connectorThresholds.get(template);
-        if (connectorThreshold == null) {
-            return thresholdSeconds;
-        }
-        if (connectorThreshold < 0) {
-            LOGGER.debug(
-                "Integration context {} (flow node {}) will not be recovered: connector template {} is excluded from the orphaned integration recovery.",
-                entity.getId(),
-                entity.getFlowNodeId(),
-                template
-            );
-        }
-        return connectorThreshold;
     }
 
     private String buildErrorMessage(int thresholdSeconds) {

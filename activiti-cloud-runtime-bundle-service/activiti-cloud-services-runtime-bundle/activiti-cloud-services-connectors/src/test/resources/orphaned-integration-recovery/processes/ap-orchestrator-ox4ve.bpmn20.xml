@@ -9,10 +9,19 @@
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="agenticTaskConnector_mraeqoyl"></bpmn2:sequenceFlow>
     <bpmn2:serviceTask id="agenticTaskConnector_mraeqoyl" name="Ap Orchestrator" implementation="agentic-task-wvis1.AI_AGENT">
+      <bpmn2:extensionElements>
+        <activiti:field name="orphanedIntegrationThresholdSeconds" stringValue="5400"></activiti:field>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1</bpmn2:incoming>
       <bpmn2:outgoing>Flow_2</bpmn2:outgoing>
     </bpmn2:serviceTask>
     <bpmn2:sequenceFlow id="Flow_2" sourceRef="agenticTaskConnector_mraeqoyl" targetRef="EndEvent_1"></bpmn2:sequenceFlow>
+    <bpmn2:serviceTask id="restConnector_default" name="Rest" implementation="rest-connector.CALL"></bpmn2:serviceTask>
+    <bpmn2:serviceTask id="restConnector_invalid" name="Rest invalid" implementation="rest-connector.CALL">
+      <bpmn2:extensionElements>
+        <activiti:field name="orphanedIntegrationThresholdSeconds" stringValue="soon"></activiti:field>
+      </bpmn2:extensionElements>
+    </bpmn2:serviceTask>
   </bpmn2:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Process_1783414154972">
     <bpmndi:BPMNPlane bpmnElement="Process_1783414154972" id="BPMNPlane_Process_1783414154972">

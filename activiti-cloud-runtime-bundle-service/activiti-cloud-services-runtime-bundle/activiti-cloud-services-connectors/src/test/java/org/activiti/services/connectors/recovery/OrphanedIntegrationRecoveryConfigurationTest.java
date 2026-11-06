@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class OrphanedIntegrationRecoveryConfigurationTest {
@@ -51,35 +49,19 @@ class OrphanedIntegrationRecoveryConfigurationTest {
     FeatureToggle featureToggle;
 
     @Test
-    void should_createConnectorTemplateResolver() {
-        var resolver = configuration.connectorTemplateResolver(
-            repositoryService,
-            JsonMapper.builder().build(),
-            new PathMatchingResourcePatternResolver(),
-            new OrphanedIntegrationRecoveryProperties()
-        );
-
-        assertThat(resolver).isNotNull();
+    void should_createThresholdResolver() {
+        assertThat(configuration.orphanedIntegrationThresholdResolver(repositoryService)).isNotNull();
     }
 
     @Test
-    void should_createSchedulerWithConnectorThresholds() {
-        var resolver = configuration.connectorTemplateResolver(
-            repositoryService,
-            JsonMapper.builder().build(),
-            new PathMatchingResourcePatternResolver(),
-            new OrphanedIntegrationRecoveryProperties()
-        );
-        var properties = new OrphanedIntegrationRecoveryProperties();
-        properties.getConnectorThresholds().put("agenticTaskConnector", -1);
-
+    void should_createScheduler() {
         var scheduler = configuration.orphanedIntegrationRecoveryScheduler(
             integrationContextService,
             integrationRequestBuilder,
             errorEventHandler,
-            properties,
+            new OrphanedIntegrationRecoveryProperties(),
             featureToggle,
-            resolver
+            configuration.orphanedIntegrationThresholdResolver(repositoryService)
         );
 
         assertThat(scheduler).isNotNull();
