@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -29,55 +32,33 @@ import org.springframework.messaging.support.GenericMessage;
 
 class OutboxDestinationProviderTest {
 
-    @Test
-    void apply_whenChannelMatchesExcludePattern_returnsNull() {
-        // Arrange
-        OutboxProperties properties = outboxProperties("excluded.*");
-        OutboxDestinationProvider provider = new OutboxDestinationProvider(properties);
-
-        Message<String> message = new GenericMessage<>("payload");
-
-        DirectChannel channel = directChannel("excludedChannel");
-
-        // Act
-        String result = provider.apply(message, channel);
-
-        // Assert
-        assertThat(result).isNull();
+    private static Stream<Arguments> channelRoutingProvider() {
+        return Stream.of(
+            // Pattern matches channel -> returns null
+            Arguments.of(new String[] { "excluded.*" }, "excludedChannel", null),
+            // Pattern doesn't match channel -> returns channel name
+            Arguments.of(new String[] { "excluded.*" }, "regularChannel", "regularChannel"),
+            // Empty pattern string -> returns channel name
+            Arguments.of(new String[] { "^$" }, "regularChannel", "regularChannel"),
+            // No patterns provided -> returns channel name
+            Arguments.of(new String[] {}, "regularChannel", "regularChannel")
+        );
     }
 
-    @Test
-    void apply_whenChannelDoesNotMatchExcludePattern_returnsBeanName() {
+    @ParameterizedTest(name = "When excludes={0} and channel={1} then expected outcome is {2}")
+    @MethodSource("channelRoutingProvider")
+    void apply_evaluatesChannelAgainstExcludePatterns(String[] excludes, String channelName, String expectedResult) {
         // Arrange
-        OutboxProperties properties = outboxProperties("excluded.*");
+        OutboxProperties properties = outboxProperties(excludes);
         OutboxDestinationProvider provider = new OutboxDestinationProvider(properties);
-
         Message<String> message = new GenericMessage<>("payload");
-
-        DirectChannel channel = directChannel("regularChannel");
+        DirectChannel channel = directChannel(channelName);
 
         // Act
         String result = provider.apply(message, channel);
 
         // Assert
-        assertThat(result).isEqualTo("regularChannel");
-    }
-
-    @Test
-    void apply_whenChannelDoesNotMatchEmptyExcludePattern_returnsBeanName() {
-        // Arrange
-        OutboxProperties properties = outboxProperties("^$");
-        OutboxDestinationProvider provider = new OutboxDestinationProvider(properties);
-
-        Message<String> message = new GenericMessage<>("payload");
-
-        DirectChannel channel = directChannel("regularChannel");
-
-        // Act
-        String result = provider.apply(message, channel);
-
-        // Assert
-        assertThat(result).isEqualTo("regularChannel");
+        assertThat(result).isEqualTo(expectedResult);
     }
 
     @Test
@@ -85,10 +66,8 @@ class OutboxDestinationProviderTest {
         // Arrange
         OutboxProperties properties = outboxProperties(".*");
         OutboxDestinationProvider provider = new OutboxDestinationProvider(properties);
-
         Message<String> message = new GenericMessage<>("payload");
 
-        // Use an anonymous MessageChannel implementation that does NOT implement NamedComponent
         MessageChannel unnamedChannel = new MessageChannel() {
             @Override
             public boolean send(Message<?> message) {
@@ -115,7 +94,6 @@ class OutboxDestinationProviderTest {
     }
 
     // --- Helper Methods ---
-
     private DirectChannel directChannel(String beanName) {
         return new DirectChannel() {
             {
