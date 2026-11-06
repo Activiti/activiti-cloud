@@ -11,6 +11,8 @@
 
 Activiti Cloud libraries and Spring Boot starters.
 
+Activiti releases and snapshots are downloaded from public Cloudsmith repositories without credentials. Maven Central remains the source for third-party dependencies and plugins.
+
 ## CI/CD
 
 Running on GH Actions.
@@ -31,6 +33,10 @@ Requires the following secrets to be set:
 | RANCHER2_ACCESS_KEY          | Rancher access key for tests       |
 | RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
 | SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
+
+CI publishes Maven artifacts to Nexus and Cloudsmith: preview snapshots go to `activiti-snapshots`, and develop alpha releases go to `activiti-releases`.
+
+Set the GitHub Actions variable `CLOUDSMITH_NAMESPACE` to `hyland`. Cloudsmith authentication uses GitHub OIDC as `activiti-activiti-cloud`; no additional Cloudsmith secret is required.
 
 ## Preview Propagation
 
