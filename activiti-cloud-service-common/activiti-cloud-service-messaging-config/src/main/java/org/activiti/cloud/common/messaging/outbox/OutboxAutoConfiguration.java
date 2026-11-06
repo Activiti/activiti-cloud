@@ -34,6 +34,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cloud.stream.binding.NewDestinationBindingCallback;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -74,6 +75,7 @@ import tools.jackson.databind.module.SimpleModule;
 @AutoConfiguration(after = OutputBindingConfiguration.class)
 @ConditionalOnProperty(name = "activiti.cloud.messaging.outbox.enabled")
 @ConditionalOnClass({ DataSource.class, JdbcChannelMessageStore.class })
+@EnableConfigurationProperties(OutboxProperties.class)
 public class OutboxAutoConfiguration {
 
     @Bean
@@ -200,8 +202,8 @@ public class OutboxAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    OutboxDestinationProvider outboxDestinationProvider() {
-        return new OutboxDestinationProvider();
+    OutboxDestinationProvider outboxDestinationProvider(OutboxProperties outboxProperties) {
+        return new OutboxDestinationProvider(outboxProperties);
     }
 
     @Bean
