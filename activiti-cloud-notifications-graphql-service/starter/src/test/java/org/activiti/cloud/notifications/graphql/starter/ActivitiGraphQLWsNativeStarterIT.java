@@ -61,6 +61,7 @@ import org.activiti.cloud.notifications.graphql.GrapqhQLApplication;
 import org.activiti.cloud.notifications.graphql.config.EngineEvents;
 import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.TokenExpiryGraphQlWebSocketHandler;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -80,6 +81,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.graphql.server.support.GraphQlWebSocketMessage;
+import org.springframework.graphql.server.webmvc.GraphQlWebSocketHandler;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -139,6 +141,9 @@ class ActivitiGraphQLWsNativeStarterIT {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private GraphQlWebSocketHandler graphQlWebSocketHandler;
+
     @MockitoBean
     private BuildProperties buildProperties;
 
@@ -149,6 +154,11 @@ class ActivitiGraphQLWsNativeStarterIT {
         identityTokenProducer.withTestUser(TESTADMIN);
         authHeaders = identityTokenProducer.authorizationHeaders();
         authHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    @Test
+    void should_useTokenExpiryWebSocketHandler() {
+        assertThat(graphQlWebSocketHandler).isInstanceOf(TokenExpiryGraphQlWebSocketHandler.class);
     }
 
     protected URI getUrl(String path) throws URISyntaxException {

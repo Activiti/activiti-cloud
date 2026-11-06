@@ -17,7 +17,9 @@ package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import static org.springframework.graphql.server.support.BearerTokenAuthenticationExtractor.AUTHORIZATION_KEY;
 
+import java.time.Instant;
 import java.util.Map;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
 import org.springframework.graphql.server.WebGraphQlRequest;
 import org.springframework.graphql.server.WebGraphQlResponse;
 import org.springframework.graphql.server.WebSocketGraphQlRequest;
@@ -30,11 +32,15 @@ import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 
 public class SecurityWebSocketInterceptor extends AbstractAuthenticationWebSocketInterceptor {
+
+    public static final String TOKEN_EXPIRES_AT_ATTRIBUTE =
+        SecurityWebSocketInterceptor.class.getName() + ".EXPIRES_AT";
 
     private final String authenticationAttribute = getClass().getName() + ".AUTHENTICATION";
 
@@ -59,13 +65,32 @@ public class SecurityWebSocketInterceptor extends AbstractAuthenticationWebSocke
         }
         return super
             .handleConnectionInitialization(info, payload)
-            .doOnNext(o -> authorize(info))
+            .doOnNext(o -> onConnectionAuthenticated(info))
             .switchIfEmpty(
                 Mono.defer(() -> {
-                    authorize(info);
+                    onConnectionAuthenticated(info);
                     return Mono.empty();
                 })
             );
+    }
+
+    private void onConnectionAuthenticated(WebSocketSessionInfo info) {
+        authorize(info);
+        Instant expiresAt = tokenExpiresAt(currentAuthentication(info));
+        if (expiresAt != null) {
+            info.getAttributes().put(TOKEN_EXPIRES_AT_ATTRIBUTE, expiresAt);
+        }
+    }
+
+    private static Instant tokenExpiresAt(Authentication authentication) {
+        if (
+            authentication != null &&
+            authentication.getDetails() instanceof GraphQLAccessToken accessToken &&
+            accessToken.getDetails() instanceof AbstractOAuth2TokenAuthenticationToken<?> tokenAuthentication
+        ) {
+            return tokenAuthentication.getToken().getExpiresAt();
+        }
+        return null;
     }
 
     /** The connection's authenticated {@link Authentication}, or {@code null} if none. */
