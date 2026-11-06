@@ -171,7 +171,5 @@ async function waitForCountPredicate(
         }
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
     }
-
     throw new Error(`Timeout waiting for ${countType} count predicate after ${timeoutMs}ms`);
 }
-

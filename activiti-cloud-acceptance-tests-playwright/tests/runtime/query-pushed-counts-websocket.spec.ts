@@ -18,6 +18,7 @@ import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
+import { TaskStatus } from '../../models/task.models';
 import type { PushedCountsSubscription } from '../../services/notifications';
 import { openPushedCountsSubscription } from '../../services/notifications';
 
@@ -31,13 +32,16 @@ activiti.describe('Runtime — Query Pushed Counts WebSocket Subscription', () =
 
     activiti(
         'should push count increases as a process is started and its task is claimed',
-        async ({ runtimeBundleServiceTestUser, taskServiceTestUser, testUserContext }) => {
+        async ({
+            runtimeBundleServiceTestUser,
+            taskServiceTestUser,
+            queryServiceTestUser,
+            testUserContext,
+        }) => {
             let taskId = '';
-            let processInstanceId = '';
-            let runningCountBeforeStart: number | undefined;
-            let assignedCountBeforeClaim: number | undefined;
-            let queuedCountBeforeStart: number | undefined;
-            let runningCountAfterStart = 0;
+            let runningCountBeforeStart = 0;
+            let assignedCountBeforeClaim = 0;
+            let queuedCountBeforeStart = 0;
 
             await activiti.step('When the user subscribes to all pushed count types', async () => {
                 activeSubscription = await openPushedCountsSubscription({
@@ -46,20 +50,21 @@ activiti.describe('Runtime — Query Pushed Counts WebSocket Subscription', () =
                 });
             });
 
-            await activiti.step('And records any available count baselines', async () => {
-                const counts = activeSubscription!.getLatestCounts();
-                runningCountBeforeStart = counts.runningProcesses?.count;
-                assignedCountBeforeClaim = counts.assignedTasks?.count;
-                queuedCountBeforeStart = counts.queuedTasks?.count;
+            await activiti.step('And records the current running process and queued task counts', async () => {
+                runningCountBeforeStart = await queryServiceTestUser.processInstances.countProcessInstances({
+                    status: [ProcessInstanceStatus.RUNNING],
+                });
+                queuedCountBeforeStart = await queryServiceTestUser.tasks.countTasks({
+                    status: [TaskStatus.CREATED],
+                });
             });
 
             await activiti.step('When a process with an unassigned task is started', async () => {
-                const { processInstance, task } = await startCatalogProcessWithFirstTask(
+                const { task } = await startCatalogProcessWithFirstTask(
                     runtimeBundleServiceTestUser,
                     taskServiceTestUser,
                     'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES'
                 );
-                processInstanceId = processInstance.id;
                 taskId = task.id;
             });
 
@@ -69,8 +74,7 @@ activiti.describe('Runtime — Query Pushed Counts WebSocket Subscription', () =
                         () => activeSubscription!.getLatestCounts().runningProcesses?.count ?? -1,
                         pollOptions()
                     )
-                    .toBeGreaterThan(runningCountBeforeStart ?? 0);
-                runningCountAfterStart = activeSubscription!.getLatestCounts().runningProcesses!.count;
+                    .toBeGreaterThan(runningCountBeforeStart);
             });
 
             await activiti.step('And the queued task count increases', async () => {
@@ -79,9 +83,11 @@ activiti.describe('Runtime — Query Pushed Counts WebSocket Subscription', () =
                         () => activeSubscription!.getLatestCounts().queuedTasks?.count ?? -1,
                         pollOptions()
                     )
-                    .toBeGreaterThan(queuedCountBeforeStart ?? 0);
-                const countsAfterStart = activeSubscription!.getLatestCounts();
-                assignedCountBeforeClaim = countsAfterStart.assignedTasks?.count ?? assignedCountBeforeClaim;
+                    .toBeGreaterThan(queuedCountBeforeStart);
+                assignedCountBeforeClaim = await queryServiceTestUser.tasks.countTasks({
+                    status: [TaskStatus.ASSIGNED],
+                    assignee: [testUserContext.username],
+                });
             });
 
             await activiti.step('When the user claims the task', async () => {
@@ -95,7 +101,7 @@ activiti.describe('Runtime — Query Pushed Counts WebSocket Subscription', () =
                         () => activeSubscription!.getLatestCounts().assignedTasks?.count ?? -1,
                         pollOptions()
                     )
-                    .toBeGreaterThan(assignedCountBeforeClaim ?? 0);
+                    .toBeGreaterThan(assignedCountBeforeClaim);
             });
         }
     );
