@@ -81,7 +81,7 @@ public class OrphanedIntegrationRecoveryScheduler {
             return;
         }
 
-        LOGGER.debug("Found {} candidate orphaned integration context(s).", orphaned.size());
+        LOGGER.warn("Found {} candidate orphaned integration context(s).", orphaned.size());
 
         orphaned.forEach(this::recoverOrphanedIntegration);
         LOGGER.debug("Orphaned integration recovery job completed. Processed {} context(s).", orphaned.size());
@@ -105,7 +105,7 @@ public class OrphanedIntegrationRecoveryScheduler {
                 return;
             }
 
-            LOGGER.warn(
+            LOGGER.debug(
                 "Integration context {} (flow node {}) is orphaned: started {} seconds ago, threshold is {} seconds. Sending integration error.",
                 entity.getId(),
                 entity.getFlowNodeId(),
