@@ -53,6 +53,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(
     properties = {
         "spring.main.banner-mode=off",
+        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
         "spring.jpa.properties.hibernate.order_by.default_null_ordering=last",
         "spring.jpa.properties.hibernate.session_factory.statement_inspector=org.activiti.cloud.services.audit.jpa.controller.v2.AuditEventsControllerV2ImplIT$CapturedStatements",
     }
