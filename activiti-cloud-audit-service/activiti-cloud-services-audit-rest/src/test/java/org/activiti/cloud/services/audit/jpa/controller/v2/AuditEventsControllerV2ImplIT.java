@@ -158,7 +158,7 @@ class AuditEventsControllerV2ImplIT {
             .orElseThrow();
 
         assertThat(auditSearchSql).containsPattern("order by .*timestamp desc");
-        assertThat(auditSearchSql).doesNotContain("nulls last");
+        assertThat(auditSearchSql).doesNotContain("nulls");
     }
 
     @Test
