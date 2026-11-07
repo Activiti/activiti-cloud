@@ -146,7 +146,7 @@ public class AuditEventsService {
     }
 
     private Sort timestampDescSortWithoutNullPrecedence() {
-        return Sort.by(Sort.Direction.DESC, TIMESTAMP);
+        return Sort.by(Sort.Order.desc(TIMESTAMP).nullsFirst());
     }
 
     private Pageable applyDefaultSort(Pageable pageable) {
