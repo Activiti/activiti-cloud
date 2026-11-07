@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.controller.v2;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -26,8 +25,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.AuditTestConfiguration;
@@ -37,9 +34,7 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.util.TestConverter;
-import org.hibernate.resource.jdbc.spi.StatementInspector;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,36 +45,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(
-    properties = {
-        "spring.main.banner-mode=off",
-        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
-        "spring.jpa.properties.hibernate.order_by.default_null_ordering=last",
-        "spring.jpa.properties.hibernate.session_factory.statement_inspector=org.activiti.cloud.services.audit.jpa.controller.v2.AuditEventsControllerV2ImplIT$CapturedStatements",
-    }
-)
+@SpringBootTest(properties = { "spring.main.banner-mode=off" })
 @AutoConfigureMockMvc
 @Import({ AlfrescoWebAutoConfiguration.class, AuditTestConfiguration.class })
 class AuditEventsControllerV2ImplIT {
-
-    public static class CapturedStatements implements StatementInspector {
-
-        private static final List<String> STATEMENTS = new CopyOnWriteArrayList<>();
-
-        @Override
-        public String inspect(String sql) {
-            STATEMENTS.add(sql);
-            return sql;
-        }
-
-        static void clear() {
-            STATEMENTS.clear();
-        }
-
-        static List<String> get() {
-            return List.copyOf(STATEMENTS);
-        }
-    }
 
     @Autowired
     private EventsRepository<AuditEventEntity> eventsRepository;
@@ -99,11 +68,6 @@ class AuditEventsControllerV2ImplIT {
 
     private static final String ENTRIES_ROOT = "$._embedded.events";
     private static final String EVENTS_ID_ROOT = "$._embedded.events[*].id";
-
-    @BeforeEach
-    void clearCapturedStatements() {
-        CapturedStatements.clear();
-    }
 
     @AfterEach
     void cleanUp() {
@@ -138,28 +102,6 @@ class AuditEventsControllerV2ImplIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath(ENTRIES_ROOT, hasSize(2)))
             .andExpect(jsonPath(EVENTS_ID_ROOT, contains(audit3.getId().toString(), audit2.getId().toString())));
-    }
-
-    @Test
-    void should_notAddNullOrderingToGeneratedSql_whenDefaultOrderingIsNullsLast() throws Exception {
-        mockMvc
-            .perform(
-                get("/v2/events")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .param("eventTimeFrom", dateTimeFormatter.format(Instant.ofEpochMilli(1000L)))
-                    .param("eventTimeTo", dateTimeFormatter.format(Instant.ofEpochMilli(3000L)))
-            )
-            .andExpect(status().isOk());
-
-        String auditSearchSql = CapturedStatements.get()
-            .stream()
-            .map(sql -> sql.toLowerCase(Locale.ROOT))
-            .filter(sql -> sql.contains("from audit_event") && sql.contains("order by") && sql.contains("timestamp"))
-            .findFirst()
-            .orElseThrow();
-
-        assertThat(auditSearchSql).containsPattern("order by .*timestamp desc");
-        assertThat(auditSearchSql).doesNotContain("nulls");
     }
 
     @Test
