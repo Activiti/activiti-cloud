@@ -128,7 +128,9 @@ public class AuditEventsService {
         SearchParams searchParams,
         Pageable pageable
     ) {
-        pageable = applyDefaultSort(pageable, timestampDescSortWithoutNullPrecedence());
+        pageable = applyNativeTimestampNullOrdering(
+            applyDefaultSort(pageable, timestampDescSortWithoutNullPrecedence())
+        );
 
         Specification<AuditEventEntity> spec = securedSearchSpec(searchParams);
 
@@ -155,17 +157,36 @@ public class AuditEventsService {
 
     private Pageable applyDefaultSort(Pageable pageable, Sort defaultSort) {
         if (pageable.getSort().isUnsorted()) {
-            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
-                Pageable inner = alfrescoPageRequest.getPageable();
-                return new AlfrescoPageRequest(
-                    alfrescoPageRequest.getOffset(),
-                    alfrescoPageRequest.getPageSize(),
-                    PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
-                );
-            }
-            return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+            return withSort(pageable, defaultSort);
         }
         return pageable;
+    }
+
+    private Pageable applyNativeTimestampNullOrdering(Pageable pageable) {
+        Sort sort = Sort.by(
+            pageable
+                .getSort()
+                .stream()
+                .map(order ->
+                    TIMESTAMP.equals(order.getProperty())
+                        ? (order.isAscending() ? order.nullsLast() : order.nullsFirst())
+                        : order
+                )
+                .toList()
+        );
+        return sort.equals(pageable.getSort()) ? pageable : withSort(pageable, sort);
+    }
+
+    private Pageable withSort(Pageable pageable, Sort sort) {
+        if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
+            Pageable inner = alfrescoPageRequest.getPageable();
+            return new AlfrescoPageRequest(
+                alfrescoPageRequest.getOffset(),
+                alfrescoPageRequest.getPageSize(),
+                PageRequest.of(inner.getPageNumber(), inner.getPageSize(), sort)
+            );
+        }
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 
     private Specification<AuditEventEntity> securedSearchSpec(SearchParams searchParams) {

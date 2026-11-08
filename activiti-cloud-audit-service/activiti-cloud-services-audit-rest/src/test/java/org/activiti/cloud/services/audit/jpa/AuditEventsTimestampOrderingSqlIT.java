@@ -122,6 +122,44 @@ class AuditEventsTimestampOrderingSqlIT {
     }
 
     @Test
+    void should_notRenderNullOrdering_when_searchingV2EventsWithExplicitDescendingSort() throws Exception {
+        mockMvc
+            .perform(
+                get("/v2/events")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("sort", "timestamp,desc")
+                    .param("eventTimeFrom", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(1000L)))
+                    .param("eventTimeTo", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(3000L)))
+            )
+            .andExpect(status().isOk());
+
+        String sql = CapturedStatements.findFirst(
+            statement -> statement.contains("from audit_event") && statement.contains("order by")
+        );
+
+        assertThat(sql).containsPattern("order by \\S*timestamp desc").doesNotContain("nulls");
+    }
+
+    @Test
+    void should_notRenderNullOrdering_when_searchingV2EventsWithExplicitAscendingSort() throws Exception {
+        mockMvc
+            .perform(
+                get("/v2/events")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("sort", "timestamp,asc")
+                    .param("eventTimeFrom", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(1000L)))
+                    .param("eventTimeTo", DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(3000L)))
+            )
+            .andExpect(status().isOk());
+
+        String sql = CapturedStatements.findFirst(
+            statement -> statement.contains("from audit_event") && statement.contains("order by")
+        );
+
+        assertThat(sql).containsPattern("order by \\S*timestamp(?: asc)? offset").doesNotContain("nulls");
+    }
+
+    @Test
     void should_notRenderNullOrdering_when_exportingEventsBetweenDates() throws Exception {
         auditEventsAdminService.exportAuditsBetweenDates(
             LocalDate.of(2024, 7, 22),
