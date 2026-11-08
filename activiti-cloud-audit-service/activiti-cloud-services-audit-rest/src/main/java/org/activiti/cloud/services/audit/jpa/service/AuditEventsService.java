@@ -169,7 +169,9 @@ public class AuditEventsService {
                 .stream()
                 .map(order ->
                     TIMESTAMP.equals(order.getProperty())
-                        ? (order.isAscending() ? order.nullsLast() : order.nullsFirst())
+                        ? order.isAscending()
+                            ? order.nullsLast()
+                            : order.nullsFirst()
                         : order
                 )
                 .toList()
