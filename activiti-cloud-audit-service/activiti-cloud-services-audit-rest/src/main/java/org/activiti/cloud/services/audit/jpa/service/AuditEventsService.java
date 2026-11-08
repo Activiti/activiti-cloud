@@ -167,13 +167,15 @@ public class AuditEventsService {
             pageable
                 .getSort()
                 .stream()
-                .map(order ->
-                    TIMESTAMP.equals(order.getProperty())
-                        ? order.isAscending()
-                            ? order.nullsLast()
-                            : order.nullsFirst()
-                        : order
-                )
+                .map(order -> {
+                    if (!TIMESTAMP.equals(order.getProperty())) {
+                        return order;
+                    }
+                    if (order.isAscending()) {
+                        return order.nullsLast();
+                    }
+                    return order.nullsFirst();
+                })
                 .toList()
         );
         return sort.equals(pageable.getSort()) ? pageable : withSort(pageable, sort);
