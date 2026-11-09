@@ -31,7 +31,7 @@ import org.springframework.data.domain.Sort;
 
 public class ApplicationAdminService {
 
-    private static final Sort DEFAULT_SORT = Sort.by(Sort.Order.desc("id"));
+    private static final Sort DEFAULT_SORT = Sort.by(Sort.Order.desc("version"), Sort.Order.desc("id"));
 
     private final ApplicationRepository repository;
 
@@ -40,7 +40,8 @@ public class ApplicationAdminService {
     }
 
     /**
-     * Finds applications using slice-based pagination, sorted by {@code id} descending unless a sort is requested.
+     * Finds applications using slice-based pagination, sorted by {@code version} descending (then {@code id} descending, as a tie-breaker
+     * for stable paging) unless a sort is requested.
      * <p>
      * No {@code COUNT} query is executed: one extra element is fetched to know whether a next page exists, and the
      * returned page reports an estimated total derived from the current offset.

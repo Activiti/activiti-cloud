@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * V2 of the applications admin endpoint.
  * <p>
- * Unlike v1, results are fetched without a {@code COUNT} query, sorted by {@code id} descending and paginated
+ * Unlike v1, results are fetched without a {@code COUNT} query, sorted by {@code version} descending and paginated
  * with a page size of 10 by default. The page metadata reports {@code hasMoreItems}, while {@code totalItems}
  * is only an estimate derived from the current offset.
  */

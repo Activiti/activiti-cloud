@@ -122,13 +122,13 @@ public class ApplicationAdminControllerV2IT {
     }
 
     @Test
-    public void shouldSortByIdDescendingByDefault() throws Exception {
+    public void shouldSortByVersionDescendingByDefault() throws Exception {
         List<ApplicationEntity> all = buildApplications(3);
         ArgumentCaptor<Pageable> captor = givenRepositoryContaining(all);
 
         mockMvc.perform(get("/admin/v2/applications").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-        assertThat(captor.getValue().getSort()).containsExactly(Sort.Order.desc("id"));
+        assertThat(captor.getValue().getSort()).containsExactly(Sort.Order.desc("version"), Sort.Order.desc("id"));
     }
 
     @Test
@@ -246,12 +246,12 @@ public class ApplicationAdminControllerV2IT {
     }
 
     /**
-     * Mimics the repository: items are sorted by id descending (the default sort applied by the controller),
+     * Mimics the repository: items are held in descending default order (the sort applied by the service),
      * and the requested slice is cut out of them using the pageable offset and size.
      */
     @SuppressWarnings("unchecked")
-    private ArgumentCaptor<Pageable> givenRepositoryContaining(List<ApplicationEntity> ascendingById) {
-        List<ApplicationEntity> descending = new ArrayList<>(ascendingById);
+    private ArgumentCaptor<Pageable> givenRepositoryContaining(List<ApplicationEntity> ascending) {
+        List<ApplicationEntity> descending = new ArrayList<>(ascending);
         Collections.reverse(descending);
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         FluentQuery.FetchableFluentQuery<ApplicationEntity> fluentQuery = mock(FluentQuery.FetchableFluentQuery.class);

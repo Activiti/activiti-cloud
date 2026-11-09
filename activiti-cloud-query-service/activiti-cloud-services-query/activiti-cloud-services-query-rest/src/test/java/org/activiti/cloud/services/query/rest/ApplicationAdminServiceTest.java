@@ -41,12 +41,12 @@ class ApplicationAdminServiceTest {
     private final ApplicationAdminService service = new ApplicationAdminService(repository);
 
     @Test
-    void shouldSortByIdDescendingWhenUnsorted() {
+    void shouldSortByVersionDescendingWhenUnsorted() {
         ArgumentCaptor<Pageable> captor = givenSlice(false, 1);
 
         service.findAllSliced(null, PageRequest.of(0, 10));
 
-        assertThat(captor.getValue().getSort()).containsExactly(Sort.Order.desc("id"));
+        assertThat(captor.getValue().getSort()).containsExactly(Sort.Order.desc("version"), Sort.Order.desc("id"));
     }
 
     @Test
@@ -67,7 +67,7 @@ class ApplicationAdminServiceTest {
         Pageable pageable = captor.getValue();
         assertThat(pageable).isInstanceOf(AlfrescoPageRequest.class);
         assertThat(pageable.getOffset()).isEqualTo(1000);
-        assertThat(pageable.getSort()).containsExactly(Sort.Order.desc("id"));
+        assertThat(pageable.getSort()).containsExactly(Sort.Order.desc("version"), Sort.Order.desc("id"));
     }
 
     @Test
