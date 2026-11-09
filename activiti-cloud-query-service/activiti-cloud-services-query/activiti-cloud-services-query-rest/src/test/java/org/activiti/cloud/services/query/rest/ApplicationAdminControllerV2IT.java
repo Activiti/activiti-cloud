@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.rest;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,7 +28,6 @@ import jakarta.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Function;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -52,14 +50,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -257,7 +252,7 @@ public class ApplicationAdminControllerV2IT {
     @SuppressWarnings("unchecked")
     private ArgumentCaptor<Pageable> givenRepositoryContaining(List<ApplicationEntity> ascendingById) {
         List<ApplicationEntity> descending = new ArrayList<>(ascendingById);
-        java.util.Collections.reverse(descending);
+        Collections.reverse(descending);
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         FluentQuery.FetchableFluentQuery<ApplicationEntity> fluentQuery = mock(FluentQuery.FetchableFluentQuery.class);
         given(fluentQuery.slice(captor.capture())).willAnswer(invocation -> {
