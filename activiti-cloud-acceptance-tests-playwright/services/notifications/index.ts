@@ -32,3 +32,10 @@ export {
     type EngineEventsSubscription,
     type OpenEngineEventsSubscriptionOptions,
 } from './subscriptions/engine-events.subscription';
+
+export {
+    openPushedCountsSubscription,
+    type PushedCountsSubscription,
+    type PushedCountsSubscriptionOptions,
+    type PushedCountMessage,
+} from './subscriptions/pushed-counts.subscription';
