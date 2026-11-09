@@ -19,11 +19,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.RepositoryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -44,32 +48,21 @@ class OrphanedIntegrationThresholdResolverTest {
         assertThat(resolve("agenticTaskConnector_mraeqoyl")).contains(5400);
     }
 
-    @Test
-    void should_returnEmpty_when_serviceTaskDoesNotDeclareThreshold() {
-        givenBpmnModel();
-
-        assertThat(resolve("restConnector_default")).isEmpty();
+    static Stream<Arguments> unresolvedThresholdCases() {
+        return Stream.of(
+            Arguments.of("unknownFlowNode", "flowNodeDoesNotExist"),
+            Arguments.of("StartEvent_1", "flowNodeIsNotServiceTask"),
+            Arguments.of("restConnector_invalid", "thresholdIsNotANumber"),
+            Arguments.of("restConnector_default", "serviceTaskDoesNotDeclareThreshold")
+        );
     }
 
-    @Test
-    void should_returnEmpty_when_thresholdIsNotANumber() {
+    @ParameterizedTest(name = "should_returnEmpty_when_{1}")
+    @MethodSource("unresolvedThresholdCases")
+    void should_returnEmpty_when_thresholdCannotBeResolved(String flowNodeId, String reason) {
         givenBpmnModel();
 
-        assertThat(resolve("restConnector_invalid")).isEmpty();
-    }
-
-    @Test
-    void should_returnEmpty_when_flowNodeIsNotServiceTask() {
-        givenBpmnModel();
-
-        assertThat(resolve("StartEvent_1")).isEmpty();
-    }
-
-    @Test
-    void should_returnEmpty_when_flowNodeDoesNotExist() {
-        givenBpmnModel();
-
-        assertThat(resolve("unknownFlowNode")).isEmpty();
+        assertThat(resolve(flowNodeId)).isEmpty();
     }
 
     @Test
