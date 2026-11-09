@@ -133,8 +133,8 @@ public class ApplicationAdminControllerV2IT {
     }
 
     @Test
-    public void shouldReturnPageSizeOfTenByDefault() throws Exception {
-        ArgumentCaptor<Pageable> captor = givenRepositoryContaining(buildApplications(25));
+    public void shouldReturnPageSizeOfOneHundredByDefault() throws Exception {
+        ArgumentCaptor<Pageable> captor = givenRepositoryContaining(buildApplications(150));
 
         String json = mockMvc
             .perform(get("/admin/v2/applications").accept(MediaType.APPLICATION_JSON))
@@ -143,8 +143,8 @@ public class ApplicationAdminControllerV2IT {
             .getResponse()
             .getContentAsString();
 
-        assertThat(captor.getValue().getPageSize()).isEqualTo(10);
-        assertThatJson(json).inPath("list.pagination.count").isEqualTo(10);
+        assertThat(captor.getValue().getPageSize()).isEqualTo(100);
+        assertThatJson(json).inPath("list.pagination.count").isEqualTo(100);
         assertThatJson(json).inPath("list.pagination.hasMoreItems").isEqualTo(true);
     }
 

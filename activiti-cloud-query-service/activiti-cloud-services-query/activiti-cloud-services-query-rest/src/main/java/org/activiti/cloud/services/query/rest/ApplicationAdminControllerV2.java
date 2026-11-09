@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
  * V2 of the applications admin endpoint.
  * <p>
  * Unlike v1, results are fetched without a {@code COUNT} query, sorted by {@code version} descending and paginated
- * with a page size of 10 by default. The page metadata reports {@code hasMoreItems}, while {@code totalItems}
+ * with a page size of 100 by default. The page metadata reports {@code hasMoreItems}, while {@code totalItems}
  * is only an estimate derived from the current offset.
  */
 @RestController
@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class ApplicationAdminControllerV2 {
 
-    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int DEFAULT_PAGE_SIZE = 100;
 
     private final ApplicationAdminService applicationAdminService;
     private final AlfrescoPagedModelAssembler<ApplicationEntity> pagedCollectionModelAssembler;
