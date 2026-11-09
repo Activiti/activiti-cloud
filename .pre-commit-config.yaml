@@ -1,5 +1,5 @@
 default_language_version:
-  node: 22.11.0
+  node: 26.13.0
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
