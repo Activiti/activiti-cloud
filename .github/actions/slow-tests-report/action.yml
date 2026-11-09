@@ -1,0 +1,63 @@
+name: Slow Tests Report
+description: >
+  Filter JUnit XML reports to retain only slow tests, publish a test-reporter
+  check, and comment on the PR with a summary table.
+
+inputs:
+  slow-threshold:
+    description: Threshold in seconds for individual slow tests
+    required: false
+    default: '5'
+  slow-class-threshold:
+    description: Threshold in seconds for slow test classes (aggregated)
+    required: false
+    default: '30'
+  report-url:
+    description: URL to the full slow test report (from dorny/test-reporter)
+    required: false
+    default: ''
+  reports-dir:
+    description: Directory containing downloaded surefire report artifacts
+    required: false
+    default: 'reports'
+  token:
+    description: GitHub token for posting PR comments
+    required: true
+
+outputs:
+  report-url:
+    description: URL to the published test report
+    value: ${{ steps.publish-report.outputs.url_html }}
+
+runs:
+  using: composite
+  steps:
+    - name: Filter slow tests from reports
+      shell: bash
+      env:
+        SLOW_THRESHOLD: ${{ inputs.slow-threshold }}
+        REPORTS_DIR: ${{ inputs.reports-dir }}
+        FILTERED_REPORTS_DIR: ${{ runner.temp }}/filtered-slow-test-reports
+      run: python3 ${{ github.action_path }}/filter-slow-tests.py
+
+    - name: Publish Test Report
+      id: publish-report
+      uses: dorny/test-reporter@d1b5dff021aa968b288b02285a8bf47471c5928a # v3.2.0
+      with:
+        name: Slow Test Results (> ${{ inputs.slow-threshold }}s)
+        path: '${{ runner.temp }}/filtered-slow-test-reports/**/TEST-*.xml'
+        reporter: java-junit
+        fail-on-empty: false
+
+    - name: Comment on PR with slow tests summary
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      env:
+        SLOW_THRESHOLD: ${{ inputs.slow-threshold }}
+        SLOW_CLASS_THRESHOLD: ${{ inputs.slow-class-threshold }}
+        REPORTS_DIR: ${{ inputs.reports-dir }}
+        REPORT_URL: ${{ inputs.report-url || steps.publish-report.outputs.url_html || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
+      with:
+        github-token: ${{ inputs.token }}
+        script: |
+          const script = require('${{ github.action_path }}/comment-slow-tests.js');
+          await script({ github, context, core });

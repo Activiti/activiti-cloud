@@ -634,6 +634,7 @@ perform_installation() {
         fi
     fi
 
+    make_cmd="$make_cmd EXTRA_VALUES_FILES='$SCRIPT_DIR/ci/preview-values/pushed-counts.yaml'"
     make_cmd="$make_cmd make install"
 
     execute_command "$make_cmd" "Running make install"

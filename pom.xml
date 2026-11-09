@@ -194,12 +194,7 @@
     <project.year>2026</project.year>
     <jacoco-report-dir-suffix></jacoco-report-dir-suffix>
 
-    <spring-boot.version>4.0.7</spring-boot.version>
-    <!-- Pin spring-amqp to 4.0.3 to avoid x-queue-leader-locator regression (spring-projects/spring-amqp#3478).
-         Remove when upgrading to Spring AMQP 4.0.5+ or 4.1.1+ which contains the fix. -->
-    <spring-amqp.version>4.0.3</spring-amqp.version>
-    <!-- AAE-51380 temporary Tomcat version override. Remove when upgrading to Spring Boot 4.1.x -->
-    <tomcat.version>11.0.27</tomcat.version>
+    <spring-boot.version>4.0.9</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
@@ -207,7 +202,7 @@
 
     <!-- plugin versions -->
     <assertj-assertions-generator-maven-plugin.version>2.0.0</assertj-assertions-generator-maven-plugin.version>
-    <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
+    <build-helper-maven-plugin.version>3.6.2</build-helper-maven-plugin.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     <git-commit-id-maven-plugin.version>10.0.1</git-commit-id-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
@@ -233,7 +228,7 @@
     <org-json.version>20260814</org-json.version>
 
     <!-- dependencies versions -->
-    <hibernate.version>7.4.13.Final</hibernate.version>
+    <hibernate.version>7.4.14.Final</hibernate.version>
     <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
     <byte-buddy.version>1.17.8</byte-buddy.version>
     <!-- End Temporary Dependency -->
@@ -257,11 +252,23 @@
     </repository>
     <repository>
       <id>activiti-releases</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases</url>
+      <url>https://dl.cloudsmith.io/basic/hyland/activiti-releases/maven/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
     <repository>
       <id>activiti-snapshots</id>
-      <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots</url>
+      <url>https://dl.cloudsmith.io/basic/hyland/activiti-snapshots/maven/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
   <pluginRepositories>
@@ -665,6 +672,19 @@ limitations under the License.]]>
     </plugins>
   </build>
   <profiles>
+    <profile>
+      <id>cloudsmith</id>
+      <distributionManagement>
+        <repository>
+          <id>cloudsmith</id>
+          <url>https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-releases/</url>
+        </repository>
+        <snapshotRepository>
+          <id>cloudsmith</id>
+          <url>https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
     <profile>
       <id>attach-sources</id>
       <activation>

@@ -214,6 +214,38 @@ class AuditEventsServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void shouldApplyNativeNullOrderingToClientTimestampDescSort_when_sortedV2Sliced() {
+        Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Order.desc("timestamp")));
+        given(securityPoliciesApplicationService.createSpecWithSecurity(any(), any())).willReturn(
+            mock(Specification.class)
+        );
+        givenSlice(new SliceImpl<>(List.of(), pageable, false));
+
+        auditEventsService.searchEventsSliced(emptySearch, pageable);
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(pagedCollectionModelAssembler).toModel(pageableCaptor.capture(), any(Page.class), any());
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(Sort.Order.desc("timestamp").nullsFirst());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldApplyNativeNullOrderingToClientTimestampAscSort_when_sortedV2Sliced() {
+        Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Order.asc("timestamp")));
+        given(securityPoliciesApplicationService.createSpecWithSecurity(any(), any())).willReturn(
+            mock(Specification.class)
+        );
+        givenSlice(new SliceImpl<>(List.of(), pageable, false));
+
+        auditEventsService.searchEventsSliced(emptySearch, pageable);
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(pagedCollectionModelAssembler).toModel(pageableCaptor.capture(), any(Page.class), any());
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(Sort.Order.asc("timestamp").nullsLast());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void should_skipEvent_when_converterNotFound() {
         AuditEventEntity entity = mock(AuditEventEntity.class);
         given(entity.getEventType()).willReturn("UNKNOWN_TYPE");

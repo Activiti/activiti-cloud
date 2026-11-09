@@ -134,9 +134,7 @@ class AuditEventsControllerV2ImplWebMvcTest {
 
         mockMvc.perform(get("/{version}/events", "v2").param("sort", "timestamp,asc")).andExpect(status().isOk());
 
-        assertThat(pageableCaptor.getValue().getSort()).containsExactly(
-            new Sort.Order(Sort.Direction.ASC, "timestamp")
-        );
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(Sort.Order.asc("timestamp").nullsLast());
     }
 
     @Test
