@@ -115,4 +115,3 @@ function buildSubscriptionVariables(options: {
         ...(options.actor ? { actor: [options.actor] } : {}),
     };
 }
-
