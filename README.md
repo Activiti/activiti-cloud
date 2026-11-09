@@ -9,7 +9,7 @@
 [![stability status](https://www.meterian.io/badge/gh/Activiti/activiti-cloud/stability)](https://www.meterian.io/report/gh/Activiti/activiti-cloud)
 [![licensing status](https://www.meterian.io/badge/gh/Activiti/activiti-cloud/licensing)](https://www.meterian.io/report/gh/Activiti/activiti-cloud)
 
-Activiti Cloud libraries and Spring Boot starters.
+Activiti Cloud libraries and Spring Boot starters, yes.
 
 Activiti releases and snapshots are downloaded from public Cloudsmith repositories without credentials. Maven Central remains the source for third-party dependencies and plugins.
 
