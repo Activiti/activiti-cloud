@@ -33,6 +33,7 @@ import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverte
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.junit.jupiter.api.Test;
@@ -46,8 +47,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor.SpecificationFluentQuery;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AuditEventsAdminServiceTest {
@@ -63,6 +66,9 @@ class AuditEventsAdminServiceTest {
 
     @Mock
     private AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler;
+
+    @Mock
+    private AuditEventsExporter auditEventsExporter;
 
     @InjectMocks
     private AuditEventsAdminService auditEventsAdminService;
@@ -108,6 +114,23 @@ class AuditEventsAdminServiceTest {
 
         // then
         verify(eventsRepository).findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong());
+    }
+
+    @Test
+    void should_sortExportByTimestampDescNullsFirst_when_exportingEventsBetweenDates() throws Exception {
+        given(eventsRepository.findAllByTimestampBetween(anyLong(), anyLong(), any(Pageable.class))).willReturn(
+            Page.empty()
+        );
+
+        auditEventsAdminService.exportAuditsBetweenDates(
+            LocalDate.of(2020, 1, 1),
+            LocalDate.of(2020, 1, 2),
+            new MockHttpServletResponse()
+        );
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(eventsRepository).findAllByTimestampBetween(anyLong(), anyLong(), pageableCaptor.capture());
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(Sort.Order.desc("timestamp").nullsFirst());
     }
 
     @Test

@@ -34,7 +34,7 @@ jobs:
           ref: ${{ inputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@768b583839a22ef7d882da0c5b82af3832197d00 # v19.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@2cebc8f19812b2653361d82e86b25f29cfa4a144 # v19.12.1
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -51,3 +51,14 @@ jobs:
           target-folder-upload-name: target-test-${{ matrix.short-name }}
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
+
+      - name: Upload surefire reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: surefire-reports-${{ matrix.short-name }}
+          path: |
+            **/target/surefire-reports/TEST-*.xml
+            **/target/failsafe-reports/TEST-*.xml
+          if-no-files-found: ignore
+          retention-days: 7

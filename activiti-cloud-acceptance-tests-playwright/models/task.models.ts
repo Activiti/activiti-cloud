@@ -61,6 +61,8 @@ export interface TaskSearchRequest {
     onlyRoot?: boolean;
     processInstanceId?: string[];
     id?: string[];
+    status?: TaskStatus[];
+    assignee?: string[];
 }
 
 export interface TaskResponse {

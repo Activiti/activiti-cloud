@@ -125,7 +125,7 @@ public class AuditEventsAdminService {
 
             Page<AuditEventEntity> auditPage;
             do {
-                Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
+                Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, timestampDescSortWithoutNullPrecedence());
                 auditPage = eventsRepository.findAllByTimestampBetween(range.start(), range.end(), pageable);
 
                 if (auditPage == null || !auditPage.hasContent()) {

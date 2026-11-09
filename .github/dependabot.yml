@@ -45,6 +45,7 @@ updates:
     - "/.github/actions/maven-deploy"
     - "/.github/actions/playwright-run"
     - "/.github/actions/prepare-preview-for-playwright"
+    - "/.github/actions/slow-tests-report"
     - "/.github/actions/setup-env-for-broker"
     schedule:
       interval: "weekly"
@@ -59,7 +60,7 @@ updates:
           - "patch"
     ignore:
       # Managed by gh aw add. Version-locked to the gh-aw compiler; do not bump.
-      - dependency-name: "github/gh-aw-actions"
+      - dependency-name: "github/gh-aw-actions/*"
 
   - package-ecosystem: "npm"
     directories:

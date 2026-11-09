@@ -1,0 +1,37 @@
+name: Label PR from branch
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+    branches:
+      - develop
+
+permissions: {}
+
+jobs:
+  label-from-branch:
+    # Skip fork PRs with read-only tokens and Dependabot-sourced runs.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.secret_source != 'Dependabot'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Label PR from branch name
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-label-from-branch@2cebc8f19812b2653361d82e86b25f29cfa4a144 # v19.12.1
+        with:
+          mapping: |
+            feat/: enhancement
+            feature/: enhancement
+            improvement/: enhancement
+            fix/: bug
+            bug/: bug
+            bugfix/: bug
+            hotfix/: bug
+            docs/: documentation
+            documentation/: documentation
+            deps/: dependencies
+            dependencies/: dependencies
