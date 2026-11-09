@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -32,6 +33,7 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateUserReposit
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.ApplicationAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
@@ -386,6 +388,12 @@ public class QueryRestWebMvcAutoConfiguration {
             securityManager,
             entityFinder
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ApplicationAdminService applicationAdminService(ApplicationRepository applicationRepository) {
+        return new ApplicationAdminService(applicationRepository);
     }
 
     @Bean
