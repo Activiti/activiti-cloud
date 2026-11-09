@@ -22,16 +22,29 @@ import java.util.Optional;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
+import org.activiti.cloud.services.query.model.QApplicationEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.QSort;
 
 public class ApplicationAdminService {
 
-    private static final Sort DEFAULT_SORT = Sort.by(Sort.Order.desc("version"), Sort.Order.desc("id"));
+    private static final QApplicationEntity APPLICATION = QApplicationEntity.applicationEntity;
+
+    /**
+     * Versions are numbers stored as strings, so a plain text sort would put "9" before "10". Sorting by length
+     * first and then by text gives the numeric order for non-negative integers without leading zeros, and never
+     * fails on non-numeric values (unlike a cast). {@code id} is a tie-breaker that keeps paging stable.
+     */
+    private static final Sort DEFAULT_SORT = new QSort(
+        APPLICATION.version.length().desc(),
+        APPLICATION.version.desc(),
+        APPLICATION.id.desc()
+    );
 
     private final ApplicationRepository repository;
 
@@ -40,8 +53,8 @@ public class ApplicationAdminService {
     }
 
     /**
-     * Finds applications using slice-based pagination, sorted by {@code version} descending (then {@code id} descending, as a tie-breaker
-     * for stable paging) unless a sort is requested.
+     * Finds applications using slice-based pagination, sorted by numeric {@code version} descending (then {@code id} descending, as a
+     * tie-breaker for stable paging) unless a sort is requested.
      * <p>
      * No {@code COUNT} query is executed: one extra element is fetched to know whether a next page exists, and the
      * returned page reports an estimated total derived from the current offset.

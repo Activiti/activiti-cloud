@@ -33,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.QSort;
 import org.springframework.data.repository.query.FluentQuery;
 
 class ApplicationAdminServiceTest {
@@ -46,7 +47,7 @@ class ApplicationAdminServiceTest {
 
         service.findAllSliced(null, PageRequest.of(0, 10));
 
-        assertThat(captor.getValue().getSort()).containsExactly(Sort.Order.desc("version"), Sort.Order.desc("id"));
+        assertThat(captor.getValue().getSort()).isInstanceOf(QSort.class).hasSize(3);
     }
 
     @Test
@@ -67,7 +68,7 @@ class ApplicationAdminServiceTest {
         Pageable pageable = captor.getValue();
         assertThat(pageable).isInstanceOf(AlfrescoPageRequest.class);
         assertThat(pageable.getOffset()).isEqualTo(1000);
-        assertThat(pageable.getSort()).containsExactly(Sort.Order.desc("version"), Sort.Order.desc("id"));
+        assertThat(pageable.getSort()).isInstanceOf(QSort.class).hasSize(3);
     }
 
     @Test

@@ -53,6 +53,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.QSort;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
@@ -128,7 +129,7 @@ public class ApplicationAdminControllerV2IT {
 
         mockMvc.perform(get("/admin/v2/applications").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-        assertThat(captor.getValue().getSort()).containsExactly(Sort.Order.desc("version"), Sort.Order.desc("id"));
+        assertThat(captor.getValue().getSort()).isInstanceOf(QSort.class).hasSize(3);
     }
 
     @Test

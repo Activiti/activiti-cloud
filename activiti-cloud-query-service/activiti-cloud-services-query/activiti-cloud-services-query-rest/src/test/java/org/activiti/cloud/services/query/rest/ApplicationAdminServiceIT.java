@@ -83,7 +83,7 @@ class ApplicationAdminServiceIT {
         assertThat(firstPage.hasNext()).isTrue();
         assertThat(secondPage.getContent())
             .extracting(ApplicationEntity::getVersion)
-            .containsExactly("10", "09", "08", "07", "06", "05", "04", "03", "02", "01");
+            .containsExactly("10", "9", "8", "7", "6", "5", "4", "3", "2", "1");
         assertThat(secondPage.hasNext()).isFalse();
     }
 
@@ -117,11 +117,11 @@ class ApplicationAdminServiceIT {
 
         assertThat(page.getContent())
             .extracting(ApplicationEntity::getVersion)
-            .containsExactly("01", "02", "03", "04", "05");
+            .containsExactly("1", "10", "11", "12", "13");
     }
 
     private String version(int i) {
-        return String.format("%02d", i);
+        return String.valueOf(i);
     }
 
     private ApplicationEntity application(String id, String name, String version) {
