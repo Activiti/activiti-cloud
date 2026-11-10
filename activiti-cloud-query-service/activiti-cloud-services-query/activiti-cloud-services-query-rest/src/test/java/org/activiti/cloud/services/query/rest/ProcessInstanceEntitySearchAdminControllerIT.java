@@ -23,12 +23,24 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.services.query.app.payload.CloudRuntimeEntitySort;
+import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
+import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.Sort;
@@ -52,6 +64,108 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @Testcontainers
 @WithMockUser(username = AbstractProcessInstanceEntitySearchControllerIT.USER, roles = "ACTIVITI_ADMIN")
 class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstanceEntitySearchControllerIT {
+
+    @Autowired
+    private BPMNActivityRepository bpmnActivityRepository;
+
+    @Autowired
+    private ProcessInstanceHierarchyRepository hierarchyRepository;
+
+    @AfterEach
+    void cleanUpActivities() {
+        bpmnActivityRepository.deleteAll();
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "0,false", "1,false", "3,false", "1,true", "3,true" })
+    void should_flagOnlyRequestedAncestors_whenServiceTaskFailsAtAnyDepth(int depth, boolean linked) {
+        ProcessInstanceEntity root = queryTestUtils.buildProcessInstance().buildAndSave();
+        ProcessInstanceEntity sibling = queryTestUtils.buildProcessInstance().subprocessOf(root).buildAndSave();
+        ProcessInstanceEntity unrelated = queryTestUtils.buildProcessInstance().buildAndSave();
+        ProcessInstanceEntity failingProcess = root;
+        Set<String> pathIds = new HashSet<>(Set.of(root.getId()));
+        for (int level = 0; level < depth; level++) {
+            var builder = queryTestUtils.buildProcessInstance();
+            failingProcess =
+                linked
+                    ? builder.withLinkedProcessInstanceId(failingProcess.getId()).buildAndSave()
+                    : builder.subprocessOf(failingProcess).buildAndSave();
+            pathIds.add(failingProcess.getId());
+        }
+        saveActivity(failingProcess, "serviceTask", BPMNActivityStatus.ERROR);
+        saveActivity(failingProcess, "serviceTask", BPMNActivityStatus.ERROR);
+
+        Set<String> affectedIds = hierarchyRepository.findProcessIdsWithServiceTaskErrors(
+            Set.of(root.getId(), sibling.getId(), unrelated.getId())
+        );
+
+        assertThat(affectedIds).containsExactly(root.getId());
+        assertThat(hierarchyRepository.findProcessIdsWithServiceTaskErrors(pathIds))
+            .containsExactlyInAnyOrderElementsOf(pathIds);
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                new ProcessInstanceSearchRequestBuilder()
+                    .withIds(root.getId(), sibling.getId(), unrelated.getId())
+                    .build()
+            )
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(
+                PROCESS_INSTANCES_JSON_PATH + ".find { it.id == '" + root.getId() + "' }.hasServiceTaskErrors",
+                equalTo(true)
+            )
+            .body(
+                PROCESS_INSTANCES_JSON_PATH + ".find { it.id == '" + sibling.getId() + "' }.hasServiceTaskErrors",
+                equalTo(false)
+            )
+            .body(
+                PROCESS_INSTANCES_JSON_PATH + ".find { it.id == '" + unrelated.getId() + "' }.hasServiceTaskErrors",
+                equalTo(false)
+            );
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BPMNActivityStatus.class, names = { "STARTED", "COMPLETED", "CANCELLED" })
+    void should_notFlagProcess_whenServiceTaskIsNotInError(BPMNActivityStatus status) {
+        ProcessInstanceEntity process = queryTestUtils.buildProcessInstance().buildAndSave();
+        saveActivity(process, "serviceTask", status);
+        saveActivity(process, "userTask", BPMNActivityStatus.ERROR);
+
+        assertThat(hierarchyRepository.findProcessIdsWithServiceTaskErrors(Set.of(process.getId()))).isEmpty();
+    }
+
+    @Test
+    void should_clearFlag_whenDescendantServiceTaskRecovers() {
+        ProcessInstanceEntity root = queryTestUtils.buildProcessInstance().buildAndSave();
+        ProcessInstanceEntity child = queryTestUtils.buildProcessInstance().subprocessOf(root).buildAndSave();
+        BPMNActivityEntity task = saveActivity(child, "serviceTask", BPMNActivityStatus.ERROR);
+        Set<String> pageIds = Set.of(root.getId(), child.getId());
+        assertThat(hierarchyRepository.findProcessIdsWithServiceTaskErrors(pageIds))
+            .containsExactlyInAnyOrderElementsOf(pageIds);
+
+        task.setStatus(BPMNActivityStatus.COMPLETED);
+        bpmnActivityRepository.save(task);
+
+        assertThat(hierarchyRepository.findProcessIdsWithServiceTaskErrors(pageIds)).isEmpty();
+    }
+
+    private BPMNActivityEntity saveActivity(
+        ProcessInstanceEntity process,
+        String activityType,
+        BPMNActivityStatus status
+    ) {
+        BPMNActivityEntity activity = new BPMNActivityEntity();
+        activity.setId(UUID.randomUUID().toString());
+        activity.setProcessInstanceId(process.getId());
+        activity.setElementId(UUID.randomUUID().toString());
+        activity.setExecutionId(UUID.randomUUID().toString());
+        activity.setActivityType(activityType);
+        activity.setStatus(status);
+        return bpmnActivityRepository.save(activity);
+    }
 
     private static final String SUBPROCESSES_COUNT_PATH = "_embedded.processInstances.subprocessesCount";
     private static final String LINKED_PROCESSES_COUNT_PATH = "_embedded.processInstances.linkedProcessesCount";
