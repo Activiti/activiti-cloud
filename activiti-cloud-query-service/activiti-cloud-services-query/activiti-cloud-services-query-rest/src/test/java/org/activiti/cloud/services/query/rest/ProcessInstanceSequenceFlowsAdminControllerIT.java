@@ -30,6 +30,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -70,6 +71,9 @@ class ProcessInstanceSequenceFlowsAdminControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private ApplicationRepository applicationRepository;
 
     @MockitoBean
     private BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
