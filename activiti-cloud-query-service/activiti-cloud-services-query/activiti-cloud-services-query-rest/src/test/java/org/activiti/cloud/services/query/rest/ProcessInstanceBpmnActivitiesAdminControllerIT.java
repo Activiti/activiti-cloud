@@ -32,6 +32,7 @@ import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -71,6 +72,9 @@ class ProcessInstanceBpmnActivitiesAdminControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private ApplicationRepository applicationRepository;
 
     @MockitoBean
     private BPMNActivityRepository bpmnActivityRepository;
