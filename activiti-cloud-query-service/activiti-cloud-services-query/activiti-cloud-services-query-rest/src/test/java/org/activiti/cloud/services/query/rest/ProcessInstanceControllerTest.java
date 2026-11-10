@@ -40,6 +40,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
@@ -132,6 +133,9 @@ class ProcessInstanceControllerTest {
 
     @MockitoBean
     private ProcessInstanceService processInstanceService;
+
+    @MockitoBean
+    private ApplicationRepository applicationRepository;
 
     @BeforeEach
     void setUp() {
