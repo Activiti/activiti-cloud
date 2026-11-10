@@ -71,7 +71,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
-public class ApplicationAdminControllerV2IT {
+class ApplicationAdminControllerV2IT {
 
     @Autowired
     private MockMvc mockMvc;
