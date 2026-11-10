@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.app.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -48,4 +49,20 @@ public interface ProcessInstanceHierarchyRepository
         String getRelationType();
         long getRelatedCount();
     }
+
+    @Query(
+        value = """
+            SELECT DISTINCT h.ancestor_id
+            FROM process_instance_hierarchy h
+            JOIN bpmn_activity task
+              ON task.process_instance_id = h.descendant_id
+            WHERE h.ancestor_id IN (:ancestorIds)
+              AND task.activity_type = 'serviceTask'
+              AND task.status = 'ERROR'
+            """,
+        nativeQuery = true
+    )
+    Set<String> findProcessIdsWithServiceTaskErrors(
+        @Param("ancestorIds") Collection<String> ancestorIds
+    );
 }
