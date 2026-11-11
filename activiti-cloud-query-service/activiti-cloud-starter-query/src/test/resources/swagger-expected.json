@@ -8632,6 +8632,9 @@
       "ProcessInstanceSearchResult_ProcessVariables" : {
         "type" : "object",
         "properties" : {
+          "hasServiceTaskErrors" : {
+            "type" : "boolean"
+          },
           "variables" : {
             "type" : "array",
             "items" : {

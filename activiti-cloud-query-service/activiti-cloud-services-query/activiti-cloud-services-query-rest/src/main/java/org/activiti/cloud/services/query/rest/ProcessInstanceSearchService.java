@@ -193,6 +193,14 @@ public class ProcessInstanceSearchService {
             );
     }
 
+    @Transactional(readOnly = true)
+    public Set<String> findProcessIdsWithServiceTaskErrors(Set<String> ancestorIds) {
+        if (ancestorIds == null || ancestorIds.isEmpty()) {
+            return Set.of();
+        }
+        return processInstanceHierarchyRepository.findProcessIdsWithServiceTaskErrors(ancestorIds);
+    }
+
     private void doEnrich(Page<ProcessInstanceEntity> processInstances, String userId) {
         List<ProcessInstanceEntity> content = processInstances.getContent();
         if (content.isEmpty()) {

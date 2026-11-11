@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.ProcessInstanceSearchResult;
 import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -36,6 +37,8 @@ import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHe
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -129,6 +132,40 @@ class ProcessInstanceAdminControllerHelperTest {
 
     @Nested
     class SearchProcessInstances {
+
+        @ParameterizedTest
+        @ValueSource(booleans = { false, true })
+        void should_mapErrorFlagsWithoutChangingStatusOrPagination(boolean hasErrors) {
+            Pageable pageable = PageRequest.of(1, 2);
+            ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequest();
+            ProcessInstanceEntity affected = new ProcessInstanceEntity();
+            affected.setId("affected");
+            affected.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+            ProcessInstanceEntity unaffected = new ProcessInstanceEntity();
+            unaffected.setId("unaffected");
+            unaffected.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+            Set<String> pageIds = Set.of("affected", "unaffected");
+            given(processInstanceAdminService.search(request, pageable)).willReturn(
+                new PageImpl<>(List.of(affected, unaffected), pageable, 8)
+            );
+            given(processInstanceSearchService.findProcessIdsWithServiceTaskErrors(pageIds)).willReturn(
+                hasErrors ? Set.of("affected") : Set.of()
+            );
+
+            Page<ProcessInstanceSearchResult> result = processInstanceAdminControllerHelper.searchProcessInstances(
+                request,
+                pageable
+            );
+
+            assertThat(result.getContent())
+                .extracting(ProcessInstanceSearchResult::getHasServiceTaskErrors)
+                .containsExactly(hasErrors, false);
+            assertThat(result.getContent())
+                .extracting(ProcessInstanceSearchResult::getStatus)
+                .containsOnly(ProcessInstance.ProcessInstanceStatus.RUNNING);
+            assertThat(result.getTotalElements()).isEqualTo(8);
+            assertThat(result.getPageable()).isEqualTo(pageable);
+        }
 
         @Test
         void should_mapEntitiesToResultsWithCounts() {

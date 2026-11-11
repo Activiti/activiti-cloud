@@ -38,4 +38,8 @@ public interface ProcessInstanceSearchResult extends CloudProcessInstance {
     Set<QueryCloudVariableInstance> getVariables();
 
     void setVariables(Set<QueryCloudVariableInstance> variables);
+
+    boolean getHasServiceTaskErrors();
+
+    void setHasServiceTaskErrors(boolean hasServiceTaskErrors);
 }
