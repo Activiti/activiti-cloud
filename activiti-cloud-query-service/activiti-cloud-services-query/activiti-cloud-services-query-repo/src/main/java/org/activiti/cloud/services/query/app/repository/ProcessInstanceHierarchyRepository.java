@@ -52,17 +52,15 @@ public interface ProcessInstanceHierarchyRepository
 
     @Query(
         value = """
-            SELECT DISTINCT h.ancestor_id
-            FROM process_instance_hierarchy h
-            JOIN bpmn_activity task
-              ON task.process_instance_id = h.descendant_id
-            WHERE h.ancestor_id IN (:ancestorIds)
-              AND task.activity_type = 'serviceTask'
-              AND task.status = 'ERROR'
-            """,
+        SELECT DISTINCT h.ancestor_id
+        FROM process_instance_hierarchy h
+        JOIN bpmn_activity task
+          ON task.process_instance_id = h.descendant_id
+        WHERE h.ancestor_id IN (:ancestorIds)
+          AND task.activity_type = 'serviceTask'
+          AND task.status = 'ERROR'
+        """,
         nativeQuery = true
     )
-    Set<String> findProcessIdsWithServiceTaskErrors(
-        @Param("ancestorIds") Collection<String> ancestorIds
-    );
+    Set<String> findProcessIdsWithServiceTaskErrors(@Param("ancestorIds") Collection<String> ancestorIds);
 }

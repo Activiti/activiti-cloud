@@ -86,10 +86,9 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         Set<String> pathIds = new HashSet<>(Set.of(root.getId()));
         for (int level = 0; level < depth; level++) {
             var builder = queryTestUtils.buildProcessInstance();
-            failingProcess =
-                linked
-                    ? builder.withLinkedProcessInstanceId(failingProcess.getId()).buildAndSave()
-                    : builder.subprocessOf(failingProcess).buildAndSave();
+            failingProcess = linked
+                ? builder.withLinkedProcessInstanceId(failingProcess.getId()).buildAndSave()
+                : builder.subprocessOf(failingProcess).buildAndSave();
             pathIds.add(failingProcess.getId());
         }
         saveActivity(failingProcess, "serviceTask", BPMNActivityStatus.ERROR);
@@ -100,8 +99,9 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         );
 
         assertThat(affectedIds).containsExactly(root.getId());
-        assertThat(hierarchyRepository.findProcessIdsWithServiceTaskErrors(pathIds))
-            .containsExactlyInAnyOrderElementsOf(pathIds);
+        assertThat(
+            hierarchyRepository.findProcessIdsWithServiceTaskErrors(pathIds)
+        ).containsExactlyInAnyOrderElementsOf(pathIds);
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(
@@ -143,8 +143,9 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         ProcessInstanceEntity child = queryTestUtils.buildProcessInstance().subprocessOf(root).buildAndSave();
         BPMNActivityEntity task = saveActivity(child, "serviceTask", BPMNActivityStatus.ERROR);
         Set<String> pageIds = Set.of(root.getId(), child.getId());
-        assertThat(hierarchyRepository.findProcessIdsWithServiceTaskErrors(pageIds))
-            .containsExactlyInAnyOrderElementsOf(pageIds);
+        assertThat(
+            hierarchyRepository.findProcessIdsWithServiceTaskErrors(pageIds)
+        ).containsExactlyInAnyOrderElementsOf(pageIds);
 
         task.setStatus(BPMNActivityStatus.COMPLETED);
         bpmnActivityRepository.save(task);

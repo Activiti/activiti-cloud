@@ -145,10 +145,12 @@ class ProcessInstanceAdminControllerHelperTest {
             unaffected.setId("unaffected");
             unaffected.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
             Set<String> pageIds = Set.of("affected", "unaffected");
-            given(processInstanceAdminService.search(request, pageable))
-                .willReturn(new PageImpl<>(List.of(affected, unaffected), pageable, 8));
-            given(processInstanceSearchService.findProcessIdsWithServiceTaskErrors(pageIds))
-                .willReturn(hasErrors ? Set.of("affected") : Set.of());
+            given(processInstanceAdminService.search(request, pageable)).willReturn(
+                new PageImpl<>(List.of(affected, unaffected), pageable, 8)
+            );
+            given(processInstanceSearchService.findProcessIdsWithServiceTaskErrors(pageIds)).willReturn(
+                hasErrors ? Set.of("affected") : Set.of()
+            );
 
             Page<ProcessInstanceSearchResult> result = processInstanceAdminControllerHelper.searchProcessInstances(
                 request,
