@@ -25,8 +25,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
@@ -43,6 +45,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -103,6 +108,7 @@ class SearchExistsSubqueriesIT {
     private static final String PROCESS_INSTANCE_IDS_JSON_PATH = "_embedded.processInstances.id";
     private static final String PROCESS_INSTANCE_ID_1 = "processInstanceId1";
     private static final String PROCESS_INSTANCE_ID_2 = "processInstanceId2";
+    private static final String PROCESS_INSTANCE_ID_3 = "processInstanceId3";
 
     @Container
     @ServiceConnection
@@ -332,6 +338,150 @@ class SearchExistsSubqueriesIT {
         assertThat(countSql).contains("count(").doesNotContain("over()").doesNotContain("group by");
     }
 
+    private static TaskSearchRequestBuilder processVariableSortRequest(Sort.Direction direction) {
+        return processVariableSortRequest(direction, VariableType.STRING);
+    }
+
+    private static TaskSearchRequestBuilder processVariableSortRequest(Sort.Direction direction, VariableType type) {
+        return new TaskSearchRequestBuilder()
+            .withProcessDefinitionName(PROCESS_DEFINITION_NAME.toLowerCase())
+            .withSort(new CloudRuntimeEntitySort(VAR_NAME, direction, true, PROCESS_DEFINITION_KEY, type));
+    }
+
+    private static Stream<Arguments> processVariableSortCases() {
+        return Stream.of(false, true).flatMap(existsSubqueriesEnabled ->
+            Stream.of(
+                Arguments.of(existsSubqueriesEnabled, VariableType.INTEGER, List.of(2, 10, 5), List.of(1, 3, 2)),
+                Arguments.of(
+                    existsSubqueriesEnabled,
+                    VariableType.BIGDECIMAL,
+                    List.of(2.1, 10.2, 5.3),
+                    List.of(1, 3, 2)
+                ),
+                Arguments.of(
+                    existsSubqueriesEnabled,
+                    VariableType.DATE,
+                    List.of("2024-09-02", "2024-09-01", "2024-09-03"),
+                    List.of(2, 1, 3)
+                ),
+                Arguments.of(
+                    existsSubqueriesEnabled,
+                    VariableType.DATETIME,
+                    List.of(
+                        "2024-09-01T00:11:00.000+00:00",
+                        "2024-09-01T00:10:00.000+00:00",
+                        "2024-09-01T00:12:00.000+00:00"
+                    ),
+                    List.of(2, 1, 3)
+                ),
+                Arguments.of(existsSubqueriesEnabled, VariableType.BOOLEAN, List.of(true, false), List.of(2, 1))
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "existsSubqueries={0}, type={1}")
+    @MethodSource("processVariableSortCases")
+    void should_sortByProcessVariableOfEachType_withNullsLast_regardlessOfTheToggle(
+        boolean existsSubqueriesEnabled,
+        VariableType type,
+        List<Object> values,
+        List<Integer> ascendingOrder
+    ) {
+        setExistsSubqueriesEnabled(existsSubqueriesEnabled);
+        for (int i = 0; i < values.size(); i++) {
+            givenTaskWithProcessVariable(taskId(i + 1), type, values.get(i));
+        }
+        String taskWithoutValue = "taskIdWithoutValue";
+        givenTaskWithProcessVariable(taskWithoutValue, type, null);
+
+        List<String> ascendingIds = ascendingOrder.stream().map(SearchExistsSubqueriesIT::taskId).toList();
+        List<String> descendingIds = ascendingIds.reversed();
+
+        assertSortedTaskIds(type, Sort.Direction.ASC, ascendingIds, taskWithoutValue);
+        assertSortedTaskIds(type, Sort.Direction.DESC, descendingIds, taskWithoutValue);
+    }
+
+    private static String taskId(int index) {
+        return "taskId" + index;
+    }
+
+    private void givenTaskWithProcessVariable(String taskId, VariableType type, Object value) {
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withProcessDefinitionName(PROCESS_DEFINITION_NAME)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, type, value))
+            .withTasks(queryTestUtils.buildTask().withId(taskId))
+            .buildAndSave();
+    }
+
+    private void assertSortedTaskIds(
+        VariableType type,
+        Sort.Direction direction,
+        List<String> expectedIds,
+        String lastTaskId
+    ) {
+        List<String> expected = new ArrayList<>(expectedIds);
+        expected.add(lastTaskId);
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(processVariableSortRequest(direction, type).buildJson())
+            .when()
+            .post(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(expected.size()))
+            .body(TASK_IDS_JSON_PATH, contains(expected.toArray()));
+    }
+
+    @ParameterizedTest(name = "existsSubqueries={0}, direction={1}")
+    @CsvSource({
+        "false, ASC, taskId1, taskId2",
+        "true, ASC, taskId1, taskId2",
+        "false, DESC, taskId2, taskId1",
+        "true, DESC, taskId2, taskId1",
+    })
+    void should_returnSameOrder_sortedByProcessVariable_regardlessOfTheToggle(
+        boolean existsSubqueriesEnabled,
+        Sort.Direction direction,
+        String firstTaskId,
+        String secondTaskId
+    ) {
+        setExistsSubqueriesEnabled(existsSubqueriesEnabled);
+        givenTwoTasksOneMatchingTheProcessVariableFilter();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(processVariableSortRequest(direction).buildJson())
+            .when()
+            .post(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(TASK_IDS_JSON_PATH, contains(firstTaskId, secondTaskId));
+    }
+
+    @Test
+    void should_sortByProcessVariableWithFilteredJoinWithoutAggregation_whenToggleIsOn() {
+        setExistsSubqueriesEnabled(true);
+        givenTwoTasksOneMatchingTheProcessVariableFilter();
+        CapturedStatements.clear();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(processVariableSortRequest(Sort.Direction.ASC).buildJson())
+            .when()
+            .post(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200);
+
+        String searchSql = CapturedStatements.findSelectFrom("from task ");
+        assertThat(searchSql)
+            .containsPattern("left join\\s*\\(\\s*task_process_variable")
+            .containsPattern("on te1_0\\.id=pv1_0\\.task_id and pv1_1\\.(process_definition_key|name)=\\?")
+            .doesNotContain("left join task_process_variable")
+            .doesNotContain("group by");
+    }
+
     private void givenTwoProcessInstancesOneMatchingTheProcessVariableFilter() {
         queryTestUtils
             .buildProcessInstance()
@@ -350,6 +500,75 @@ class SearchExistsSubqueriesIT {
             .withProcessDefinitionName(PROCESS_DEFINITION_NAME)
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "other-value"))
             .buildAndSave();
+    }
+
+    private void givenProcessInstanceWithoutVariable(String processInstanceId) {
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(processInstanceId)
+            .withInitiator(CURRENT_USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withProcessDefinitionName(PROCESS_DEFINITION_NAME)
+            .buildAndSave();
+    }
+
+    private static ProcessInstanceSearchRequestBuilder processInstanceVariableSortRequest(Sort.Direction direction) {
+        return new ProcessInstanceSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, direction, true, PROCESS_DEFINITION_KEY, VariableType.STRING)
+        );
+    }
+
+    @ParameterizedTest(name = "existsSubqueries={0}, direction={1}")
+    @CsvSource({
+        "false, ASC, processInstanceId1, processInstanceId2",
+        "true, ASC, processInstanceId1, processInstanceId2",
+        "false, DESC, processInstanceId2, processInstanceId1",
+        "true, DESC, processInstanceId2, processInstanceId1",
+    })
+    void should_sortProcessInstancesByProcessVariableWithMissingVariableLast_regardlessOfTheToggle(
+        boolean existsSubqueriesEnabled,
+        Sort.Direction direction,
+        String firstProcessInstanceId,
+        String secondProcessInstanceId
+    ) {
+        setExistsSubqueriesEnabled(existsSubqueriesEnabled);
+        givenTwoProcessInstancesOneMatchingTheProcessVariableFilter();
+        givenProcessInstanceWithoutVariable(PROCESS_INSTANCE_ID_3);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(processInstanceVariableSortRequest(direction).buildJson())
+            .when()
+            .post(PROCESS_INSTANCE_SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(3))
+            .body(
+                PROCESS_INSTANCE_IDS_JSON_PATH,
+                contains(firstProcessInstanceId, secondProcessInstanceId, PROCESS_INSTANCE_ID_3)
+            );
+    }
+
+    @Test
+    void should_sortProcessInstancesByProcessVariableWithoutAggregation_whenToggleIsOn() {
+        setExistsSubqueriesEnabled(true);
+        givenTwoProcessInstancesOneMatchingTheProcessVariableFilter();
+        givenProcessInstanceWithoutVariable(PROCESS_INSTANCE_ID_3);
+        CapturedStatements.clear();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(processInstanceVariableSortRequest(Sort.Direction.ASC).buildJson())
+            .when()
+            .post(PROCESS_INSTANCE_SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200);
+
+        String searchSql = CapturedStatements.findSelectFrom("from process_instance ");
+        assertThat(searchSql)
+            .containsPattern("left join process_variable \\w+ on \\w+\\.id=\\w+\\.process_instance_id and")
+            .doesNotContain("group by")
+            .doesNotContain("max(");
     }
 
     private static ProcessInstanceSearchRequestBuilder processInstanceVariableLikeRequest() {
