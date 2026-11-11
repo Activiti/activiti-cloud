@@ -252,7 +252,9 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
         if (sort != null) {
             validateSort(sort);
             Expression<?> orderByClause;
-            if (sort.isProcessVariable()) {
+            if (sort.isProcessVariable() && useExistsSubqueries()) {
+                orderByClause = processVariableSortValue(root, criteriaBuilder, sort);
+            } else if (sort.isProcessVariable()) {
                 From<T, ProcessVariableEntity> joinRoot = joinSupplier.get();
                 orderByClause = new VariableSelectionExpressionImpl<>(
                     joinRoot,
@@ -275,6 +277,41 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
                     : criteriaBuilder.desc(orderByClause)
             );
         }
+    }
+
+    /**
+     * Left-joins only the sorted variable and returns its value as the sort key, e.g.
+     * <pre>
+     * left join (task_process_variable tpv
+     *            join process_variable pv on pv.id = tpv.process_variable_id)
+     *        on tpv.task_id = t.id and pv.process_definition_key = ? and pv.name = ?
+     * order by pv.value -&gt;&gt; 'value'
+     * </pre>
+     * Unlike the legacy form, the variable filter sits in the {@code ON} clause, so only the sorted
+     * variable is read instead of joining and aggregating every variable of every matching entity,
+     * and no {@code group by} is needed. An entity holds at most one variable per
+     * {@code (processDefinitionKey, name)}, so the join does not duplicate rows.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    protected Expression<Object> processVariableSortValue(
+        Root<T> root,
+        CriteriaBuilder criteriaBuilder,
+        CloudRuntimeEntitySort sort
+    ) {
+        SetJoin<T, ProcessVariableEntity> variableJoin = root.join(getProcessVariablesAttribute(), JoinType.LEFT);
+        VariableSelectionExpressionImpl<T, ProcessVariableEntity> selection = new VariableSelectionExpressionImpl<>(
+            variableJoin,
+            Map.of(
+                variableJoin.get(ProcessVariableEntity_.processDefinitionKey),
+                sort.processDefinitionKey(),
+                variableJoin.get(AbstractVariableEntity_.name),
+                sort.field()
+            ),
+            javaTypeMapping.get(sort.type()),
+            criteriaBuilder
+        );
+        variableJoin.on(selection.getSelectionPredicate());
+        return selection.getExtractedValue();
     }
 
     protected void validateSort(CloudRuntimeEntitySort sort) {
