@@ -69,6 +69,7 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -92,6 +93,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.integration.MessageTimeoutException;
+import org.springframework.integration.dispatcher.AggregateMessageDeliveryException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -307,12 +309,16 @@ public class FunctionRouterBindingConfigurationIT {
             return message -> {
                 Optional.ofNullable(message.getHeaders().get("timeout", Duration.class)).ifPresentOrElse(
                     timeout -> {
-                        await()
-                            .atMost(timeout)
-                            .pollInSameThread()
-                            .until(() -> Thread.currentThread().isInterrupted());
-
-                        isInterrupted.set(Thread.currentThread().isInterrupted());
+                        try {
+                            await()
+                                .atMost(timeout)
+                                .pollInSameThread()
+                                .until(() -> Thread.currentThread().isInterrupted());
+                        } catch (ConditionTimeoutException cause) {
+                            throw new RuntimeException("timeout waiting for interrupt", cause);
+                        } finally {
+                            isInterrupted.set(Thread.currentThread().isInterrupted());
+                        }
                     },
                     () -> {
                         throw new RuntimeException("optimistic locking exception");
@@ -680,6 +686,37 @@ public class FunctionRouterBindingConfigurationIT {
             assertThat(isInterrupted.get()).isTrue();
 
             verify(errorMessageConsumer, never()).accept(any(ErrorMessage.class));
+        });
+    }
+
+    @Test
+    void messageTimeoutExceptionBeforeInterrupt() {
+        withRequestTimeout(Duration.ofSeconds(2), () -> {
+            // given
+            Message<String> message = MessageBuilder.withPayload("Test")
+                .setHeader(FUNCTION_DESTINATION, "integration-requests")
+                .setHeader("timeout", Duration.ofSeconds(1))
+                .build();
+
+            ExceptionCaptor<RuntimeException> exceptionCaptor = new ExceptionCaptor<>();
+            ArgumentCaptor<ErrorMessage> errorMessageCaptor = ArgumentCaptor.forClass(ErrorMessage.class);
+            doAnswer(exceptionCaptor).when(functionRouterErrorMessageHandler).accept(errorMessageCaptor.capture());
+
+            // when
+            assertThatThrownBy(() -> input.send(message, "integration-requests"))
+                .isInstanceOf(MessageDeliveryException.class)
+                .hasCauseInstanceOf(AggregateMessageDeliveryException.class)
+                .isNotNull();
+
+            assertThat(errorMessageCaptor.getValue()).extracting(ErrorMessage::getOriginalMessage).isNotNull();
+            assertThat(exceptionCaptor.getException())
+                .isInstanceOf(MessageDeliveryException.class)
+                .hasRootCauseInstanceOf(ConditionTimeoutException.class);
+            assertThat(isInterrupted.get()).isFalse();
+
+            verify(errorMessageConsumer, times(messagingProperties.getFunctionRouter().getMaxRetries())).accept(
+                any(ErrorMessage.class)
+            );
         });
     }
 
