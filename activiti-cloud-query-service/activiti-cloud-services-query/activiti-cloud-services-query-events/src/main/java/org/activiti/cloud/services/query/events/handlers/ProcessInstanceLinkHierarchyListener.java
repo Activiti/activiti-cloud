@@ -56,15 +56,13 @@ public class ProcessInstanceLinkHierarchyListener implements PostUpdateEventList
 
         if (index >= 0 && event.getOldState()[index] == null && event.getState()[index] != null) {
             String linkedProcessInstanceId = (String) event.getState()[index];
-            event
-                .getSession()
-                .doWork(connection -> {
-                    try (var statement = connection.prepareStatement(REGISTER_LINKED_PROCESS_SQL)) {
-                        statement.setString(1, linkedProcessInstanceId);
-                        statement.setString(2, processInstance.getId());
-                        statement.executeUpdate();
-                    }
-                });
+            event.getSession().doWork(connection -> {
+                try (var statement = connection.prepareStatement(REGISTER_LINKED_PROCESS_SQL)) {
+                    statement.setString(1, linkedProcessInstanceId);
+                    statement.setString(2, processInstance.getId());
+                    statement.executeUpdate();
+                }
+            });
         }
     }
 }
