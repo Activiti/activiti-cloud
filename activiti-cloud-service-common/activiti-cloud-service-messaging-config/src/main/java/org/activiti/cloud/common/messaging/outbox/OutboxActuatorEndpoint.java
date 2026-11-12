@@ -15,22 +15,19 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
-import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
-
 import java.util.Map;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
-import org.springframework.integration.support.SmartLifecycleRoleController;
 
 @Endpoint(id = "outbox")
 public class OutboxActuatorEndpoint {
 
-    private final SmartLifecycleRoleController smartLifecycleRoleController;
+    private final OutboxLifecycleController outboxLifecycleController;
 
-    public OutboxActuatorEndpoint(SmartLifecycleRoleController smartLifecycleRoleController) {
-        this.smartLifecycleRoleController = smartLifecycleRoleController;
+    public OutboxActuatorEndpoint(OutboxLifecycleController outboxLifecycleController) {
+        this.outboxLifecycleController = outboxLifecycleController;
     }
 
     /**
@@ -38,7 +35,7 @@ public class OutboxActuatorEndpoint {
      */
     @ReadOperation
     public Map<String, Boolean> getEndpointsRunningStatus() {
-        return smartLifecycleRoleController.getEndpointsRunningStatus(OUTBOX_ROLE);
+        return outboxLifecycleController.getEndpointsRunningStatus();
     }
 
     /**
@@ -48,10 +45,10 @@ public class OutboxActuatorEndpoint {
     public void smartLifecycleRoleController(@Selector String command) {
         switch (command) {
             case "start":
-                smartLifecycleRoleController.startLifecyclesInRole(OUTBOX_ROLE);
+                outboxLifecycleController.start();
                 break;
             case "stop":
-                smartLifecycleRoleController.stopLifecyclesInRole(OUTBOX_ROLE);
+                outboxLifecycleController.stop();
                 break;
             default:
                 throw new IllegalArgumentException("Invalid command argument");

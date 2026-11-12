@@ -35,6 +35,8 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.dsl.Pollers;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.dsl.context.IntegrationFlowContext.IntegrationFlowRegistration;
+import org.springframework.integration.jdbc.metadata.JdbcMetadataStore;
+import org.springframework.integration.scheduling.PollSkipAdvice;
 import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.messaging.Message;
@@ -60,6 +62,7 @@ public class OutboxChannelInterceptorFactory
     private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry lockRegistry;
     private final Advice outboxMessageHandlerErrorAdvice;
+    private final JdbcMetadataStore outboxMetadataStore;
 
     private final Map<String, ChannelInterceptor> interceptorsMap = new ConcurrentHashMap<>();
     private final Map<String, IntegrationFlowRegistration> flowRegistrationsMap = new ConcurrentHashMap<>();
@@ -70,7 +73,8 @@ public class OutboxChannelInterceptorFactory
         IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry lockRegistry,
-        Advice outboxMessageHandlerErrorAdvice
+        Advice outboxMessageHandlerErrorAdvice,
+        JdbcMetadataStore outboxMetadataStore
     ) {
         this.channelMessageStore = channelMessageStore;
         this.transactionManager = transactionManager;
@@ -78,6 +82,7 @@ public class OutboxChannelInterceptorFactory
         this.streamBridgeProvider = streamBridgeProvider;
         this.lockRegistry = lockRegistry;
         this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice;
+        this.outboxMetadataStore = outboxMetadataStore;
     }
 
     @Override
@@ -106,7 +111,7 @@ public class OutboxChannelInterceptorFactory
                                 .maxMessagesPerPoll(1)
                                 .receiveTimeout(Duration.ofSeconds(1).toMillis())
                                 .errorChannel(ERROR_CHANNEL)
-                                .advice(new PollLockAdvice(lockRegistry, partitionKey))
+                                .advice(pollSkipAdvice(partitionKey), pollLockAdvice(partitionKey))
                                 .transactional(transactionManager)
                         )
                 )
@@ -127,6 +132,16 @@ public class OutboxChannelInterceptorFactory
 
             return new OutboxChannelInterceptor(queueChannel, destinationProvider);
         });
+    }
+
+    private PollSkipAdvice pollSkipAdvice(String partitionKey) {
+        final var pollSkipStrategy = new MetadataStorePollSkipStrategy(outboxMetadataStore, partitionKey);
+
+        return new PollSkipAdvice(pollSkipStrategy);
+    }
+
+    private PollLockAdvice pollLockAdvice(String partitionKey) {
+        return new PollLockAdvice(lockRegistry, partitionKey);
     }
 
     private TaskScheduler taskScheduler(String partitionKey) {
