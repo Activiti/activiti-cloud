@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.messages.jdbc;
 import javax.sql.DataSource;
 import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
+import org.activiti.cloud.services.messages.core.config.MessagesMetadataStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -57,6 +58,7 @@ public class JdbcMessageStoreAutoConfiguration {
     }
 
     @Bean
+    @MessagesMetadataStore
     @ConditionalOnMissingBean
     public ConcurrentMetadataStore metadataStore(JdbcTemplate jdbcTemplate) {
         return new JdbcMetadataStore(jdbcTemplate);

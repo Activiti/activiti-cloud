@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.messages.redis;
 
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
+import org.activiti.cloud.services.messages.core.config.MessagesMetadataStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -49,6 +50,7 @@ public class RedisMessageStoreAutoConfiguration {
     }
 
     @Bean
+    @MessagesMetadataStore
     @ConditionalOnMissingBean
     public ConcurrentMetadataStore metadataStore(RedisConnectionFactory connectionFactory) {
         return new RedisMetadataStore(connectionFactory);

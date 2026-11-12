@@ -44,6 +44,7 @@ import org.springframework.context.annotation.Role;
 import org.springframework.core.serializer.support.SerializingConverter;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice;
+import org.springframework.integration.jdbc.metadata.JdbcMetadataStore;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
 import org.springframework.integration.jdbc.store.channel.ChannelMessageStorePreparedStatementSetter;
 import org.springframework.integration.jdbc.store.channel.ChannelMessageStoreQueryProvider;
@@ -164,7 +165,8 @@ public class OutboxAutoConfiguration {
         IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry lockRegistry,
-        ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice
+        ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice,
+        @OutboxMetadataStore JdbcMetadataStore outboxMetadataStore
     ) {
         return new OutboxChannelInterceptorFactory(
             outboxChannelMessageStore,
@@ -172,7 +174,8 @@ public class OutboxAutoConfiguration {
             integrationFlowContext,
             streamBridgeProvider,
             lockRegistry,
-            outboxMessageHandlerErrorAdvice
+            outboxMessageHandlerErrorAdvice,
+            outboxMetadataStore
         );
     }
 
@@ -232,7 +235,9 @@ public class OutboxAutoConfiguration {
         ChannelMessageStorePreparedStatementSetter channelMessageStorePreparedStatementSetter,
         MessageRowMapper messageRowMapper,
         ChannelMessageStoreQueryProvider channelMessageStoreQueryProvider,
-        @Value("${activiti.cloud.messaging.outbox.region:${spring.application.name:default}}") String region
+        @Value(
+            "${activiti.cloud.messaging.outbox.store.region:${spring.application.name:default}_outbox}"
+        ) String region
     ) {
         final var messageStore = new JdbcChannelMessageStore(dataSource);
 
@@ -264,8 +269,16 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    OutboxManager outboxManager(SmartLifecycleRoleController smartLifecycleRoleController) {
-        return new OutboxManager(smartLifecycleRoleController);
+    OutboxLifecycleController outboxLifecycleController(SmartLifecycleRoleController smartLifecycleRoleController) {
+        return new OutboxLifecycleController(smartLifecycleRoleController);
+    }
+
+    @Bean
+    OutboxManager outboxManager(
+        OutboxLifecycleController outboxLifecycleController,
+        @OutboxMetadataStore JdbcMetadataStore outboxMetadataStore
+    ) {
+        return new OutboxManager(outboxLifecycleController, outboxMetadataStore);
     }
 
     @Configuration
@@ -274,8 +287,8 @@ public class OutboxAutoConfiguration {
     static class OutboxActuatorConfiguration {
 
         @Bean
-        OutboxActuatorEndpoint outboxActuatorEndpoint(SmartLifecycleRoleController smartLifecycleRoleController) {
-            return new OutboxActuatorEndpoint(smartLifecycleRoleController);
+        OutboxActuatorEndpoint outboxActuatorEndpoint(OutboxLifecycleController outboxLifecycleController) {
+            return new OutboxActuatorEndpoint(outboxLifecycleController);
         }
     }
 
@@ -287,9 +300,22 @@ public class OutboxAutoConfiguration {
         @Bean
         OutboxHealthIndicator outboxHealthIndicator(
             JdbcChannelMessageStore outboxQueueChannelMessageStore,
-            SmartLifecycleRoleController smartLifecycleRoleController
+            OutboxLifecycleController outboxLifecycleController
         ) {
-            return new OutboxHealthIndicator(outboxQueueChannelMessageStore, smartLifecycleRoleController);
+            return new OutboxHealthIndicator(outboxQueueChannelMessageStore, outboxLifecycleController);
         }
+    }
+
+    @Bean
+    @OutboxMetadataStore
+    public JdbcMetadataStore outboxMetadataStore(
+        DataSource dataSource,
+        @Value(
+            "${activiti.cloud.messaging.outbox.metadata.region:${spring.application.name:default}_outbox}}"
+        ) String region
+    ) {
+        JdbcMetadataStore metadataStore = new JdbcMetadataStore(dataSource);
+        metadataStore.setRegion(region);
+        return metadataStore;
     }
 }
