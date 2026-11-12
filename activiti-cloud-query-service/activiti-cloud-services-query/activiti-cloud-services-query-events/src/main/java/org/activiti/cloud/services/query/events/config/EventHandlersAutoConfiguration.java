@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.events.config;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.util.Set;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
@@ -39,6 +40,7 @@ import org.activiti.cloud.services.query.events.handlers.ProcessDeletedEventHand
 import org.activiti.cloud.services.query.events.handlers.ProcessDeployedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessInstanceHierarchyService;
 import org.activiti.cloud.services.query.events.handlers.ProcessInstanceHierarchyServiceImpl;
+import org.activiti.cloud.services.query.events.handlers.ProcessInstanceLinkHierarchyListener;
 import org.activiti.cloud.services.query.events.handlers.ProcessResumedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessStartedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessSuspendedEventHandler;
@@ -68,6 +70,9 @@ import org.activiti.cloud.services.query.events.handlers.TaskVariableUpdater;
 import org.activiti.cloud.services.query.events.handlers.VariableCreatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.VariableDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHandler;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.event.service.spi.EventListenerRegistry;
+import org.hibernate.event.spi.EventType;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -122,6 +127,20 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessInstanceHierarchyService processInstanceHierarchyService(EntityManager entityManager) {
         return new ProcessInstanceHierarchyServiceImpl(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceLinkHierarchyListener processInstanceLinkHierarchyListener(
+        EntityManagerFactory entityManagerFactory
+    ) {
+        ProcessInstanceLinkHierarchyListener listener = new ProcessInstanceLinkHierarchyListener();
+        entityManagerFactory
+            .unwrap(SessionFactoryImplementor.class)
+            .getServiceRegistry()
+            .getService(EventListenerRegistry.class)
+            .appendListeners(EventType.POST_UPDATE, listener);
+        return listener;
     }
 
     @Bean
