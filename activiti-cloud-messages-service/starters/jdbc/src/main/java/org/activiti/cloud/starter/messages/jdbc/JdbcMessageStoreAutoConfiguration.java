@@ -59,7 +59,6 @@ public class JdbcMessageStoreAutoConfiguration {
 
     @Bean
     @MessagesMetadataStore
-    @ConditionalOnMissingBean
     public ConcurrentMetadataStore metadataStore(JdbcTemplate jdbcTemplate) {
         return new JdbcMetadataStore(jdbcTemplate);
     }
