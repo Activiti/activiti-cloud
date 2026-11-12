@@ -44,6 +44,7 @@ import org.springframework.cloud.function.context.FunctionProperties;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.integration.dispatcher.AggregateMessageDeliveryException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
@@ -119,19 +120,19 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
 
                             if (!errors.isEmpty()) {
                                 log.debug("Errors handling function route message request {}", errors);
-                                final Function<ErrorMessage, Consumer<ErrorMessage>> fallbackErrorHandler =
-                                    errorMessage -> {
-                                        throw new RuntimeException(errorMessage.getPayload());
-                                    };
+                                final Consumer<ErrorMessage> fallbackErrorHandler = errorMessage -> {
+                                    throw new RuntimeException(errorMessage.getPayload());
+                                };
 
                                 final var errorHandlingResults = errors
                                     .stream()
                                     .filter(Objects::nonNull)
+                                    .filter(Predicate.not(this::isTimeoutException))
                                     .map(entry -> {
                                         final var errorMessage = errorMessage(message, entry.getValue());
                                         final var errorHandlerDefinition = functionRouterErrorHandlerDefinitionResolver
                                             .apply(entry.getKey())
-                                            .orElseGet(() -> fallbackErrorHandler.apply(errorMessage));
+                                            .orElse(fallbackErrorHandler);
 
                                         return CompletableFuture.runAsync(
                                             () -> errorHandlerDefinition.accept(errorMessage),
@@ -150,6 +151,16 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                                         errorHandlingResults
                                     );
                                 }
+
+                                errors
+                                    .stream()
+                                    .filter(Objects::nonNull)
+                                    .filter(this::isTimeoutException)
+                                    .map(Map.Entry::getValue)
+                                    .findFirst()
+                                    .ifPresent(timeout -> {
+                                        throw new CompletionException(timeout);
+                                    });
                             } else {
                                 log.debug("Successfully completed function route message request {}", message);
                             }
@@ -181,6 +192,10 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                     );
                 }
             );
+    }
+
+    private boolean isTimeoutException(Map.Entry<String, Throwable> entry) {
+        return NestedExceptionUtils.getMostSpecificCause(entry.getValue()) instanceof TimeoutException;
     }
 
     private Optional<String> resolveDestination(Message<?> message) {
