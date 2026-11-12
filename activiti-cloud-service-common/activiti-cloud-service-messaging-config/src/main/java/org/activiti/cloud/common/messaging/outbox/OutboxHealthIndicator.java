@@ -15,32 +15,29 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
-import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
-
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
-import org.springframework.integration.support.SmartLifecycleRoleController;
 
 public class OutboxHealthIndicator implements HealthIndicator {
 
     private final JdbcChannelMessageStore jdbcChannelMessageStore;
-    private final SmartLifecycleRoleController smartLifecycleRoleController;
+    private final OutboxLifecycleController outboxLifecycleController;
 
     // Inject your specific queue channel bean
     public OutboxHealthIndicator(
         JdbcChannelMessageStore jdbcChannelMessageStore,
-        SmartLifecycleRoleController smartLifecycleRoleController
+        OutboxLifecycleController outboxLifecycleController
     ) {
         this.jdbcChannelMessageStore = jdbcChannelMessageStore;
-        this.smartLifecycleRoleController = smartLifecycleRoleController;
+        this.outboxLifecycleController = outboxLifecycleController;
     }
 
     @Override
     public Health health() {
-        final var endpoints = smartLifecycleRoleController.getEndpointsRunningStatus(OUTBOX_ROLE);
+        final var endpoints = outboxLifecycleController.getEndpointsRunningStatus();
 
         final var messageGroups = endpoints
             .keySet()

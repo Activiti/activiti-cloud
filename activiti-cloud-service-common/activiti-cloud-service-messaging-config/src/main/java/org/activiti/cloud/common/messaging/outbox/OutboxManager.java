@@ -15,26 +15,39 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
-import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
-
-import org.springframework.integration.support.SmartLifecycleRoleController;
+import org.springframework.integration.metadata.ConcurrentMetadataStore;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
 public class OutboxManager {
 
-    private final SmartLifecycleRoleController smartLifecycleRoleController;
+    private final OutboxLifecycleController outboxLifecycleController;
+    private final ConcurrentMetadataStore outboxMetadataStore;
 
-    public OutboxManager(SmartLifecycleRoleController smartLifecycleRoleController) {
-        this.smartLifecycleRoleController = smartLifecycleRoleController;
+    public OutboxManager(
+        OutboxLifecycleController outboxLifecycleController,
+        ConcurrentMetadataStore outboxMetadataStore
+    ) {
+        this.outboxLifecycleController = outboxLifecycleController;
+        this.outboxMetadataStore = outboxMetadataStore;
     }
 
     @ManagedOperation
     public void start() {
-        smartLifecycleRoleController.startLifecyclesInRole(OUTBOX_ROLE);
+        outboxLifecycleController.start();
+
+        syncMetadataStoreStatus();
     }
 
     @ManagedOperation
     public void stop() {
-        smartLifecycleRoleController.stopLifecyclesInRole(OUTBOX_ROLE);
+        outboxLifecycleController.stop();
+
+        syncMetadataStoreStatus();
+    }
+
+    protected void syncMetadataStoreStatus() {
+        outboxLifecycleController
+            .getEndpointsRunningStatus()
+            .forEach((endpoint, status) -> outboxMetadataStore.put(endpoint, status.toString()));
     }
 }
