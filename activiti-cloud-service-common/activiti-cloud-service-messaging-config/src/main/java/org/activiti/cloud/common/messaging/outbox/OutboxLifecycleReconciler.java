@@ -59,9 +59,9 @@ public class OutboxLifecycleReconciler implements SmartLifecycle {
                 desiredState
             );
 
-            if ("false".equalsIgnoreCase(desiredState) && isRunning) {
+            if ("false".equalsIgnoreCase(desiredState) && Boolean.TRUE.equals(isRunning)) {
                 outboxLifecycleController.stop(endpoint);
-            } else if (!isRunning) {
+            } else if (Boolean.FALSE.equals(isRunning)) {
                 outboxLifecycleController.start(endpoint);
             }
         });
