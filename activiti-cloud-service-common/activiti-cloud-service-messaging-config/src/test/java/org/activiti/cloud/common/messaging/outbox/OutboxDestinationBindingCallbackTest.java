@@ -105,16 +105,14 @@ class OutboxDestinationBindingCallbackTest {
     }
 
     static Stream<MessageChannel> nonInterceptableChannelsProvider() {
-        return Stream.of(
-            mock(MessageChannel.class),
-            spy(
-                new MessageChannel() {
-                    @Override
-                    public boolean send(Message<?> message, long timeout) {
-                        return true;
-                    }
-                }
-            )
-        );
+        return Stream.of(mock(MessageChannel.class), spy(new TestChannel()));
+    }
+
+    static class TestChannel implements MessageChannel {
+
+        @Override
+        public boolean send(Message<?> message, long timeout) {
+            return true;
+        }
     }
 }
