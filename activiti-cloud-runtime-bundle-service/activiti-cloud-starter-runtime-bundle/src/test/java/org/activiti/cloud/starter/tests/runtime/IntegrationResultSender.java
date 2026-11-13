@@ -19,16 +19,16 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 @TestComponent
 public class IntegrationResultSender {
 
-    private StreamBridge streamBridge;
+    private StreamOperations streamBridge;
 
-    public IntegrationResultSender(StreamBridge streamBridge) {
+    public IntegrationResultSender(StreamOperations streamBridge) {
         this.streamBridge = streamBridge;
     }
 

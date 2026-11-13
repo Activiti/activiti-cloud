@@ -19,6 +19,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.spring.transaction.HazelcastTransactionManager;
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
+import org.activiti.cloud.services.messages.core.config.MessagesMetadataStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -62,7 +63,7 @@ public class HazelcastMessageStoreAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @MessagesMetadataStore
     public ConcurrentMetadataStore metadataStore(HazelcastInstance hazelcastInstance) {
         return new HazelcastMetadataStore(hazelcastInstance);
     }

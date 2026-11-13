@@ -48,7 +48,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.binding.BindingService;
-import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.cloud.stream.function.StreamOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
@@ -154,7 +154,7 @@ public class MessagesCoreAutoConfiguration {
     public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(
         CommandConsumerDestinationMapper commandConsumerDestinationMapper,
         BindingService bindingService,
-        StreamBridge streamBridge
+        StreamOperations streamBridge
     ) {
         return new CommandConsumerMessageChannelResolver(
             commandConsumerDestinationMapper,
@@ -253,7 +253,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public MetadataStoreSelector metadataStoreSelector(
-        ConcurrentMetadataStore metadataStore,
+        @MessagesMetadataStore ConcurrentMetadataStore metadataStore,
         MessageProcessor<String> metadataStoreKeyStrategy
     ) {
         return new MetadataStoreSelector(metadataStoreKeyStrategy, metadataStore);
@@ -312,6 +312,7 @@ public class MessagesCoreAutoConfiguration {
     }
 
     @Bean
+    @MessagesMetadataStore
     @ConditionalOnMissingBean
     public ConcurrentMetadataStore metadataStore() {
         return new SimpleMetadataStore();
