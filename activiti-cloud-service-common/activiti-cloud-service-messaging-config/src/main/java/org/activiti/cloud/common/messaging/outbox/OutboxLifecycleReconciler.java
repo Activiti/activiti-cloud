@@ -67,11 +67,23 @@ public class OutboxLifecycleReconciler implements SmartLifecycle {
         });
     }
 
-    public void setAutoStartup(boolean status) {
+    public void setAutoStartup(Boolean autoStartup) {
         final var endpoints = outboxLifecycleController.getEndpoints();
-        log.warn("{} auto-startup of outbox partitions: {} ", status ? "Enabling" : "Disabling", endpoints);
 
-        endpoints.forEach(key -> outboxMetadataStore.put(key, Boolean.valueOf(status).toString()));
+        Optional.ofNullable(autoStartup).ifPresentOrElse(
+            desiredStatus -> {
+                log.warn(
+                    "{} auto-startup of outbox partitions: {} ",
+                    desiredStatus ? "Enabling" : "Disabling",
+                    endpoints
+                );
+                endpoints.forEach(key -> outboxMetadataStore.put(key, Boolean.toString(desiredStatus)));
+            },
+            () -> {
+                log.warn("Clear auto-startup of outbox partitions: {} ", endpoints);
+                endpoints.forEach(outboxMetadataStore::remove);
+            }
+        );
     }
 
     @Override
