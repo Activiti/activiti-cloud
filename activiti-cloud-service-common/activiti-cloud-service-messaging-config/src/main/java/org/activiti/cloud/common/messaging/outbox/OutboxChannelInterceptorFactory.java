@@ -22,13 +22,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
-import org.activiti.cloud.common.messaging.config.QueueSizeBasedTrigger;
 import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.integration.aop.SimpleActiveIdleReceiveMessageAdvice;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
@@ -39,6 +39,7 @@ import org.springframework.integration.jdbc.metadata.JdbcMetadataStore;
 import org.springframework.integration.scheduling.PollSkipAdvice;
 import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.integration.util.DynamicPeriodicTrigger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -98,6 +99,8 @@ public class OutboxChannelInterceptorFactory
                 partitionKey.concat(OUTBOX_ROLE)
             ).getObject();
 
+            final var dynamicPeriodicTrigger = new DynamicPeriodicTrigger(Duration.ofMillis(100));
+
             // 2. Build a single-threaded flow dedicated to this partition
             IntegrationFlow partitionFlow = IntegrationFlow.from(queueChannel)
                 .bridge(endpoint ->
@@ -107,11 +110,15 @@ public class OutboxChannelInterceptorFactory
                         .autoStartup(false)
                         .taskScheduler(taskScheduler(partitionKey))
                         .poller(
-                            Pollers.trigger(queueSizeBasedTrigger(queueChannel))
+                            Pollers.trigger(dynamicPeriodicTrigger)
                                 .maxMessagesPerPoll(1)
-                                .receiveTimeout(Duration.ofSeconds(1).toMillis())
+                                .receiveTimeout(Duration.ZERO.toMillis())
                                 .errorChannel(ERROR_CHANNEL)
-                                .advice(pollSkipAdvice(partitionKey), pollLockAdvice(partitionKey))
+                                .advice(
+                                    pollSkipAdvice(partitionKey),
+                                    pollActiveIdleAdvice(dynamicPeriodicTrigger),
+                                    pollLockAdvice(partitionKey)
+                                )
                                 .transactional(transactionManager)
                         )
                 )
@@ -152,8 +159,12 @@ public class OutboxChannelInterceptorFactory
         );
     }
 
-    private QueueSizeBasedTrigger queueSizeBasedTrigger(QueueChannel queueChannel) {
-        return new QueueSizeBasedTrigger(queueChannel, Duration.ofMillis(50), Duration.ofMillis(1));
+    public Advice pollActiveIdleAdvice(DynamicPeriodicTrigger trigger) {
+        final var advice = new SimpleActiveIdleReceiveMessageAdvice(trigger);
+        advice.setActivePollPeriod(Duration.ofMillis(1).toMillis());
+        advice.setIdlePollPeriod(Duration.ofMillis(50).toMillis());
+
+        return advice;
     }
 
     @Override
