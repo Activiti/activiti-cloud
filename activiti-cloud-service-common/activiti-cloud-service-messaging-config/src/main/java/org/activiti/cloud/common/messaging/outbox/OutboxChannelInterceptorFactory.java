@@ -119,7 +119,7 @@ public class OutboxChannelInterceptorFactory
                                 .receiveTimeout(Duration.ZERO.toMillis())
                                 .errorChannel(ERROR_CHANNEL)
                                 .advice(
-                                    pollSkipAdvice(partitionKey),
+                                    pollSkipAdvice(partitionKey.concat(OUTBOX_ROLE)),
                                     pollActiveIdleAdvice(dynamicPeriodicTrigger),
                                     pollLockAdvice(partitionKey)
                                 )
@@ -133,7 +133,7 @@ public class OutboxChannelInterceptorFactory
                 .get();
 
             flowRegistrationsMap.put(
-                partitionKey,
+                partitionKey.concat(OUTBOX_ROLE),
                 integrationFlowContext
                     .registration(partitionFlow)
                     .id(partitionKey.concat("OutboxFlow"))
@@ -174,12 +174,13 @@ public class OutboxChannelInterceptorFactory
     @Override
     public void start() {
         running = true;
-        log.info("Outbox properties: {}", outboxProperties);
+        log.info("Using Outbox properties: {}", outboxProperties);
+        log.info("Registered outbox partitions: {} ", flowRegistrationsMap.keySet());
 
         Optional.ofNullable(outboxProperties.getAutoStartup()).ifPresent(autoStartup -> {
             log.warn(
-                "{} polling outbox partitions: {} ",
-                autoStartup ? "Enabled" : "Disabled",
+                "{} auto-startup outbox partitions: {} ",
+                autoStartup ? "Enabling" : "Disabling",
                 flowRegistrationsMap.keySet()
             );
             if (!autoStartup) {
@@ -189,8 +190,14 @@ public class OutboxChannelInterceptorFactory
             }
         });
 
-        log.info("Start outbox partitions: {} ", flowRegistrationsMap.keySet());
-        flowRegistrationsMap.values().forEach(IntegrationFlowRegistration::start);
+        final var autoStartPartitions = flowRegistrationsMap
+            .keySet()
+            .stream()
+            .filter(key -> !"false".equalsIgnoreCase(outboxMetadataStore.get(key)))
+            .toList();
+
+        log.info("Start outbox partitions: {} ", autoStartPartitions);
+        autoStartPartitions.stream().map(flowRegistrationsMap::get).forEach(IntegrationFlowRegistration::start);
     }
 
     @Override
