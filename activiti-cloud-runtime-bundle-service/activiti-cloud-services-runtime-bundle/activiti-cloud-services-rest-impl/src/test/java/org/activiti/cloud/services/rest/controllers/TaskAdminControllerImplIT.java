@@ -17,6 +17,7 @@ package org.activiti.cloud.services.rest.controllers;
 
 import static org.activiti.cloud.services.rest.controllers.PageConverterTestUtils.setupPageConverterStub;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
+import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -180,6 +181,12 @@ class TaskAdminControllerImplIT {
     void completeTask() throws Exception {
         given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete", 1)).andExpect(status().isOk());
+    }
+
+    @Test
+    void releaseTask() throws Exception {
+        given(taskAdminRuntime.release(any())).willReturn(buildTask("my task", Task.TaskStatus.CREATED));
+        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/release", 1)).andExpect(status().isOk());
     }
 
     @Test
