@@ -4837,8 +4837,8 @@
     "/v2/applications" : {
       "get" : {
         "tags" : [ "application-controller-v-2" ],
-        "summary" : "findAllApplications",
-        "operationId" : "findAllApplications",
+        "summary" : "findAllApplicationsV2",
+        "operationId" : "findAllApplicationsV2",
         "parameters" : [ {
           "name" : "maxItems",
           "in" : "query",

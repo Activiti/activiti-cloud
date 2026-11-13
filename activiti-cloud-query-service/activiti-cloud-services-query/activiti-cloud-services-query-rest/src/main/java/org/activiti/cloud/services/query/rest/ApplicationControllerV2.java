@@ -66,7 +66,7 @@ public class ApplicationControllerV2 {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudApplication>> findAllApplications(
+    public PagedModel<EntityModel<CloudApplication>> findAllApplicationsV2(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ApplicationEntity.class
         ) Predicate predicate,
