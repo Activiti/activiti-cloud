@@ -118,6 +118,14 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
 
     @Override
+    public EntityModel<CloudTask> releaseTask(@PathVariable String taskId) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "release", taskId);
+        return taskRepresentationModelAssembler.toModel(
+            taskAdminRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
+        );
+    }
+
+    @Override
     public EntityModel<CloudTask> updateTask(
         @PathVariable String taskId,
         @RequestBody UpdateTaskPayload updateTaskPayload
