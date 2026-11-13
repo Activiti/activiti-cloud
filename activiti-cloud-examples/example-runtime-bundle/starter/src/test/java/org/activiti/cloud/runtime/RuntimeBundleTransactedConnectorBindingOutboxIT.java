@@ -26,9 +26,7 @@ import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.boot.health.contributor.Status;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(
-    properties = { "activiti.cloud.messaging.outbox.enabled=true", "activiti.cloud.messaging.outbox.auto-startup=true" }
-)
+@TestPropertySource(properties = { "activiti.cloud.messaging.outbox.enabled=true" })
 class RuntimeBundleTransactedConnectorBindingOutboxIT extends RuntimeBundleTransactedConnectorBindingIT {
 
     @Autowired
