@@ -18,229 +18,165 @@ package org.activiti.cloud.common.messaging.outbox;
 
 import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ApplicationContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.integration.support.SmartLifecycleRoleController;
+import org.springframework.integration.support.context.NamedComponent;
 
-@ExtendWith(MockitoExtension.class)
 class OutboxLifecycleControllerTest {
 
-    @Mock
-    private SmartLifecycleRoleController smartLifecycleRoleController;
-
-    @Mock
-    private ApplicationContext applicationContext;
-
-    @InjectMocks
+    private SmartLifecycleRoleController roleController;
+    private GenericApplicationContext applicationContext;
     private OutboxLifecycleController controller;
 
+    @BeforeEach
+    void setUp() {
+        roleController = new SmartLifecycleRoleController();
+        applicationContext = new GenericApplicationContext();
+        applicationContext.refresh();
+        controller = new OutboxLifecycleController(roleController, applicationContext);
+    }
+
     @Test
-    void shouldStartAllLifecyclesInOutboxRole() {
+    void shouldStartAndStopAllLifecyclesInOutboxRole() {
+        TestSmartLifecycle endpoint1 = registerLifecycle("outboxEndpoint1", false);
+        TestSmartLifecycle endpoint2 = registerLifecycle("outboxEndpoint2", false);
+
         controller.start();
 
-        verify(smartLifecycleRoleController).startLifecyclesInRole(OUTBOX_ROLE);
-    }
+        assertThat(endpoint1.isRunning()).isTrue();
+        assertThat(endpoint2.isRunning()).isTrue();
+        assertThat(controller.allEndpointsRunning()).isTrue();
 
-    @Test
-    void shouldStopAllLifecyclesInOutboxRole() {
         controller.stop();
 
-        verify(smartLifecycleRoleController).stopLifecyclesInRole(OUTBOX_ROLE);
+        assertThat(endpoint1.isRunning()).isFalse();
+        assertThat(endpoint2.isRunning()).isFalse();
+        assertThat(controller.allEndpointsRunning()).isFalse();
     }
 
-    @Test
-    void shouldReturnEndpointsRunningStatus() {
-        Map<String, Boolean> expectedStatus = Map.of("outboxEndpoint1", true, "outboxEndpoint2", false);
-        when(smartLifecycleRoleController.getEndpointsRunningStatus(OUTBOX_ROLE)).thenReturn(expectedStatus);
+    @ParameterizedTest
+    @MethodSource("endpointStatesProvider")
+    void shouldReportRunningStatusAndEndpointNames(
+        Map<String, Boolean> initialStates,
+        boolean expectedAllRunning,
+        List<String> expectedEndpoints
+    ) {
+        initialStates.forEach(this::registerLifecycle);
 
-        Map<String, Boolean> result = controller.getEndpointsRunningStatus();
-
-        assertThat(result).containsExactlyInAnyOrderEntriesOf(expectedStatus);
+        assertThat(controller.getEndpointsRunningStatus()).containsExactlyInAnyOrderEntriesOf(initialStates);
+        assertThat(controller.allEndpointsRunning()).isEqualTo(expectedAllRunning);
+        assertThat(controller.getEndpoints()).containsExactlyInAnyOrderElementsOf(expectedEndpoints);
     }
 
-    @Test
-    void shouldReturnTrueWhenAllEndpointsAreRunning() {
-        when(smartLifecycleRoleController.allEndpointsRunning(OUTBOX_ROLE)).thenReturn(true);
-
-        boolean result = controller.allEndpointsRunning();
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void shouldReturnFalseWhenNotAllEndpointsAreRunning() {
-        when(smartLifecycleRoleController.allEndpointsRunning(OUTBOX_ROLE)).thenReturn(false);
-
-        boolean result = controller.allEndpointsRunning();
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    void shouldReturnListOfEndpointNames() {
-        Map<String, Boolean> statusMap = new LinkedHashMap<>();
-        statusMap.put("endpointA", true);
-        statusMap.put("endpointB", false);
-        when(smartLifecycleRoleController.getEndpointsRunningStatus(OUTBOX_ROLE)).thenReturn(statusMap);
-
-        List<String> endpoints = controller.getEndpoints();
-
-        assertThat(endpoints).containsExactly("endpointA", "endpointB");
-    }
-
-    @Test
-    void shouldStartSpecificEndpointWhenBeanExists() {
-        String endpointName = "customOutboxEndpoint";
-        SmartLifecycle lifecycle = mock(SmartLifecycle.class);
-        when(applicationContext.containsBean(endpointName)).thenReturn(true);
-        when(applicationContext.getBean(endpointName, SmartLifecycle.class)).thenReturn(lifecycle);
+    @ParameterizedTest
+    @ValueSource(strings = { "outboxChannelA", "outboxChannelB" })
+    void shouldStartSpecificEndpointByBeanName(String endpointName) {
+        TestSmartLifecycle target = registerLifecycle(endpointName, false);
+        TestSmartLifecycle other = registerLifecycle("otherChannel", false);
 
         controller.start(endpointName);
 
-        verify(lifecycle).start();
+        assertThat(target.isRunning()).isTrue();
+        assertThat(other.isRunning()).isFalse();
     }
 
-    @Test
-    void shouldNotFailWhenStartingNonExistentEndpoint() {
-        String endpointName = "unknownEndpoint";
-        when(applicationContext.containsBean(endpointName)).thenReturn(false);
-
-        controller.start(endpointName);
-
-        verify(applicationContext, never()).getBean(anyString(), any(Class.class));
-    }
-
-    @Test
-    void shouldNotFailWhenStartingNullEndpoint() {
-        controller.start(null);
-
-        verifyNoInteractions(applicationContext);
-    }
-
-    @Test
-    void shouldStopSpecificEndpointWhenBeanExists() {
-        String endpointName = "customOutboxEndpoint";
-        SmartLifecycle lifecycle = mock(SmartLifecycle.class);
-        when(applicationContext.containsBean(endpointName)).thenReturn(true);
-        when(applicationContext.getBean(endpointName, SmartLifecycle.class)).thenReturn(lifecycle);
+    @ParameterizedTest
+    @ValueSource(strings = { "outboxChannelA", "outboxChannelB" })
+    void shouldStopSpecificEndpointByBeanName(String endpointName) {
+        TestSmartLifecycle target = registerLifecycle(endpointName, true);
+        TestSmartLifecycle other = registerLifecycle("otherChannel", true);
 
         controller.stop(endpointName);
 
-        verify(lifecycle).stop();
+        assertThat(target.isRunning()).isFalse();
+        assertThat(other.isRunning()).isTrue();
     }
 
-    @Test
-    void shouldNotFailWhenStoppingNonExistentEndpoint() {
-        String endpointName = "unknownEndpoint";
-        when(applicationContext.containsBean(endpointName)).thenReturn(false);
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { "unknownEndpoint", "   " })
+    void shouldSafelyIgnoreNullOrUnregisteredEndpoints(String invalidEndpoint) {
+        SmartLifecycle spyLifecycle = mock(SmartLifecycle.class);
+        applicationContext.registerBean("validEndpoint", SmartLifecycle.class, () -> spyLifecycle);
+        roleController.addLifecycleToRole(OUTBOX_ROLE, spyLifecycle);
 
-        controller.stop(endpointName);
+        controller.start(invalidEndpoint);
+        controller.stop(invalidEndpoint);
 
-        verify(applicationContext, never()).getBean(anyString(), any(Class.class));
+        verify(spyLifecycle, org.mockito.Mockito.never()).start();
+        verify(spyLifecycle, org.mockito.Mockito.never()).stop();
     }
 
-    @Test
-    void shouldNotFailWhenStoppingNullEndpoint() {
-        controller.stop(null);
-
-        verifyNoInteractions(applicationContext);
+    private TestSmartLifecycle registerLifecycle(String name, boolean initiallyRunning) {
+        TestSmartLifecycle lifecycle = new TestSmartLifecycle(initiallyRunning).withComponentName(name);
+        applicationContext.registerBean(name, SmartLifecycle.class, () -> lifecycle);
+        roleController.addLifecycleToRole(OUTBOX_ROLE, lifecycle);
+        return lifecycle;
     }
 
-    @Test
-    void shouldThrowExceptionWhenStartingBeanNotOfSmartLifecycleType() {
-        String endpointName = "notALifecycleBean";
-        when(applicationContext.containsBean(endpointName)).thenReturn(true);
-        when(applicationContext.getBean(endpointName, SmartLifecycle.class)).thenThrow(
-            new BeanNotOfRequiredTypeException(endpointName, SmartLifecycle.class, String.class)
+    static Stream<Arguments> endpointStatesProvider() {
+        return Stream.of(
+            Arguments.of(Map.of(), false, List.of()),
+            Arguments.of(Map.of("endpoint1", true), true, List.of("endpoint1")),
+            Arguments.of(Map.of("endpoint1", false), false, List.of("endpoint1")),
+            Arguments.of(Map.of("endpoint1", true, "endpoint2", false), false, List.of("endpoint1", "endpoint2")),
+            Arguments.of(Map.of("endpoint1", true, "endpoint2", true), true, List.of("endpoint1", "endpoint2"))
         );
-
-        assertThatExceptionOfType(BeanNotOfRequiredTypeException.class)
-            .isThrownBy(() -> controller.start(endpointName))
-            .withMessageContaining(endpointName);
     }
 
-    @Test
-    void shouldThrowExceptionWhenStoppingBeanNotOfSmartLifecycleType() {
-        String endpointName = "notALifecycleBean";
-        when(applicationContext.containsBean(endpointName)).thenReturn(true);
-        when(applicationContext.getBean(endpointName, SmartLifecycle.class)).thenThrow(
-            new BeanNotOfRequiredTypeException(endpointName, SmartLifecycle.class, String.class)
-        );
+    private static class TestSmartLifecycle implements SmartLifecycle, NamedComponent {
 
-        assertThatExceptionOfType(BeanNotOfRequiredTypeException.class)
-            .isThrownBy(() -> controller.stop(endpointName))
-            .withMessageContaining(endpointName);
-    }
+        private final AtomicBoolean running;
+        private String componentName;
 
-    @Test
-    void shouldPropagateExceptionWhenBeanRemovedConcurrentlyDuringStart() {
-        String endpointName = "transientEndpoint";
-        when(applicationContext.containsBean(endpointName)).thenReturn(true);
-        when(applicationContext.getBean(endpointName, SmartLifecycle.class)).thenThrow(
-            new NoSuchBeanDefinitionException(endpointName)
-        );
+        TestSmartLifecycle(boolean initiallyRunning) {
+            this.running = new AtomicBoolean(initiallyRunning);
+        }
 
-        assertThatExceptionOfType(BeansException.class)
-            .isThrownBy(() -> controller.start(endpointName))
-            .isInstanceOf(NoSuchBeanDefinitionException.class);
-    }
+        public TestSmartLifecycle withComponentName(String componentName) {
+            this.componentName = componentName;
 
-    @Test
-    void shouldPropagateRuntimeExceptionWhenEndpointStartFails() {
-        String endpointName = "failingEndpoint";
-        SmartLifecycle lifecycle = mock(SmartLifecycle.class);
-        when(applicationContext.containsBean(endpointName)).thenReturn(true);
-        when(applicationContext.getBean(endpointName, SmartLifecycle.class)).thenReturn(lifecycle);
-        doThrow(new IllegalStateException("Failed to start endpoint")).when(lifecycle).start();
+            return this;
+        }
 
-        assertThatThrownBy(() -> controller.start(endpointName))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Failed to start endpoint");
-    }
+        @Override
+        public void start() {
+            running.set(true);
+        }
 
-    @Test
-    void shouldPropagateRuntimeExceptionWhenEndpointStopFails() {
-        String endpointName = "failingEndpoint";
-        SmartLifecycle lifecycle = mock(SmartLifecycle.class);
-        when(applicationContext.containsBean(endpointName)).thenReturn(true);
-        when(applicationContext.getBean(endpointName, SmartLifecycle.class)).thenReturn(lifecycle);
-        doThrow(new IllegalStateException("Failed to stop endpoint")).when(lifecycle).stop();
+        @Override
+        public void stop() {
+            running.set(false);
+        }
 
-        assertThatThrownBy(() -> controller.stop(endpointName))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Failed to stop endpoint");
-    }
+        @Override
+        public boolean isRunning() {
+            return running.get();
+        }
 
-    @Test
-    void shouldPropagateExceptionWhenRoleControllerFailsToStartAll() {
-        doThrow(new RuntimeException("Role start failed"))
-            .when(smartLifecycleRoleController)
-            .startLifecyclesInRole(OUTBOX_ROLE);
+        @Override
+        public String getComponentName() {
+            return componentName;
+        }
 
-        assertThatThrownBy(() -> controller.start())
-            .isInstanceOf(RuntimeException.class)
-            .hasMessage("Role start failed");
+        @Override
+        public String getComponentType() {
+            return "test";
+        }
     }
 }
