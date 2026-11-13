@@ -22,32 +22,33 @@ public class OutboxManager {
 
     private final OutboxLifecycleController outboxLifecycleController;
     private final ConcurrentMetadataStore outboxMetadataStore;
+    private final OutboxLifecycleReconciler outboxLifecycleReconciler;
 
     public OutboxManager(
         OutboxLifecycleController outboxLifecycleController,
-        ConcurrentMetadataStore outboxMetadataStore
+        ConcurrentMetadataStore outboxMetadataStore,
+        OutboxLifecycleReconciler outboxLifecycleReconciler
     ) {
         this.outboxLifecycleController = outboxLifecycleController;
         this.outboxMetadataStore = outboxMetadataStore;
+        this.outboxLifecycleReconciler = outboxLifecycleReconciler;
     }
 
     @ManagedOperation
     public void start() {
-        outboxLifecycleController.start();
+        outboxLifecycleController
+            .getEndpoints()
+            .forEach(endpoint -> outboxMetadataStore.put(endpoint, Boolean.TRUE.toString()));
 
-        syncMetadataStoreStatus();
+        outboxLifecycleReconciler.reconcile();
     }
 
     @ManagedOperation
     public void stop() {
-        outboxLifecycleController.stop();
-
-        syncMetadataStoreStatus();
-    }
-
-    protected void syncMetadataStoreStatus() {
         outboxLifecycleController
-            .getEndpointsRunningStatus()
-            .forEach((endpoint, status) -> outboxMetadataStore.put(endpoint, status.toString()));
+            .getEndpoints()
+            .forEach(endpoint -> outboxMetadataStore.put(endpoint, Boolean.FALSE.toString()));
+
+        outboxLifecycleReconciler.reconcile();
     }
 }

@@ -19,9 +19,9 @@ import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
@@ -36,8 +36,6 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.dsl.Pollers;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.dsl.context.IntegrationFlowContext.IntegrationFlowRegistration;
-import org.springframework.integration.jdbc.metadata.JdbcMetadataStore;
-import org.springframework.integration.scheduling.PollSkipAdvice;
 import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.util.DynamicPeriodicTrigger;
@@ -56,7 +54,7 @@ public class OutboxChannelInterceptorFactory
 
     private static final Logger log = LoggerFactory.getLogger(OutboxChannelInterceptorFactory.class);
 
-    private volatile boolean running = false;
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private final OutboxProperties outboxProperties;
     private final ChannelMessageStore channelMessageStore;
@@ -65,7 +63,6 @@ public class OutboxChannelInterceptorFactory
     private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry lockRegistry;
     private final Advice outboxMessageHandlerErrorAdvice;
-    private final JdbcMetadataStore outboxMetadataStore;
 
     private final Map<String, ChannelInterceptor> interceptorsMap = new ConcurrentHashMap<>();
     private final Map<String, IntegrationFlowRegistration> flowRegistrationsMap = new ConcurrentHashMap<>();
@@ -77,8 +74,7 @@ public class OutboxChannelInterceptorFactory
         IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry lockRegistry,
-        Advice outboxMessageHandlerErrorAdvice,
-        JdbcMetadataStore outboxMetadataStore
+        Advice outboxMessageHandlerErrorAdvice
     ) {
         this.outboxProperties = outboxProperties;
         this.channelMessageStore = channelMessageStore;
@@ -87,7 +83,6 @@ public class OutboxChannelInterceptorFactory
         this.streamBridgeProvider = streamBridgeProvider;
         this.lockRegistry = lockRegistry;
         this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice;
-        this.outboxMetadataStore = outboxMetadataStore;
     }
 
     @Override
@@ -103,7 +98,7 @@ public class OutboxChannelInterceptorFactory
                 partitionKey.concat(OUTBOX_ROLE)
             ).getObject();
 
-            final var dynamicPeriodicTrigger = new DynamicPeriodicTrigger(Duration.ofMillis(100));
+            final var dynamicPeriodicTrigger = new DynamicPeriodicTrigger(outboxProperties.getPollerActivePeriod());
 
             // 2. Build a single-threaded flow dedicated to this partition
             IntegrationFlow partitionFlow = IntegrationFlow.from(queueChannel)
@@ -118,11 +113,7 @@ public class OutboxChannelInterceptorFactory
                                 .maxMessagesPerPoll(1)
                                 .receiveTimeout(Duration.ZERO.toMillis())
                                 .errorChannel(ERROR_CHANNEL)
-                                .advice(
-                                    pollSkipAdvice(partitionKey.concat(OUTBOX_ROLE)),
-                                    pollActiveIdleAdvice(dynamicPeriodicTrigger),
-                                    pollLockAdvice(partitionKey)
-                                )
+                                .advice(pollActiveIdleAdvice(dynamicPeriodicTrigger), pollLockAdvice(partitionKey))
                                 .transactional(transactionManager)
                         )
                 )
@@ -145,12 +136,6 @@ public class OutboxChannelInterceptorFactory
         });
     }
 
-    private PollSkipAdvice pollSkipAdvice(String partitionKey) {
-        final var pollSkipStrategy = new MetadataStorePollSkipStrategy(outboxMetadataStore, partitionKey);
-
-        return new PollSkipAdvice(pollSkipStrategy);
-    }
-
     private PollLockAdvice pollLockAdvice(String partitionKey) {
         return new PollLockAdvice(lockRegistry, partitionKey);
     }
@@ -165,50 +150,29 @@ public class OutboxChannelInterceptorFactory
 
     public Advice pollActiveIdleAdvice(DynamicPeriodicTrigger trigger) {
         final var advice = new SimpleActiveIdleReceiveMessageAdvice(trigger);
-        advice.setActivePollPeriod(Duration.ofMillis(1).toMillis());
-        advice.setIdlePollPeriod(Duration.ofMillis(50).toMillis());
+        advice.setActivePollPeriod(outboxProperties.getPollerActivePeriod().toMillis());
+        advice.setIdlePollPeriod(outboxProperties.getPollerIdlePeriod().toMillis());
 
         return advice;
     }
 
     @Override
     public void start() {
-        running = true;
-        log.info("Using Outbox properties: {}", outboxProperties);
-        log.info("Registered outbox partitions: {} ", flowRegistrationsMap.keySet());
-
-        Optional.ofNullable(outboxProperties.getAutoStartup()).ifPresent(autoStartup -> {
-            log.warn(
-                "{} auto-startup outbox partitions: {} ",
-                autoStartup ? "Enabling" : "Disabling",
-                flowRegistrationsMap.keySet()
-            );
-            if (!autoStartup) {
-                flowRegistrationsMap.keySet().forEach(key -> outboxMetadataStore.put(key, Boolean.FALSE.toString()));
-            } else {
-                flowRegistrationsMap.keySet().forEach(key -> outboxMetadataStore.put(key, Boolean.TRUE.toString()));
-            }
-        });
-
-        final var autoStartPartitions = flowRegistrationsMap
-            .keySet()
-            .stream()
-            .filter(key -> !"false".equalsIgnoreCase(outboxMetadataStore.get(key)))
-            .toList();
-
-        log.info("Start outbox partitions: {} ", autoStartPartitions);
-        autoStartPartitions.stream().map(flowRegistrationsMap::get).forEach(IntegrationFlowRegistration::start);
+        if (running.compareAndSet(false, true)) {
+            log.info("Registered outbox {} partitions properties {} ", flowRegistrationsMap.keySet(), outboxProperties);
+        }
     }
 
     @Override
     public void stop() {
-        running = false;
-        log.info("Stop outbox partitions: {} ", flowRegistrationsMap.keySet());
-        flowRegistrationsMap.values().forEach(IntegrationFlowRegistration::stop);
+        if (running.compareAndSet(true, false)) {
+            log.info("Stop outbox partitions: {} ", flowRegistrationsMap.keySet());
+            flowRegistrationsMap.values().forEach(IntegrationFlowRegistration::stop);
+        }
     }
 
     @Override
     public boolean isRunning() {
-        return running;
+        return running.get();
     }
 }

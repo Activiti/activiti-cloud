@@ -38,6 +38,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cloud.stream.binding.NewDestinationBindingCallback;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
@@ -66,6 +67,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import tools.jackson.databind.DefaultTyping;
 import tools.jackson.databind.DeserializationFeature;
@@ -166,8 +168,7 @@ public class OutboxAutoConfiguration {
         IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry lockRegistry,
-        ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice,
-        @OutboxMetadataStore JdbcMetadataStore outboxMetadataStore
+        ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice
     ) {
         return new OutboxChannelInterceptorFactory(
             outboxProperties,
@@ -176,8 +177,7 @@ public class OutboxAutoConfiguration {
             integrationFlowContext,
             streamBridgeProvider,
             lockRegistry,
-            outboxMessageHandlerErrorAdvice,
-            outboxMetadataStore
+            outboxMessageHandlerErrorAdvice
         );
     }
 
@@ -271,16 +271,35 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    OutboxLifecycleController outboxLifecycleController(SmartLifecycleRoleController smartLifecycleRoleController) {
-        return new OutboxLifecycleController(smartLifecycleRoleController);
+    OutboxLifecycleController outboxLifecycleController(
+        SmartLifecycleRoleController smartLifecycleRoleController,
+        ApplicationContext applicationContext
+    ) {
+        return new OutboxLifecycleController(smartLifecycleRoleController, applicationContext);
     }
 
     @Bean
     OutboxManager outboxManager(
         OutboxLifecycleController outboxLifecycleController,
-        @OutboxMetadataStore JdbcMetadataStore outboxMetadataStore
+        @OutboxMetadataStore JdbcMetadataStore outboxMetadataStore,
+        OutboxLifecycleReconciler outboxLifecycleReconciler
     ) {
-        return new OutboxManager(outboxLifecycleController, outboxMetadataStore);
+        return new OutboxManager(outboxLifecycleController, outboxMetadataStore, outboxLifecycleReconciler);
+    }
+
+    @Bean
+    OutboxLifecycleReconciler outboxLifecycleReconciler(
+        OutboxProperties outboxProperties,
+        @OutboxMetadataStore JdbcMetadataStore outboxMetadataStore,
+        OutboxLifecycleController outboxLifecycleController,
+        TaskScheduler taskScheduler
+    ) {
+        return new OutboxLifecycleReconciler(
+            outboxProperties,
+            outboxMetadataStore,
+            outboxLifecycleController,
+            taskScheduler
+        );
     }
 
     @Configuration
