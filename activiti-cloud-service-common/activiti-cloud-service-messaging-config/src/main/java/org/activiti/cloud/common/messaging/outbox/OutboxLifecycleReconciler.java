@@ -67,18 +67,17 @@ public class OutboxLifecycleReconciler implements SmartLifecycle {
         });
     }
 
+    public void setAutoStartup(boolean status) {
+        final var endpoints = outboxLifecycleController.getEndpoints();
+        log.warn("{} auto-startup of outbox partitions: {} ", status ? "Enabling" : "Disabling", endpoints);
+
+        endpoints.forEach(key -> outboxMetadataStore.put(key, Boolean.valueOf(status).toString()));
+    }
+
     @Override
     public void start() {
         if (running.compareAndSet(false, true)) {
-            Optional.ofNullable(outboxProperties.getAutoStartup()).ifPresent(autoStartup -> {
-                final var endpoints = outboxLifecycleController.getEndpoints();
-                log.warn("{} auto-startup outbox partitions: {} ", autoStartup ? "Enabling" : "Disabling", endpoints);
-                if (!autoStartup) {
-                    endpoints.forEach(key -> outboxMetadataStore.put(key, Boolean.FALSE.toString()));
-                } else {
-                    endpoints.forEach(key -> outboxMetadataStore.put(key, Boolean.TRUE.toString()));
-                }
-            });
+            Optional.ofNullable(outboxProperties.getAutoStartup()).ifPresent(this::setAutoStartup);
 
             log.info("Start Outbox reconciler scheduled task with {} period", outboxProperties.getReconcilePeriod());
 
