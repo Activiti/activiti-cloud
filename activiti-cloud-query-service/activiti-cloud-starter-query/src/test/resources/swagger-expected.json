@@ -4834,6 +4834,111 @@
         } ]
       }
     },
+    "/v2/applications" : {
+      "get" : {
+        "tags" : [ "application-controller-v-2" ],
+        "summary" : "findAllApplications",
+        "operationId" : "findAllApplications",
+        "parameters" : [ {
+          "name" : "maxItems",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "skipCount",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "name",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentCloudApplication"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentCloudApplication"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
+      }
+    },
     "/admin/v1/tasks/{td}/variables" : {
       "get" : {
         "tags" : [ "task-variable-admin-controller" ],
