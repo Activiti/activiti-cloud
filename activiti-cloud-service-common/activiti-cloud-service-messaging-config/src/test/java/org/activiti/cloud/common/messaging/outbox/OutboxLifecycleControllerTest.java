@@ -19,6 +19,7 @@ package org.activiti.cloud.common.messaging.outbox;
 import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
@@ -118,8 +119,8 @@ class OutboxLifecycleControllerTest {
         controller.start(invalidEndpoint);
         controller.stop(invalidEndpoint);
 
-        verify(spyLifecycle, org.mockito.Mockito.never()).start();
-        verify(spyLifecycle, org.mockito.Mockito.never()).stop();
+        verify(spyLifecycle, never()).start();
+        verify(spyLifecycle, never()).stop();
     }
 
     private TestSmartLifecycle registerLifecycle(String name, boolean initiallyRunning) {
