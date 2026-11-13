@@ -118,7 +118,8 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
 
     @Override
-    public EntityModel<CloudTask> releaseTask(@PathVariable("taskId") String taskId) {
+    @SuppressWarnings("java:S6856")
+    public EntityModel<CloudTask> releaseTask(@PathVariable String taskId) {
         TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "release", taskId);
         return taskRepresentationModelAssembler.toModel(
             taskAdminRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
