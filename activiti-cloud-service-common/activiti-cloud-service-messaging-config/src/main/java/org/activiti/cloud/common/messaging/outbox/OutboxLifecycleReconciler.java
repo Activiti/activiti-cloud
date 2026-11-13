@@ -51,7 +51,10 @@ public class OutboxLifecycleReconciler implements SmartLifecycle {
 
     public void reconcile() {
         outboxLifecycleController.getEndpointsRunningStatus().forEach((endpoint, isRunning) -> {
-            String desiredState = outboxMetadataStore.get(endpoint);
+            Boolean desiredState = Optional.ofNullable(outboxMetadataStore.get(endpoint))
+                .filter("false"::equalsIgnoreCase)
+                .map(Boolean::valueOf)
+                .orElse(true);
             log.debug(
                 "Reconciling Outbox endpoint {} status {} with the desired state {}",
                 endpoint,
@@ -59,9 +62,9 @@ public class OutboxLifecycleReconciler implements SmartLifecycle {
                 desiredState
             );
 
-            if ("false".equalsIgnoreCase(desiredState) && Boolean.TRUE.equals(isRunning)) {
+            if (Boolean.FALSE.equals(desiredState) && Boolean.TRUE.equals(isRunning)) {
                 outboxLifecycleController.stop(endpoint);
-            } else if (Boolean.FALSE.equals(isRunning)) {
+            } else if (!Boolean.FALSE.equals(desiredState) && Boolean.FALSE.equals(isRunning)) {
                 outboxLifecycleController.start(endpoint);
             }
         });
