@@ -19,6 +19,7 @@ import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
@@ -57,6 +58,7 @@ public class OutboxChannelInterceptorFactory
 
     private volatile boolean running = false;
 
+    private final OutboxProperties outboxProperties;
     private final ChannelMessageStore channelMessageStore;
     private final PlatformTransactionManager transactionManager;
     private final IntegrationFlowContext integrationFlowContext;
@@ -69,6 +71,7 @@ public class OutboxChannelInterceptorFactory
     private final Map<String, IntegrationFlowRegistration> flowRegistrationsMap = new ConcurrentHashMap<>();
 
     public OutboxChannelInterceptorFactory(
+        OutboxProperties outboxProperties,
         ChannelMessageStore channelMessageStore,
         PlatformTransactionManager transactionManager,
         IntegrationFlowContext integrationFlowContext,
@@ -77,6 +80,7 @@ public class OutboxChannelInterceptorFactory
         Advice outboxMessageHandlerErrorAdvice,
         JdbcMetadataStore outboxMetadataStore
     ) {
+        this.outboxProperties = outboxProperties;
         this.channelMessageStore = channelMessageStore;
         this.transactionManager = transactionManager;
         this.integrationFlowContext = integrationFlowContext;
@@ -170,6 +174,21 @@ public class OutboxChannelInterceptorFactory
     @Override
     public void start() {
         running = true;
+        log.info("Outbox properties: {}", outboxProperties);
+
+        Optional.ofNullable(outboxProperties.getAutoStartup()).ifPresent(autoStartup -> {
+            log.warn(
+                "{} polling outbox partitions: {} ",
+                autoStartup ? "Enabled" : "Disabled",
+                flowRegistrationsMap.keySet()
+            );
+            if (!autoStartup) {
+                flowRegistrationsMap.keySet().forEach(key -> outboxMetadataStore.put(key, Boolean.FALSE.toString()));
+            } else {
+                flowRegistrationsMap.keySet().forEach(key -> outboxMetadataStore.put(key, Boolean.TRUE.toString()));
+            }
+        });
+
         log.info("Start outbox partitions: {} ", flowRegistrationsMap.keySet());
         flowRegistrationsMap.values().forEach(IntegrationFlowRegistration::start);
     }

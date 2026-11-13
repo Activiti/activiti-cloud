@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -23,6 +24,8 @@ public class OutboxProperties {
 
     private boolean enabled = false;
     private Pattern[] excludes = { Pattern.compile("^$") };
+
+    private Boolean autoStartup = true;
 
     public boolean isEnabled() {
         return enabled;
@@ -38,5 +41,23 @@ public class OutboxProperties {
 
     public void setExcludes(Pattern[] excludes) {
         this.excludes = excludes;
+    }
+
+    public Boolean getAutoStartup() {
+        return autoStartup;
+    }
+
+    public void setAutoStartup(Boolean autoStartup) {
+        this.autoStartup = autoStartup;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("OutboxProperties{");
+        sb.append("enabled=").append(enabled);
+        sb.append(", excludes=").append(excludes == null ? "null" : Arrays.asList(excludes).toString());
+        sb.append(", autoStartup=").append(autoStartup);
+        sb.append('}');
+        return sb.toString();
     }
 }

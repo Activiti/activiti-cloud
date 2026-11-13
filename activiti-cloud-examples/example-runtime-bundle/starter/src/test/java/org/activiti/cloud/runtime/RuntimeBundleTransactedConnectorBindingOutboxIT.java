@@ -18,6 +18,7 @@ package org.activiti.cloud.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory;
+import org.activiti.cloud.common.messaging.outbox.OutboxProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.health.contributor.Health;
@@ -25,7 +26,9 @@ import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.boot.health.contributor.Status;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = { "activiti.cloud.messaging.outbox.enabled=true" })
+@TestPropertySource(
+    properties = { "activiti.cloud.messaging.outbox.enabled=true", "activiti.cloud.messaging.outbox.auto-startup=true" }
+)
 class RuntimeBundleTransactedConnectorBindingOutboxIT extends RuntimeBundleTransactedConnectorBindingIT {
 
     @Autowired
@@ -33,6 +36,14 @@ class RuntimeBundleTransactedConnectorBindingOutboxIT extends RuntimeBundleTrans
 
     @Autowired
     private HealthIndicator outboxHealthIndicator;
+
+    @Autowired
+    private OutboxProperties outboxProperties;
+
+    @Test
+    void outboxProperties() {
+        assertThat(outboxProperties.getAutoStartup()).isTrue();
+    }
 
     @Test
     void outboxChannelInterceptorFactory() {
