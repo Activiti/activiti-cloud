@@ -16,8 +16,12 @@
 package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
+import java.time.Duration;
 import org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory;
+import org.activiti.cloud.common.messaging.outbox.OutboxLifecycleController;
+import org.activiti.cloud.common.messaging.outbox.OutboxLifecycleReconciler;
 import org.activiti.cloud.common.messaging.outbox.OutboxProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,12 @@ class RuntimeBundleTransactedConnectorBindingOutboxIT extends RuntimeBundleTrans
     private OutboxChannelInterceptorFactory outboxChannelInterceptorFactory;
 
     @Autowired
+    private OutboxLifecycleReconciler outboxLifecycleReconciler;
+
+    @Autowired
+    private OutboxLifecycleController outboxLifecycleController;
+
+    @Autowired
     private HealthIndicator outboxHealthIndicator;
 
     @Autowired
@@ -40,7 +50,11 @@ class RuntimeBundleTransactedConnectorBindingOutboxIT extends RuntimeBundleTrans
 
     @Test
     void outboxProperties() {
-        assertThat(outboxProperties.getAutoStartup()).isTrue();
+        assertThat(outboxProperties.isEnabled()).isTrue();
+        assertThat(outboxProperties.getAutoStartup()).isNull();
+        assertThat(outboxProperties.getReconcilePeriod()).isEqualTo(Duration.ofSeconds(1));
+        assertThat(outboxProperties.getPollerIdlePeriod()).isEqualTo(Duration.ofMillis(50));
+        assertThat(outboxProperties.getPollerActivePeriod()).isEqualTo(Duration.ofMillis(1));
     }
 
     @Test
@@ -49,7 +63,17 @@ class RuntimeBundleTransactedConnectorBindingOutboxIT extends RuntimeBundleTrans
     }
 
     @Test
+    void outboxLifecycleReconciler() {
+        assertThat(outboxLifecycleReconciler.isRunning()).isTrue();
+    }
+
+    @Test
     void outboxHealthIndicator() {
         assertThat(outboxHealthIndicator.health()).extracting(Health::getStatus).isEqualTo(Status.UP);
+    }
+
+    @Test
+    void outboxLifecycleController() {
+        await().untilAsserted(() -> assertThat(outboxLifecycleController.allEndpointsRunning()).isTrue());
     }
 }

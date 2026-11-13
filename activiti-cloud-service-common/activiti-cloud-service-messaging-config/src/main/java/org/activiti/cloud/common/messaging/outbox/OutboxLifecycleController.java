@@ -17,7 +17,11 @@ package org.activiti.cloud.common.messaging.outbox;
 
 import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.integration.support.SmartLifecycleRoleController;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -25,9 +29,14 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 public class OutboxLifecycleController {
 
     private final SmartLifecycleRoleController smartLifecycleRoleController;
+    private final ApplicationContext applicationContext;
 
-    public OutboxLifecycleController(SmartLifecycleRoleController smartLifecycleRoleController) {
+    public OutboxLifecycleController(
+        SmartLifecycleRoleController smartLifecycleRoleController,
+        ApplicationContext applicationContext
+    ) {
         this.smartLifecycleRoleController = smartLifecycleRoleController;
+        this.applicationContext = applicationContext;
     }
 
     @ManagedOperation
@@ -43,5 +52,31 @@ public class OutboxLifecycleController {
     @ManagedAttribute
     public Map<String, Boolean> getEndpointsRunningStatus() {
         return smartLifecycleRoleController.getEndpointsRunningStatus(OUTBOX_ROLE);
+    }
+
+    @ManagedAttribute
+    public boolean allEndpointsRunning() {
+        return smartLifecycleRoleController.allEndpointsRunning(OUTBOX_ROLE);
+    }
+
+    @ManagedAttribute
+    public List<String> getEndpoints() {
+        return smartLifecycleRoleController.getEndpointsRunningStatus(OUTBOX_ROLE).keySet().stream().toList();
+    }
+
+    @ManagedOperation
+    public void start(String endpoint) {
+        smartLifecycle(endpoint).ifPresent(SmartLifecycle::start);
+    }
+
+    @ManagedOperation
+    public void stop(String endpoint) {
+        smartLifecycle(endpoint).ifPresent(SmartLifecycle::stop);
+    }
+
+    private Optional<SmartLifecycle> smartLifecycle(String endpoint) {
+        return Optional.ofNullable(endpoint)
+            .filter(applicationContext::containsBean)
+            .map(_ -> applicationContext.getBean(endpoint, SmartLifecycle.class));
     }
 }
