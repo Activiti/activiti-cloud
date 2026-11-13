@@ -123,7 +123,7 @@ class ApplicationControllerV2IT {
     }
 
     @Test
-    public void shouldSortByVersionDescendingByDefault() throws Exception {
+    void shouldSortByVersionDescendingByDefault() throws Exception {
         List<ApplicationEntity> all = buildApplications(3);
         ArgumentCaptor<Pageable> captor = givenRepositoryContaining(all);
 
@@ -133,7 +133,7 @@ class ApplicationControllerV2IT {
     }
 
     @Test
-    public void shouldReturnPageSizeOfOneHundredByDefault() throws Exception {
+    void shouldReturnPageSizeOfOneHundredByDefault() throws Exception {
         ArgumentCaptor<Pageable> captor = givenRepositoryContaining(buildApplications(150));
 
         String json = mockMvc
@@ -149,7 +149,7 @@ class ApplicationControllerV2IT {
     }
 
     @Test
-    public void shouldKeepRequestedSortWhenProvided() throws Exception {
+    void shouldKeepRequestedSortWhenProvided() throws Exception {
         ArgumentCaptor<Pageable> captor = givenRepositoryContaining(buildApplications(3));
 
         mockMvc
@@ -160,7 +160,7 @@ class ApplicationControllerV2IT {
     }
 
     @Test
-    public void shouldReturnHasMoreItemsFalseWhenLastPage() throws Exception {
+    void shouldReturnHasMoreItemsFalseWhenLastPage() throws Exception {
         givenRepositoryContaining(buildApplications(5));
 
         MvcResult result = mockMvc
@@ -174,7 +174,7 @@ class ApplicationControllerV2IT {
     }
 
     @Test
-    public void shouldReturnHasMoreItemsTrueWhenMoreItemsExist() throws Exception {
+    void shouldReturnHasMoreItemsTrueWhenMoreItemsExist() throws Exception {
         givenRepositoryContaining(buildApplications(15));
 
         MvcResult result = mockMvc
@@ -188,7 +188,7 @@ class ApplicationControllerV2IT {
     }
 
     @Test
-    public void shouldPaginateMoreThanOneThousandItemsInDescendingOrder() throws Exception {
+    void shouldPaginateMoreThanOneThousandItemsInDescendingOrder() throws Exception {
         int total = 2500;
         givenRepositoryContaining(buildApplications(total));
 
@@ -212,7 +212,7 @@ class ApplicationControllerV2IT {
     }
 
     @Test
-    public void shouldReturnHasMoreItemsFalseWhenPageEndsExactlyAtLastItem() throws Exception {
+    void shouldReturnHasMoreItemsFalseWhenPageEndsExactlyAtLastItem() throws Exception {
         givenRepositoryContaining(buildApplications(1500));
 
         String json = getPage(1000, 500);
@@ -222,7 +222,7 @@ class ApplicationControllerV2IT {
     }
 
     @Test
-    public void shouldRejectMaxItemsGreaterThanLimit() throws Exception {
+    void shouldRejectMaxItemsGreaterThanLimit() throws Exception {
         givenRepositoryContaining(buildApplications(1500));
 
         mockMvc
