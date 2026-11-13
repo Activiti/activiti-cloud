@@ -56,7 +56,7 @@ public interface TaskAdminController {
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     );
 
-    @RequestMapping(value = "/{taskId}/release", method = RequestMethod.POST)
+    @PostMapping(value = "/{taskId}/release")
     EntityModel<CloudTask> releaseTask(
         @Parameter(description = "Enter the taskId to release task") @PathVariable("taskId") String taskId
     );
