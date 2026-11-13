@@ -160,6 +160,7 @@ public class OutboxAutoConfiguration {
 
     @Bean
     OutboxChannelInterceptorFactory outboxChannelInterceptorFactory(
+        OutboxProperties outboxProperties,
         ChannelMessageStore outboxChannelMessageStore,
         PlatformTransactionManager transactionManager,
         IntegrationFlowContext integrationFlowContext,
@@ -169,6 +170,7 @@ public class OutboxAutoConfiguration {
         @OutboxMetadataStore JdbcMetadataStore outboxMetadataStore
     ) {
         return new OutboxChannelInterceptorFactory(
+            outboxProperties,
             outboxChannelMessageStore,
             transactionManager,
             integrationFlowContext,
