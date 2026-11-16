@@ -17,7 +17,6 @@ package org.activiti.cloud.starter.rb.configuration;
 
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
-import org.activiti.engine.impl.bpmn.helper.ErrorContextMappingProvider;
 import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.spring.SpringProcessEngineConfiguration;
@@ -31,7 +30,6 @@ public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConf
     private ExtensionsVariablesMappingProvider variablesMappingProvider;
     private ProcessVariablesInitiator processVariablesInitiator;
     private EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
-    private final ErrorContextMappingProvider errorContextMappingProvider;
     private final VariablesPropagator variablesPropagator;
 
     public SignalBehaviourConfigurer(
@@ -39,21 +37,19 @@ public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConf
         ExtensionsVariablesMappingProvider variablesMappingProvider,
         ProcessVariablesInitiator processVariablesInitiator,
         EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider,
-        ErrorContextMappingProvider errorContextMappingProvider,
         VariablesPropagator variablesPropagator
     ) {
         this.applicationContext = applicationContext;
         this.variablesMappingProvider = variablesMappingProvider;
         this.processVariablesInitiator = processVariablesInitiator;
         this.eventSubscriptionPayloadMappingProvider = eventSubscriptionPayloadMappingProvider;
-        this.errorContextMappingProvider = errorContextMappingProvider;
         this.variablesPropagator = variablesPropagator;
     }
 
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
         processEngineConfiguration.setEventSubscriptionPayloadMappingProvider(eventSubscriptionPayloadMappingProvider);
-        processEngineConfiguration.setErrorContextMappingProvider(errorContextMappingProvider);
+        processEngineConfiguration.setErrorVariablesPropagator(variablesPropagator);
 
         processEngineConfiguration.setActivityBehaviorFactory(
             new CloudActivityBehaviorFactory(
