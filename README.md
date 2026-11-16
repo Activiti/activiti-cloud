@@ -27,16 +27,19 @@ Requires the following secrets to be set:
 | BOT_GITHUB_USERNAME          | Username to issue propagation PRs  |
 | DOCKERHUB_USERNAME           | Docker Hub repository username     |
 | DOCKERHUB_PASSWORD           | Docker Hub repository password     |
-| NEXUS_USERNAME               | Maven repository username (CI)     |
-| NEXUS_PASSWORD               | Maven repository password (CI)     |
 | RANCHER2_URL                 | Rancher URL for tests              |
 | RANCHER2_ACCESS_KEY          | Rancher access key for tests       |
 | RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
 | SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
 
-CI publishes Maven artifacts to Nexus and Cloudsmith: preview snapshots go to `activiti-snapshots`, and develop alpha releases go to `activiti-releases`.
+CI publishes Maven artifacts to Cloudsmith only: preview snapshots go to `activiti-snapshots`, and develop alpha releases go to `activiti-releases`.
 
-Set the GitHub Actions variable `CLOUDSMITH_NAMESPACE` to `hyland`. Cloudsmith authentication uses GitHub OIDC as `activiti-activiti-cloud`; no additional Cloudsmith secret is required.
+### Maven repositories
+
+- Local builds need no credentials and no `settings.xml`. The POM resolves from Maven Central and the public Cloudsmith `activiti-releases` and `activiti-snapshots` repositories.
+- CI runs Maven with [settings.xml](settings.xml). Its mirror (`mirrorOf *`) sends all requests to the Cloudsmith `cic-ext-pull-through` cache, so all dependencies go through the Cloudsmith supply-chain policies.
+- The `cloudsmith-auth` action uses GitHub OIDC as `activiti-activiti-cloud` to provide temporary `CLOUDSMITH_USERNAME` and `CLOUDSMITH_API_KEY` credentials. No Cloudsmith secret is necessary. Set the GitHub Actions variable `CLOUDSMITH_NAMESPACE` to `hyland`. Jobs that run Maven need the `id-token: write` permission.
+- If a Cloudsmith policy quarantines a dependency, the CI build fails but a local build can pass. Ask the Cloudsmith administrators to review the package.
 
 ## Preview Propagation
 
