@@ -140,12 +140,4 @@ class OutboxStreamBridgeAdviceTest {
             )
         );
     }
-
-    private Class<?>[] getParameterTypes(Object[] args) {
-        Class<?>[] types = new Class<?>[args.length];
-        for (int i = 0; i < args.length; i++) {
-            types[i] = args[i].getClass();
-        }
-        return types;
-    }
 }

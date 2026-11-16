@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import org.activiti.cloud.common.messaging.config.StreamBridgeOperations;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.messaging.Message;
@@ -52,7 +53,7 @@ class OutboxStreamBridgeOperationsPostProcessorTest {
         Advised advised = (Advised) processedBean;
         assertThat(advised.getAdvisors())
             .hasSize(1)
-            .extracting(advisor -> advisor.getAdvice())
+            .extracting(Advisor::getAdvice)
             .hasOnlyElementsOfType(OutboxStreamBridgeAdvice.class);
     }
 
