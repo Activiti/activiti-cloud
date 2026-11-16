@@ -12,16 +12,15 @@ on:
     secrets:
       BOT_GITHUB_TOKEN:
         required: true
-      NEXUS_USERNAME:
-        required: true
-      NEXUS_PASSWORD:
-        required: true
 
 env:
   MAVEN_VERSION: "3.10.0"
 
 jobs:
   test:
+    permissions:
+      contents: read
+      id-token: write
     name: maven-test (${{ matrix.short-name }})
     runs-on: ubuntu-latest
     strategy:
@@ -34,10 +33,13 @@ jobs:
           ref: ${{ inputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
+      - name: Authenticate with Cloudsmith
+        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@2cebc8f19812b2653361d82e86b25f29cfa4a144 # v19.12.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+          verify-auth: "true"
+
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@2cebc8f19812b2653361d82e86b25f29cfa4a144 # v19.12.1
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
           java-version: '25'
           java-distribution: 'corretto'
