@@ -26,10 +26,10 @@ import org.springframework.context.ApplicationContext;
 
 public class CloudBehaviorFactoryMappingConfigurer implements ProcessEngineConfigurationConfigurer {
 
-    private ApplicationContext applicationContext;
-    private ExtensionsVariablesMappingProvider variablesMappingProvider;
-    private ProcessVariablesInitiator processVariablesInitiator;
-    private EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
+    private final ApplicationContext applicationContext;
+    private final ExtensionsVariablesMappingProvider variablesMappingProvider;
+    private final ProcessVariablesInitiator processVariablesInitiator;
+    private final EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
     private final VariablesPropagator variablesPropagator;
 
     public CloudBehaviorFactoryMappingConfigurer(
