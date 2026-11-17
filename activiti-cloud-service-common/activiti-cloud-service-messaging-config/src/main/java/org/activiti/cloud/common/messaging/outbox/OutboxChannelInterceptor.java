@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
+import static org.springframework.messaging.MessageHeaders.REPLY_CHANNEL;
+
 import java.util.Optional;
 import java.util.function.BiFunction;
 import org.springframework.messaging.Message;
@@ -42,7 +45,10 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
         if (!message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
             final var result = Optional.ofNullable(destinationProvider.apply(message, channel))
                 .map(outboxDestination ->
-                    MessageBuilder.fromMessage(message).setHeader(OUTBOX_DESTINATION, outboxDestination).build()
+                    MessageBuilder.fromMessage(message)
+                        .setHeader(OUTBOX_DESTINATION, outboxDestination)
+                        .removeHeaders(REPLY_CHANNEL, ERROR_CHANNEL)
+                        .build()
                 )
                 .map(outboxChannel::send);
 
