@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -39,6 +40,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Role;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -116,6 +118,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     }
 
     @Bean(name = "functionBindingBeanPostProcessor")
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public BeanPostProcessor functionBindingBeanPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
