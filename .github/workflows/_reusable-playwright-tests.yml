@@ -93,12 +93,12 @@ jobs:
           version: v1.19.6
 
       - name: Set up Helm
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5.1.0
         with:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@2cebc8f19812b2653361d82e86b25f29cfa4a144 # v19.12.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@3bbbfc459dd15452e68e3cefcbc56596d88d71ee # v19.15.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
