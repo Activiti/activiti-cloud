@@ -23,6 +23,7 @@ import java.util.Map;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ActivitiProperties;
@@ -65,6 +66,9 @@ class EngineConfigurationIT {
     @Autowired
     private RepositoryService repositoryService;
 
+    @Autowired
+    private VariablesPropagator variablesPropagator;
+
     @Test
     void shouldConfigureDefaultConnectorBindingProperties() {
         //given
@@ -101,6 +105,11 @@ class EngineConfigurationIT {
         assertThat(configuration.getBpmnParser().getActivityBehaviorFactory())
             .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
             .isInstanceOf(CloudActivityBehaviorFactory.class);
+    }
+
+    @Test
+    void shouldUseSpringVariablesPropagatorForErrorVariables() {
+        assertThat(configuration.getErrorVariablesPropagator()).isSameAs(variablesPropagator);
     }
 
     @Test
