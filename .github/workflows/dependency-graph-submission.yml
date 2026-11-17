@@ -11,6 +11,9 @@ jobs:
   submit:
     name: Submit
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -19,11 +22,18 @@ jobs:
         with:
           java-version: "25"
           distribution: "corretto"
+      - name: Authenticate with Cloudsmith
+        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@2cebc8f19812b2653361d82e86b25f29cfa4a144 # v19.12.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+          verify-auth: "true"
+
       - name: Submit Dependency Graph
         uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@2cebc8f19812b2653361d82e86b25f29cfa4a144 # v19.12.1
         with:
           java-version: '25'
           maven-version: ${{ env.MAVEN_VERSION }}
           maven-args: -Dmaven.wagon.http.pool=false
-          maven-username: ${{ secrets.NEXUS_USERNAME }}
-          maven-password: ${{ secrets.NEXUS_PASSWORD }}
+          # The Cloudsmith settings read CLOUDSMITH_USERNAME and CLOUDSMITH_API_KEY, not these inputs.
+          maven-username: ""
+          maven-password: ""

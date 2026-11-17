@@ -40,6 +40,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      id-token: write
       security-events: write
 
     strategy:
@@ -72,6 +73,12 @@ jobs:
       with:
         version: ${{ env.MAVEN_VERSION }}
 
+    - name: Authenticate with Cloudsmith
+      uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@2cebc8f19812b2653361d82e86b25f29cfa4a144 # v19.12.1
+      with:
+        oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+        verify-auth: "true"
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
@@ -91,8 +98,6 @@ jobs:
       name: Custom Build
       shell: bash
       env:
-       MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-       MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
        MAVEN_CLI_OPTS: >-
         --settings settings.xml -V --no-transfer-progress -Dspring.main.banner-mode=off
       run: mvn ${{ env.MAVEN_CLI_OPTS}} clean package -f "pom.xml" -B -V -e -Dfindbugs.skip
