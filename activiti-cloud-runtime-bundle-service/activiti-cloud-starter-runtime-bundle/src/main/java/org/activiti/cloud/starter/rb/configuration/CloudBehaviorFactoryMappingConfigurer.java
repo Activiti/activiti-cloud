@@ -24,7 +24,7 @@ import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.activiti.spring.process.ProcessVariablesInitiator;
 import org.springframework.context.ApplicationContext;
 
-public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConfigurer {
+public class CloudBehaviorFactoryMappingConfigurer implements ProcessEngineConfigurationConfigurer {
 
     private ApplicationContext applicationContext;
     private ExtensionsVariablesMappingProvider variablesMappingProvider;
@@ -32,7 +32,7 @@ public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConf
     private EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
     private final VariablesPropagator variablesPropagator;
 
-    public SignalBehaviourConfigurer(
+    public CloudBehaviorFactoryMappingConfigurer(
         ApplicationContext applicationContext,
         ExtensionsVariablesMappingProvider variablesMappingProvider,
         ProcessVariablesInitiator processVariablesInitiator,

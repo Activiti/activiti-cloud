@@ -37,14 +37,14 @@ public class ActivitiCloudEngineAutoConfiguration {
 
     @Bean(BEHAVIOR_FACTORY_MAPPING_CONFIGURER)
     @ConditionalOnMissingBean(name = BEHAVIOR_FACTORY_MAPPING_CONFIGURER)
-    public SignalBehaviourConfigurer signalBehaviourConfigurator(
+    public CloudBehaviorFactoryMappingConfigurer cloudBehaviorFactoryMappingConfigurer(
         ApplicationContext applicationContext,
         ExtensionsVariablesMappingProvider variablesMappingProvider,
         ProcessVariablesInitiator processVariablesInitiator,
         EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider,
         VariablesPropagator variablesPropagator
     ) {
-        return new SignalBehaviourConfigurer(
+        return new CloudBehaviorFactoryMappingConfigurer(
             applicationContext,
             variablesMappingProvider,
             processVariablesInitiator,
