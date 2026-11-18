@@ -150,7 +150,7 @@ import tools.jackson.databind.ObjectMapper;
     }
 )
 @EnableTestBinder
-@Import({ TestBindingsChannelsConfiguration.class })
+@Import({ TestBindingsChannelsConfiguration.class, FunctionRouterBindingConfigurationIT.ApplicationConfig.class })
 public class FunctionRouterBindingConfigurationIT {
 
     private static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
