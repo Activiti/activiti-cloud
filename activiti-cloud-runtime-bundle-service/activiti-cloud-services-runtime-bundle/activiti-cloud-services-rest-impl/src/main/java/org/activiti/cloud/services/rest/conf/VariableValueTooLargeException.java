@@ -18,10 +18,6 @@ package org.activiti.cloud.services.rest.conf;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-/**
- * Exception thrown when the combined size of non-whitelisted variable values
- * exceeds the allowed limit.
- */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class VariableValueTooLargeException extends RuntimeException {
 

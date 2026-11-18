@@ -29,26 +29,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * A servlet filter that enforces a maximum request body size for variable-related endpoints.
- * <p>
- * This filter acts as an application-level replacement for the AWS WAF rules that were
- * previously blocking oversized requests to process and task variable endpoints.
- * <p>
- * Enforcement happens in two stages:
- * <ol>
- *   <li>If the {@code Content-Length} header is present and exceeds the limit, the request
- *       is rejected immediately without reading the body.</li>
- *   <li>Otherwise the body is drained into a bounded buffer (up to {@code maxBytes + 1}).
- *       If the buffer exceeds the limit the request is rejected; otherwise the buffered body
- *       is passed downstream via {@link SizeLimitedRequestWrapper}.</li>
- * </ol>
- * This ensures the <em>entire</em> body is validated regardless of how much the downstream
- * deserializer actually consumes.
- * <p>
- * URL matching uses {@link AntPathMatcher} with {@code /**} prefixed patterns so that the
- * filter works regardless of any gateway or proxy path prefix.
- */
 public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VariableRequestSizeLimitFilter.class);
@@ -88,10 +68,6 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
         }
     }
 
-    /**
-     * Stage 1: reject immediately if the Content-Length header is present and exceeds the limit.
-     * This avoids buffering a known-oversized body into memory.
-     */
     private void rejectIfContentLengthExceedsLimit(HttpServletRequest request) {
         long contentLength = request.getContentLengthLong();
         if (contentLength > maxContentLengthBytes) {
@@ -106,10 +82,6 @@ public class VariableRequestSizeLimitFilter extends OncePerRequestFilter {
         }
     }
 
-    /**
-     * Stage 2: drain the body into a bounded buffer (up to {@code maxBytes + 1}) to enforce
-     * the limit regardless of how much the downstream deserializer consumes.
-     */
     private byte[] readAndValidateBody(HttpServletRequest request) throws IOException {
         int readLimit = (int) Math.min(maxContentLengthBytes + 1, Integer.MAX_VALUE);
         byte[] body = request.getInputStream().readNBytes(readLimit);

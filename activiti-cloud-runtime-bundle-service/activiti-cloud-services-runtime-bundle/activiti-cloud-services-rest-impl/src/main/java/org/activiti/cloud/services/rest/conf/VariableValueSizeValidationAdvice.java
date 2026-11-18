@@ -33,17 +33,6 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 import tools.jackson.databind.ObjectMapper;
 
-/**
- * A {@link org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice} that
- * validates the combined size of non-whitelisted variable values after Jackson deserialization.
- * <p>
- * This complements {@link VariableRequestSizeLimitFilter} (which enforces total request body
- * size at the servlet level) by adding per-variable content inspection at the application level.
- * <p>
- * Registered by {@link VariableRequestSizeLimitAutoConfiguration}. It enables its own
- * {@link VariableSizeLimitProperties} so it can also start when picked up by component scanning
- * (e.g. in {@code @WebMvcTest} slices) without that auto-configuration being present.
- */
 @ControllerAdvice
 @EnableConfigurationProperties(VariableSizeLimitProperties.class)
 public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter {
@@ -101,10 +90,6 @@ public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter 
         return body;
     }
 
-    /**
-     * Extracts the {@code {variableName}} path variable from Spring's resolved URI template
-     * variables for the current request.
-     */
     private String extractVariableNameFromUri() {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attrs != null) {

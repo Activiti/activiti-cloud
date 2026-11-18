@@ -22,11 +22,6 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-/**
- * An {@link HttpServletRequestWrapper} that serves a pre-buffered request body.
- * The body has already been read and validated by {@link VariableRequestSizeLimitFilter},
- * so downstream code (Jackson, controllers) reads from the buffered copy.
- */
 public class SizeLimitedRequestWrapper extends HttpServletRequestWrapper {
 
     private final byte[] body;
@@ -55,9 +50,6 @@ public class SizeLimitedRequestWrapper extends HttpServletRequestWrapper {
         return body.length;
     }
 
-    /**
-     * A {@link ServletInputStream} backed by a byte array.
-     */
     private static class ByteArrayServletInputStream extends ServletInputStream {
 
         private final ByteArrayInputStream delegate;

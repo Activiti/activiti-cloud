@@ -22,22 +22,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-/**
- * Auto-configuration for variable size limits on process and task variable endpoints.
- * <p>
- * Registers a {@link VariableRequestSizeLimitFilter}, which enforces the total request body size,
- * and imports {@link VariableValueSizeValidationAdvice}, which enforces the combined size of
- * non-whitelisted variable values after deserialization.
- * <p>
- * Configured through {@link VariableSizeLimitProperties} ({@code activiti.cloud.services.variables.*}):
- * <ul>
- *   <li>{@code max-request-size-bytes} — maximum total request body size (default: 5 MB)</li>
- *   <li>{@code max-variable-value-length} — maximum combined size of non-whitelisted variable
- *       values (default: 8000 bytes)</li>
- *   <li>{@code whitelisted-variables} — comma-separated list of variable names exempt from the
- *       per-variable size limit</li>
- * </ul>
- */
 @AutoConfiguration
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(VariableSizeLimitProperties.class)

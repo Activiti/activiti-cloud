@@ -19,26 +19,13 @@ import java.util.HashSet;
 import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/**
- * Size limits applied to process and task variable requests.
- */
 @ConfigurationProperties("activiti.cloud.services.variables")
 public class VariableSizeLimitProperties {
 
-    /**
-     * Maximum total request body size in bytes, enforced by {@link VariableRequestSizeLimitFilter}.
-     */
     private long maxRequestSizeBytes = 5L * 1024 * 1024;
 
-    /**
-     * Maximum combined size of non-whitelisted variable values, enforced by
-     * {@link VariableValueSizeValidationAdvice}.
-     */
     private long maxVariableValueLength = 8000;
 
-    /**
-     * Variable names exempt from {@link #maxVariableValueLength}. Accepts a comma-separated list.
-     */
     private Set<String> whitelistedVariables = new HashSet<>();
 
     public long getMaxRequestSizeBytes() {

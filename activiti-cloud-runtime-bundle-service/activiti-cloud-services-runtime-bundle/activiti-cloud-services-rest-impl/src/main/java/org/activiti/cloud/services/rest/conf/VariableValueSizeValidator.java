@@ -21,13 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
 
-/**
- * Validates that the combined serialized size of non-whitelisted variable values
- * does not exceed a configurable limit.
- * <p>
- * Whitelisted variable names (e.g. {@code batchState}) are exempt from the limit
- * and may be as large as the overall request body size allows.
- */
 public class VariableValueSizeValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VariableValueSizeValidator.class);
@@ -46,14 +39,6 @@ public class VariableValueSizeValidator {
         this.objectMapper = objectMapper;
     }
 
-    /**
-     * Validates a map of variables (e.g. from {@code SetProcessVariablesPayload}
-     * or {@code StartProcessPayload}).
-     *
-     * @param variables the variable name-to-value map
-     * @throws VariableValueTooLargeException if the combined size of non-whitelisted
-     *         variable values exceeds the limit
-     */
     public void validate(Map<String, Object> variables) {
         if (variables == null || variables.isEmpty()) {
             return;
@@ -78,15 +63,6 @@ public class VariableValueSizeValidator {
         }
     }
 
-    /**
-     * Validates a single variable (e.g. from {@code CreateTaskVariablePayload}
-     * or {@code UpdateTaskVariablePayload}).
-     *
-     * @param name the variable name
-     * @param value the variable value
-     * @throws VariableValueTooLargeException if the variable is not whitelisted
-     *         and its value exceeds the limit
-     */
     public void validateSingle(String name, Object value) {
         if (whitelistedVariableNames.contains(name)) {
             return;
@@ -105,11 +81,6 @@ public class VariableValueSizeValidator {
         }
     }
 
-    /**
-     * Returns the size in UTF-8 bytes of the JSON-serialized value, using the application's
-     * configured {@link ObjectMapper}. This ensures maps, lists and multi-byte characters
-     * are measured consistently with how they appear on the wire.
-     */
     private long serializedSize(Object value) {
         if (value == null) {
             return 0;
