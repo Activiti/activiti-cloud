@@ -78,6 +78,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @AutoConfiguration
 public class QueryRestWebMvcAutoConfiguration {
@@ -379,7 +382,7 @@ public class QueryRestWebMvcAutoConfiguration {
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
         EntityFinder entityFinder,
-        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository
+        ProcessInstanceLinker processInstanceLinker
     ) {
         return new ProcessInstanceService(
             processInstanceRepository,
@@ -389,7 +392,32 @@ public class QueryRestWebMvcAutoConfiguration {
             securityPoliciesApplicationService,
             securityManager,
             entityFinder,
-            new ProcessInstanceLinker(processInstanceRepository, processInstanceHierarchyRepository, entityFinder)
+            processInstanceLinker
+        );
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    @ConditionalOnMissingBean
+    public ProcessInstanceLinker processInstanceLinker(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository,
+        PlatformTransactionManager transactionManager,
+        @Value("${query.process-instance-link.retry.max-attempts:1}") int maxRetries,
+        @Value("${query.process-instance-link.retry.delay-seconds:60}") int retryDelaySeconds
+    ) {
+        var retryScheduler = new ThreadPoolTaskScheduler();
+        retryScheduler.setPoolSize(1);
+        retryScheduler.setThreadNamePrefix("process-instance-link-retry-");
+        retryScheduler.setDaemon(true);
+        retryScheduler.setWaitForTasksToCompleteOnShutdown(true);
+        retryScheduler.initialize();
+        return new ProcessInstanceLinker(
+            processInstanceRepository,
+            processInstanceHierarchyRepository,
+            new TransactionTemplate(transactionManager),
+            maxRetries,
+            retryDelaySeconds,
+            retryScheduler
         );
     }
 

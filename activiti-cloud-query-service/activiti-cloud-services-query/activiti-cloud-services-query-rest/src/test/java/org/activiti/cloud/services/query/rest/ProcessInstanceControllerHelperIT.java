@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.rest;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 import com.querydsl.core.types.Predicate;
@@ -28,7 +27,6 @@ import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
@@ -358,7 +356,7 @@ class ProcessInstanceControllerHelperIT {
         }
 
         @Test
-        void shouldThrowExceptionWhenLinkingProcessInstancesWithInvalidMainProcessInstanceId() {
+        void should_notLinkAndNotThrow_when_mainProcessInstanceIdIsInvalid() {
             ProcessInstanceEntity orphanProcessInstance = buildProcessInstanceEntity();
             orphanProcessInstance.setInitiator(TEST_USER);
             orphanProcessInstance.setLinkedProcessInstanceType("form-type");
@@ -370,11 +368,14 @@ class ProcessInstanceControllerHelperIT {
 
             String invalidMainProcessInstanceId = UUID.randomUUID().toString();
 
-            assertThatThrownBy(() ->
-                processInstanceControllerHelper.linkProcessInstances(request, invalidMainProcessInstanceId)
-            )
-                .isInstanceOf(QueryEntityNotFoundException.class)
-                .hasMessage("Unable to find process for the given id:'" + invalidMainProcessInstanceId + "'");
+            processInstanceControllerHelper.linkProcessInstances(request, invalidMainProcessInstanceId);
+
+            assertThat(
+                processInstanceRepository
+                    .findById(orphanProcessInstance.getId())
+                    .orElseThrow()
+                    .getLinkedProcessInstanceId()
+            ).isNull();
         }
     }
 }
