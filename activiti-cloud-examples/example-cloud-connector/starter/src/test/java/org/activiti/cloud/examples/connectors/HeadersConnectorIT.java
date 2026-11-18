@@ -93,7 +93,7 @@ public class HeadersConnectorIT {
         input.send(message, "headers.GET");
 
         //then
-        Message<?> outputMessage = output.receive(10000, "integrationResult_myApp");
+        Message<?> outputMessage = output.receive(2000, "integrationResult_myApp");
         assertThat(outputMessage).isNull();
     }
 
