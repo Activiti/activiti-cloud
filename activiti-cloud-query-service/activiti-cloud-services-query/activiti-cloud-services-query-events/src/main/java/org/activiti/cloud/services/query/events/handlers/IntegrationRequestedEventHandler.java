@@ -76,6 +76,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
         serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
         serviceTaskEntity.setCompletedDate(null);
+        serviceTaskEntity.updateServiceTaskType(integrationContext.getServiceTaskType());
 
         // Increment counter only for new integration contexts
         if (isNewEntity) {

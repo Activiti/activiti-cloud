@@ -54,6 +54,11 @@ public class ServiceTaskBuilder {
         return this;
     }
 
+    public ServiceTaskBuilder withServiceTaskType(String serviceTaskType) {
+        serviceTask.setServiceTaskType(serviceTaskType);
+        return this;
+    }
+
     public ServiceTaskEntity save() {
         return repository.save(serviceTask);
     }

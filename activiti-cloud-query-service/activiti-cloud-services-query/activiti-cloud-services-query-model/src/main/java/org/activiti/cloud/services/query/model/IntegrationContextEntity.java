@@ -207,6 +207,11 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     @Override
+    public String getServiceTaskType() {
+        return serviceTask != null ? serviceTask.getServiceTaskType() : null;
+    }
+
+    @Override
     public Map<String, Object> getInBoundVariables() {
         return inBoundVariables;
     }
