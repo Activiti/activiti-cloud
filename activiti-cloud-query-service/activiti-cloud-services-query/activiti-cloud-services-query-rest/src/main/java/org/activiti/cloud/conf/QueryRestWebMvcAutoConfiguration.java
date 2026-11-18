@@ -379,7 +379,7 @@ public class QueryRestWebMvcAutoConfiguration {
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
         EntityFinder entityFinder,
-        ProcessInstanceLinker processInstanceLinker
+        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository
     ) {
         return new ProcessInstanceService(
             processInstanceRepository,
@@ -389,18 +389,8 @@ public class QueryRestWebMvcAutoConfiguration {
             securityPoliciesApplicationService,
             securityManager,
             entityFinder,
-            processInstanceLinker
+            new ProcessInstanceLinker(processInstanceRepository, processInstanceHierarchyRepository, entityFinder)
         );
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ProcessInstanceLinker processInstanceLinker(
-        ProcessInstanceRepository processInstanceRepository,
-        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository,
-        EntityFinder entityFinder
-    ) {
-        return new ProcessInstanceLinker(processInstanceRepository, processInstanceHierarchyRepository, entityFinder);
     }
 
     @Bean
