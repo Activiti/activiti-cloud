@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
@@ -89,6 +90,9 @@ class VariableRequestSizeLimitFilterIT {
 
     private static final int MAX_SIZE_BYTES = 256;
 
+    private static final String EXPECTED_SIZE_LIMIT_MESSAGE =
+        "Request body exceeds the maximum allowed size of " + MAX_SIZE_BYTES + " bytes";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -149,7 +153,8 @@ class VariableRequestSizeLimitFilterIT {
 
         mockMvc
             .perform(post("/v1/process-instances").contentType(APPLICATION_JSON).content(oversizedBody))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value(EXPECTED_SIZE_LIMIT_MESSAGE));
     }
 
     @Test
@@ -178,7 +183,8 @@ class VariableRequestSizeLimitFilterIT {
                     .contentType(APPLICATION_JSON)
                     .content(oversizedBody)
             )
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value(EXPECTED_SIZE_LIMIT_MESSAGE));
     }
 
     @Test
@@ -211,7 +217,8 @@ class VariableRequestSizeLimitFilterIT {
                     .contentType(APPLICATION_JSON)
                     .content(oversizedBody)
             )
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value(EXPECTED_SIZE_LIMIT_MESSAGE));
     }
 
     @Test
@@ -249,7 +256,8 @@ class VariableRequestSizeLimitFilterIT {
 
         mockMvc
             .perform(post("/v1/process-instances").contentType(APPLICATION_JSON).content(oversizedBody))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value(EXPECTED_SIZE_LIMIT_MESSAGE));
     }
 
     // --- Filter should not apply to non-variable endpoints ---
