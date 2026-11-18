@@ -114,6 +114,12 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
         this.serviceTaskType = serviceTaskType;
     }
 
+    public void updateServiceTaskType(String serviceTaskType) {
+        if (serviceTaskType != null) {
+            this.serviceTaskType = serviceTaskType;
+        }
+    }
+
     /**
      * Increments the integration context counter by one.
      * Called when a new integration context is created.

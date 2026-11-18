@@ -17,6 +17,7 @@ package org.activiti.cloud.services.audit.jpa.converters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.CloudIntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
@@ -40,10 +41,14 @@ class IntegrationRequestedEventConverterTest {
     }
 
     @Test
-    void should_exposeServiceTaskType_when_setOnIntegrationContext() {
+    void should_keepServiceTaskType_when_convertingToAPIEvent() {
         CloudIntegrationContextImpl integrationContext = new CloudIntegrationContextImpl();
         integrationContext.setServiceTaskType("Rest Connector: GET");
+        CloudIntegrationRequestedEventImpl event = new CloudIntegrationRequestedEventImpl(integrationContext);
+        IntegrationRequestSentEventEntity eventEntity = new IntegrationRequestSentEventEntity(event);
 
-        assertThat(integrationContext.getServiceTaskType()).isEqualTo("Rest Connector: GET");
+        CloudRuntimeEventImpl<?, ?> apiEvent = integrationRequestedEventConverter.createAPIEvent(eventEntity);
+
+        assertThat(((IntegrationContext) apiEvent.getEntity()).getServiceTaskType()).isEqualTo("Rest Connector: GET");
     }
 }

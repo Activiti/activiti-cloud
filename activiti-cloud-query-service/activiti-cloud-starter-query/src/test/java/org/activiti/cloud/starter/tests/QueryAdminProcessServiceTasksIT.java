@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests;
 
 import static org.activiti.cloud.services.query.model.IntegrationContextEntity.ERROR_MESSAGE_LENGTH;
+import static org.activiti.cloud.services.query.model.ServiceTaskEntity.DEFAULT_SERVICE_TASK_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -96,8 +97,6 @@ public class QueryAdminProcessServiceTasksIT {
     private static final String SERVICE_TASK_TYPE = "serviceTask";
 
     private static final String SERVICE_TASK_TYPE_LABEL = "Rest Connector: GET";
-
-    private static final String DEFAULT_SERVICE_TASK_TYPE = "ServiceTask";
 
     private static final String PROC_URL = "/admin/v1/process-instances";
 
@@ -353,7 +352,6 @@ public class QueryAdminProcessServiceTasksIT {
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isNotNull();
             assertThat(responseEntity.getBody().getContent())
-                .hasSize(1)
                 .extracting(CloudServiceTask::getServiceTaskType)
                 .containsExactly(expectedServiceTaskType);
         });
