@@ -19,43 +19,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.util.Map;
-import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.outbox.OutboxLifecycleController;
 import org.activiti.cloud.common.messaging.outbox.OutboxManager;
+import org.activiti.cloud.common.messaging.outbox.SpringIntegrationJdbcTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.integration.jdbc.lock.DefaultLockRepository;
-import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
-import org.springframework.integration.jdbc.lock.LockRepository;
-import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.outbox.enabled=true", "spring.sql.init.platform=h2" })
-@Import(FunctionBindingOutboxConfigurationIT.SpringIntegrationJdbcConfiguration.class)
-public class FunctionBindingOutboxConfigurationIT extends FunctionBindingConfigurationIT {
+@Import(SpringIntegrationJdbcTestConfiguration.class)
+public class FunctionRouterBindingConfigurationOutboxEnabledIT extends FunctionRouterBindingConfigurationIT {
 
     @Autowired
     private OutboxManager outboxManager;
 
     @Autowired
     private OutboxLifecycleController outboxLifecycleController;
-
-    @TestConfiguration
-    static class SpringIntegrationJdbcConfiguration {
-
-        @Bean
-        public LockRepository lockRepository(DataSource dataSource) {
-            return new DefaultLockRepository(dataSource);
-        }
-
-        @Bean
-        LockRegistry lockRegistry(LockRepository lockRepository) {
-            return new JdbcLockRegistry(lockRepository);
-        }
-    }
 
     @Test
     void outboxLifecycleController_allEndpointsRunning() {
@@ -90,8 +70,24 @@ public class FunctionBindingOutboxConfigurationIT extends FunctionBindingConfigu
 
         await().untilAsserted(() -> assertThat(outboxLifecycleController.allEndpointsRunning()).isFalse());
 
+        assertThat(outboxLifecycleController.getEndpointsRunningStatus()).containsOnly(
+            Map.entry("auditProducerIncidentsOutbox", false),
+            Map.entry("auditProducerOutbox", false),
+            Map.entry("commandResultsOutbox", false),
+            Map.entry("integrationResultsOutbox", false),
+            Map.entry("streamBridgeOutbox", false)
+        );
+
         outboxManager.start();
 
         await().untilAsserted(() -> assertThat(outboxLifecycleController.allEndpointsRunning()).isTrue());
+
+        assertThat(outboxLifecycleController.getEndpointsRunningStatus()).containsOnly(
+            Map.entry("auditProducerIncidentsOutbox", true),
+            Map.entry("auditProducerOutbox", true),
+            Map.entry("commandResultsOutbox", true),
+            Map.entry("integrationResultsOutbox", true),
+            Map.entry("streamBridgeOutbox", true)
+        );
     }
 }

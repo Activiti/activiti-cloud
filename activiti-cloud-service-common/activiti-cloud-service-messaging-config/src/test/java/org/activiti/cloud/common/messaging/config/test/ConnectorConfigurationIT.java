@@ -106,7 +106,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
         "SCRIPT_EXECUTE_TIMEOUT=PT10S",
     }
 )
-@Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
+@Import({
+    TestChannelBinderConfiguration.class,
+    TestBindingsChannelsConfiguration.class,
+    ConnectorConfigurationIT.ApplicationConfig.class,
+})
 @ExtendWith(MockitoExtension.class)
 public class ConnectorConfigurationIT {
 
