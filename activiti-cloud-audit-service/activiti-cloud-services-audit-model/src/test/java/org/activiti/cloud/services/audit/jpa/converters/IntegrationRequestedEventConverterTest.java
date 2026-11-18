@@ -45,6 +45,7 @@ class IntegrationRequestedEventConverterTest {
         CloudIntegrationContextImpl integrationContext = new CloudIntegrationContextImpl();
         integrationContext.setServiceTaskType("Rest Connector: GET");
         CloudIntegrationRequestedEventImpl event = new CloudIntegrationRequestedEventImpl(integrationContext);
+        event.setSequenceNumber(1);
         IntegrationRequestSentEventEntity eventEntity = new IntegrationRequestSentEventEntity(event);
 
         CloudRuntimeEventImpl<?, ?> apiEvent = integrationRequestedEventConverter.createAPIEvent(eventEntity);
