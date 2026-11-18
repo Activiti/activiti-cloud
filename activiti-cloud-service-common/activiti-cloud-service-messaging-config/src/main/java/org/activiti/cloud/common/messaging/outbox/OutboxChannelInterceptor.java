@@ -20,6 +20,7 @@ import static org.springframework.messaging.MessageHeaders.REPLY_CHANNEL;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -31,6 +32,7 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
 
     private final MessageChannel outboxChannel;
     private final BiFunction<Message<?>, MessageChannel, String> destinationProvider;
+    private String[] headersToRemove = { REPLY_CHANNEL, ERROR_CHANNEL };
 
     public OutboxChannelInterceptor(
         MessageChannel outboxChannel,
@@ -40,6 +42,12 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
         this.destinationProvider = destinationProvider;
     }
 
+    public OutboxChannelInterceptor withHeadersToRemove(@NonNull String[] headersToRemove) {
+        this.headersToRemove = headersToRemove;
+
+        return this;
+    }
+
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         if (!message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
@@ -47,7 +55,7 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
                 .map(outboxDestination ->
                     MessageBuilder.fromMessage(message)
                         .setHeader(OUTBOX_DESTINATION, outboxDestination)
-                        .removeHeaders(REPLY_CHANNEL, ERROR_CHANNEL)
+                        .removeHeaders(headersToRemove)
                         .build()
                 )
                 .map(outboxChannel::send);
