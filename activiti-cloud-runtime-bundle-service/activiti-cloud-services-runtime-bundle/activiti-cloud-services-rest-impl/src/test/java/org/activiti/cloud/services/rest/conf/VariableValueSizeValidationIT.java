@@ -16,7 +16,11 @@
 package org.activiti.cloud.services.rest.conf;
 
 import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,10 +34,15 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
+import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
+import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
@@ -47,6 +56,8 @@ import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableControllerImpl;
+import org.activiti.cloud.services.rest.controllers.TaskVariableAdminControllerImpl;
+import org.activiti.cloud.services.rest.controllers.TaskVariableControllerImpl;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
@@ -54,6 +65,8 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -65,12 +78,20 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
-@WebMvcTest({ ProcessInstanceControllerImpl.class, ProcessInstanceVariableControllerImpl.class })
+@WebMvcTest({
+    ProcessInstanceControllerImpl.class,
+    ProcessInstanceVariableControllerImpl.class,
+    TaskVariableControllerImpl.class,
+    TaskVariableAdminControllerImpl.class,
+})
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @Import({
+    CommonModelAutoConfiguration.class,
+    TaskModelAutoConfiguration.class,
     RuntimeBundleProperties.class,
     CloudEventsAutoConfiguration.class,
     ProcessEngineChannelsConfiguration.class,
@@ -92,6 +113,7 @@ import tools.jackson.databind.ObjectMapper;
 class VariableValueSizeValidationIT {
 
     private static final int MAX_VARIABLE_VALUE_LENGTH = 100;
+    private static final String TASK_ID = "task-1";
 
     @Autowired
     private MockMvc mockMvc;
@@ -107,6 +129,9 @@ class VariableValueSizeValidationIT {
 
     @MockitoBean
     private TaskAdminRuntime taskAdminRuntime;
+
+    @MockitoBean
+    private TaskRuntime taskRuntime;
 
     @MockitoBean
     private ProcessAdminRuntime processAdminRuntime;
@@ -333,5 +358,80 @@ class VariableValueSizeValidationIT {
                     )
             )
             .andExpect(status().isBadRequest());
+    }
+
+    // --- UpdateTaskVariablePayload: PUT {base}/tasks/{taskId}/variables/{variableName} ---
+    // The value exceeds the 100-byte variable limit but the request body stays far below
+    // the total request-size limit, so the advice (not the filter) performs the validation.
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = { "/v1", "/admin/v1" })
+    void should_rejectUpdateTaskVariable_when_nonWhitelistedValueExceedsLimit(String basePath) throws Exception {
+        String oversizedValue = "x".repeat(MAX_VARIABLE_VALUE_LENGTH + 1);
+
+        mockMvc
+            .perform(updateTaskVariable(basePath, "ordinaryVar", "ordinaryVar", oversizedValue))
+            .andExpect(status().isBadRequest())
+            .andExpect(result ->
+                assertThat(result.getResolvedException()).isInstanceOf(VariableValueTooLargeException.class)
+            );
+
+        verifyNoTaskVariableUpdate();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = { "/v1", "/admin/v1" })
+    void should_rejectUpdateTaskVariable_when_bodyNameIsWhitelistedButUriNameIsNot(String basePath) throws Exception {
+        String oversizedValue = "x".repeat(MAX_VARIABLE_VALUE_LENGTH + 1);
+
+        // Body claims the whitelisted name; URI targets a non-whitelisted variable.
+        mockMvc
+            .perform(updateTaskVariable(basePath, "ordinaryVar", "batchState", oversizedValue))
+            .andExpect(status().isBadRequest())
+            .andExpect(result ->
+                assertThat(result.getResolvedException()).isInstanceOf(VariableValueTooLargeException.class)
+            );
+
+        verifyNoTaskVariableUpdate();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = { "/v1", "/admin/v1" })
+    void should_allowUpdateTaskVariable_when_uriNameIsWhitelistedRegardlessOfBodyName(String basePath)
+        throws Exception {
+        String oversizedValue = "x".repeat(MAX_VARIABLE_VALUE_LENGTH + 1);
+
+        // URI targets the whitelisted variable; body name must not cause a rejection.
+        mockMvc
+            .perform(updateTaskVariable(basePath, "batchState", "ordinaryVar", oversizedValue))
+            .andExpect(status().isOk());
+
+        // The controller overwrites the payload name with the URI name before calling the runtime.
+        if (basePath.startsWith("/admin")) {
+            verify(taskAdminRuntime).updateVariable(argThat(p -> "batchState".equals(p.getName())));
+        } else {
+            verify(taskRuntime).updateVariable(argThat(p -> "batchState".equals(p.getName())));
+        }
+    }
+
+    private MockHttpServletRequestBuilder updateTaskVariable(
+        String basePath,
+        String uriVariableName,
+        String payloadVariableName,
+        String value
+    ) {
+        UpdateTaskVariablePayload payload = TaskPayloadBuilder.updateVariable()
+            .withTaskId(TASK_ID)
+            .withVariable(payloadVariableName, value)
+            .build();
+
+        return put(basePath + "/tasks/{taskId}/variables/{variableName}", TASK_ID, uriVariableName)
+            .contentType(APPLICATION_JSON)
+            .content(mapper.writeValueAsString(payload));
+    }
+
+    private void verifyNoTaskVariableUpdate() {
+        verify(taskRuntime, never()).updateVariable(any(UpdateTaskVariablePayload.class));
+        verify(taskAdminRuntime, never()).updateVariable(any(UpdateTaskVariablePayload.class));
     }
 }
