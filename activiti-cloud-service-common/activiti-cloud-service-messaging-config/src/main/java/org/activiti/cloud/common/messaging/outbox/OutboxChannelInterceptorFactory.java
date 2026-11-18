@@ -132,7 +132,9 @@ public class OutboxChannelInterceptorFactory
                     .register()
             );
 
-            return new OutboxChannelInterceptor(queueChannel, destinationProvider);
+            return new OutboxChannelInterceptor(queueChannel, destinationProvider).withHeadersToRemove(
+                outboxProperties.getHeadersToRemove()
+            );
         });
     }
 

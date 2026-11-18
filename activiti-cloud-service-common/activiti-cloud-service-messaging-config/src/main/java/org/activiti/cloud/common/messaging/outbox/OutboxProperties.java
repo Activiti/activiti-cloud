@@ -42,6 +42,9 @@ public class OutboxProperties {
     @NotNull
     private Duration pollerIdlePeriod = Duration.ofMillis(50);
 
+    @NotNull
+    private String[] headersToRemove = { "errorChannel", "replyChannel", "sourceData", "amqp_*", "kafka_*" };
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -90,6 +93,14 @@ public class OutboxProperties {
         this.pollerIdlePeriod = pollerIdlePeriod;
     }
 
+    public String[] getHeadersToRemove() {
+        return headersToRemove;
+    }
+
+    public void setHeadersToRemove(String[] headersToRemove) {
+        this.headersToRemove = headersToRemove;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("OutboxProperties{");
@@ -99,6 +110,9 @@ public class OutboxProperties {
         sb.append(", reconcilePeriod=").append(reconcilePeriod);
         sb.append(", pollerActivePeriod=").append(pollerActivePeriod);
         sb.append(", pollerIdlePeriod=").append(pollerIdlePeriod);
+        sb.append(", headersToRemove=").append(
+            headersToRemove == null ? "null" : Arrays.asList(headersToRemove).toString()
+        );
         sb.append('}');
         return sb.toString();
     }

@@ -112,10 +112,15 @@ class OutboxChannelInterceptorTest {
         String scenario,
         Message<String> originalMessage,
         String resolvedDestination,
+        String[] headersToRemove,
         Map<String, Object> expectedRetainedHeaders
     ) {
         when(destinationProvider.apply(originalMessage, sourceChannel)).thenReturn(resolvedDestination);
         when(outboxChannel.send(any())).thenReturn(true);
+
+        if (headersToRemove.length > 0) {
+            interceptor.withHeadersToRemove(headersToRemove);
+        }
 
         Message<?> result = interceptor.preSend(originalMessage, sourceChannel);
 
@@ -128,7 +133,7 @@ class OutboxChannelInterceptorTest {
         assertThat(sentMessage.getHeaders())
             .containsEntry(OutboxChannelInterceptor.OUTBOX_DESTINATION, resolvedDestination)
             .containsAllEntriesOf(expectedRetainedHeaders)
-            .doesNotContainKeys(REPLY_CHANNEL, ERROR_CHANNEL);
+            .doesNotContainKeys(headersToRemove);
     }
 
     static Stream<Arguments> rerouteScenarios() {
@@ -149,20 +154,31 @@ class OutboxChannelInterceptorTest {
 
         Message<String> minimalHeaders = MessageBuilder.withPayload("user-updated").build();
 
+        String[] emptyHeadersToRemove = {};
+        String[] headersToRemove = { REPLY_CHANNEL, ERROR_CHANNEL };
+
         return Stream.of(
             Arguments.of(
                 "Strips MessageChannel instances for reply/error headers",
                 withReplyAndErrorChannels,
                 "orders.outbox",
+                headersToRemove,
                 Map.of("tenantId", "tenant-123")
             ),
             Arguments.of(
                 "Strips String channel names for reply/error headers",
                 withStringChannelNames,
                 "payments.outbox",
+                headersToRemove,
                 Map.of("correlationId", "corr-456")
             ),
-            Arguments.of("Works when no reply/error or custom headers exist", minimalHeaders, "users.outbox", Map.of())
+            Arguments.of(
+                "Works when no reply/error or custom headers exist",
+                minimalHeaders,
+                "users.outbox",
+                emptyHeadersToRemove,
+                Map.of()
+            )
         );
     }
 }
