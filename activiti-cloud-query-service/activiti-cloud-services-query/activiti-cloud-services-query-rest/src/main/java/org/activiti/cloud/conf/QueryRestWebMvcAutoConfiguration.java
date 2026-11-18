@@ -35,6 +35,7 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.ApplicationAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
+import org.activiti.cloud.services.query.rest.ProcessInstanceLinker;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.ProcessVariableService;
@@ -377,7 +378,8 @@ public class QueryRestWebMvcAutoConfiguration {
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
-        EntityFinder entityFinder
+        EntityFinder entityFinder,
+        ProcessInstanceLinker processInstanceLinker
     ) {
         return new ProcessInstanceService(
             processInstanceRepository,
@@ -386,8 +388,19 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceRestrictionService,
             securityPoliciesApplicationService,
             securityManager,
-            entityFinder
+            entityFinder,
+            processInstanceLinker
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceLinker processInstanceLinker(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository,
+        EntityFinder entityFinder
+    ) {
+        return new ProcessInstanceLinker(processInstanceRepository, processInstanceHierarchyRepository, entityFinder);
     }
 
     @Bean

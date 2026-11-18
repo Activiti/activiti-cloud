@@ -15,12 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -32,7 +28,6 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -77,6 +72,9 @@ class ProcessInstanceServiceTest {
     @Mock
     private EntityFinder entityFinder;
 
+    @Mock
+    private ProcessInstanceLinker processInstanceLinker;
+
     @BeforeEach
     void setUp() {
         processInstanceService = new ProcessInstanceService(
@@ -86,139 +84,22 @@ class ProcessInstanceServiceTest {
             processInstanceRestrictionService,
             securityPoliciesApplicationService,
             securityManager,
-            entityFinder
+            entityFinder,
+            processInstanceLinker
         );
     }
 
     @Test
-    void should_linkProcess_when_initiatorsMatch() {
+    void should_delegateToLinker_when_linkProcessInstances() {
         // given
-        ProcessInstanceEntity mainProcess = buildProcessInstanceEntity();
-        mainProcess.setId(MAIN_PROCESS_ID);
-        mainProcess.setInitiator(TEST_USER);
-
-        ProcessInstanceEntity orphan = buildProcessInstanceEntity();
-        orphan.setId("orphan-1");
-        orphan.setInitiator(TEST_USER);
-        orphan.setLinkedProcessInstanceType(LINK_TYPE);
-
-        given(entityFinder.findById(any(), anyString(), anyString())).willReturn(mainProcess);
         given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
-        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(List.of(orphan));
-
-        // when
-        processInstanceService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
-
-        // then
-        verify(processInstanceRepository).save(orphan);
-    }
-
-    @Test
-    void should_linkProcess_when_only_matchingInitiators() {
-        // given
-        ProcessInstanceEntity mainProcess = buildProcessInstanceEntity();
-        mainProcess.setId(MAIN_PROCESS_ID);
-        mainProcess.setInitiator(TEST_USER);
-
-        ProcessInstanceEntity orphan1 = buildProcessInstanceEntity();
-        orphan1.setId("orphan-1");
-        orphan1.setInitiator(TEST_USER);
-        orphan1.setLinkedProcessInstanceType(LINK_TYPE);
-
-        ProcessInstanceEntity orphan2 = buildProcessInstanceEntity();
-        orphan2.setId("orphan-2");
-        orphan2.setInitiator("anotherUser");
-        orphan2.setLinkedProcessInstanceType(LINK_TYPE);
-
-        ProcessInstanceEntity orphan3 = buildProcessInstanceEntity();
-        orphan3.setId("orphan-3");
-        orphan3.setInitiator(TEST_USER);
-        orphan3.setLinkedProcessInstanceType(LINK_TYPE);
-
-        given(entityFinder.findById(any(), anyString(), anyString())).willReturn(mainProcess);
-        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
-        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(
-            List.of(orphan1, orphan2, orphan3)
-        );
-
-        // when
-        processInstanceService.linkProcessInstances(
-            MAIN_PROCESS_ID,
-            List.of("orphan-1", "orphan-2", "orphan-3"),
-            LINK_TYPE
-        );
-
-        // then
-        verify(processInstanceRepository).save(orphan1);
-        verify(processInstanceRepository).save(orphan3);
-        verify(processInstanceRepository, never()).save(orphan2);
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideInvalidProcessInstanceIds")
-    void should_not_linkProcess_when_processInstanceIds_isInvalid(List<String> processInstanceIds) {
-        // given
-        ProcessInstanceEntity mainProcess = buildProcessInstanceEntity();
-        mainProcess.setId(MAIN_PROCESS_ID);
-        mainProcess.setInitiator(TEST_USER);
-
-        given(entityFinder.findById(any(), anyString(), anyString())).willReturn(mainProcess);
-
-        // when
-        processInstanceService.linkProcessInstances(MAIN_PROCESS_ID, processInstanceIds, LINK_TYPE);
-
-        // then
-        verify(processInstanceRepository, never()).findAll(any(ProcessInstanceSpecification.class));
-        verify(processInstanceRepository, never()).save(any(ProcessInstanceEntity.class));
-    }
-
-    @Test
-    void should_not_linkProcess_when_orphanProcesses_notFound() {
-        // given
-        ProcessInstanceEntity mainProcess = buildProcessInstanceEntity();
-        mainProcess.setId(MAIN_PROCESS_ID);
-        mainProcess.setInitiator(TEST_USER);
-
-        given(entityFinder.findById(any(), anyString(), anyString())).willReturn(mainProcess);
-        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
-        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(
-            Collections.emptyList()
-        );
-
         List<String> processInstanceIds = List.of("orphan-1", "orphan-2");
 
         // when
         processInstanceService.linkProcessInstances(MAIN_PROCESS_ID, processInstanceIds, LINK_TYPE);
 
         // then
-        verify(processInstanceRepository, never()).save(any(ProcessInstanceEntity.class));
-    }
-
-    @Test
-    void should_not_linkProcess_when_initiators_dontMatch() {
-        // given
-        ProcessInstanceEntity mainProcess = buildProcessInstanceEntity();
-        mainProcess.setId(MAIN_PROCESS_ID);
-        mainProcess.setInitiator("anotherUser");
-
-        ProcessInstanceEntity orphan = buildProcessInstanceEntity();
-        orphan.setId("orphan-1");
-        orphan.setInitiator(TEST_USER);
-        orphan.setLinkedProcessInstanceType(LINK_TYPE);
-
-        given(entityFinder.findById(any(), anyString(), anyString())).willReturn(mainProcess);
-        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
-        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(List.of(orphan));
-
-        // when
-        processInstanceService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
-
-        // then
-        verify(processInstanceRepository, never()).save(orphan);
-    }
-
-    private static Stream<Arguments> provideInvalidProcessInstanceIds() {
-        return Stream.of(Arguments.of((List<String>) null), Arguments.of(Collections.emptyList()));
+        verify(processInstanceLinker).linkProcessInstances(MAIN_PROCESS_ID, processInstanceIds, LINK_TYPE, TEST_USER);
     }
 
     @Test

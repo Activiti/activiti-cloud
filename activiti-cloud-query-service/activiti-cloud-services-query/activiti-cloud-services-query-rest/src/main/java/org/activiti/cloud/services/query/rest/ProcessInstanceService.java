@@ -20,7 +20,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,6 +69,8 @@ public class ProcessInstanceService {
 
     private final EntityFinder entityFinder;
 
+    private final ProcessInstanceLinker processInstanceLinker;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -80,7 +81,8 @@ public class ProcessInstanceService {
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
-        EntityFinder entityFinder
+        EntityFinder entityFinder,
+        ProcessInstanceLinker processInstanceLinker
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.taskRepository = taskRepository;
@@ -89,6 +91,7 @@ public class ProcessInstanceService {
         this.securityPoliciesApplicationService = securityPoliciesApplicationService;
         this.securityManager = securityManager;
         this.entityFinder = entityFinder;
+        this.processInstanceLinker = processInstanceLinker;
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
@@ -256,45 +259,12 @@ public class ProcessInstanceService {
         List<String> processInstanceIds,
         String linkProcessInstanceType
     ) {
-        var mainProcess = entityFinder.findById(
-            processInstanceRepository,
+        processInstanceLinker.linkProcessInstances(
             mainProcessInstanceId,
-            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + mainProcessInstanceId + "'"
+            processInstanceIds,
+            linkProcessInstanceType,
+            securityManager.getAuthenticatedUserId()
         );
-
-        if (processInstanceIds != null && !processInstanceIds.isEmpty()) {
-            var request = new ProcessInstanceSearchRequest();
-            request.setId(new HashSet<>(processInstanceIds));
-            request.setLinkedProcessInstanceType(Set.of(linkProcessInstanceType));
-
-            var orphanProcesses = processInstanceRepository.findAll(
-                ProcessInstanceSpecification.restricted(request, securityManager.getAuthenticatedUserId())
-            );
-
-            if (orphanProcesses.isEmpty()) {
-                LOGGER.debug("No process instance found for the given ids:'{}'", processInstanceIds);
-                return;
-            }
-
-            orphanProcesses.forEach(orphanProcess -> {
-                if (orphanProcess.getInitiator().equals(mainProcess.getInitiator())) {
-                    orphanProcess.setLinkedProcessInstanceId(mainProcess.getId());
-                    processInstanceRepository.save(orphanProcess);
-                } else {
-                    LOGGER.debug(
-                        "User {} not permitted to link process instance id {} to main process instance id {}",
-                        securityManager.getAuthenticatedUserId(),
-                        orphanProcess.getId(),
-                        mainProcessInstanceId
-                    );
-                }
-            });
-        } else {
-            LOGGER.debug(
-                "No process instance id provided to link to main process instance id '{}'",
-                mainProcessInstanceId
-            );
-        }
     }
 
     @Transactional(readOnly = true)
