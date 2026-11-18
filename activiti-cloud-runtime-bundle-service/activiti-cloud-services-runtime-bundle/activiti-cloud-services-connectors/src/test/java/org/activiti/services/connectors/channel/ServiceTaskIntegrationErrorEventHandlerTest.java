@@ -163,7 +163,6 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         assertThat(compositeCommand.getCommands()).hasSize(2);
         assertThat(compositeCommand.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
-        // ephemeral flag is resolved from the runtime bundle's own integration context (mapping), not the error payload
         verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
     }
 
@@ -341,7 +340,6 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
             AggregateIntegrationErrorReceivedEventCmd.class
         );
 
-        // the flag is resolved once from the mapping and reused by the fallback command
         verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
 
         fallbackCommand.getCommands().getLast().execute(null);

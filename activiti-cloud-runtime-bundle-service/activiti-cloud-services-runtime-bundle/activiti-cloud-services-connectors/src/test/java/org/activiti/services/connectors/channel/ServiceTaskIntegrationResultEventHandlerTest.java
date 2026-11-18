@@ -160,7 +160,6 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(composite.getCommands()).hasSize(2);
         assertThat(composite.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(composite.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
-        // ephemeral flag is resolved from the runtime bundle's own integration context (mapping), not the reply
         verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
     }
 

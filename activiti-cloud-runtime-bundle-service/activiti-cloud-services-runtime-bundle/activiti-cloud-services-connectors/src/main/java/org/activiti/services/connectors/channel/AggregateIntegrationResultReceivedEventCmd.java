@@ -30,10 +30,6 @@ class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final boolean ephemeralMapping;
 
-    /**
-     * @param ephemeralMapping whether the variables mapping of the service task is ephemeral, as resolved by the
-     *                         runtime bundle from its process extensions (never taken from the connector reply)
-     */
     AggregateIntegrationResultReceivedEventCmd(
         IntegrationContext integrationContext,
         RuntimeBundleProperties runtimeBundleProperties,

@@ -23,13 +23,6 @@ import org.activiti.spring.process.model.ProcessVariablesMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Resolves whether the variables mapping of a service task is ephemeral.
- * <p>
- * The flag is read from the process extensions (mapping) deployed in this runtime bundle,
- * using the process definition id and flow node id stored in the runtime bundle's own
- * integration context. It never relies on the flag sent back by the connector.
- */
 public class EphemeralMappingResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EphemeralMappingResolver.class);
