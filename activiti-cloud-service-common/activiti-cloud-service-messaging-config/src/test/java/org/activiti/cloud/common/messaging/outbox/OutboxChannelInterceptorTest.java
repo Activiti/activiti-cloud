@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptor.OUTBOX_DESTINATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -76,7 +77,9 @@ class OutboxChannelInterceptorTest {
 
         Message<?> result = interceptor.preSend(originalMessage, sourceChannel);
 
-        assertThat(result).isSameAs(originalMessage);
+        assertThat(result).isNotNull().extracting(Message::getPayload).isSameAs(originalMessage.getPayload());
+        assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
+
         verify(outboxChannel, never()).send(any());
 
         if (expectProviderInvocation) {
@@ -88,11 +91,11 @@ class OutboxChannelInterceptorTest {
 
     static Stream<Arguments> passthroughScenarios() {
         Message<String> withExistingHeader = MessageBuilder.withPayload("payload-1")
-            .setHeader(OutboxChannelInterceptor.OUTBOX_DESTINATION, "existing.destination")
+            .setHeader(OUTBOX_DESTINATION, "existing.destination")
             .build();
 
         Message<String> withNullHeaderValue = MessageBuilder.withPayload("payload-2")
-            .setHeader(OutboxChannelInterceptor.OUTBOX_DESTINATION, null)
+            .setHeader(OUTBOX_DESTINATION, null)
             .build();
 
         Message<String> withoutHeader = MessageBuilder.withPayload("payload-3")
@@ -131,7 +134,7 @@ class OutboxChannelInterceptorTest {
 
         assertThat(sentMessage.getPayload()).isEqualTo(originalMessage.getPayload());
         assertThat(sentMessage.getHeaders())
-            .containsEntry(OutboxChannelInterceptor.OUTBOX_DESTINATION, resolvedDestination)
+            .containsEntry(OUTBOX_DESTINATION, resolvedDestination)
             .containsAllEntriesOf(expectedRetainedHeaders)
             .doesNotContainKeys(headersToRemove);
     }

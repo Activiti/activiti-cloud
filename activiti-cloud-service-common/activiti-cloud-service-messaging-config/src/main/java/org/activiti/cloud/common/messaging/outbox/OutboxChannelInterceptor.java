@@ -63,6 +63,6 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
             return result.isPresent() ? null : message;
         }
 
-        return message;
+        return MessageBuilder.fromMessage(message).removeHeader(OUTBOX_DESTINATION).build();
     }
 }
