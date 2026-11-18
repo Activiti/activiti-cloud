@@ -19,6 +19,7 @@ import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.rest.ApplicationAdminController;
 import org.activiti.cloud.services.query.rest.ApplicationAdminControllerV2;
 import org.activiti.cloud.services.query.rest.ApplicationController;
+import org.activiti.cloud.services.query.rest.ApplicationControllerV2;
 import org.activiti.cloud.services.query.rest.CommonExceptionHandlerQuery;
 import org.activiti.cloud.services.query.rest.IntegrationContextAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionAdminController;
@@ -84,6 +85,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
     ProcessInstanceServiceTasksAdminController.class,
     ServiceTaskIntegrationContextAdminController.class,
     ApplicationController.class,
+    ApplicationControllerV2.class,
     ApplicationAdminController.class,
     ApplicationAdminControllerV2.class,
     IntegrationContextAdminController.class,

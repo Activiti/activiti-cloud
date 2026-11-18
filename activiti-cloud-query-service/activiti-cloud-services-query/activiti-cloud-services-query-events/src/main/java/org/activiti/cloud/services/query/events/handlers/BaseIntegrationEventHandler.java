@@ -79,6 +79,7 @@ public abstract class BaseIntegrationEventHandler {
 
         if (serviceTaskEntity != null && entity.getServiceTask() == null) {
             entity.setServiceTask(serviceTaskEntity);
+            serviceTaskEntity.updateServiceTaskType(integrationEvent.getEntity().getServiceTaskType());
 
             if (isNewEntity) {
                 serviceTaskEntity.incrementIntegrationContextCounter();

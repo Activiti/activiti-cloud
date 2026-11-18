@@ -162,6 +162,26 @@ class IntegrationErrorReceivedEventHandlerTest {
         assertThat(handler.getHandledEvent()).isEqualTo(CloudRuntimeEventType.INTEGRATION_ERROR_RECEIVED.name());
     }
 
+    @Test
+    void should_propagateServiceTaskType_when_recoveringMissingEntityWithTypedPayload() {
+        IntegrationContextImpl errorIntegrationContext = buildIntegrationContext();
+        errorIntegrationContext.setServiceTaskType("Rest Connector: GET");
+
+        ServiceTaskEntity serviceTaskEntity = buildServiceTaskEntity();
+
+        when(entityManager.find(IntegrationContextEntity.class, INTEGRATION_CONTEXT_ID)).thenReturn(null);
+        when(
+            entityManager.find(
+                ServiceTaskEntity.class,
+                IntegrationContextEntity.IdBuilderHelper.from(errorIntegrationContext)
+            )
+        ).thenReturn(serviceTaskEntity);
+
+        handler.handle(buildErrorEvent(errorIntegrationContext, List.of()));
+
+        assertThat(serviceTaskEntity.getServiceTaskType()).isEqualTo("Rest Connector: GET");
+    }
+
     private IntegrationContextImpl buildIntegrationContext() {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setId(INTEGRATION_CONTEXT_ID);

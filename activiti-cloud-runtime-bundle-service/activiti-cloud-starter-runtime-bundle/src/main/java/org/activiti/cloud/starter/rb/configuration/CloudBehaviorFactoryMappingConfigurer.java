@@ -24,15 +24,15 @@ import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.activiti.spring.process.ProcessVariablesInitiator;
 import org.springframework.context.ApplicationContext;
 
-public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConfigurer {
+public class CloudBehaviorFactoryMappingConfigurer implements ProcessEngineConfigurationConfigurer {
 
-    private ApplicationContext applicationContext;
-    private ExtensionsVariablesMappingProvider variablesMappingProvider;
-    private ProcessVariablesInitiator processVariablesInitiator;
-    private EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
+    private final ApplicationContext applicationContext;
+    private final ExtensionsVariablesMappingProvider variablesMappingProvider;
+    private final ProcessVariablesInitiator processVariablesInitiator;
+    private final EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider;
     private final VariablesPropagator variablesPropagator;
 
-    public SignalBehaviourConfigurer(
+    public CloudBehaviorFactoryMappingConfigurer(
         ApplicationContext applicationContext,
         ExtensionsVariablesMappingProvider variablesMappingProvider,
         ProcessVariablesInitiator processVariablesInitiator,
@@ -49,6 +49,7 @@ public class SignalBehaviourConfigurer implements ProcessEngineConfigurationConf
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
         processEngineConfiguration.setEventSubscriptionPayloadMappingProvider(eventSubscriptionPayloadMappingProvider);
+        processEngineConfiguration.setErrorVariablesPropagator(variablesPropagator);
 
         processEngineConfiguration.setActivityBehaviorFactory(
             new CloudActivityBehaviorFactory(

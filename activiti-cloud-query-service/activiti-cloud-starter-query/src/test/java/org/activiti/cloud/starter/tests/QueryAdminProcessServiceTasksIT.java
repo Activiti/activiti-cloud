@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests;
 
 import static org.activiti.cloud.services.query.model.IntegrationContextEntity.ERROR_MESSAGE_LENGTH;
+import static org.activiti.cloud.services.query.model.ServiceTaskEntity.DEFAULT_SERVICE_TASK_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -94,6 +95,8 @@ public class QueryAdminProcessServiceTasksIT {
     private static final String SERVICE_TASK_ELEMENT_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
 
     private static final String SERVICE_TASK_TYPE = "serviceTask";
+
+    private static final String SERVICE_TASK_TYPE_LABEL = "Rest Connector: GET";
 
     private static final String PROC_URL = "/admin/v1/process-instances";
 
@@ -306,6 +309,51 @@ public class QueryAdminProcessServiceTasksIT {
                 .hasSize(1)
                 .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getIntegrationContextCounter)
                 .contains(tuple(SERVICE_TASK_TYPE, 1));
+        });
+    }
+
+    @Test
+    public void shouldReturnDefaultServiceTaskTypeWhenNoTypeInformation() {
+        sendEventsForStartSimpleProcessInstance();
+
+        awaitServiceTaskType(DEFAULT_SERVICE_TASK_TYPE);
+    }
+
+    @Test
+    public void shouldReturnServiceTaskTypeFromIntegrationRequest() {
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        CloudServiceTask serviceTask = waitForServiceTask(BPMNActivityStatus.STARTED);
+
+        IntegrationContextImpl integrationContext = buildIntegrationContext(
+            process,
+            serviceTask.getProcessInstanceId(),
+            serviceTask
+        );
+        integrationContext.setServiceTaskType(SERVICE_TASK_TYPE_LABEL);
+        sendIntegrationRequestedEvent(integrationContext);
+
+        awaitServiceTaskType(SERVICE_TASK_TYPE_LABEL);
+
+        await().untilAsserted(() ->
+            assertThat(retrieveIntegrationContext(serviceTask.getId()).getServiceTaskType()).isEqualTo(
+                SERVICE_TASK_TYPE_LABEL
+            )
+        );
+    }
+
+    private void awaitServiceTaskType(String expectedServiceTaskType) {
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                SERVICE_TASKS_URL,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE
+            );
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .extracting(CloudServiceTask::getServiceTaskType)
+                .containsExactly(expectedServiceTaskType);
         });
     }
 
