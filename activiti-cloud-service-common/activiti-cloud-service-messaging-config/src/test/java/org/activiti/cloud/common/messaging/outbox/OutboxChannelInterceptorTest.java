@@ -17,14 +17,21 @@ package org.activiti.cloud.common.messaging.outbox;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
+import static org.springframework.messaging.MessageHeaders.REPLY_CHANNEL;
 
+import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -40,7 +47,7 @@ class OutboxChannelInterceptorTest {
     private MessageChannel outboxChannel;
 
     @Mock
-    private MessageChannel originalChannel;
+    private MessageChannel sourceChannel;
 
     @Mock
     private BiFunction<Message<?>, MessageChannel, String> destinationProvider;
@@ -55,75 +62,107 @@ class OutboxChannelInterceptorTest {
         interceptor = new OutboxChannelInterceptor(outboxChannel, destinationProvider);
     }
 
-    @Test
-    void preSend_ShouldReturnSameMessage_WhenHeaderAlreadyExists() {
-        // Arrange
-        Message<String> inputMessage = MessageBuilder.withPayload("test-payload")
-            .setHeader(OutboxChannelInterceptor.OUTBOX_DESTINATION, "existing-destination")
-            .build();
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("passthroughScenarios")
+    void preSend_whenPassthroughConditionMet_returnsOriginalMessage(
+        String scenario,
+        Message<String> originalMessage,
+        String providerReturnValue,
+        boolean expectProviderInvocation
+    ) {
+        if (expectProviderInvocation) {
+            when(destinationProvider.apply(originalMessage, sourceChannel)).thenReturn(providerReturnValue);
+        }
 
-        // Act
-        Message<?> result = interceptor.preSend(inputMessage, originalChannel);
+        Message<?> result = interceptor.preSend(originalMessage, sourceChannel);
 
-        // Assert
-        assertThat(result).isSameAs(inputMessage);
-        verifyNoInteractions(destinationProvider, outboxChannel);
+        assertThat(result).isSameAs(originalMessage);
+        verify(outboxChannel, never()).send(any());
+
+        if (expectProviderInvocation) {
+            verify(destinationProvider).apply(originalMessage, sourceChannel);
+        } else {
+            verify(destinationProvider, never()).apply(any(), any());
+        }
     }
 
-    @Test
-    void preSend_ShouldReturnNull_WhenHeaderIsMissingAndDestinationIsProvidedAndSentSuccessfully() {
-        // Arrange
-        Message<String> inputMessage = MessageBuilder.withPayload("test-payload").build();
-        String targetDestination = "resolved-destination";
+    static Stream<Arguments> passthroughScenarios() {
+        Message<String> withExistingHeader = MessageBuilder.withPayload("payload-1")
+            .setHeader(OutboxChannelInterceptor.OUTBOX_DESTINATION, "existing.destination")
+            .build();
 
-        when(destinationProvider.apply(inputMessage, originalChannel)).thenReturn(targetDestination);
-        when(outboxChannel.send(any(Message.class))).thenReturn(true);
+        Message<String> withNullHeaderValue = MessageBuilder.withPayload("payload-2")
+            .setHeader(OutboxChannelInterceptor.OUTBOX_DESTINATION, null)
+            .build();
 
-        // Act
-        Message<?> result = interceptor.preSend(inputMessage, originalChannel);
+        Message<String> withoutHeader = MessageBuilder.withPayload("payload-3")
+            .setHeader("customHeader", "value")
+            .build();
 
-        // Assert
+        return Stream.of(
+            Arguments.of("Header already present with value", withExistingHeader, "ignored", false),
+            Arguments.of("Header already present with null value", withNullHeaderValue, null, true),
+            Arguments.of("Header absent and destination provider returns null", withoutHeader, null, true)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("rerouteScenarios")
+    void preSend_whenDestinationResolved_reroutesToOutboxAndStripsRoutingHeaders(
+        String scenario,
+        Message<String> originalMessage,
+        String resolvedDestination,
+        Map<String, Object> expectedRetainedHeaders
+    ) {
+        when(destinationProvider.apply(originalMessage, sourceChannel)).thenReturn(resolvedDestination);
+        when(outboxChannel.send(any())).thenReturn(true);
+
+        Message<?> result = interceptor.preSend(originalMessage, sourceChannel);
+
         assertThat(result).isNull();
 
         verify(outboxChannel).send(messageCaptor.capture());
         Message<?> sentMessage = messageCaptor.getValue();
 
-        assertThat(sentMessage.getPayload()).isEqualTo("test-payload");
-        assertThat(sentMessage.getHeaders()).containsEntry(
-            OutboxChannelInterceptor.OUTBOX_DESTINATION,
-            targetDestination
+        assertThat(sentMessage.getPayload()).isEqualTo(originalMessage.getPayload());
+        assertThat(sentMessage.getHeaders())
+            .containsEntry(OutboxChannelInterceptor.OUTBOX_DESTINATION, resolvedDestination)
+            .containsAllEntriesOf(expectedRetainedHeaders)
+            .doesNotContainKeys(REPLY_CHANNEL, ERROR_CHANNEL);
+    }
+
+    static Stream<Arguments> rerouteScenarios() {
+        MessageChannel dummyReply = mock(MessageChannel.class);
+        MessageChannel dummyError = mock(MessageChannel.class);
+
+        Message<String> withReplyAndErrorChannels = MessageBuilder.withPayload("order-created")
+            .setHeader("tenantId", "tenant-123")
+            .setHeader(REPLY_CHANNEL, dummyReply)
+            .setHeader(ERROR_CHANNEL, dummyError)
+            .build();
+
+        Message<String> withStringChannelNames = MessageBuilder.withPayload("payment-processed")
+            .setHeader("correlationId", "corr-456")
+            .setHeader(REPLY_CHANNEL, "replyChannelName")
+            .setHeader(ERROR_CHANNEL, "errorChannelName")
+            .build();
+
+        Message<String> minimalHeaders = MessageBuilder.withPayload("user-updated").build();
+
+        return Stream.of(
+            Arguments.of(
+                "Strips MessageChannel instances for reply/error headers",
+                withReplyAndErrorChannels,
+                "orders.outbox",
+                Map.of("tenantId", "tenant-123")
+            ),
+            Arguments.of(
+                "Strips String channel names for reply/error headers",
+                withStringChannelNames,
+                "payments.outbox",
+                Map.of("correlationId", "corr-456")
+            ),
+            Arguments.of("Works when no reply/error or custom headers exist", minimalHeaders, "users.outbox", Map.of())
         );
-    }
-
-    @Test
-    void preSend_ShouldReturnSameMessage_WhenDestinationProviderReturnsNull() {
-        // Arrange
-        Message<String> inputMessage = MessageBuilder.withPayload("test-payload").build();
-
-        when(destinationProvider.apply(inputMessage, originalChannel)).thenReturn(null);
-
-        // Act
-        Message<?> result = interceptor.preSend(inputMessage, originalChannel);
-
-        // Assert
-        assertThat(result).isSameAs(inputMessage);
-        verifyNoInteractions(outboxChannel);
-    }
-
-    @Test
-    void preSend_ShouldReturnNull_WhenOutboxChannelSendMessage() {
-        // Arrange
-        Message<String> inputMessage = MessageBuilder.withPayload("test-payload").build();
-        String targetDestination = "resolved-destination";
-
-        when(destinationProvider.apply(inputMessage, originalChannel)).thenReturn(targetDestination);
-        when(outboxChannel.send(any(Message.class))).thenReturn(true);
-
-        // Act
-        Message<?> result = interceptor.preSend(inputMessage, originalChannel);
-
-        // Assert
-        assertThat(result).isNull();
-        verify(outboxChannel).send(any(Message.class));
     }
 }
