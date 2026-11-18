@@ -298,6 +298,70 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    public void should_forwardMappingFlagAndSanitizeEvent_when_bpmnErrorPropagationFailsAndIsCaught(
+        boolean ephemeralMapping
+    ) {
+        //given
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(
+            integrationContextEntity
+        );
+        given(ephemeralMappingResolver.isEphemeral(integrationContextEntity)).willReturn(ephemeralMapping);
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
+
+        ExecutionEntity executionEntity = mock(ExecutionEntity.class);
+        given(executionEntity.getActivityId()).willReturn(CLIENT_ID);
+        when(executionQuery.list()).thenReturn(Collections.singletonList(executionEntity));
+
+        IntegrationContextImpl integrationContext = buildIntegrationContext();
+        integrationContext.addInBoundVariables(Map.of("restUrl", "https://example.com"));
+        integrationContext.addOutBoundVariables(Map.of("restResult", "fromConnector"));
+        // the connector error payload claims the opposite of the mapping
+        integrationContext.setEphemeralVariables(!ephemeralMapping);
+        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
+            new IntegrationRequestImpl(integrationContext),
+            new CloudBpmnError("Test Error")
+        );
+
+        // propagating the BPMN error fails, so the handler falls back to deleting the context and auditing the error
+        given(managementService.executeCommand(any()))
+            .willThrow(new RuntimeException("BPMN error propagation failed"))
+            .willReturn(null);
+
+        //when
+        handler.receive(integrationErrorEvent);
+
+        //then
+        verify(managementService, times(2)).executeCommand(commandArgumentCaptor.capture());
+        CompositeCommand fallbackCommand = commandArgumentCaptor.getAllValues().getLast();
+        assertThat(fallbackCommand.getCommands()).hasExactlyElementsOfTypes(
+            DeleteIntegrationContextCmd.class,
+            AggregateIntegrationErrorReceivedEventCmd.class
+        );
+
+        // the flag is resolved once from the mapping and reused by the fallback command
+        verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
+
+        fallbackCommand.getCommands().getLast().execute(null);
+
+        ArgumentCaptor<CloudIntegrationErrorReceivedEventImpl> eventCaptor = ArgumentCaptor.forClass(
+            CloudIntegrationErrorReceivedEventImpl.class
+        );
+        verify(processEngineEventsAggregator).add(eventCaptor.capture());
+        IntegrationContext auditedContext = eventCaptor.getValue().getEntity();
+        assertThat(auditedContext.hasEphemeralVariables()).isEqualTo(ephemeralMapping);
+        assertThat(auditedContext.getInBoundVariables()).isEmpty();
+        if (ephemeralMapping) {
+            assertThat(auditedContext.getOutBoundVariables()).isEmpty();
+        } else {
+            assertThat(auditedContext.getOutBoundVariables()).containsExactlyEntriesOf(
+                Map.of("restResult", "fromConnector")
+            );
+        }
+    }
+
     private IntegrationContextEntityImpl buildIntegrationContextEntity() {
         IntegrationContextEntityImpl integrationContextEntity = new IntegrationContextEntityImpl();
         integrationContextEntity.setExecutionId(EXECUTION_ID);
