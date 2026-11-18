@@ -21,18 +21,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
 import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.integration.jdbc.lock.LockRepository;
-import org.springframework.integration.support.locks.LockRegistry;
 
 @TestConfiguration
 public class SpringIntegrationJdbcTestConfiguration {
 
     @Bean
-    public LockRepository lockRepository(DataSource dataSource) {
+    public LockRepository outboxLockRepository(DataSource dataSource) {
         return new DefaultLockRepository(dataSource);
     }
 
     @Bean
-    LockRegistry lockRegistry(LockRepository lockRepository) {
-        return new JdbcLockRegistry(lockRepository);
+    JdbcLockRegistry outboxLockRegistry(LockRepository outboxLockRepository) {
+        return new JdbcLockRegistry(outboxLockRepository);
     }
 }

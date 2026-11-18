@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_DESTINATION;
 import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 import static org.springframework.messaging.MessageHeaders.REPLY_CHANNEL;
 
@@ -27,8 +28,6 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 
 public class OutboxChannelInterceptor implements ChannelInterceptor {
-
-    public static final String OUTBOX_DESTINATION = "outboxDestination";
 
     private final MessageChannel outboxChannel;
     private final BiFunction<Message<?>, MessageChannel, String> destinationProvider;
