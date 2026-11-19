@@ -16,8 +16,6 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.Collections;
@@ -45,10 +43,6 @@ import org.springframework.data.domain.PageImpl;
 @ExtendWith(MockitoExtension.class)
 class ProcessInstanceServiceTest {
 
-    private static final String TEST_USER = "testuser";
-    private static final String MAIN_PROCESS_ID = "main-123";
-    private static final String LINK_TYPE = "form-type";
-
     private ProcessInstanceService processInstanceService;
 
     @Mock
@@ -72,9 +66,6 @@ class ProcessInstanceServiceTest {
     @Mock
     private EntityFinder entityFinder;
 
-    @Mock
-    private ProcessInstanceLinker processInstanceLinker;
-
     @BeforeEach
     void setUp() {
         processInstanceService = new ProcessInstanceService(
@@ -84,22 +75,8 @@ class ProcessInstanceServiceTest {
             processInstanceRestrictionService,
             securityPoliciesApplicationService,
             securityManager,
-            entityFinder,
-            processInstanceLinker
+            entityFinder
         );
-    }
-
-    @Test
-    void should_delegateToLinker_when_linkProcessInstances() {
-        // given
-        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
-        List<String> processInstanceIds = List.of("orphan-1", "orphan-2");
-
-        // when
-        processInstanceService.linkProcessInstances(MAIN_PROCESS_ID, processInstanceIds, LINK_TYPE);
-
-        // then
-        verify(processInstanceLinker).linkProcessInstances(MAIN_PROCESS_ID, processInstanceIds, LINK_TYPE, TEST_USER);
     }
 
     @Test

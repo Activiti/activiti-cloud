@@ -357,6 +357,7 @@ class ProcessInstanceControllerHelperIT {
 
         @Test
         void should_notLinkAndNotThrow_when_mainProcessInstanceIdIsInvalid() {
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
             ProcessInstanceEntity orphanProcessInstance = buildProcessInstanceEntity();
             orphanProcessInstance.setInitiator(TEST_USER);
             orphanProcessInstance.setLinkedProcessInstanceType("form-type");

@@ -35,7 +35,7 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.ApplicationAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
-import org.activiti.cloud.services.query.rest.ProcessInstanceLinker;
+import org.activiti.cloud.services.query.rest.ProcessInstanceLinkService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.ProcessVariableService;
@@ -381,8 +381,7 @@ public class QueryRestWebMvcAutoConfiguration {
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
-        EntityFinder entityFinder,
-        ProcessInstanceLinker processInstanceLinker
+        EntityFinder entityFinder
     ) {
         return new ProcessInstanceService(
             processInstanceRepository,
@@ -391,17 +390,17 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceRestrictionService,
             securityPoliciesApplicationService,
             securityManager,
-            entityFinder,
-            processInstanceLinker
+            entityFinder
         );
     }
 
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean
-    public ProcessInstanceLinker processInstanceLinker(
+    public ProcessInstanceLinkService processInstanceLinkService(
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceHierarchyRepository processInstanceHierarchyRepository,
         PlatformTransactionManager transactionManager,
+        SecurityManager securityManager,
         @Value("${query.process-instance-link.retry.max-attempts:1}") int maxRetries,
         @Value("${query.process-instance-link.retry.delay-seconds:60}") int retryDelaySeconds
     ) {
@@ -411,10 +410,11 @@ public class QueryRestWebMvcAutoConfiguration {
         retryScheduler.setDaemon(true);
         retryScheduler.setWaitForTasksToCompleteOnShutdown(true);
         retryScheduler.initialize();
-        return new ProcessInstanceLinker(
+        return new ProcessInstanceLinkService(
             processInstanceRepository,
             processInstanceHierarchyRepository,
             new TransactionTemplate(transactionManager),
+            securityManager,
             maxRetries,
             retryDelaySeconds,
             retryScheduler
@@ -447,12 +447,14 @@ public class QueryRestWebMvcAutoConfiguration {
     public ProcessInstanceControllerHelper processInstanceControllerHelper(
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceService processInstanceService,
-        ProcessInstanceSearchService processInstanceSearchService
+        ProcessInstanceSearchService processInstanceSearchService,
+        ProcessInstanceLinkService processInstanceLinkService
     ) {
         return new ProcessInstanceControllerHelper(
             processInstanceRepository,
             processInstanceService,
-            processInstanceSearchService
+            processInstanceSearchService,
+            processInstanceLinkService
         );
     }
 

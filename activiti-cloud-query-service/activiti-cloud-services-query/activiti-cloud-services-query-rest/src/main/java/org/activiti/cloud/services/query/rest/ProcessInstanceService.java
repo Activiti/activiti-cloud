@@ -69,8 +69,6 @@ public class ProcessInstanceService {
 
     private final EntityFinder entityFinder;
 
-    private final ProcessInstanceLinker processInstanceLinker;
-
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -81,8 +79,7 @@ public class ProcessInstanceService {
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
-        EntityFinder entityFinder,
-        ProcessInstanceLinker processInstanceLinker
+        EntityFinder entityFinder
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.taskRepository = taskRepository;
@@ -91,7 +88,6 @@ public class ProcessInstanceService {
         this.securityPoliciesApplicationService = securityPoliciesApplicationService;
         this.securityManager = securityManager;
         this.entityFinder = entityFinder;
-        this.processInstanceLinker = processInstanceLinker;
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
@@ -252,19 +248,6 @@ public class ProcessInstanceService {
         );
 
         return processInstanceRepository.findAll(restrictedSpecification);
-    }
-
-    public void linkProcessInstances(
-        String mainProcessInstanceId,
-        List<String> processInstanceIds,
-        String linkProcessInstanceType
-    ) {
-        processInstanceLinker.linkProcessInstances(
-            mainProcessInstanceId,
-            processInstanceIds,
-            linkProcessInstanceType,
-            securityManager.getAuthenticatedUserId()
-        );
     }
 
     @Transactional(readOnly = true)

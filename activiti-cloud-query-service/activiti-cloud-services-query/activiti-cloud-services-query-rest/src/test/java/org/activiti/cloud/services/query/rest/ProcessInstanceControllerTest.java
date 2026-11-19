@@ -139,6 +139,9 @@ class ProcessInstanceControllerTest {
     private ProcessInstanceService processInstanceService;
 
     @MockitoBean
+    private ProcessInstanceLinkService processInstanceLinkService;
+
+    @MockitoBean
     private ApplicationRepository applicationRepository;
 
     @BeforeEach
@@ -284,7 +287,7 @@ class ProcessInstanceControllerTest {
     void should_return_InternalServerError_when_linkProcessInstances() throws Exception {
         RuntimeException generic = new RuntimeException("boom");
         doThrow(generic)
-            .when(processInstanceService)
+            .when(processInstanceLinkService)
             .linkProcessInstances(
                 "mainProcessInstanceId",
                 List.of("orphanProcessInstanceId1", "orphanProcessInstanceId2"),

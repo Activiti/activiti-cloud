@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -32,14 +33,15 @@ import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecif
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyId;
+import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class ProcessInstanceLinker {
+public class ProcessInstanceLinkService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceLinker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceLinkService.class);
 
     private final ProcessInstanceRepository processInstanceRepository;
 
@@ -47,16 +49,19 @@ public class ProcessInstanceLinker {
 
     private final TransactionTemplate transactionTemplate;
 
+    private final SecurityManager securityManager;
+
     private final ThreadPoolTaskScheduler retryScheduler;
 
     private final int maxRetries;
 
     private final int retryDelaySeconds;
 
-    public ProcessInstanceLinker(
+    public ProcessInstanceLinkService(
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceHierarchyRepository processInstanceHierarchyRepository,
         TransactionTemplate transactionTemplate,
+        SecurityManager securityManager,
         int maxRetries,
         int retryDelaySeconds,
         ThreadPoolTaskScheduler retryScheduler
@@ -64,6 +69,7 @@ public class ProcessInstanceLinker {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceHierarchyRepository = processInstanceHierarchyRepository;
         this.transactionTemplate = transactionTemplate;
+        this.securityManager = securityManager;
         this.retryScheduler = retryScheduler;
         this.maxRetries = maxRetries;
         this.retryDelaySeconds = retryDelaySeconds;
@@ -76,9 +82,12 @@ public class ProcessInstanceLinker {
     public void linkProcessInstances(
         String mainProcessInstanceId,
         List<String> processInstanceIds,
-        String linkProcessInstanceType,
-        String userId
+        String linkProcessInstanceType
     ) {
+        String userId = securityManager.getAuthenticatedUserId();
+        if (userId == null) {
+            throw new ActivitiForbiddenException("No authenticated user found to link process instances");
+        }
         linkProcessInstances(mainProcessInstanceId, processInstanceIds, linkProcessInstanceType, userId, 0);
     }
 
@@ -225,7 +234,7 @@ public class ProcessInstanceLinker {
         Set<ProcessInstanceHierarchyId> existing = processInstanceHierarchyRepository
             .findAllById(candidates.keySet())
             .stream()
-            .map(ProcessInstanceLinker::idOf)
+            .map(ProcessInstanceLinkService::idOf)
             .collect(Collectors.toSet());
 
         processInstanceHierarchyRepository.saveAll(

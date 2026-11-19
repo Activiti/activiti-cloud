@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -30,11 +31,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
+import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,13 +53,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
-class ProcessInstanceLinkerTest {
+class ProcessInstanceLinkServiceTest {
 
     private static final String TEST_USER = "testuser";
     private static final String MAIN_PROCESS_ID = "main-123";
     private static final String LINK_TYPE = "form-type";
 
-    private ProcessInstanceLinker processInstanceLinker;
+    private ProcessInstanceLinkService processInstanceLinkService;
 
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
@@ -68,6 +71,9 @@ class ProcessInstanceLinkerTest {
     private PlatformTransactionManager transactionManager;
 
     @Mock
+    private SecurityManager securityManager;
+
+    @Mock
     private ThreadPoolTaskScheduler retryScheduler;
 
     @Captor
@@ -75,10 +81,11 @@ class ProcessInstanceLinkerTest {
 
     @BeforeEach
     void setUp() {
-        processInstanceLinker = new ProcessInstanceLinker(
+        processInstanceLinkService = new ProcessInstanceLinkService(
             processInstanceRepository,
             processInstanceHierarchyRepository,
             new TransactionTemplate(transactionManager),
+            securityManager,
             3,
             2,
             retryScheduler
@@ -87,20 +94,34 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_linkProcess_when_initiatorsMatch() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity mainProcess = mainProcess(TEST_USER);
         ProcessInstanceEntity orphan = orphan("orphan-1", TEST_USER);
 
         given(processInstanceRepository.findById(MAIN_PROCESS_ID)).willReturn(Optional.of(mainProcess));
         given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(List.of(orphan));
 
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE, TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
 
         assertThat(orphan.getLinkedProcessInstanceId()).isEqualTo(MAIN_PROCESS_ID);
         verify(processInstanceRepository).saveAll(List.of(orphan));
     }
 
     @Test
+    void should_throwForbidden_when_noAuthenticatedUser() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(null);
+        List<String> processInstanceIds = List.of("orphan-1");
+
+        assertThatThrownBy(() ->
+            processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, processInstanceIds, LINK_TYPE)
+        ).isInstanceOf(ActivitiForbiddenException.class);
+
+        verifyNoInteractions(processInstanceRepository);
+    }
+
+    @Test
     void should_linkProcess_when_only_matchingInitiators() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity mainProcess = mainProcess(TEST_USER);
         ProcessInstanceEntity orphan1 = orphan("orphan-1", TEST_USER);
         ProcessInstanceEntity orphan2 = orphan("orphan-2", "anotherUser");
@@ -111,11 +132,10 @@ class ProcessInstanceLinkerTest {
             List.of(orphan1, orphan2, orphan3)
         );
 
-        processInstanceLinker.linkProcessInstances(
+        processInstanceLinkService.linkProcessInstances(
             MAIN_PROCESS_ID,
             List.of("orphan-1", "orphan-2", "orphan-3"),
-            LINK_TYPE,
-            TEST_USER
+            LINK_TYPE
         );
 
         verify(processInstanceRepository).saveAll(List.of(orphan1, orphan3));
@@ -125,7 +145,8 @@ class ProcessInstanceLinkerTest {
     @ParameterizedTest
     @MethodSource("provideInvalidProcessInstanceIds")
     void should_not_linkProcess_when_processInstanceIds_isInvalid(List<String> processInstanceIds) {
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, processInstanceIds, LINK_TYPE, TEST_USER);
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, processInstanceIds, LINK_TYPE);
 
         verify(processInstanceRepository, never()).findAll(any(ProcessInstanceSpecification.class));
         verify(processInstanceRepository, never()).saveAll(any());
@@ -134,17 +155,13 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_not_linkProcess_when_orphanProcesses_notFound() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         given(processInstanceRepository.findById(MAIN_PROCESS_ID)).willReturn(Optional.of(mainProcess(TEST_USER)));
         given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(
             Collections.emptyList()
         );
 
-        processInstanceLinker.linkProcessInstances(
-            MAIN_PROCESS_ID,
-            List.of("orphan-1", "orphan-2"),
-            LINK_TYPE,
-            TEST_USER
-        );
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1", "orphan-2"), LINK_TYPE);
 
         verify(processInstanceRepository, never()).saveAll(any());
         verifyNoInteractions(processInstanceHierarchyRepository);
@@ -152,12 +169,13 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_not_linkProcess_when_initiators_dontMatch() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity orphan = orphan("orphan-1", TEST_USER);
 
         given(processInstanceRepository.findById(MAIN_PROCESS_ID)).willReturn(Optional.of(mainProcess("anotherUser")));
         given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(List.of(orphan));
 
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE, TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
 
         assertThat(orphan.getLinkedProcessInstanceId()).isNull();
         verifyNoInteractions(processInstanceHierarchyRepository);
@@ -165,6 +183,7 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_linkProcess_when_mainProcess_foundOnRetry() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity orphan = orphan("orphan-1", TEST_USER);
 
         given(processInstanceRepository.findById(MAIN_PROCESS_ID)).willReturn(
@@ -174,7 +193,7 @@ class ProcessInstanceLinkerTest {
         runScheduledTasksImmediately();
         given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(List.of(orphan));
 
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE, TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
 
         verify(retryScheduler, times(1)).schedule(any(Runnable.class), any(Instant.class));
         assertThat(orphan.getLinkedProcessInstanceId()).isEqualTo(MAIN_PROCESS_ID);
@@ -182,12 +201,14 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_stopRetrying_when_mainProcess_neverFound() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         given(processInstanceRepository.findById(MAIN_PROCESS_ID)).willReturn(Optional.empty());
         runScheduledTasksImmediately();
 
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE, TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
 
         verify(retryScheduler, times(3)).schedule(any(Runnable.class), any(Instant.class));
+        verify(securityManager, times(1)).getAuthenticatedUserId();
         verify(processInstanceRepository, times(4)).findById(MAIN_PROCESS_ID);
         verify(processInstanceRepository, never()).findAll(any(ProcessInstanceSpecification.class));
         verifyNoInteractions(processInstanceHierarchyRepository);
@@ -195,6 +216,7 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_retryLinking_when_linkFailsWithException() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity failedAttemptOrphan = orphan("orphan-1", TEST_USER);
         ProcessInstanceEntity retriedOrphan = orphan("orphan-1", TEST_USER);
 
@@ -208,9 +230,10 @@ class ProcessInstanceLinkerTest {
             .willReturn(List.of(retriedOrphan));
         runScheduledTasksImmediately();
 
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE, TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
 
         verify(retryScheduler, times(1)).schedule(any(Runnable.class), any(Instant.class));
+        verify(securityManager, times(1)).getAuthenticatedUserId();
         verify(transactionManager).rollback(any());
         verify(transactionManager).commit(any());
         assertThat(retriedOrphan.getLinkedProcessInstanceId()).isEqualTo(MAIN_PROCESS_ID);
@@ -218,6 +241,7 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_notLinkProcess_when_alreadyLinked() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity alreadyLinked = orphan("orphan-1", TEST_USER);
         alreadyLinked.setLinkedProcessInstanceId("other-main");
 
@@ -226,7 +250,7 @@ class ProcessInstanceLinkerTest {
             List.of(alreadyLinked)
         );
 
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE, TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
 
         assertThat(alreadyLinked.getLinkedProcessInstanceId()).isEqualTo("other-main");
         verifyNoInteractions(processInstanceHierarchyRepository);
@@ -234,6 +258,7 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_keepShortestDepth_when_linkedProcessIsAlsoDescendantOfAnotherLinkedProcess() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity parent = orphan("orphan-1", TEST_USER);
         ProcessInstanceEntity child = orphan("child-1", TEST_USER);
 
@@ -254,12 +279,7 @@ class ProcessInstanceLinkerTest {
             )
         );
 
-        processInstanceLinker.linkProcessInstances(
-            MAIN_PROCESS_ID,
-            List.of("orphan-1", "child-1"),
-            LINK_TYPE,
-            TEST_USER
-        );
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1", "child-1"), LINK_TYPE);
 
         verify(processInstanceHierarchyRepository).saveAll(savedHierarchyRows.capture());
         assertThat(savedHierarchyRows.getValue())
@@ -273,6 +293,7 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_registerLinkedProcessAndItsSubtree_when_linked() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity orphan = orphan("orphan-1", TEST_USER);
 
         given(processInstanceRepository.findById(MAIN_PROCESS_ID)).willReturn(Optional.of(mainProcess(TEST_USER)));
@@ -292,7 +313,7 @@ class ProcessInstanceLinkerTest {
             )
         );
 
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE, TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
 
         verify(processInstanceHierarchyRepository).saveAll(savedHierarchyRows.capture());
         assertThat(savedHierarchyRows.getValue())
@@ -312,6 +333,7 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_notRegisterAgain_when_hierarchyRowsAlreadyExist() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
         ProcessInstanceEntity orphan = orphan("orphan-1", TEST_USER);
         ProcessInstanceHierarchyEntity existing = new ProcessInstanceHierarchyEntity(
             MAIN_PROCESS_ID,
@@ -330,7 +352,7 @@ class ProcessInstanceLinkerTest {
         ).willReturn(List.of(new ProcessInstanceHierarchyEntity("orphan-1", "orphan-1", 0, "self")));
         given(processInstanceHierarchyRepository.findAllById(any())).willReturn(List.of(existing));
 
-        processInstanceLinker.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE, TEST_USER);
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
 
         verify(processInstanceHierarchyRepository).saveAll(savedHierarchyRows.capture());
         assertThat(savedHierarchyRows.getValue()).isEmpty();
@@ -338,7 +360,7 @@ class ProcessInstanceLinkerTest {
 
     @Test
     void should_shutdownRetryScheduler_when_shutdown() {
-        processInstanceLinker.shutdown();
+        processInstanceLinkService.shutdown();
 
         verify(retryScheduler).shutdown();
     }
