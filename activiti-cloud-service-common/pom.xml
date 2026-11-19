@@ -41,7 +41,7 @@
     <!-- See activiti-cloud-api/pom.xml: skip.common.tests for per-service CI builds -->
     <skip.common.tests>false</skip.common.tests>
     <java-semver.version>0.10.2</java-semver.version>
-    <resteasy.version>7.0.2.Final</resteasy.version>
+    <resteasy.version>7.0.6.Final</resteasy.version>
     <logstash.version>9.0</logstash.version>
     <springdoc.version>3.1.1</springdoc.version>
     <xstream.version>1.4.21</xstream.version>
