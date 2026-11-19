@@ -359,6 +359,74 @@ class ProcessInstanceLinkServiceTest {
     }
 
     @Test
+    void should_replaceHierarchyRow_when_shorterRelationIsDiscovered() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+        ProcessInstanceEntity orphan = orphan("child-1", TEST_USER);
+        ProcessInstanceHierarchyEntity existing = new ProcessInstanceHierarchyEntity(
+            MAIN_PROCESS_ID,
+            "child-1",
+            2,
+            "subprocess"
+        );
+
+        given(processInstanceRepository.findById(MAIN_PROCESS_ID)).willReturn(Optional.of(mainProcess(TEST_USER)));
+        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(List.of(orphan));
+        given(processInstanceHierarchyRepository.findByDescendantId(MAIN_PROCESS_ID)).willReturn(
+            List.of(new ProcessInstanceHierarchyEntity(MAIN_PROCESS_ID, MAIN_PROCESS_ID, 0, "self"))
+        );
+        given(
+            processInstanceHierarchyRepository.findByAncestorIdInAndDepthGreaterThan(List.of("child-1"), -1)
+        ).willReturn(List.of(new ProcessInstanceHierarchyEntity("child-1", "child-1", 0, "self")));
+        given(processInstanceHierarchyRepository.findAllById(any())).willReturn(List.of(existing));
+
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("child-1"), LINK_TYPE);
+
+        verify(processInstanceHierarchyRepository).saveAll(savedHierarchyRows.capture());
+        assertThat(savedHierarchyRows.getValue())
+            .extracting(
+                ProcessInstanceHierarchyEntity::getAncestorId,
+                ProcessInstanceHierarchyEntity::getDescendantId,
+                ProcessInstanceHierarchyEntity::getDepth,
+                ProcessInstanceHierarchyEntity::getRelationType
+            )
+            .containsExactly(tuple(MAIN_PROCESS_ID, "child-1", 1, "linked"));
+    }
+
+    @Test
+    void should_notReplaceHierarchyRow_when_existingRelationIsShorter() {
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+        ProcessInstanceEntity orphan = orphan("orphan-1", TEST_USER);
+        ProcessInstanceHierarchyEntity existing = new ProcessInstanceHierarchyEntity(
+            MAIN_PROCESS_ID,
+            "child-1",
+            1,
+            "linked"
+        );
+
+        given(processInstanceRepository.findById(MAIN_PROCESS_ID)).willReturn(Optional.of(mainProcess(TEST_USER)));
+        given(processInstanceRepository.findAll(any(ProcessInstanceSpecification.class))).willReturn(List.of(orphan));
+        given(processInstanceHierarchyRepository.findByDescendantId(MAIN_PROCESS_ID)).willReturn(
+            List.of(new ProcessInstanceHierarchyEntity(MAIN_PROCESS_ID, MAIN_PROCESS_ID, 0, "self"))
+        );
+        given(
+            processInstanceHierarchyRepository.findByAncestorIdInAndDepthGreaterThan(List.of("orphan-1"), -1)
+        ).willReturn(
+            List.of(
+                new ProcessInstanceHierarchyEntity("orphan-1", "orphan-1", 0, "self"),
+                new ProcessInstanceHierarchyEntity("orphan-1", "child-1", 1, "subprocess")
+            )
+        );
+        given(processInstanceHierarchyRepository.findAllById(any())).willReturn(List.of(existing));
+
+        processInstanceLinkService.linkProcessInstances(MAIN_PROCESS_ID, List.of("orphan-1"), LINK_TYPE);
+
+        verify(processInstanceHierarchyRepository).saveAll(savedHierarchyRows.capture());
+        assertThat(savedHierarchyRows.getValue())
+            .extracting(ProcessInstanceHierarchyEntity::getDescendantId)
+            .containsExactly("orphan-1");
+    }
+
+    @Test
     void should_shutdownRetryScheduler_when_shutdown() {
         processInstanceLinkService.shutdown();
 

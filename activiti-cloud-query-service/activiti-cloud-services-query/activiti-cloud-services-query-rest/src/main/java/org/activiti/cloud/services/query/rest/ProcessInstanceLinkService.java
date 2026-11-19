@@ -231,17 +231,21 @@ public class ProcessInstanceLinkService {
             }
         }
 
-        Set<ProcessInstanceHierarchyId> existing = processInstanceHierarchyRepository
+        // A process linked after one of its ancestors was already linked in a previous request gets a shorter
+        // direct relation, which must replace the longer one registered earlier.
+        Map<ProcessInstanceHierarchyId, Integer> existingDepths = processInstanceHierarchyRepository
             .findAllById(candidates.keySet())
             .stream()
-            .map(ProcessInstanceLinkService::idOf)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toMap(ProcessInstanceLinkService::idOf, ProcessInstanceHierarchyEntity::getDepth));
 
         processInstanceHierarchyRepository.saveAll(
             candidates
                 .values()
                 .stream()
-                .filter(candidate -> !existing.contains(idOf(candidate)))
+                .filter(candidate -> {
+                    Integer existingDepth = existingDepths.get(idOf(candidate));
+                    return existingDepth == null || candidate.getDepth() < existingDepth;
+                })
                 .toList()
         );
     }
