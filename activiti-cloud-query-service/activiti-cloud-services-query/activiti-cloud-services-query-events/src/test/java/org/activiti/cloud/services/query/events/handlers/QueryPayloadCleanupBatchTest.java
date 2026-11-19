@@ -57,7 +57,6 @@ class QueryPayloadCleanupBatchTest {
 
         then(handlers).should().handle(event);
         then(entityManager).should().flush();
-
     }
 
     @Test
@@ -68,9 +67,7 @@ class QueryPayloadCleanupBatchTest {
 
         var consumer = consumer();
         List<CloudRuntimeEvent<?, ?>> events = List.of(event);
-        assertThatThrownBy(() -> consumer.receive(events, Map.of())).isInstanceOf(
-            IllegalStateException.class
-        );
+        assertThatThrownBy(() -> consumer.receive(events, Map.of())).isInstanceOf(IllegalStateException.class);
 
         then(strategy).shouldHaveNoInteractions();
         then(entityManager).should().clear();

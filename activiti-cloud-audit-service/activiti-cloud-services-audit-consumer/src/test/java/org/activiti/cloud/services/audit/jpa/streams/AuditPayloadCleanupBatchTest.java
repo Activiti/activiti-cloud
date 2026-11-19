@@ -54,9 +54,9 @@ class AuditPayloadCleanupBatchTest {
         var handler = handler();
         Map<String, Object> id = Map.of("id", "batch");
         var cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl();
-        assertThatThrownBy(() ->
-            handler.receiveCloudRuntimeEvent(id, cloudProcessCompletedEvent)
-        ).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> handler.receiveCloudRuntimeEvent(id, cloudProcessCompletedEvent)).isInstanceOf(
+            IllegalStateException.class
+        );
 
         then(strategy).shouldHaveNoInteractions();
     }
@@ -70,9 +70,7 @@ class AuditPayloadCleanupBatchTest {
         var handler = handler();
         Map<String, Object> id = Map.of("id", "batch");
         var cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl();
-        assertThatThrownBy(() ->
-            handler.receiveCloudRuntimeEvent(id, cloudProcessCompletedEvent)
-        )
+        assertThatThrownBy(() -> handler.receiveCloudRuntimeEvent(id, cloudProcessCompletedEvent))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("cleanup failed");
     }

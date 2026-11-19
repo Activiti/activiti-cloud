@@ -16,9 +16,7 @@ class QueryPayloadCleanupConfigurationTest {
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
         .withUserConfiguration(EventHandlersAutoConfiguration.class)
         .withBean(EntityManager.class, () -> mock(EntityManager.class))
-        .withBean(ApplicationRepository.class, () ->
-            mock(ApplicationRepository.class)
-        );
+        .withBean(ApplicationRepository.class, () -> mock(ApplicationRepository.class));
 
     @Test
     void should_preserveExistingRetention_whenPolicyIsAbsent() {
@@ -28,19 +26,15 @@ class QueryPayloadCleanupConfigurationTest {
     @ParameterizedTest
     @ValueSource(strings = { "keep", "transient" })
     void should_selectCleanupByPolicy(String policy) {
-        runner
-            .withPropertyValues("activiti.cloud.processing-data.retention-policy=" + policy)
-            .run(context -> {
-                assertThat(context).hasNotFailed();
-                if (policy.equals("transient")) {
-                    assertThat(context).hasSingleBean(QueryPayloadCleanup.class);
-                    assertThat(context.getBean(QueryPayloadCleanup.class)).isInstanceOf(
-                        TransientQueryPayloadCleanup.class
-                    );
-                } else {
-                    assertThat(context).doesNotHaveBean(QueryPayloadCleanup.class);
-                }
-            });
+        runner.withPropertyValues("activiti.cloud.processing-data.retention-policy=" + policy).run(context -> {
+            assertThat(context).hasNotFailed();
+            if (policy.equals("transient")) {
+                assertThat(context).hasSingleBean(QueryPayloadCleanup.class);
+                assertThat(context.getBean(QueryPayloadCleanup.class)).isInstanceOf(TransientQueryPayloadCleanup.class);
+            } else {
+                assertThat(context).doesNotHaveBean(QueryPayloadCleanup.class);
+            }
+        });
     }
 
     @Test

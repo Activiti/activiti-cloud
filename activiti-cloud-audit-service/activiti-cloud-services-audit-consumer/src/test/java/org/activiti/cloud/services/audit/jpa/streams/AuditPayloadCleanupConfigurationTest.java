@@ -28,19 +28,15 @@ class AuditPayloadCleanupConfigurationTest {
     @ParameterizedTest
     @ValueSource(strings = { "keep", "transient" })
     void should_selectCleanupByPolicy(String policy) {
-        runner
-            .withPropertyValues("activiti.cloud.processing-data.retention-policy=" + policy)
-            .run(context -> {
-                assertThat(context).hasNotFailed();
-                if (policy.equals("transient")) {
-                    assertThat(context).hasSingleBean(AuditPayloadCleanup.class);
-                    assertThat(context.getBean(AuditPayloadCleanup.class)).isInstanceOf(
-                        TransientAuditPayloadCleanup.class
-                    );
-                } else {
-                    assertThat(context).doesNotHaveBean(AuditPayloadCleanup.class);
-                }
-            });
+        runner.withPropertyValues("activiti.cloud.processing-data.retention-policy=" + policy).run(context -> {
+            assertThat(context).hasNotFailed();
+            if (policy.equals("transient")) {
+                assertThat(context).hasSingleBean(AuditPayloadCleanup.class);
+                assertThat(context.getBean(AuditPayloadCleanup.class)).isInstanceOf(TransientAuditPayloadCleanup.class);
+            } else {
+                assertThat(context).doesNotHaveBean(AuditPayloadCleanup.class);
+            }
+        });
     }
 
     @Test
