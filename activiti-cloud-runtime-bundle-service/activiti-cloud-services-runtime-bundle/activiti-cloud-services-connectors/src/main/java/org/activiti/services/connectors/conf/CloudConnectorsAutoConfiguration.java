@@ -38,7 +38,9 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
+import org.activiti.services.connectors.channel.AggregateIntegrationEventCmdFactory;
 import org.activiti.services.connectors.channel.ConnectorIncidentEventHandler;
+import org.activiti.services.connectors.channel.EphemeralMappingResolver;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
@@ -48,6 +50,7 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEven
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryProperties;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -73,35 +76,48 @@ public class CloudConnectorsAutoConfiguration {
     public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
             integrationContextService,
-            runtimeBundleProperties,
             managementService,
-            processEngineEventsAggregator,
             variablesPropagator,
-            serviceTaskIntegrationCompletionHandler
+            serviceTaskIntegrationCompletionHandler,
+            aggregateIntegrationEventCmdFactory
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EphemeralMappingResolver ephemeralMappingResolver(ProcessExtensionService processExtensionService) {
+        return new EphemeralMappingResolver(processExtensionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory(
+        RuntimeBundleProperties runtimeBundleProperties,
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        EphemeralMappingResolver ephemeralMappingResolver
+    ) {
+        return new AggregateIntegrationEventCmdFactory(
+            runtimeBundleProperties,
+            processEngineEventsAggregator,
+            ephemeralMappingResolver
         );
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler(
-        RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
     ) {
-        return new ServiceTaskIntegrationCompletionHandler(
-            runtimeBundleProperties,
-            managementService,
-            processEngineEventsAggregator
-        );
+        return new ServiceTaskIntegrationCompletionHandler(managementService, aggregateIntegrationEventCmdFactory);
     }
 
     @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -118,15 +134,13 @@ public class CloudConnectorsAutoConfiguration {
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
         ManagementService managementService,
-        RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
     ) {
         return new ServiceTaskIntegrationErrorEventHandler(
             runtimeService,
             integrationContextService,
             managementService,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
+            aggregateIntegrationEventCmdFactory
         );
     }
 

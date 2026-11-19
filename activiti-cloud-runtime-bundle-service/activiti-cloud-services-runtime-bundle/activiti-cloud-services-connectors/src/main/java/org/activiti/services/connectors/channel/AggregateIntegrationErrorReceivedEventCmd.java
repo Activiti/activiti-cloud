@@ -29,15 +29,18 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
     private final IntegrationError integrationError;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private final boolean ephemeralMapping;
 
     AggregateIntegrationErrorReceivedEventCmd(
         IntegrationError integrationError,
         RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        boolean ephemeralMapping
     ) {
         this.integrationError = integrationError;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
+        this.ephemeralMapping = ephemeralMapping;
     }
 
     @Override
@@ -47,7 +50,8 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
                 integrationError.getIntegrationContext()
             );
             sanitizedContext.clearInBoundVariables();
-            if (integrationError.getIntegrationContext().hasEphemeralVariables()) {
+            sanitizedContext.setEphemeralVariables(ephemeralMapping);
+            if (ephemeralMapping) {
                 sanitizedContext.clearOutBoundVariables();
             }
             CloudIntegrationErrorReceivedEventImpl integrationErrorReceived = createIntegrationErrorReceivedEvent(

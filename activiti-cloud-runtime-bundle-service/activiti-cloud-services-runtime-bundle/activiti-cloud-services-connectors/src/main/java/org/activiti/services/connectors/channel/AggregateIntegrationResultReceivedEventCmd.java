@@ -28,15 +28,18 @@ class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
     private final IntegrationContext integrationContext;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private final boolean ephemeralMapping;
 
     AggregateIntegrationResultReceivedEventCmd(
         IntegrationContext integrationContext,
         RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        ProcessEngineEventsAggregator processEngineEventsAggregator,
+        boolean ephemeralMapping
     ) {
         this.integrationContext = integrationContext;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
+        this.ephemeralMapping = ephemeralMapping;
     }
 
     @Override
@@ -44,7 +47,8 @@ class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(integrationContext);
             sanitizedContext.clearInBoundVariables();
-            if (integrationContext.hasEphemeralVariables()) {
+            sanitizedContext.setEphemeralVariables(ephemeralMapping);
+            if (ephemeralMapping) {
                 sanitizedContext.clearOutBoundVariables();
             }
             CloudIntegrationResultReceivedEventImpl integrationResultReceived =

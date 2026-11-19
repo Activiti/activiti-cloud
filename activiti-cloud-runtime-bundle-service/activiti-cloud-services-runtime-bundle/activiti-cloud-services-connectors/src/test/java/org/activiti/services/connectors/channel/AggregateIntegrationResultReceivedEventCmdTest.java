@@ -28,21 +28,24 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AggregateIntegrationResultReceivedEventCmdTest {
 
-    @InjectMocks
-    private AggregateIntegrationResultReceivedEventCmd command;
-
-    @Mock
-    private IntegrationContext integrationContext;
+    private static final Map<String, Object> OUTBOUND_VARIABLES = Map.of(
+        "outboundVar1",
+        "value1",
+        "outboundVar2",
+        "value2"
+    );
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RuntimeBundleProperties runtimeBundleProperties;
@@ -59,7 +62,7 @@ class AggregateIntegrationResultReceivedEventCmdTest {
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
         //when
-        command.execute(null);
+        buildCommand(buildIntegrationContext(null), false).execute(null);
 
         //then
         verify(processEngineEventsAggregator).add(messageCaptor.capture());
@@ -72,25 +75,11 @@ class AggregateIntegrationResultReceivedEventCmdTest {
         //given
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
-        IntegrationContextImpl testIntegrationContext = new IntegrationContextImpl();
-        testIntegrationContext.addInBoundVariables(Map.of("inboundVar1", "value1", "inboundVar2", "value2"));
-        testIntegrationContext.addOutBoundVariables(Map.of("outboundVar1", "value1", "outboundVar2", "value2"));
-
-        AggregateIntegrationResultReceivedEventCmd aggregateIntegrationResultReceivedEventCmd =
-            new AggregateIntegrationResultReceivedEventCmd(
-                testIntegrationContext,
-                runtimeBundleProperties,
-                processEngineEventsAggregator
-            );
-
         //when
-        aggregateIntegrationResultReceivedEventCmd.execute(null);
+        buildCommand(buildIntegrationContext(null), false).execute(null);
 
         //then
-        verify(processEngineEventsAggregator).add(messageCaptor.capture());
-        CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
-        IntegrationContext sanitizedContext = event.getEntity();
-        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
+        assertThat(captureSentContext().getInBoundVariables()).isEmpty();
     }
 
     @Test
@@ -99,67 +88,72 @@ class AggregateIntegrationResultReceivedEventCmdTest {
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
 
         //when
-        command.execute(null);
+        buildCommand(buildIntegrationContext(null), true).execute(null);
 
         //then
         verifyNoInteractions(processEngineEventsAggregator);
     }
 
-    @Test
-    void should_removeInboundOutBoundVariables_when_integrationContextHasEphemeralVariables() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(booleans = { true, false })
+    void should_removeInboundAndOutBoundVariables_when_mappingIsEphemeral_regardlessOfConnectorFlag(
+        Boolean connectorEphemeralFlag
+    ) {
         //given
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
-        IntegrationContextImpl testIntegrationContext = new IntegrationContextImpl();
-        testIntegrationContext.setEphemeralVariables(true);
-        testIntegrationContext.addInBoundVariables(Map.of("inboundVar1", "value1", "inboundVar2", "value2"));
-        testIntegrationContext.addOutBoundVariables(Map.of("outboundVar1", "value1", "outboundVar2", "value2"));
-
-        AggregateIntegrationResultReceivedEventCmd aggregateIntegrationResultReceivedEventCmd =
-            new AggregateIntegrationResultReceivedEventCmd(
-                testIntegrationContext,
-                runtimeBundleProperties,
-                processEngineEventsAggregator
-            );
-
         //when
-        aggregateIntegrationResultReceivedEventCmd.execute(null);
+        buildCommand(buildIntegrationContext(connectorEphemeralFlag), true).execute(null);
 
         //then
-        verify(processEngineEventsAggregator).add(messageCaptor.capture());
-        CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
-        IntegrationContext sanitizedContext = event.getEntity();
+        IntegrationContext sanitizedContext = captureSentContext();
         assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
         assertThat(sanitizedContext.getOutBoundVariables()).isEmpty();
+        assertThat(sanitizedContext.hasEphemeralVariables()).isTrue();
     }
 
-    @Test
-    void should_retainOutBoundVariables_when_integrationContextHasNoEphemeralVariables() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(booleans = { true, false })
+    void should_retainOutBoundVariables_when_mappingIsNotEphemeral_regardlessOfConnectorFlag(
+        Boolean connectorEphemeralFlag
+    ) {
         //given
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
-        IntegrationContextImpl testIntegrationContext = new IntegrationContextImpl();
-        testIntegrationContext.setEphemeralVariables(false);
-        testIntegrationContext.addInBoundVariables(Map.of("inboundVar1", "value1", "inboundVar2", "value2"));
-        testIntegrationContext.addOutBoundVariables(Map.of("outboundVar1", "value1", "outboundVar2", "value2"));
-
-        AggregateIntegrationResultReceivedEventCmd aggregateIntegrationResultReceivedEventCmd =
-            new AggregateIntegrationResultReceivedEventCmd(
-                testIntegrationContext,
-                runtimeBundleProperties,
-                processEngineEventsAggregator
-            );
-
         //when
-        aggregateIntegrationResultReceivedEventCmd.execute(null);
+        buildCommand(buildIntegrationContext(connectorEphemeralFlag), false).execute(null);
 
         //then
-        verify(processEngineEventsAggregator).add(messageCaptor.capture());
-        CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
-        IntegrationContext sanitizedContext = event.getEntity();
+        IntegrationContext sanitizedContext = captureSentContext();
         assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
-        assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(
-            Map.of("outboundVar1", "value1", "outboundVar2", "value2")
+        assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(OUTBOUND_VARIABLES);
+        assertThat(sanitizedContext.hasEphemeralVariables()).isFalse();
+    }
+
+    private AggregateIntegrationResultReceivedEventCmd buildCommand(
+        IntegrationContext integrationContext,
+        boolean ephemeralMapping
+    ) {
+        return new AggregateIntegrationResultReceivedEventCmd(
+            integrationContext,
+            runtimeBundleProperties,
+            processEngineEventsAggregator,
+            ephemeralMapping
         );
+    }
+
+    private IntegrationContextImpl buildIntegrationContext(Boolean connectorEphemeralFlag) {
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setEphemeralVariables(connectorEphemeralFlag);
+        integrationContext.addInBoundVariables(Map.of("inboundVar1", "value1", "inboundVar2", "value2"));
+        integrationContext.addOutBoundVariables(OUTBOUND_VARIABLES);
+        return integrationContext;
+    }
+
+    private IntegrationContext captureSentContext() {
+        verify(processEngineEventsAggregator).add(messageCaptor.capture());
+        return messageCaptor.getValue().getEntity();
     }
 }
