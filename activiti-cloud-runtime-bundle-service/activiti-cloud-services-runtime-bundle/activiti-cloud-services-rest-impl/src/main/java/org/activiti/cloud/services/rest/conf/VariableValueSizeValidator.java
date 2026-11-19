@@ -63,24 +63,6 @@ public class VariableValueSizeValidator {
         }
     }
 
-    public void validateSingle(String name, Object value) {
-        if (whitelistedVariableNames.contains(name)) {
-            return;
-        }
-
-        long size = serializedSize(value);
-
-        if (size > maxNonWhitelistedBytes) {
-            LOGGER.warn(
-                "Variable '{}' value of {} bytes exceeds the maximum allowed size of {} bytes",
-                name,
-                size,
-                maxNonWhitelistedBytes
-            );
-            throw new VariableValueTooLargeException(size, maxNonWhitelistedBytes);
-        }
-    }
-
     private long serializedSize(Object value) {
         if (value == null) {
             return 0;

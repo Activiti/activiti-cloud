@@ -15,14 +15,25 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
+import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.process.model.payloads.UpdateProcessPayload;
+import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.core.ResolvableType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -55,6 +66,39 @@ class VariableValueSizeValidationAdviceTest {
         request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("variableName", variableName));
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
     }
+
+    // --- supports(): decides whether the advice runs for a request body type ---
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(
+        classes = {
+            SetProcessVariablesPayload.class,
+            StartProcessPayload.class,
+            CreateTaskVariablePayload.class,
+            UpdateTaskVariablePayload.class,
+            SubclassedSetProcessVariablesPayload.class,
+        }
+    )
+    void should_support_variablePayloadTypes(Class<?> payloadType) {
+        assertThat(createAdvice(Set.of()).supports(null, payloadType, null)).isTrue();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(
+        classes = { UpdateProcessPayload.class, CreateProcessInstancePayload.class, String.class, Object.class }
+    )
+    void should_notSupport_otherPayloadTypes(Class<?> payloadType) {
+        assertThat(createAdvice(Set.of()).supports(null, payloadType, null)).isFalse();
+    }
+
+    @Test
+    void should_notSupport_parameterizedTypes() {
+        Type listOfStrings = ResolvableType.forClassWithGenerics(List.class, String.class).getType();
+
+        assertThat(createAdvice(Set.of()).supports(null, listOfStrings, null)).isFalse();
+    }
+
+    static class SubclassedSetProcessVariablesPayload extends SetProcessVariablesPayload {}
 
     // --- UpdateTaskVariablePayload: URI name takes precedence over body name ---
 

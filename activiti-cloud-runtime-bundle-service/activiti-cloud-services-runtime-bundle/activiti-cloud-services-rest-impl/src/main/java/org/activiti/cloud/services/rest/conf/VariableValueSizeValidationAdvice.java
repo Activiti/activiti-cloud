@@ -16,8 +16,10 @@
 package org.activiti.cloud.services.rest.conf;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
+import java.util.function.Function;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
@@ -37,11 +39,28 @@ import tools.jackson.databind.ObjectMapper;
 @EnableConfigurationProperties(VariableSizeLimitProperties.class)
 public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter {
 
-    private static final Set<Class<?>> SUPPORTED_PAYLOAD_TYPES = Set.of(
+    private static final Map<Class<?>, Function<Object, Map<String, Object>>> VARIABLE_EXTRACTORS = Map.of(
         SetProcessVariablesPayload.class,
+        payload -> ((SetProcessVariablesPayload) payload).getVariables(),
         StartProcessPayload.class,
+        payload -> ((StartProcessPayload) payload).getVariables(),
         CreateTaskVariablePayload.class,
-        UpdateTaskVariablePayload.class
+        payload -> {
+            CreateTaskVariablePayload createPayload = (CreateTaskVariablePayload) payload;
+            return Collections.singletonMap(createPayload.getName(), createPayload.getValue());
+        },
+        UpdateTaskVariablePayload.class,
+        payload -> {
+            // The controller overwrites payload.name with the URI's {variableName} AFTER
+            // this advice runs, so we must validate against the URI variable name to prevent
+            // bypass (body claims a whitelisted name while the URI targets a non-whitelisted one).
+            UpdateTaskVariablePayload updatePayload = (UpdateTaskVariablePayload) payload;
+            String resolvedName = extractVariableNameFromUri();
+            return Collections.singletonMap(
+                resolvedName != null ? resolvedName : updatePayload.getName(),
+                updatePayload.getValue()
+            );
+        }
     );
 
     private final VariableValueSizeValidator validator;
@@ -60,10 +79,7 @@ public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter 
         Type targetType,
         Class<? extends HttpMessageConverter<?>> converterType
     ) {
-        if (targetType instanceof Class<?> clazz) {
-            return SUPPORTED_PAYLOAD_TYPES.stream().anyMatch(supported -> supported.isAssignableFrom(clazz));
-        }
-        return false;
+        return targetType instanceof Class<?> clazz && findExtractor(clazz).isPresent();
     }
 
     @Override
@@ -74,23 +90,19 @@ public class VariableValueSizeValidationAdvice extends RequestBodyAdviceAdapter 
         Type targetType,
         Class<? extends HttpMessageConverter<?>> converterType
     ) {
-        if (body instanceof SetProcessVariablesPayload payload) {
-            validator.validate(payload.getVariables());
-        } else if (body instanceof StartProcessPayload payload) {
-            validator.validate(payload.getVariables());
-        } else if (body instanceof CreateTaskVariablePayload payload) {
-            validator.validateSingle(payload.getName(), payload.getValue());
-        } else if (body instanceof UpdateTaskVariablePayload payload) {
-            // The controller overwrites payload.name with the URI's {variableName} AFTER
-            // this advice runs, so we must validate against the URI variable name to prevent
-            // bypass (body claims a whitelisted name while the URI targets a non-whitelisted one).
-            String resolvedName = extractVariableNameFromUri();
-            validator.validateSingle(resolvedName != null ? resolvedName : payload.getName(), payload.getValue());
-        }
+        findExtractor(body.getClass()).ifPresent(extractor -> validator.validate(extractor.apply(body)));
         return body;
     }
 
-    private String extractVariableNameFromUri() {
+    private static Optional<Function<Object, Map<String, Object>>> findExtractor(Class<?> payloadType) {
+        return VARIABLE_EXTRACTORS.entrySet()
+            .stream()
+            .filter(entry -> entry.getKey().isAssignableFrom(payloadType))
+            .map(Map.Entry::getValue)
+            .findFirst();
+    }
+
+    private static String extractVariableNameFromUri() {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attrs != null) {
             Object uriVars = attrs.getRequest().getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);

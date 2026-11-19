@@ -162,47 +162,6 @@ class VariableValueSizeValidatorTest {
         assertThatNoException().isThrownBy(() -> validator.validate(variables));
     }
 
-    // --- Single variable validation (CreateTaskVariablePayload / UpdateTaskVariablePayload) ---
-
-    @Test
-    void should_allowSingleVariable_when_withinLimit() {
-        VariableValueSizeValidator validator = new VariableValueSizeValidator(
-            MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet(),
-            MAPPER
-        );
-
-        assertThatNoException().isThrownBy(() -> validator.validateSingle("var1", "small value"));
-    }
-
-    @Test
-    void should_rejectSingleVariable_when_exceedsLimit() {
-        VariableValueSizeValidator validator = new VariableValueSizeValidator(
-            MAX_NON_WHITELISTED_BYTES,
-            Collections.emptySet(),
-            MAPPER
-        );
-
-        String largeValue = "x".repeat((int) MAX_NON_WHITELISTED_BYTES + 1);
-
-        assertThatThrownBy(() -> validator.validateSingle("var1", largeValue)).isInstanceOf(
-            VariableValueTooLargeException.class
-        );
-    }
-
-    @Test
-    void should_allowSingleWhitelistedVariable_when_exceedsLimit() {
-        VariableValueSizeValidator validator = new VariableValueSizeValidator(
-            MAX_NON_WHITELISTED_BYTES,
-            Set.of("batchState"),
-            MAPPER
-        );
-
-        String largeValue = "x".repeat(100_000);
-
-        assertThatNoException().isThrownBy(() -> validator.validateSingle("batchState", largeValue));
-    }
-
     // --- VariableValueTooLargeException ---
 
     @Test
