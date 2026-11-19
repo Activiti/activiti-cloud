@@ -41,7 +41,6 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.BpmnError;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
-import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -49,8 +48,6 @@ import org.activiti.engine.runtime.ExecutionQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -64,6 +61,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     private static final String EXECUTION_ID = "execId";
     private static final String ENTITY_ID = "entityId";
     private static final String CLIENT_ID = "entityId";
+    private static final Map<String, Object> CONNECTOR_OUTBOUND_VARIABLES = Map.of("restResult", "fromConnector");
 
     @InjectMocks
     private ServiceTaskIntegrationErrorEventHandler handler;
@@ -247,117 +245,137 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void should_useEphemeralFlagFromMapping_andIgnoreConnectorFlag(boolean ephemeralMapping) {
+    @Test
+    public void should_removeOutboundVariablesFromAuditEvent_when_mappingIsEphemeral() {
         //given
-        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(
-            integrationContextEntity
-        );
-        given(ephemeralMappingResolver.isEphemeral(integrationContextEntity)).willReturn(ephemeralMapping);
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
+        givenIntegrationContextWithMapping(true);
         when(executionQuery.list()).thenReturn(List.of());
-
-        IntegrationContextImpl integrationContext = buildIntegrationContext();
-        integrationContext.addOutBoundVariables(Map.of("restResult", "fromConnector"));
         // the connector error payload claims the opposite of the mapping
-        integrationContext.setEphemeralVariables(!ephemeralMapping);
-        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
-            new IntegrationRequestImpl(integrationContext),
-            new RuntimeException("connector failure")
-        );
+        IntegrationError integrationError = buildIntegrationError(false, new RuntimeException("connector failure"));
 
         //when
-        handler.receive(integrationErrorEvent);
+        handler.receive(integrationError);
 
         //then
         verify(managementService).executeCommand(commandArgumentCaptor.capture());
-        Command<?> aggregateCommand = commandArgumentCaptor
-            .getValue()
-            .getCommands()
-            .stream()
-            .filter(AggregateIntegrationErrorReceivedEventCmd.class::isInstance)
-            .findFirst()
-            .orElseThrow();
-        aggregateCommand.execute(null);
-
-        ArgumentCaptor<CloudIntegrationErrorReceivedEventImpl> eventCaptor = ArgumentCaptor.forClass(
-            CloudIntegrationErrorReceivedEventImpl.class
-        );
-        verify(processEngineEventsAggregator).add(eventCaptor.capture());
-        IntegrationContext auditedContext = eventCaptor.getValue().getEntity();
-        assertThat(auditedContext.hasEphemeralVariables()).isEqualTo(ephemeralMapping);
-        if (ephemeralMapping) {
-            assertThat(auditedContext.getOutBoundVariables()).isEmpty();
-        } else {
-            assertThat(auditedContext.getOutBoundVariables()).containsExactlyEntriesOf(
-                Map.of("restResult", "fromConnector")
-            );
-        }
+        IntegrationContext auditedContext = executeAuditCommandAndCaptureContext(commandArgumentCaptor.getValue());
+        assertThat(auditedContext.hasEphemeralVariables()).isTrue();
+        assertThat(auditedContext.getInBoundVariables()).isEmpty();
+        assertThat(auditedContext.getOutBoundVariables()).isEmpty();
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    public void should_forwardMappingFlagAndSanitizeEvent_when_bpmnErrorPropagationFailsAndIsCaught(
-        boolean ephemeralMapping
-    ) {
+    @Test
+    public void should_keepOutboundVariablesInAuditEvent_when_mappingIsNotEphemeral() {
         //given
+        givenIntegrationContextWithMapping(false);
+        when(executionQuery.list()).thenReturn(List.of());
+        // the connector error payload claims the opposite of the mapping
+        IntegrationError integrationError = buildIntegrationError(true, new RuntimeException("connector failure"));
+
+        //when
+        handler.receive(integrationError);
+
+        //then
+        verify(managementService).executeCommand(commandArgumentCaptor.capture());
+        IntegrationContext auditedContext = executeAuditCommandAndCaptureContext(commandArgumentCaptor.getValue());
+        assertThat(auditedContext.hasEphemeralVariables()).isFalse();
+        assertThat(auditedContext.getInBoundVariables()).isEmpty();
+        assertThat(auditedContext.getOutBoundVariables()).containsExactlyEntriesOf(CONNECTOR_OUTBOUND_VARIABLES);
+    }
+
+    @Test
+    public void should_removeOutboundVariablesFromAuditEvent_when_bpmnErrorPropagationFailsAndIsCaught_andMappingIsEphemeral() {
+        //given
+        IntegrationContextEntityImpl integrationContextEntity = givenIntegrationContextWithMapping(true);
+        givenWaitingExecutionAndFailingBpmnErrorPropagation();
+        // the connector error payload claims the opposite of the mapping
+        IntegrationError integrationError = buildIntegrationError(false, new CloudBpmnError("Test Error"));
+
+        //when
+        handler.receive(integrationError);
+
+        //then
+        CompositeCommand fallbackCommand = captureFallbackCommand();
+        verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
+        IntegrationContext auditedContext = executeAuditCommandAndCaptureContext(fallbackCommand);
+        assertThat(auditedContext.hasEphemeralVariables()).isTrue();
+        assertThat(auditedContext.getInBoundVariables()).isEmpty();
+        assertThat(auditedContext.getOutBoundVariables()).isEmpty();
+    }
+
+    @Test
+    public void should_keepOutboundVariablesInAuditEvent_when_bpmnErrorPropagationFailsAndIsCaught_andMappingIsNotEphemeral() {
+        //given
+        IntegrationContextEntityImpl integrationContextEntity = givenIntegrationContextWithMapping(false);
+        givenWaitingExecutionAndFailingBpmnErrorPropagation();
+        // the connector error payload claims the opposite of the mapping
+        IntegrationError integrationError = buildIntegrationError(true, new CloudBpmnError("Test Error"));
+
+        //when
+        handler.receive(integrationError);
+
+        //then
+        CompositeCommand fallbackCommand = captureFallbackCommand();
+        verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
+        IntegrationContext auditedContext = executeAuditCommandAndCaptureContext(fallbackCommand);
+        assertThat(auditedContext.hasEphemeralVariables()).isFalse();
+        assertThat(auditedContext.getInBoundVariables()).isEmpty();
+        assertThat(auditedContext.getOutBoundVariables()).containsExactlyEntriesOf(CONNECTOR_OUTBOUND_VARIABLES);
+    }
+
+    private IntegrationContextEntityImpl givenIntegrationContextWithMapping(boolean ephemeralMapping) {
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(
             integrationContextEntity
         );
         given(ephemeralMappingResolver.isEphemeral(integrationContextEntity)).willReturn(ephemeralMapping);
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
+        return integrationContextEntity;
+    }
 
+    private void givenWaitingExecutionAndFailingBpmnErrorPropagation() {
         ExecutionEntity executionEntity = mock(ExecutionEntity.class);
         given(executionEntity.getActivityId()).willReturn(CLIENT_ID);
         when(executionQuery.list()).thenReturn(Collections.singletonList(executionEntity));
-
-        IntegrationContextImpl integrationContext = buildIntegrationContext();
-        integrationContext.addInBoundVariables(Map.of("restUrl", "https://example.com"));
-        integrationContext.addOutBoundVariables(Map.of("restResult", "fromConnector"));
-        // the connector error payload claims the opposite of the mapping
-        integrationContext.setEphemeralVariables(!ephemeralMapping);
-        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
-            new IntegrationRequestImpl(integrationContext),
-            new CloudBpmnError("Test Error")
-        );
 
         // propagating the BPMN error fails, so the handler falls back to deleting the context and auditing the error
         given(managementService.executeCommand(any()))
             .willThrow(new RuntimeException("BPMN error propagation failed"))
             .willReturn(null);
+    }
 
-        //when
-        handler.receive(integrationErrorEvent);
+    private IntegrationError buildIntegrationError(boolean connectorEphemeralFlag, Throwable error) {
+        IntegrationContextImpl integrationContext = buildIntegrationContext();
+        integrationContext.addInBoundVariables(Map.of("restUrl", "https://example.com"));
+        integrationContext.addOutBoundVariables(CONNECTOR_OUTBOUND_VARIABLES);
+        integrationContext.setEphemeralVariables(connectorEphemeralFlag);
+        return new IntegrationErrorImpl(new IntegrationRequestImpl(integrationContext), error);
+    }
 
-        //then
+    private CompositeCommand captureFallbackCommand() {
         verify(managementService, times(2)).executeCommand(commandArgumentCaptor.capture());
         CompositeCommand fallbackCommand = commandArgumentCaptor.getAllValues().getLast();
         assertThat(fallbackCommand.getCommands()).hasExactlyElementsOfTypes(
             DeleteIntegrationContextCmd.class,
             AggregateIntegrationErrorReceivedEventCmd.class
         );
+        return fallbackCommand;
+    }
 
-        verify(ephemeralMappingResolver).isEphemeral(integrationContextEntity);
-
-        fallbackCommand.getCommands().getLast().execute(null);
+    private IntegrationContext executeAuditCommandAndCaptureContext(CompositeCommand compositeCommand) {
+        compositeCommand
+            .getCommands()
+            .stream()
+            .filter(AggregateIntegrationErrorReceivedEventCmd.class::isInstance)
+            .findFirst()
+            .orElseThrow()
+            .execute(null);
 
         ArgumentCaptor<CloudIntegrationErrorReceivedEventImpl> eventCaptor = ArgumentCaptor.forClass(
             CloudIntegrationErrorReceivedEventImpl.class
         );
         verify(processEngineEventsAggregator).add(eventCaptor.capture());
-        IntegrationContext auditedContext = eventCaptor.getValue().getEntity();
-        assertThat(auditedContext.hasEphemeralVariables()).isEqualTo(ephemeralMapping);
-        assertThat(auditedContext.getInBoundVariables()).isEmpty();
-        if (ephemeralMapping) {
-            assertThat(auditedContext.getOutBoundVariables()).isEmpty();
-        } else {
-            assertThat(auditedContext.getOutBoundVariables()).containsExactlyEntriesOf(
-                Map.of("restResult", "fromConnector")
-            );
-        }
+        return eventCaptor.getValue().getEntity();
     }
 
     private IntegrationContextEntityImpl buildIntegrationContextEntity() {
