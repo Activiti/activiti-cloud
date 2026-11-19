@@ -21,6 +21,8 @@ import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.activiti.cloud.services.query.events.handlers.QueryPayloadCleanup;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,9 +41,10 @@ public class QueryConsumerMessageHandler
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        MessageChannel queryEventsChannel
+        MessageChannel queryEventsChannel,
+        ObjectProvider<QueryPayloadCleanup> payloadCleanup
     ) {
-        super(eventHandlerContext, optimizer, entityManager);
+        super(eventHandlerContext, optimizer, entityManager, payloadCleanup);
         this.queryEventsChannel = queryEventsChannel;
     }
 

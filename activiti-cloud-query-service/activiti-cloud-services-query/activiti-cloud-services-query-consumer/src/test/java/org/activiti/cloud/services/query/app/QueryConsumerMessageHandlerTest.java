@@ -18,9 +18,13 @@ package org.activiti.cloud.services.query.app;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
@@ -30,11 +34,15 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.activiti.cloud.services.query.events.handlers.QueryPayloadCleanup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -58,9 +66,62 @@ public class QueryConsumerMessageHandlerTest {
     @Mock
     private MessageChannel queryEventsChannel;
 
+    @Mock
+    private QueryPayloadCleanup payloadCleanup;
+
+    private final DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
+
     @BeforeEach
     void setUp() {
-        consumer = new QueryConsumerMessageHandler(eventHandlerContext, optimizer, entityManager, queryEventsChannel);
+        consumer = new QueryConsumerMessageHandler(
+            eventHandlerContext,
+            optimizer,
+            entityManager,
+            queryEventsChannel,
+            beans.getBeanProvider(QueryPayloadCleanup.class)
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void should_cleanupBeforePublishingQueryEvents_whenStrategyIsConfigured(boolean cleanupEnabled) {
+        if (cleanupEnabled) {
+            beans.registerSingleton("payloadCleanup", payloadCleanup);
+        }
+        var event = new CloudProcessCreatedEventImpl();
+        List<CloudRuntimeEvent<?, ?>> events = List.of(event);
+        var message = MessageBuilder.withPayload(events).build();
+        given(optimizer.optimize(events)).willReturn(events);
+
+        new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx -> consumer.accept(message));
+
+        var order = inOrder(eventHandlerContext, entityManager, payloadCleanup, queryEventsChannel);
+        order.verify(eventHandlerContext).handle(event);
+        order.verify(entityManager).flush();
+        order.verify(entityManager).clear();
+        if (cleanupEnabled) {
+            order.verify(payloadCleanup).cleanup(events);
+        } else {
+            verifyNoInteractions(payloadCleanup);
+        }
+        order.verify(queryEventsChannel).send(message);
+    }
+
+    @Test
+    void should_notPublishQueryEvents_whenCleanupFails() {
+        beans.registerSingleton("payloadCleanup", payloadCleanup);
+        var event = new CloudProcessCreatedEventImpl();
+        List<CloudRuntimeEvent<?, ?>> events = List.of(event);
+        var message = MessageBuilder.withPayload(events).build();
+        given(optimizer.optimize(events)).willReturn(events);
+        willThrow(new IllegalStateException("cleanup failed")).given(payloadCleanup).cleanup(events);
+        var transaction = new TransactionTemplate(new PseudoTransactionManager());
+
+        assertThatThrownBy(() -> transaction.executeWithoutResult(_ -> consumer.accept(message)))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("cleanup failed");
+
+        verify(queryEventsChannel, never()).send(any(Message.class));
     }
 
     @Test
@@ -90,6 +151,7 @@ public class QueryConsumerMessageHandlerTest {
     @Test
     void receiveShouldNotPublishQueryEventsMessageWhenEventHandlingFails() {
         //given
+        beans.registerSingleton("payloadCleanup", payloadCleanup);
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent);
 
@@ -106,6 +168,7 @@ public class QueryConsumerMessageHandlerTest {
 
         //then
         verify(eventHandlerContext).handle(processCreatedEvent);
+        verifyNoInteractions(payloadCleanup);
         verify(entityManager, never()).flush();
         verify(entityManager).clear();
         verify(queryEventsChannel, never()).send(any(Message.class));
