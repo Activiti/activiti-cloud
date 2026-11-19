@@ -20,12 +20,8 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.ProcessVariablesMapping;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EphemeralMappingResolver {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EphemeralMappingResolver.class);
 
     private final ProcessExtensionService processExtensionService;
 
@@ -40,26 +36,14 @@ public class EphemeralMappingResolver {
         return isEphemeral(integrationContextEntity.getProcessDefinitionId(), integrationContextEntity.getFlowNodeId());
     }
 
-    public boolean isEphemeral(String processDefinitionId, String flowNodeId) {
+    private boolean isEphemeral(String processDefinitionId, String flowNodeId) {
         if (processDefinitionId == null || flowNodeId == null) {
             return false;
         }
-        try {
-            return Optional.ofNullable(processExtensionService.getExtensionsForId(processDefinitionId))
-                .map(Extension::getMappings)
-                .map(mappings -> mappings.get(flowNodeId))
-                .map(ProcessVariablesMapping::isEphemeral)
-                .orElse(false);
-        } catch (RuntimeException e) {
-            // Fail closed: if the mapping cannot be resolved, do not leak outbound variables in audit events
-            LOGGER.warn(
-                "Unable to resolve ephemeral flag for process definition '{}' and flow node '{}'. " +
-                    "Treating the mapping as ephemeral.",
-                processDefinitionId,
-                flowNodeId,
-                e
-            );
-            return true;
-        }
+        return Optional.ofNullable(processExtensionService.getExtensionsForId(processDefinitionId))
+            .map(Extension::getMappings)
+            .map(mappings -> mappings.get(flowNodeId))
+            .map(ProcessVariablesMapping::isEphemeral)
+            .orElse(false);
     }
 }

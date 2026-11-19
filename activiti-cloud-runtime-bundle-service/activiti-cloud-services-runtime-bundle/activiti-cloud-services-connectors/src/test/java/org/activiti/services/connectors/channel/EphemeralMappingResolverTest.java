@@ -20,7 +20,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.Map;
-import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
@@ -77,15 +76,6 @@ class EphemeralMappingResolverTest {
         assertThat(resolver.isEphemeral(buildEntity(null, FLOW_NODE_ID))).isFalse();
         assertThat(resolver.isEphemeral(buildEntity(PROC_DEF_ID, null))).isFalse();
         verifyNoInteractions(processExtensionService);
-    }
-
-    @Test
-    void should_returnTrue_when_mappingCannotBeResolved() {
-        given(processExtensionService.getExtensionsForId(PROC_DEF_ID)).willThrow(
-            new ActivitiObjectNotFoundException("not found")
-        );
-
-        assertThat(resolver.isEphemeral(buildEntity(PROC_DEF_ID, FLOW_NODE_ID))).isTrue();
     }
 
     private void givenMapping(String flowNodeId, boolean ephemeral) {
