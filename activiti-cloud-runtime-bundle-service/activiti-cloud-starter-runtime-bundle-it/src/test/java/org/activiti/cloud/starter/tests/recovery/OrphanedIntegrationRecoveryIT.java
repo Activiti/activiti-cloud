@@ -42,8 +42,6 @@ import org.activiti.cloud.common.feature.FeatureToggleAutoConfiguration;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
@@ -51,7 +49,7 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.integration.IntegrationContextService;
-import org.activiti.services.connectors.channel.EphemeralMappingResolver;
+import org.activiti.services.connectors.channel.AggregateIntegrationEventCmdFactory;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryConfiguration;
@@ -481,18 +479,14 @@ class OrphanedIntegrationRecoveryIT {
             RuntimeService runtimeService,
             IntegrationContextService integrationContextService,
             ManagementService managementService,
-            RuntimeBundleProperties runtimeBundleProperties,
-            ProcessEngineEventsAggregator processEngineEventsAggregator,
-            EphemeralMappingResolver ephemeralMappingResolver
+            AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
         ) {
             return spy(
                 new ServiceTaskIntegrationErrorEventHandler(
                     runtimeService,
                     integrationContextService,
                     managementService,
-                    runtimeBundleProperties,
-                    processEngineEventsAggregator,
-                    ephemeralMappingResolver
+                    aggregateIntegrationEventCmdFactory
                 )
             );
         }

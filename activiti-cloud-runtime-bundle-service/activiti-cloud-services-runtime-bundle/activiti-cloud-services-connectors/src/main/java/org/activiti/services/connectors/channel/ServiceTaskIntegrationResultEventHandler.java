@@ -24,8 +24,6 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
@@ -47,31 +45,25 @@ public class ServiceTaskIntegrationResultEventHandler {
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
-    private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
-    private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
     private final ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
-    private final EphemeralMappingResolver ephemeralMappingResolver;
+    private final AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
         ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
-        EphemeralMappingResolver ephemeralMappingResolver
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
-        this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
-        this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
         this.serviceTaskIntegrationCompletionHandler = serviceTaskIntegrationCompletionHandler;
-        this.ephemeralMappingResolver = ephemeralMappingResolver;
+        this.aggregateIntegrationEventCmdFactory = aggregateIntegrationEventCmdFactory;
     }
 
     @Retryable(
@@ -125,12 +117,7 @@ public class ServiceTaskIntegrationResultEventHandler {
             }
 
             commands.add(
-                new AggregateIntegrationResultReceivedEventCmd(
-                    integrationContext,
-                    runtimeBundleProperties,
-                    processEngineEventsAggregator,
-                    ephemeralMappingResolver.isEphemeral(integrationContextEntity)
-                )
+                aggregateIntegrationEventCmdFactory.resultReceived(integrationContext, integrationContextEntity)
             );
 
             try {

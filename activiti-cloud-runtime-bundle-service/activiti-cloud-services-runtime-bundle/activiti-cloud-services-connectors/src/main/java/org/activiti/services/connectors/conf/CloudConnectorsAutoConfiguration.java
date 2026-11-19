@@ -38,6 +38,7 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
+import org.activiti.services.connectors.channel.AggregateIntegrationEventCmdFactory;
 import org.activiti.services.connectors.channel.ConnectorIncidentEventHandler;
 import org.activiti.services.connectors.channel.EphemeralMappingResolver;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
@@ -75,22 +76,18 @@ public class CloudConnectorsAutoConfiguration {
     public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
         ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
-        EphemeralMappingResolver ephemeralMappingResolver
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
             integrationContextService,
-            runtimeBundleProperties,
             managementService,
-            processEngineEventsAggregator,
             variablesPropagator,
             serviceTaskIntegrationCompletionHandler,
-            ephemeralMappingResolver
+            aggregateIntegrationEventCmdFactory
         );
     }
 
@@ -102,18 +99,25 @@ public class CloudConnectorsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler(
+    public AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory(
         RuntimeBundleProperties runtimeBundleProperties,
-        ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         EphemeralMappingResolver ephemeralMappingResolver
     ) {
-        return new ServiceTaskIntegrationCompletionHandler(
+        return new AggregateIntegrationEventCmdFactory(
             runtimeBundleProperties,
-            managementService,
             processEngineEventsAggregator,
             ephemeralMappingResolver
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler(
+        ManagementService managementService,
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
+    ) {
+        return new ServiceTaskIntegrationCompletionHandler(managementService, aggregateIntegrationEventCmdFactory);
     }
 
     @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -130,17 +134,13 @@ public class CloudConnectorsAutoConfiguration {
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
         ManagementService managementService,
-        RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
-        EphemeralMappingResolver ephemeralMappingResolver
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
     ) {
         return new ServiceTaskIntegrationErrorEventHandler(
             runtimeService,
             integrationContextService,
             managementService,
-            runtimeBundleProperties,
-            processEngineEventsAggregator,
-            ephemeralMappingResolver
+            aggregateIntegrationEventCmdFactory
         );
     }
 

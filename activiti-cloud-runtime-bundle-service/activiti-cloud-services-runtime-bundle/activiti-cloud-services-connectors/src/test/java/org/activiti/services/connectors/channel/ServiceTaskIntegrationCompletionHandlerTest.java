@@ -64,12 +64,7 @@ class ServiceTaskIntegrationCompletionHandlerTest {
 
     @Test
     void handlePropagationFailure_shouldExecuteCompositeCommand() {
-        ServiceTaskIntegrationCompletionHandler handler = new ServiceTaskIntegrationCompletionHandler(
-            runtimeBundleProperties,
-            managementService,
-            processEngineEventsAggregator,
-            ephemeralMappingResolver
-        );
+        ServiceTaskIntegrationCompletionHandler handler = buildHandler();
 
         IntegrationErrorImpl error = mock(IntegrationErrorImpl.class);
         IntegrationContextEntity ctxEntity = mock(IntegrationContextEntity.class);
@@ -123,10 +118,12 @@ class ServiceTaskIntegrationCompletionHandlerTest {
 
     private ServiceTaskIntegrationCompletionHandler buildHandler() {
         return new ServiceTaskIntegrationCompletionHandler(
-            runtimeBundleProperties,
             managementService,
-            processEngineEventsAggregator,
-            ephemeralMappingResolver
+            new AggregateIntegrationEventCmdFactory(
+                runtimeBundleProperties,
+                processEngineEventsAggregator,
+                ephemeralMappingResolver
+            )
         );
     }
 

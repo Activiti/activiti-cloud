@@ -18,8 +18,6 @@ package org.activiti.services.connectors.channel;
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.interceptor.Command;
@@ -28,21 +26,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class ServiceTaskIntegrationCompletionHandler {
 
-    private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
-    private final ProcessEngineEventsAggregator processEngineEventsAggregator;
-    private final EphemeralMappingResolver ephemeralMappingResolver;
+    private final AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory;
 
     public ServiceTaskIntegrationCompletionHandler(
-        RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
-        EphemeralMappingResolver ephemeralMappingResolver
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
     ) {
-        this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
-        this.processEngineEventsAggregator = processEngineEventsAggregator;
-        this.ephemeralMappingResolver = ephemeralMappingResolver;
+        this.aggregateIntegrationEventCmdFactory = aggregateIntegrationEventCmdFactory;
     }
 
     @Transactional(propagation = REQUIRES_NEW)
@@ -51,12 +43,7 @@ public class ServiceTaskIntegrationCompletionHandler {
         IntegrationContextEntity integrationContextEntity
     ) {
         Command<?> finalErrorHandlingCmd = CompositeCommand.of(
-            new AggregateIntegrationErrorReceivedEventCmd(
-                integrationError,
-                runtimeBundleProperties,
-                processEngineEventsAggregator,
-                ephemeralMappingResolver.isEphemeral(integrationContextEntity)
-            ),
+            aggregateIntegrationEventCmdFactory.errorReceived(integrationError, integrationContextEntity),
             new DeleteIntegrationContextCmd(integrationContextEntity)
         );
 

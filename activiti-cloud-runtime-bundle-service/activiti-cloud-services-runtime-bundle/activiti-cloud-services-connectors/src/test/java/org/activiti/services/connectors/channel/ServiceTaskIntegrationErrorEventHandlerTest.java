@@ -51,7 +51,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -63,7 +62,6 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     private static final String CLIENT_ID = "entityId";
     private static final Map<String, Object> CONNECTOR_OUTBOUND_VARIABLES = Map.of("restResult", "fromConnector");
 
-    @InjectMocks
     private ServiceTaskIntegrationErrorEventHandler handler;
 
     @Mock
@@ -92,6 +90,16 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
     @BeforeEach
     public void setUp() {
+        handler = new ServiceTaskIntegrationErrorEventHandler(
+            runtimeService,
+            integrationContextService,
+            managementService,
+            new AggregateIntegrationEventCmdFactory(
+                runtimeBundleProperties,
+                processEngineEventsAggregator,
+                ephemeralMappingResolver
+            )
+        );
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(EXECUTION_ID)).thenReturn(executionQuery);
     }

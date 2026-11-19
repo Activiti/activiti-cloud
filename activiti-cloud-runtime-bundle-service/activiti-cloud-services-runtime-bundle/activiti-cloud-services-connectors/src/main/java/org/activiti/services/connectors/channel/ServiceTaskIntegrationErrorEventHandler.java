@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
@@ -42,25 +40,19 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
-    private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
-    private final ProcessEngineEventsAggregator processEngineEventsAggregator;
-    private final EphemeralMappingResolver ephemeralMappingResolver;
+    private final AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory;
 
     public ServiceTaskIntegrationErrorEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
         ManagementService managementService,
-        RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
-        EphemeralMappingResolver ephemeralMappingResolver
+        AggregateIntegrationEventCmdFactory aggregateIntegrationEventCmdFactory
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
-        this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
-        this.processEngineEventsAggregator = processEngineEventsAggregator;
-        this.ephemeralMappingResolver = ephemeralMappingResolver;
+        this.aggregateIntegrationEventCmdFactory = aggregateIntegrationEventCmdFactory;
     }
 
     @Retryable(
@@ -75,7 +67,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
         );
 
         if (integrationContextEntity != null) {
-            boolean ephemeralMapping = ephemeralMappingResolver.isEphemeral(integrationContextEntity);
+            AggregateIntegrationErrorReceivedEventCmd aggregateIntegrationErrorReceivedEventCmd =
+                aggregateIntegrationEventCmdFactory.errorReceived(integrationError, integrationContextEntity);
             List<Command<?>> commands = new ArrayList<>();
 
             commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
@@ -109,12 +102,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             commands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
                             commands.add(
                                 new AggregateIntegrationErrorReceivedClosingEventCmd(
-                                    new AggregateIntegrationErrorReceivedEventCmd(
-                                        integrationError,
-                                        runtimeBundleProperties,
-                                        processEngineEventsAggregator,
-                                        ephemeralMapping
-                                    )
+                                    aggregateIntegrationErrorReceivedEventCmd
                                 )
                             );
 
@@ -153,14 +141,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                 LOGGER.warn(message);
             }
 
-            commands.add(
-                new AggregateIntegrationErrorReceivedEventCmd(
-                    integrationError,
-                    runtimeBundleProperties,
-                    processEngineEventsAggregator,
-                    ephemeralMapping
-                )
-            );
+            commands.add(aggregateIntegrationErrorReceivedEventCmd);
 
             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
         }

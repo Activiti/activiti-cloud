@@ -41,17 +41,18 @@ import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregato
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -67,7 +68,6 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     private static final String CLIENT_TYPE = ServiceTask.class.getSimpleName();
     private static final Map<String, Object> CONNECTOR_OUTBOUND_VARIABLES = Map.of("restResult", "fromConnector");
 
-    @InjectMocks
     private ServiceTaskIntegrationResultEventHandler handler;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -90,6 +90,25 @@ class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Mock
     private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
+    @Mock
+    private VariablesPropagator variablesPropagator;
+
+    @BeforeEach
+    void setUp() {
+        handler = new ServiceTaskIntegrationResultEventHandler(
+            runtimeService,
+            integrationContextService,
+            managementService,
+            variablesPropagator,
+            serviceTaskIntegrationCompletionHandler,
+            new AggregateIntegrationEventCmdFactory(
+                runtimeBundleProperties,
+                processEngineEventsAggregator,
+                ephemeralMappingResolver
+            )
+        );
+    }
 
     @Test
     void receive_should_removeOutboundVariablesFromAuditEvent_when_mappingIsEphemeral() {
