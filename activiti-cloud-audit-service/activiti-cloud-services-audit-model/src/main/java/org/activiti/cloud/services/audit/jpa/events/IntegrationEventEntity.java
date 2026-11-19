@@ -40,6 +40,17 @@ public abstract class IntegrationEventEntity extends AuditEventEntity {
         return integrationContext;
     }
 
+    public void clearVariablePayloads() {
+        if (integrationContext != null) {
+            if (integrationContext.getInBoundVariables() != null) {
+                integrationContext.getInBoundVariables().clear();
+            }
+            if (integrationContext.getOutBoundVariables() != null) {
+                integrationContext.getOutBoundVariables().clear();
+            }
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
