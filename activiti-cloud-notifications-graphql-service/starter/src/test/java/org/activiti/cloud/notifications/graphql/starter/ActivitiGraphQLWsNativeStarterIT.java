@@ -18,6 +18,7 @@ package org.activiti.cloud.notifications.graphql.starter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
+import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -61,6 +62,8 @@ import org.activiti.cloud.notifications.graphql.GrapqhQLApplication;
 import org.activiti.cloud.notifications.graphql.config.EngineEvents;
 import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
+import org.activiti.cloud.services.notifications.graphql.ws.handler.DecoratingGraphQlWebSocketHandler;
+import org.activiti.cloud.services.notifications.graphql.ws.liveness.GraphQlWebSocketLivenessMonitor;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -80,6 +83,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.graphql.server.support.GraphQlWebSocketMessage;
+import org.springframework.graphql.server.webmvc.GraphQlWebSocketHandler;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -119,6 +123,7 @@ class ActivitiGraphQLWsNativeStarterIT {
     private static final String GRAPHQL_URL = "/graphql";
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
     private static final Duration WEB_SOCKET_STOP_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration LIVENESS_TIMEOUT = Duration.ofSeconds(10);
 
     private static final WebsocketClientSpec graphqlWsClientSpec = WebsocketClientSpec.builder()
         .protocols(GRAPHQL_WS)
@@ -138,6 +143,12 @@ class ActivitiGraphQLWsNativeStarterIT {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private GraphQlWebSocketHandler graphQlWebSocketHandler;
+
+    @Autowired
+    private GraphQlWebSocketLivenessMonitor graphQlWebSocketLivenessMonitor;
 
     @MockitoBean
     private BuildProperties buildProperties;
@@ -238,6 +249,83 @@ class ActivitiGraphQLWsNativeStarterIT {
             .subscribe();
 
         StepVerifier.create(output).expectComplete().verify(); //TODO add timeout
+    }
+
+    @Test
+    void should_useDecoratingWebSocketHandlerWithLivenessCheck() {
+        assertThat(graphQlWebSocketHandler).isInstanceOf(DecoratingGraphQlWebSocketHandler.class);
+        assertThat(graphQlWebSocketLivenessMonitor.getTimeout()).isEqualTo(LIVENESS_TIMEOUT);
+    }
+
+    @Test
+    void should_closeSessionWithPingTimeoutStatus_when_clientStopsAnsweringPings() throws JacksonException {
+        String initMessage = connectionInitMessage(TESTADMIN);
+
+        Mono<WebSocketCloseStatus> closeStatus = HttpClient.create()
+            .baseUrl("ws://localhost:" + port)
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) ->
+                Flux.merge(
+                    o.sendString(Mono.just(initMessage)).then().then(Mono.<WebSocketCloseStatus>never()),
+                    i.receive().then(Mono.<WebSocketCloseStatus>never()),
+                    i.receiveCloseStatus()
+                )
+            )
+            .next();
+
+        StepVerifier.create(closeStatus)
+            .expectSubscription()
+            .expectNoEvent(LIVENESS_TIMEOUT.minusSeconds(2))
+            .assertNext(status ->
+                assertThat(status.code()).isEqualTo(GraphQlWebSocketLivenessMonitor.PING_TIMEOUT_STATUS.getCode())
+            )
+            .expectComplete()
+            .verify(LIVENESS_TIMEOUT.plus(TIMEOUT));
+    }
+
+    @Test
+    void should_keepSessionOpen_when_clientAnswersPings() throws JacksonException {
+        String initMessage = connectionInitMessage(TESTADMIN);
+        String pingMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.ping(null));
+        String pongMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.pong(null));
+
+        Mono<WebSocketCloseStatus> closeStatus = HttpClient.create()
+            .baseUrl("ws://localhost:" + port)
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) ->
+                Flux.merge(
+                    o
+                        .sendString(
+                            Flux.concat(
+                                Mono.just(initMessage),
+                                i
+                                    .receive()
+                                    .asString()
+                                    .filter(pingMessage::equals)
+                                    .map(ping -> pongMessage)
+                            )
+                        )
+                        .then()
+                        .then(Mono.<WebSocketCloseStatus>never()),
+                    i.receiveCloseStatus()
+                )
+            )
+            .next();
+
+        StepVerifier.create(closeStatus)
+            .expectSubscription()
+            .expectNoEvent(LIVENESS_TIMEOUT.plusSeconds(5))
+            .thenCancel()
+            .verify(LIVENESS_TIMEOUT.plus(TIMEOUT));
+    }
+
+    private String connectionInitMessage(String user) throws JacksonException {
+        identityTokenProducer.withTestUser(user);
+        String accessToken = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        Map<String, Object> payload = new StringObjectMapBuilder().put("Authorization", accessToken).get();
+        return objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(payload));
     }
 
     private void closeWebSocketAnCompleteDataProcessor(
