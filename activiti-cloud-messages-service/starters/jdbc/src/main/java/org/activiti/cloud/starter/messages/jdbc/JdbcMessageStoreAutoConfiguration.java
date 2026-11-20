@@ -59,6 +59,7 @@ public class JdbcMessageStoreAutoConfiguration {
 
     @Bean
     @MessagesMetadataStore
+    @ConditionalOnMissingBean(annotation = MessagesMetadataStore.class)
     public ConcurrentMetadataStore metadataStore(JdbcTemplate jdbcTemplate) {
         return new JdbcMetadataStore(jdbcTemplate);
     }

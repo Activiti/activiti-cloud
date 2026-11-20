@@ -25,9 +25,11 @@ import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 public class OutboxActuatorEndpoint {
 
     private final OutboxLifecycleController outboxLifecycleController;
+    private final OutboxManager outboxManager;
 
-    public OutboxActuatorEndpoint(OutboxLifecycleController outboxLifecycleController) {
+    public OutboxActuatorEndpoint(OutboxLifecycleController outboxLifecycleController, OutboxManager outboxManager) {
         this.outboxLifecycleController = outboxLifecycleController;
+        this.outboxManager = outboxManager;
     }
 
     /**
@@ -45,10 +47,10 @@ public class OutboxActuatorEndpoint {
     public void smartLifecycleRoleController(@Selector String command) {
         switch (command) {
             case "start":
-                outboxLifecycleController.start();
+                outboxManager.start();
                 break;
             case "stop":
-                outboxLifecycleController.stop();
+                outboxManager.stop();
                 break;
             default:
                 throw new IllegalArgumentException("Invalid command argument");

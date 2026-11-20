@@ -51,6 +51,7 @@ public class RedisMessageStoreAutoConfiguration {
 
     @Bean
     @MessagesMetadataStore
+    @ConditionalOnMissingBean(annotation = MessagesMetadataStore.class)
     public ConcurrentMetadataStore metadataStore(RedisConnectionFactory connectionFactory) {
         return new RedisMetadataStore(connectionFactory);
     }

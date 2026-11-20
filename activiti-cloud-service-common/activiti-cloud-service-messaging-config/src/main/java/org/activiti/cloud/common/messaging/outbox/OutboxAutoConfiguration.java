@@ -308,8 +308,11 @@ public class OutboxAutoConfiguration {
     static class OutboxActuatorConfiguration {
 
         @Bean
-        OutboxActuatorEndpoint outboxActuatorEndpoint(OutboxLifecycleController outboxLifecycleController) {
-            return new OutboxActuatorEndpoint(outboxLifecycleController);
+        OutboxActuatorEndpoint outboxActuatorEndpoint(
+            OutboxLifecycleController outboxLifecycleController,
+            OutboxManager outboxManager
+        ) {
+            return new OutboxActuatorEndpoint(outboxLifecycleController, outboxManager);
         }
     }
 
