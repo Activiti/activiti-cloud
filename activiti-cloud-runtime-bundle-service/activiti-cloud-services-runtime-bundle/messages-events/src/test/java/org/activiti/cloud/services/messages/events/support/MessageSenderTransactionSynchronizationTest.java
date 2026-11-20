@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.integration.MessageDispatchingException;
+import org.springframework.integration.MessageTimeoutException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -58,7 +58,7 @@ class MessageSenderTransactionSynchronizationTest {
             assertThatThrownBy(() -> synchronization.beforeCommit(readOnly))
                 .isInstanceOf(expectedExceptionType)
                 .satisfies(throwable -> {
-                    if (throwable instanceof MessageDispatchingException dispatchingEx) {
+                    if (throwable instanceof MessageDeliveryException dispatchingEx) {
                         assertThat(dispatchingEx.getFailedMessage()).isSameAs(message);
                     }
                 });
@@ -80,13 +80,13 @@ class MessageSenderTransactionSynchronizationTest {
                 "throws MessageDispatchingException with failed message when channel.send returns false",
                 false,
                 (ChannelBehavior) () -> false,
-                MessageDispatchingException.class
+                MessageDeliveryException.class
             ),
             Arguments.of(
                 "rethrows underlying exception when channel.send throws",
                 false,
                 (ChannelBehavior) () -> {
-                    throw new MessageDeliveryException("Channel closed");
+                    throw new MessageTimeoutException("Channel closed");
                 },
                 MessageDeliveryException.class
             )
