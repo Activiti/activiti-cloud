@@ -121,8 +121,7 @@ class SubscriberRegistryTest {
     }
 
     @Test
-    void should_recordExactlyOneUser_when_manyThreadsRegisterSessionsForTheSameUserConcurrently()
-        throws InterruptedException {
+    void should_recordExactlyOneUser_when_manyThreadsRegisterSessionsForTheSameUserConcurrently() throws InterruptedException {
         int threadCount = 32;
         try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
             CountDownLatch readyLatch = new CountDownLatch(threadCount);

@@ -79,8 +79,9 @@ public class ActivitiQueryConsumerAutoConfiguration {
     }
 
     @Bean
-    ChannelMessageStoreQueryProvider channelMessageStoreQueryProvider(DataSource dataSource)
-        throws MetaDataAccessException {
+    ChannelMessageStoreQueryProvider channelMessageStoreQueryProvider(
+        DataSource dataSource
+    ) throws MetaDataAccessException {
         final var databaseName = JdbcUtils.extractDatabaseMetaData(
             dataSource,
             DatabaseMetaData::getDatabaseProductName

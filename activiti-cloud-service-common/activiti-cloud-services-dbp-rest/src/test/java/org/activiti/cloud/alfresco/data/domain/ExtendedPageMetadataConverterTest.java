@@ -36,8 +36,7 @@ public class ExtendedPageMetadataConverterTest {
     }
 
     @Test
-    public void getMetadataShouldReturnTotalPagesAsDivisionOfTotalElementsByPageSizePlusOneWhenThereIsRemainder()
-        throws Exception {
+    public void getMetadataShouldReturnTotalPagesAsDivisionOfTotalElementsByPageSizePlusOneWhenThereIsRemainder() throws Exception {
         //given
         PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 31);
 
@@ -49,8 +48,7 @@ public class ExtendedPageMetadataConverterTest {
     }
 
     @Test
-    public void getMetadataShouldIncreaseTotalPagesByOneWhenSkipCountIsNotDivisibleAndTotalElementsIsDivisible()
-        throws Exception {
+    public void getMetadataShouldIncreaseTotalPagesByOneWhenSkipCountIsNotDivisibleAndTotalElementsIsDivisible() throws Exception {
         //given
         PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 30);
         //when
@@ -68,8 +66,7 @@ public class ExtendedPageMetadataConverterTest {
     }
 
     @Test
-    public void getMetadataShouldNotChangeTotalPagesWhenTotalElementsRemainderIsLowerThanOrEqualsToSkipCountRemainder()
-        throws Exception {
+    public void getMetadataShouldNotChangeTotalPagesWhenTotalElementsRemainderIsLowerThanOrEqualsToSkipCountRemainder() throws Exception {
         //given
         PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 31);
 
@@ -88,8 +85,7 @@ public class ExtendedPageMetadataConverterTest {
     }
 
     @Test
-    public void getMetadataShouldIncreaseTotalPagesByOneWhenTotalElementsRemainderIsGreaterThanSkipCountRemainder()
-        throws Exception {
+    public void getMetadataShouldIncreaseTotalPagesByOneWhenTotalElementsRemainderIsGreaterThanSkipCountRemainder() throws Exception {
         //given
         PagedModel.PageMetadata basePageMetadata = new PagedModel.PageMetadata(10, 1, 32);
         //when

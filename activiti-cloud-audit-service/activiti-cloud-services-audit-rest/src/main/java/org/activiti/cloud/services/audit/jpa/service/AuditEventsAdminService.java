@@ -114,7 +114,8 @@ public class AuditEventsAdminService {
     }
 
     public void exportAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, HttpServletResponse response)
-        throws IOException, AuditExportException {
+        throws IOException, AuditExportException
+    {
         TimestampRange range = validateAndConvertDates(fromDate, toDate);
 
         try {

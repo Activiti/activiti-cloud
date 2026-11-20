@@ -44,7 +44,8 @@ public class AuditEventsExporter {
     }
 
     public void writeChunk(CSVWriter csvWriter, List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events)
-        throws CsvFieldAssignmentException, CsvChainedException {
+        throws CsvFieldAssignmentException, CsvChainedException
+    {
         for (CloudRuntimeEvent<?, CloudRuntimeEventType> event : events) {
             csvWriter.writeNext(objectToJsonStrategy.transmuteBean(new CsvLogEntry(event)), true);
         }

@@ -128,8 +128,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
     }
 
     @Test
-    public void getVariablesShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
-        throws Exception {
+    public void getVariablesShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
@@ -161,8 +160,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
     }
 
     @Test
-    public void getVariablesShouldReturnAllResultsWithEphemeralFieldUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
-        throws Exception {
+    public void getVariablesShouldReturnAllResultsWithEphemeralFieldUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 

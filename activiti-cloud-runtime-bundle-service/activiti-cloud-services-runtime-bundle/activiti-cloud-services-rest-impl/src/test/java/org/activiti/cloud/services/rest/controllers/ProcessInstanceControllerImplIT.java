@@ -238,8 +238,7 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void should_startProcessReturnUnprocessableEntity_when_unprocessableEntityExceptionIsThrownByController()
-        throws Exception {
+    void should_startProcessReturnUnprocessableEntity_when_unprocessableEntityExceptionIsThrownByController() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
         willThrow(new UnprocessableEntityException("Unprocessable entry"))

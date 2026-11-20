@@ -97,8 +97,7 @@ public class AlfrescoJacksonHttpMessageConverterTest {
     }
 
     @Test
-    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfCollectionModel()
-        throws Exception {
+    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfCollectionModel() throws Exception {
         //given
         given(pagedCollectionModelConverter.resourcesToListResponseContent(baseCollectionModel)).willReturn(
             alfrescoPageContentListWrapper
@@ -116,8 +115,7 @@ public class AlfrescoJacksonHttpMessageConverterTest {
     }
 
     @Test
-    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource()
-        throws Exception {
+    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource() throws Exception {
         //given
         doNothing().when(httpMessageConverter).defaultWriteInternal(any(), eq(type), eq(outputMessage), eq(hints));
 
@@ -168,8 +166,7 @@ public class AlfrescoJacksonHttpMessageConverterTest {
     }
 
     @Test
-    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModelInsideMappingJacksonValue()
-        throws Exception {
+    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModelInsideMappingJacksonValue() throws Exception {
         //given
         final MappingJacksonValue baseMappingJacksonValue = new MappingJacksonValue(basePagedModel);
         given(pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(basePagedModel)).willReturn(

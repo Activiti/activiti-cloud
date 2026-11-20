@@ -40,8 +40,10 @@ public final class SafeZipExtractor {
 
     private SafeZipExtractor() {}
 
-    public static List<SafeZipEntry> extractEntries(InputStream zipInputStream, SafeZipLimits limits)
-        throws IOException {
+    public static List<SafeZipEntry> extractEntries(
+        InputStream zipInputStream,
+        SafeZipLimits limits
+    ) throws IOException {
         List<SafeZipEntry> entries = new ArrayList<>();
         forEachStreamEntry(zipInputStream, limits, entries::add);
         if (entries.isEmpty()) {
@@ -50,13 +52,19 @@ public final class SafeZipExtractor {
         return entries;
     }
 
-    public static void forEachEntry(InputStream zipInputStream, SafeZipLimits limits, Consumer<SafeZipEntry> consumer)
-        throws IOException {
+    public static void forEachEntry(
+        InputStream zipInputStream,
+        SafeZipLimits limits,
+        Consumer<SafeZipEntry> consumer
+    ) throws IOException {
         forEachStreamEntry(zipInputStream, limits, consumer);
     }
 
-    static void forEachStreamEntry(InputStream zipInputStream, SafeZipLimits limits, Consumer<SafeZipEntry> consumer)
-        throws IOException {
+    static void forEachStreamEntry(
+        InputStream zipInputStream,
+        SafeZipLimits limits,
+        Consumer<SafeZipEntry> consumer
+    ) throws IOException {
         long totalDecompressedSize = 0L;
         int entryCount = 0;
 
@@ -97,8 +105,11 @@ public final class SafeZipExtractor {
         extractToDirectoryInternal(zipFile, targetDirectory, limits);
     }
 
-    private static void extractToDirectoryInternal(File zipFile, Path targetDirectory, SafeZipLimits limits)
-        throws IOException {
+    private static void extractToDirectoryInternal(
+        File zipFile,
+        Path targetDirectory,
+        SafeZipLimits limits
+    ) throws IOException {
         Path targetRoot = ZipEntryPaths.resolveTargetRoot(targetDirectory);
 
         try (ZipFile zip = new ZipFile(zipFile)) {
