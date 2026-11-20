@@ -35,7 +35,7 @@ public class MessageSenderTransactionSynchronization implements TransactionSynch
     }
 
     @Override
-    public void afterCommit() {
+    public void beforeCommit(boolean readOnly) {
         logger.debug("Sending bpmn message '{}' via message channel: {}", message, messageChannel);
 
         try {
