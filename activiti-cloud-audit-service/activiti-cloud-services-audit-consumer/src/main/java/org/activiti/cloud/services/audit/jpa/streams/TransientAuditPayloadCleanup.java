@@ -19,6 +19,7 @@ import jakarta.persistence.EntityManager;
 import java.util.HashSet;
 import java.util.List;
 import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJpaJsonConverter;
+import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCancelledAuditEventEntity;
@@ -35,6 +36,8 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
 
     private final IntegrationContextJpaJsonConverter integrationContextConverter =
         new IntegrationContextJpaJsonConverter();
+
+    private final VariableJpaJsonConverter variableInstanceConverter = new VariableJpaJsonConverter();
 
     public TransientAuditPayloadCleanup(EntityManager entityManager) {
         this.entityManager = entityManager;
@@ -98,15 +101,18 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
     private int clearVariablePayload(VariableAuditEventEntity event) {
         event.clearVariablePayloads();
 
+        String variableInstance = variableInstanceConverter.convertToDatabaseColumn(event.getVariableInstance());
+
         return entityManager
             .createNativeQuery(
                 """
                 update audit_event
-                set variable_instance = null,
+                set variable_instance = :variableInstance,
                     variable_previous_value = null
                 where id = :id
                 """
             )
+            .setParameter("variableInstance", variableInstance)
             .setParameter("id", event.getId())
             .executeUpdate();
     }

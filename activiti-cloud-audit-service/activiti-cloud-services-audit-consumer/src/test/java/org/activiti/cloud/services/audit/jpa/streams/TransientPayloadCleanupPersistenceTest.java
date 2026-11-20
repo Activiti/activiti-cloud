@@ -21,13 +21,23 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
+import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
+import org.activiti.cloud.services.audit.jpa.converters.VariableCreatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationErrorReceivedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationEventEntity;
@@ -60,6 +70,14 @@ class TransientPayloadCleanupPersistenceTest {
     private LocalContainerEntityManagerFactoryBean factory;
     private EntityManager entityManager;
     private HikariDataSource dataSource;
+
+    private final APIEventToEntityConverters eventConverters = new APIEventToEntityConverters(
+        Set.of(
+            new VariableCreatedEventConverter(new EventContextInfoAppender()),
+            new VariableUpdatedEventConverter(new EventContextInfoAppender()),
+            new VariableDeletedEventConverter(new EventContextInfoAppender())
+        )
+    );
 
     @BeforeAll
     void createDatabase() {
@@ -143,8 +161,40 @@ class TransientPayloadCleanupPersistenceTest {
             assertThat(stored.getTimestamp()).isEqualTo(123L);
             assertThat(stored.getProcessInstanceId()).isEqualTo("target");
             if (stored instanceof VariableAuditEventEntity variable) {
-                assertThat(variable.getVariableInstance()).isNull();
-                assertThat(variable.getVariableName()).isEqualTo("payload");
+                var instance = variable.getVariableInstance();
+                assertThat(instance).isNotNull();
+                assertThat(instance.getName()).isEqualTo("payload");
+                assertThat(instance.getType()).isEqualTo("string");
+                assertThat(instance.getProcessInstanceId()).isEqualTo("target");
+                assertThat(instance.getTaskId()).isNull();
+                assertThat((Object) instance.getValue()).isNull();
+                var apiEvent = (CloudVariableEvent) eventConverters
+                    .getConverterByEventTypeName(variable.getEventType())
+                    .convertToAPI(variable);
+                assertThat(apiEvent.getId()).isEqualTo(variable.getEventId());
+                assertThat(apiEvent.getTimestamp()).isEqualTo(123L);
+                assertThat(apiEvent.getAppName()).isEqualTo("app");
+                assertThat(apiEvent.getProcessInstanceId()).isEqualTo("target");
+                assertThat(apiEvent.getEntity()).usingRecursiveComparison().isEqualTo(instance);
+                if (apiEvent instanceof CloudVariableUpdatedEvent updatedEvent) {
+                    assertThat((Object) updatedEvent.getPreviousValue()).isNull();
+                }
+                var storedPayloads = (Object[]) entityManager
+                    .createNativeQuery(
+                        """
+                        select variable_instance, variable_previous_value from audit_event
+                        where id = :id
+                        """
+                    )
+                    .setParameter("id", variable.getId())
+                    .getSingleResult();
+                assertThat(storedPayloads[0]).isInstanceOf(String.class);
+                String storedJson = (String) storedPayloads[0];
+                assertThat(storedJson).isNotBlank().doesNotContain("secret");
+                assertThat(new VariableJpaJsonConverter().convertToEntityAttribute(storedJson))
+                    .usingRecursiveComparison()
+                    .isEqualTo(instance);
+                assertThat(storedPayloads[1]).isNull();
             }
             if (stored instanceof VariableUpdatedEventEntity updated) {
                 assertThat(updated.getPreviousValue()).isNull();
@@ -211,11 +261,14 @@ class TransientPayloadCleanupPersistenceTest {
         var variable = new VariableInstanceImpl<>("payload", "string", "secret", processId, null);
         var created = new VariableCreatedEventEntity();
         created.setVariableInstance(variable);
+        created.setEventType(VariableEvent.VariableEvents.VARIABLE_CREATED.name());
         var updated = new VariableUpdatedEventEntity();
         updated.setVariableInstance(variable);
+        updated.setEventType(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
         updated.setPreviousValue(new VariableValue<>("previous secret"));
         var deleted = new VariableDeletedEventEntity();
         deleted.setVariableInstance(variable);
+        deleted.setEventType(VariableEvent.VariableEvents.VARIABLE_DELETED.name());
         var context = new IntegrationContextImpl();
         context.setId("context-" + processId);
         context.setProcessInstanceId(processId);
@@ -241,6 +294,7 @@ class TransientPayloadCleanupPersistenceTest {
         for (AuditEventEntity event : events) {
             event.setProcessInstanceId(processId);
             event.setAppName(appName);
+            event.setEventId(UUID.randomUUID().toString());
             event.setTimestamp(123L);
             entityManager.persist(event);
         }

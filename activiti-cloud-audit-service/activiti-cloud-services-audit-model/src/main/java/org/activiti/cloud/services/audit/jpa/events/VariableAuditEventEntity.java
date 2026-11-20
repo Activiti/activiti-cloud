@@ -19,6 +19,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.MappedSuperclass;
 import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 
@@ -85,7 +86,13 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
     }
 
     public void clearVariablePayloads() {
-        variableInstance = null;
+        variableInstance = new VariableInstanceImpl<>(
+            variableName,
+            variableType,
+            null,
+            super.getProcessInstanceId(),
+            taskId
+        );
     }
 
     @Override
