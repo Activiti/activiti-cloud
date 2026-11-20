@@ -71,6 +71,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @WebMvcTest(TaskController.class)
 @Import({
@@ -132,6 +133,9 @@ class TaskEntityControllerIT {
 
     @MockitoBean
     private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
+    private PlatformTransactionManager transactionManager;
 
     @MockitoBean
     private EntityManagerFactory entityManagerFactory;
