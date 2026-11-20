@@ -120,8 +120,11 @@ public class TestMvcClient {
      * @return a mocked servlet response with results from GET [href]
      * @throws Exception
      */
-    public MockHttpServletResponse request(String href, MediaType contentType, HttpHeaders httpHeaders)
-        throws Exception {
+    public MockHttpServletResponse request(
+        String href,
+        MediaType contentType,
+        HttpHeaders httpHeaders
+    ) throws Exception {
         return mvc
             .perform(get(href).accept(contentType).headers(httpHeaders))
             .andExpect(status().isOk()) //

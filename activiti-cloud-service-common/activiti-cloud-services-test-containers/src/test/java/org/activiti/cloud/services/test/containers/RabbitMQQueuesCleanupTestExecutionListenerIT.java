@@ -102,7 +102,8 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
     }
 
     private static void declareQueue(RabbitMQContainer container, String vhost)
-        throws IOException, InterruptedException {
+        throws IOException, InterruptedException
+    {
         Container.ExecResult result = container.execInContainer(
             "rabbitmqadmin",
             "--vhost=" + vhost,
@@ -117,7 +118,8 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
     }
 
     private static void publishMessage(RabbitMQContainer container, String vhost, String payload)
-        throws IOException, InterruptedException {
+        throws IOException, InterruptedException
+    {
         Container.ExecResult result = container.execInContainer(
             "rabbitmqadmin",
             "--vhost=" + vhost,
@@ -132,7 +134,8 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
     }
 
     private static int getMessageCount(RabbitMQContainer container, String vhost)
-        throws IOException, InterruptedException {
+        throws IOException, InterruptedException
+    {
         Container.ExecResult result = container.execInContainer(
             "rabbitmqctl",
             "list_queues",

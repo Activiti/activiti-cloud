@@ -298,8 +298,7 @@ class SafeZipExtractorTest {
     }
 
     @Test
-    void extractEntries_shouldRejectZipBomb_when_compressionRatioIsCheckedDespiteSmallCompressedSize()
-        throws IOException {
+    void extractEntries_shouldRejectZipBomb_when_compressionRatioIsCheckedDespiteSmallCompressedSize() throws IOException {
         byte[] payload = new byte[64 * 1024];
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("bomb.json", payload));
 

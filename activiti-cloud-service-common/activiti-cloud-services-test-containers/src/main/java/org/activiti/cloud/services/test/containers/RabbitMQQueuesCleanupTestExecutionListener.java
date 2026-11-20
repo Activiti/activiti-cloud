@@ -62,7 +62,8 @@ public class RabbitMQQueuesCleanupTestExecutionListener extends AbstractTestExec
     }
 
     private static ExecResult executePurgeAllQueues(String vhost, RabbitMQContainer container)
-        throws IOException, InterruptedException {
+        throws IOException, InterruptedException
+    {
         String purgeCommand = String.format(
             "rabbitmqctl list_queues name --no-table-headers -p '%s' | grep -vE '^\\s*(Timeout|Listing|$)' | while read q; do rabbitmqctl purge_queue \"$q\" -p '%s'; done",
             vhost,

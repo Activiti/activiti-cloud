@@ -436,8 +436,7 @@ class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_startEventHasNoFormAndMappings()
-        throws Exception {
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_startEventHasNoFormAndMappings() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -498,8 +497,7 @@ class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoMappingForStartEvent()
-        throws Exception {
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoMappingForStartEvent() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -765,8 +763,7 @@ class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    void should_getEmptyMapForProcessModelConstantsForStartEvent_when_startEventHasNoFormAndNoConstants()
-        throws Exception {
+    void should_getEmptyMapForProcessModelConstantsForStartEvent_when_startEventHasNoFormAndNoConstants() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -816,8 +813,7 @@ class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    void should_getEmptyMapForProcessModelConstantsMappingForStartEvent_when_hasFormAndNoConstantsForStartEvent()
-        throws Exception {
+    void should_getEmptyMapForProcessModelConstantsMappingForStartEvent_when_hasFormAndNoConstantsForStartEvent() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";

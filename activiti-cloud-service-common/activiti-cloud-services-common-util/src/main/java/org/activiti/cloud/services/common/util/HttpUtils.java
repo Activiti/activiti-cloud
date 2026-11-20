@@ -32,8 +32,11 @@ public final class HttpUtils {
     public static final String HEADER_ATTACHEMNT_FILENAME = "attachment;filename=";
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
-    public static void writeFileToResponse(HttpServletResponse response, FileContent fileContent, boolean attachment)
-        throws IOException {
+    public static void writeFileToResponse(
+        HttpServletResponse response,
+        FileContent fileContent,
+        boolean attachment
+    ) throws IOException {
         response.setContentType(fileContent.getContentType());
         if (attachment) {
             response.setHeader(CONTENT_DISPOSITION, HEADER_ATTACHEMNT_FILENAME + fileContent.getFilename());

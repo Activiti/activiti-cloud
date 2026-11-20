@@ -459,8 +459,7 @@ public abstract class AbstractMQServiceTaskIT {
     }
 
     @Test
-    void should_beAbleToExecuteMultiInstanceServiceTasksAndNotMultiInstantiatedServiceTasksWithoutRaceConditions()
-        throws Exception {
+    void should_beAbleToExecuteMultiInstanceServiceTasksAndNotMultiInstantiatedServiceTasksWithoutRaceConditions() throws Exception {
         //given
         CompletableFuture<ProcessInstance> singleInstanceCompletableFuture = CompletableFuture.supplyAsync(() ->
             runtimeService.startProcessInstanceByKey(

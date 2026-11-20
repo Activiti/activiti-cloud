@@ -53,8 +53,7 @@ public class VariableValueJsonConverterTest {
     }
 
     @Test
-    public void convertToDatabaseColumnShouldThrowQueryExceptionWhenAnExceptionOccursWhileProcessing()
-        throws Exception {
+    public void convertToDatabaseColumnShouldThrowQueryExceptionWhenAnExceptionOccursWhileProcessing() throws Exception {
         //given
         MockJsonProcessingException exception = new MockJsonProcessingException("any");
         given(objectMapper.writeValueAsString(ENTITY_REPRESENTATION)).willThrow(exception);

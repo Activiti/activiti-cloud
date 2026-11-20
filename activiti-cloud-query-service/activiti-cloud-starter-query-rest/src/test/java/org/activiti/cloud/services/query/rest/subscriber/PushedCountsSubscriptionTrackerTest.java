@@ -75,8 +75,7 @@ class PushedCountsSubscriptionTrackerTest {
     }
 
     @Test
-    void should_produceExactlyOneZeroToOneTransition_when_manyThreadsIncrementTheSameSessionConcurrently()
-        throws InterruptedException {
+    void should_produceExactlyOneZeroToOneTransition_when_manyThreadsIncrementTheSameSessionConcurrently() throws InterruptedException {
         int threadCount = 32;
         AtomicInteger wasZeroCount = new AtomicInteger();
         try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {

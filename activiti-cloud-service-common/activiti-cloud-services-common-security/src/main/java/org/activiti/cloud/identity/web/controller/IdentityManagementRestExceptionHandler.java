@@ -52,8 +52,10 @@ public class IdentityManagementRestExceptionHandler {
 
     @ExceptionHandler(IdentityInvalidApplicationException.class)
     @ResponseStatus(NOT_FOUND)
-    public void handleAppException(IdentityInvalidApplicationException ex, HttpServletResponse response)
-        throws IOException {
+    public void handleAppException(
+        IdentityInvalidApplicationException ex,
+        HttpServletResponse response
+    ) throws IOException {
         response.sendError(NOT_FOUND.value(), ex.getMessage());
     }
 }
