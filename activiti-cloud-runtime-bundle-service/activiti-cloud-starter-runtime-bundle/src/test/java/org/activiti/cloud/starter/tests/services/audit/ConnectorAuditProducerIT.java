@@ -27,10 +27,13 @@ import static org.activiti.services.connectors.channel.ProcessEngineIntegrationC
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.api.model.shared.event.RuntimeEvent;
@@ -54,6 +57,9 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.engine.ActivitiOptimisticLockingException;
+import org.activiti.engine.ManagementService;
+import org.activiti.engine.impl.interceptor.Command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +75,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @ActiveProfiles(ConnectorAuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -123,6 +130,9 @@ public class ConnectorAuditProducerIT {
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
+
+    @MockitoSpyBean
+    private ManagementService managementService;
 
     @Value("integrationResult_${spring.application.name}")
     private String integrationResultDestination;
@@ -461,6 +471,103 @@ public class ConnectorAuditProducerIT {
                 .extracting(RuntimeEvent::getEventType, RuntimeEvent::getProcessInstanceId)
                 .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
         });
+    }
+
+    @Test
+    public void shouldRetryCloudBpmnErrorPropagation_when_optimisticLockingFailureOccurs() {
+        //given
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
+            "cloudBpmnErrorCloudConnectorProcess",
+            null,
+            null
+        );
+        List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
+
+        await().untilAsserted(() -> {
+            List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
+                getProcessInstanceEvents(startProcessEntity),
+                INTEGRATION_REQUESTED
+            );
+            assertThat(receivedIntegrationRequestedEvents)
+                .extracting(event -> ((IntegrationContext) event.getEntity()).getClientId())
+                .containsExactly("performBusinessTaskCloudConnector");
+
+            integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
+        });
+
+        // the first error propagation fails as if the execution was updated concurrently:
+        // the real commands run, then the transaction is rolled back by an optimistic locking failure
+        AtomicBoolean failNextPropagation = new AtomicBoolean(true);
+        AtomicBoolean lockFailureInjected = new AtomicBoolean();
+        doAnswer(invocation -> {
+            Command<?> command = invocation.getArgument(0);
+            if (
+                "CompositeCommand".equals(command.getClass().getSimpleName()) &&
+                failNextPropagation.compareAndSet(true, false)
+            ) {
+                lockFailureInjected.set(true);
+                return managementService.executeCommand(commandContext -> {
+                    command.execute(commandContext);
+                    throw new ActivitiOptimisticLockingException("Simulated concurrent update of the execution");
+                });
+            }
+            return invocation.callRealMethod();
+        })
+            .when(managementService)
+            .executeCommand(any());
+
+        //when
+        sendIntegrationErrorFor(integrationRequestedEvents);
+
+        //then the propagation is retried and the error reaches the boundary event
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
+
+            List<CloudIntegrationErrorReceivedEvent> receivedIntegrationErrorEvents = getEventsByType(
+                receivedEvents,
+                INTEGRATION_ERROR_RECEIVED
+            );
+            assertThat(receivedIntegrationErrorEvents)
+                .extracting(event -> ((IntegrationContext) event.getEntity()).getClientId())
+                .containsExactly("performBusinessTaskCloudConnector");
+
+            List<CloudBPMNErrorReceivedEvent> receivedBpmnErrorEvents = getEventsByType(receivedEvents, ERROR_RECEIVED);
+            assertThat(receivedBpmnErrorEvents)
+                .extracting(event -> ((BPMNError) event.getEntity()).getErrorCode())
+                .containsExactly("CLOUD_BPMN_ERROR");
+        });
+        assertThat(lockFailureInjected).isTrue();
+
+        // and the process continues
+        integrationRequestedEvents.clear();
+        streamHandler.clear();
+
+        List<CloudTask> tasks = new ArrayList<>(
+            processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent()
+        );
+        assertThat(tasks).extracting(CloudTask::getName).containsExactly("Correct Business Error");
+
+        taskRestTemplate.complete(tasks.getFirst());
+
+        await().untilAsserted(() -> {
+            List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
+                getProcessInstanceEvents(startProcessEntity),
+                INTEGRATION_REQUESTED
+            );
+            assertThat(receivedIntegrationRequestedEvents)
+                .extracting(event -> ((IntegrationContext) event.getEntity()).getClientId())
+                .containsExactly("performBusinessTaskCloudConnector");
+
+            integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
+        });
+
+        sendIntegrationResultFor(integrationRequestedEvents);
+
+        await().untilAsserted(() ->
+            assertThat(getProcessInstanceEvents(startProcessEntity))
+                .extracting(RuntimeEvent::getEventType, RuntimeEvent::getProcessInstanceId)
+                .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()))
+        );
     }
 
     @Test
