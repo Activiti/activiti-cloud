@@ -51,7 +51,7 @@ public class OutboxMessageHandler implements MessageHandler {
 
         final var sent = Optional.ofNullable(message.getHeaders().get(OUTBOX_DESTINATION, String.class))
             .filter(Predicate.not(String::isEmpty))
-            .map(outboxBinding -> streamBridge().send(outboxBinding, message))
+            .map(outboxDestination -> streamBridge().send(outboxDestination, message))
             .orElseThrow(() ->
                 new DestinationResolutionException(
                     "Cannot resolve %s message header outbox %s partition".formatted(

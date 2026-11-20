@@ -25,8 +25,9 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.integration.dispatcher.LoadBalancingStrategy;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 
-public class OutboxLoadBalancingStrategy implements LoadBalancingStrategy {
+public class OutboxLoadBalancingStrategy implements LoadBalancingStrategy, MessageHandler {
 
     private final MessageHandler outboxMessageHandler;
 
@@ -42,6 +43,14 @@ public class OutboxLoadBalancingStrategy implements LoadBalancingStrategy {
     ) {
         return message.getHeaders().containsKey(OUTBOX_DESTINATION)
             ? Stream.of(outboxMessageHandler).iterator()
-            : handlers.stream().filter(Predicate.not(outboxMessageHandler::equals)).iterator();
+            : handlers
+                  .stream()
+                  .filter(Predicate.not(outboxMessageHandler::equals).and(Predicate.not(this::equals)))
+                  .iterator();
+    }
+
+    @Override
+    public void handleMessage(Message<?> message) throws MessagingException {
+        // noop
     }
 }
