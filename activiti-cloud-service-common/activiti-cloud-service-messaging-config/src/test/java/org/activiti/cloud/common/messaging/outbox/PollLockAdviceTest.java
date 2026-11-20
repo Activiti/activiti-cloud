@@ -149,8 +149,9 @@ class PollLockAdviceTest {
 
     @ParameterizedTest(name = "Propagates {0} and releases real lock")
     @ValueSource(classes = { IllegalStateException.class, RuntimeException.class })
-    void invoke_whenProceedThrowsException_unlocksAndPropagates(Class<? extends Throwable> exceptionType)
-        throws Throwable {
+    void invoke_whenProceedThrowsException_unlocksAndPropagates(
+        Class<? extends Throwable> exceptionType
+    ) throws Throwable {
         // Arrange
         Method callMethod = Callable.class.getMethod("call");
         Throwable simulatedError = exceptionType.getConstructor(String.class).newInstance("Poll failure");

@@ -105,11 +105,7 @@ class OutboxDestinationProviderTest {
     private OutboxProperties outboxProperties(String... regexes) {
         return new OutboxProperties() {
             {
-                setExcludes(
-                    Stream.of(regexes)
-                        .map(Pattern::compile)
-                        .toArray(Pattern[]::new)
-                );
+                setExcludes(Stream.of(regexes).map(Pattern::compile).toArray(Pattern[]::new));
             }
         };
     }
