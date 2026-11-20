@@ -23,7 +23,7 @@ import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJpaJsonConverter;
 
 @MappedSuperclass
-public abstract class IntegrationEventEntity extends AuditEventEntity {
+public abstract class IntegrationEventEntity extends AuditEventEntity implements VariablePayloadEvent {
 
     @Convert(converter = IntegrationContextJpaJsonConverter.class)
     @Column(columnDefinition = "text")
@@ -40,6 +40,17 @@ public abstract class IntegrationEventEntity extends AuditEventEntity {
         return integrationContext;
     }
 
+    @Override
+    public boolean isVariablePayloadEmpty() {
+        if (integrationContext == null) {
+            return true;
+        }
+        var inbound = integrationContext.getInBoundVariables();
+        var outbound = integrationContext.getOutBoundVariables();
+        return (inbound == null || inbound.isEmpty()) && (outbound == null || outbound.isEmpty());
+    }
+
+    @Override
     public void clearVariablePayloads() {
         if (integrationContext != null) {
             if (integrationContext.getInBoundVariables() != null) {

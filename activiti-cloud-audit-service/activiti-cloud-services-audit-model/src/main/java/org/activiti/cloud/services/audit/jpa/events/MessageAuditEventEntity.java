@@ -18,12 +18,13 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.MappedSuperclass;
+import java.util.HashMap;
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageJpaJsonConverter;
 
 @MappedSuperclass
-public abstract class MessageAuditEventEntity extends AuditEventEntity {
+public abstract class MessageAuditEventEntity extends AuditEventEntity implements VariablePayloadEvent {
 
     @Convert(converter = MessageJpaJsonConverter.class)
     @Column(columnDefinition = "text")
@@ -47,6 +48,25 @@ public abstract class MessageAuditEventEntity extends AuditEventEntity {
 
     public void setMessage(BPMNMessage message) {
         this.message = message;
+    }
+
+    @Override
+    public boolean isVariablePayloadEmpty() {
+        if (message == null || message.getMessagePayload() == null) {
+            return true;
+        }
+        var variables = message.getMessagePayload().getVariables();
+        return variables == null || variables.isEmpty();
+    }
+
+    @Override
+    public void clearVariablePayloads() {
+        if (message != null && message.getMessagePayload() != null) {
+            var payload = message.getMessagePayload();
+            if (payload.getVariables() != null) {
+                payload.setVariables(new HashMap<>());
+            }
+        }
     }
 
     @Override

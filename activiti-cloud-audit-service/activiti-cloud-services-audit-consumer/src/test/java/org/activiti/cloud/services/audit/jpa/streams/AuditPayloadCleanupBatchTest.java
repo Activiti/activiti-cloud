@@ -29,6 +29,7 @@ import java.util.Map;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.junit.jupiter.api.Test;

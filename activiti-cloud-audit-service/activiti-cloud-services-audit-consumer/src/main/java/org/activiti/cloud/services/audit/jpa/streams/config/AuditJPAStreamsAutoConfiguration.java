@@ -25,10 +25,14 @@ import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.TransientAuditPayloadCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.IntegrationPayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.MessagePayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.SignalPayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.VariablePayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.streams.AuditConsumerChannelHandlerImpl;
-import org.activiti.cloud.services.audit.jpa.streams.AuditPayloadCleanup;
-import org.activiti.cloud.services.audit.jpa.streams.TransientAuditPayloadCleanup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -70,7 +74,15 @@ public class AuditJPAStreamsAutoConfiguration {
         matchIfMissing = false
     )
     public AuditPayloadCleanup auditPayloadCleanup(EntityManager entityManager) {
-        return new TransientAuditPayloadCleanup(entityManager);
+        return new TransientAuditPayloadCleanup(
+            entityManager,
+            List.of(
+                new VariablePayloadUpdateStrategy(entityManager),
+                new IntegrationPayloadUpdateStrategy(entityManager),
+                new MessagePayloadUpdateStrategy(entityManager),
+                new SignalPayloadUpdateStrategy(entityManager)
+            )
+        );
     }
 
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER)

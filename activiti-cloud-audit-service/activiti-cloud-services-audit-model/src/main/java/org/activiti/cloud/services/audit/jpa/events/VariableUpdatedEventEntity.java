@@ -39,6 +39,11 @@ public class VariableUpdatedEventEntity extends VariableAuditEventEntity {
     }
 
     @Override
+    public boolean isVariablePayloadEmpty() {
+        return super.isVariablePayloadEmpty() && previousValue == null;
+    }
+
+    @Override
     public void clearVariablePayloads() {
         super.clearVariablePayloads();
         previousValue = null;

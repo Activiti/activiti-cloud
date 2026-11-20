@@ -24,7 +24,7 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 
 @MappedSuperclass
-public abstract class VariableAuditEventEntity extends AuditEventEntity {
+public abstract class VariableAuditEventEntity extends AuditEventEntity implements VariablePayloadEvent {
 
     private String variableName;
     private String variableType;
@@ -85,6 +85,12 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
         }
     }
 
+    @Override
+    public boolean isVariablePayloadEmpty() {
+        return variableInstance == null || variableInstance.getValue() == null;
+    }
+
+    @Override
     public void clearVariablePayloads() {
         variableInstance = new VariableInstanceImpl<>(
             variableName,

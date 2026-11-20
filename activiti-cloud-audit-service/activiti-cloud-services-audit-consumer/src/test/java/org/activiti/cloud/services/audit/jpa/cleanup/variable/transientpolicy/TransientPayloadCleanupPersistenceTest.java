@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.jpa.streams;
+package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,34 +24,58 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.activiti.api.model.shared.event.VariableEvent;
+import org.activiti.api.process.model.BPMNMessage;
+import org.activiti.api.process.model.BPMNSignal;
+import org.activiti.api.process.model.events.BPMNMessageEvent;
+import org.activiti.api.process.model.events.BPMNSignalEvent;
+import org.activiti.api.process.model.payloads.MessageEventPayload;
+import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
+import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
+import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
 import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
+import org.activiti.cloud.services.audit.jpa.converters.MessageReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.MessageSentEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.MessageWaitingEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.SignalReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.json.JpaJsonConverter;
+import org.activiti.cloud.services.audit.jpa.converters.json.MessageJpaJsonConverter;
+import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationErrorReceivedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationRequestSentEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationResultReceivedEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageReceivedAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageSentAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.MessageWaitingAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCancelledAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableCreatedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableDeletedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableValue;
+import org.activiti.cloud.services.audit.jpa.streams.config.AuditJPAStreamsAutoConfiguration;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -70,12 +94,17 @@ class TransientPayloadCleanupPersistenceTest {
     private LocalContainerEntityManagerFactoryBean factory;
     private EntityManager entityManager;
     private HikariDataSource dataSource;
+    private AuditPayloadCleanup cleanup;
 
     private final APIEventToEntityConverters eventConverters = new APIEventToEntityConverters(
         Set.of(
             new VariableCreatedEventConverter(new EventContextInfoAppender()),
             new VariableUpdatedEventConverter(new EventContextInfoAppender()),
-            new VariableDeletedEventConverter(new EventContextInfoAppender())
+            new VariableDeletedEventConverter(new EventContextInfoAppender()),
+            new MessageWaitingEventConverter(new EventContextInfoAppender()),
+            new MessageSentEventConverter(new EventContextInfoAppender()),
+            new MessageReceivedEventConverter(new EventContextInfoAppender()),
+            new SignalReceivedEventConverter(new EventContextInfoAppender())
         )
     );
 
@@ -106,6 +135,7 @@ class TransientPayloadCleanupPersistenceTest {
     void beginTransaction() {
         entityManager = factory.getObject().createEntityManager();
         entityManager.getTransaction().begin();
+        cleanup = new AuditJPAStreamsAutoConfiguration().auditPayloadCleanup(entityManager);
     }
 
     @AfterEach
@@ -150,7 +180,6 @@ class TransientPayloadCleanupPersistenceTest {
         terminal.setParentProcessInstanceId(relationship.equals("child") ? "parent" : null);
         terminal.setAppName("app");
         entityManager.persist(terminal);
-        var cleanup = new TransientAuditPayloadCleanup(entityManager);
 
         cleanup.cleanup(List.of(terminal, terminal));
         entityManager.flush();
@@ -204,6 +233,32 @@ class TransientPayloadCleanupPersistenceTest {
                 assertThat(integration.getIntegrationContext().getOutBoundVariables()).isEmpty();
                 assertThat(integration.getIntegrationContext().getId()).startsWith("context-");
             }
+            if (stored instanceof MessageAuditEventEntity messageEvent) {
+                var message = messageEvent.getMessage();
+                assertMessageMetadata(message, "target");
+                assertThat(message.getMessagePayload().getVariables()).isEmpty();
+                assertThat(message.getMessagePayload().getId()).isEqualTo(
+                    ((MessageAuditEventEntity) event).getMessage().getMessagePayload().getId()
+                );
+                var apiEvent = (CloudBPMNMessageEvent) eventConverters
+                    .getConverterByEventTypeName(stored.getEventType())
+                    .convertToAPI(stored);
+                assertThat(apiEvent.getEntity()).usingRecursiveComparison().isEqualTo(message);
+                assertStoredJson(stored, "message", new MessageJpaJsonConverter(), message);
+            }
+            if (stored instanceof SignalReceivedAuditEventEntity signalEvent) {
+                var signal = signalEvent.getSignal();
+                assertSignalMetadata(signal, "target");
+                assertThat(signal.getSignalPayload().getVariables()).isEmpty();
+                assertThat(signal.getSignalPayload().getId()).isEqualTo(
+                    ((SignalReceivedAuditEventEntity) event).getSignal().getSignalPayload().getId()
+                );
+                var apiEvent = (CloudBPMNSignalReceivedEvent) eventConverters
+                    .getConverterByEventTypeName(stored.getEventType())
+                    .convertToAPI(stored);
+                assertThat(apiEvent.getEntity()).usingRecursiveComparison().isEqualTo(signal);
+                assertStoredJson(stored, "signal", new SignalJpaJsonConverter(), signal);
+            }
         }
         for (AuditEventEntity event : List.of(otherProcess.getFirst(), otherApplication.getFirst())) {
             assertThat(
@@ -213,18 +268,21 @@ class TransientPayloadCleanupPersistenceTest {
                     .getValue()
             ).isEqualTo("secret");
         }
+        assertMessageAndSignalPayloadsRetained(otherProcess);
+        assertMessageAndSignalPayloadsRetained(otherApplication);
         assertThat(entityManager.find(terminal.getClass(), terminal.getId())).isNotNull();
         cleanup.cleanup(List.of(terminal));
     }
 
     @Test
     void should_preservePayloadsForNonTerminalEvents() {
-        var payload = seed("running", "app").getFirst();
+        var payloads = seed("running", "app");
+        var payload = payloads.getFirst();
         var running = new ProcessCreatedAuditEventEntity();
         running.setProcessInstanceId("running");
         running.setAppName("app");
 
-        new TransientAuditPayloadCleanup(entityManager).cleanup(List.of(running));
+        cleanup.cleanup(List.of(running));
         entityManager.clear();
 
         assertThat(
@@ -233,18 +291,20 @@ class TransientPayloadCleanupPersistenceTest {
                 .getVariableInstance()
                 .getValue()
         ).isEqualTo("secret");
+        assertMessageAndSignalPayloadsRetained(payloads);
     }
 
     @Test
     void should_rollbackRedactionWithTransaction() {
-        var payload = seed("rollback", "app").getFirst();
+        var payloads = seed("rollback", "app");
+        var payload = payloads.getFirst();
         entityManager.getTransaction().commit();
         entityManager.getTransaction().begin();
         var terminal = new ProcessCompletedEventEntity();
         terminal.setProcessInstanceId("rollback");
         terminal.setAppName("app");
 
-        new TransientAuditPayloadCleanup(entityManager).cleanup(List.of(terminal));
+        cleanup.cleanup(List.of(terminal));
         entityManager.getTransaction().rollback();
         entityManager.clear();
         entityManager.getTransaction().begin();
@@ -255,6 +315,7 @@ class TransientPayloadCleanupPersistenceTest {
                 .getVariableInstance()
                 .getValue()
         ).isEqualTo("secret");
+        assertMessageAndSignalPayloadsRetained(payloads);
     }
 
     private List<AuditEventEntity> seed(String processId, String appName) {
@@ -289,8 +350,44 @@ class TransientPayloadCleanupPersistenceTest {
         var requested = new IntegrationRequestSentEventEntity(requestedEvent);
         var result = new IntegrationResultReceivedEventEntity(resultEvent);
         var error = new IntegrationErrorReceivedEventEntity(errorEvent);
+        var waiting = new MessageWaitingAuditEventEntity();
+        waiting.setMessage(message(processId, "waiting"));
+        waiting.setEntityId("waiting-activity");
+        waiting.setProcessDefinitionId("definition");
+        waiting.setEventType(BPMNMessageEvent.MessageEvents.MESSAGE_WAITING.name());
+        var sent = new MessageSentAuditEventEntity();
+        sent.setMessage(message(processId, "sent"));
+        sent.setEntityId("sent-activity");
+        sent.setProcessDefinitionId("definition");
+        sent.setEventType(BPMNMessageEvent.MessageEvents.MESSAGE_SENT.name());
+        var received = new MessageReceivedAuditEventEntity();
+        received.setMessage(message(processId, "received"));
+        received.setEntityId("received-activity");
+        received.setProcessDefinitionId("definition");
+        received.setEventType(BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED.name());
+        var signal = new BPMNSignalImpl("signal-activity");
+        signal.setProcessInstanceId(processId);
+        signal.setProcessDefinitionId("definition");
+        signal.setSignalPayload(new SignalPayload("notification-signal", Map.of("signal-variable", "secret")));
+        var signalled = new SignalReceivedAuditEventEntity();
+        signalled.setSignal(signal);
+        signalled.setEntityId("signal-activity");
+        signalled.setProcessDefinitionId("definition");
+        signalled.setEventType(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());
         var metadata = new ProcessCreatedAuditEventEntity();
-        List<AuditEventEntity> events = List.of(created, updated, deleted, requested, result, error, metadata);
+        List<AuditEventEntity> events = List.of(
+            created,
+            updated,
+            deleted,
+            requested,
+            result,
+            error,
+            waiting,
+            sent,
+            received,
+            signalled,
+            metadata
+        );
         for (AuditEventEntity event : events) {
             event.setProcessInstanceId(processId);
             event.setAppName(appName);
@@ -300,5 +397,67 @@ class TransientPayloadCleanupPersistenceTest {
         }
         entityManager.flush();
         return events;
+    }
+
+    private BPMNMessageImpl message(String processId, String name) {
+        var message = new BPMNMessageImpl(name + "-activity");
+        message.setProcessInstanceId(processId);
+        message.setProcessDefinitionId("definition");
+        message.setMessagePayload(
+            new MessageEventPayload(
+                "notification",
+                "correlation",
+                "message-business",
+                Map.of("message-variable", "secret")
+            )
+        );
+        return message;
+    }
+
+    private void assertMessageMetadata(BPMNMessage message, String processId) {
+        assertThat(message.getProcessInstanceId()).isEqualTo(processId);
+        assertThat(message.getProcessDefinitionId()).isEqualTo("definition");
+        assertThat(message.getElementId()).endsWith("-activity");
+        assertThat(message.getMessagePayload().getName()).isEqualTo("notification");
+        assertThat(message.getMessagePayload().getCorrelationKey()).isEqualTo("correlation");
+        assertThat(message.getMessagePayload().getBusinessKey()).isEqualTo("message-business");
+    }
+
+    private void assertSignalMetadata(BPMNSignal signal, String processId) {
+        assertThat(signal.getProcessInstanceId()).isEqualTo(processId);
+        assertThat(signal.getProcessDefinitionId()).isEqualTo("definition");
+        assertThat(signal.getElementId()).isEqualTo("signal-activity");
+        assertThat(signal.getSignalPayload().getName()).isEqualTo("notification-signal");
+    }
+
+    private void assertStoredJson(
+        AuditEventEntity event,
+        String column,
+        JpaJsonConverter<?> converter,
+        Object expected
+    ) {
+        String json = (String) entityManager
+            .createNativeQuery("select " + column + " from audit_event where id = :id")
+            .setParameter("id", event.getId())
+            .getSingleResult();
+        assertThat(json).isNotBlank().doesNotContain("secret");
+        Object payload = converter.convertToEntityAttribute(json);
+        assertThat(payload).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    private void assertMessageAndSignalPayloadsRetained(List<AuditEventEntity> events) {
+        for (AuditEventEntity event : events) {
+            var stored = entityManager.find(event.getClass(), event.getId());
+            if (stored instanceof MessageAuditEventEntity message) {
+                assertThat(message.getMessage().getMessagePayload().getVariables()).containsExactlyEntriesOf(
+                    Map.of("message-variable", "secret")
+                );
+            }
+            if (stored instanceof SignalReceivedAuditEventEntity signal) {
+                assertThat(signal.getSignal().getSignalPayload().getVariables()).containsExactlyEntriesOf(
+                    Map.of("signal-variable", "secret")
+                );
+            }
+        }
     }
 }
