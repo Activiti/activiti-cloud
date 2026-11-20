@@ -60,7 +60,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.function.StreamOperations;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.annotation.BridgeFrom;
@@ -108,7 +108,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     protected ObjectMapper objectMapper;
 
     @Autowired
-    protected StreamOperations streamBridge;
+    protected StreamBridge streamBridge;
 
     @Autowired
     private OutputDestination outputDestination;

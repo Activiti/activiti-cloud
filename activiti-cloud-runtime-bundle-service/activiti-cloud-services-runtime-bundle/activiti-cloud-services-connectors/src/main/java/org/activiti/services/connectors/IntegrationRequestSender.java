@@ -26,7 +26,7 @@ import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.function.StreamOperations;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -37,12 +37,12 @@ public class IntegrationRequestSender {
     public static final String CONNECTOR_TYPE = "connectorType";
     private static final Logger log = LoggerFactory.getLogger(IntegrationRequestSender.class);
 
-    private final StreamOperations streamBridge;
+    private final StreamBridge streamBridge;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
     private final FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     public IntegrationRequestSender(
-        StreamOperations streamBridge,
+        StreamBridge streamBridge,
         IntegrationContextMessageBuilderFactory messageBuilderFactory,
         FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
