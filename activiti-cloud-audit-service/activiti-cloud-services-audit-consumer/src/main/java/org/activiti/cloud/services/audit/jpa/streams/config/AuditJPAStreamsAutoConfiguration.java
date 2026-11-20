@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.streams.config;
 
+import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +27,15 @@ import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.streams.AuditConsumerChannelHandlerImpl;
+import org.activiti.cloud.services.audit.jpa.streams.AuditPayloadCleanup;
+import org.activiti.cloud.services.audit.jpa.streams.TransientAuditPayloadCleanup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -51,9 +56,21 @@ public class AuditJPAStreamsAutoConfiguration {
     @ConditionalOnMissingBean
     public AuditConsumerChannelHandler auditConsumerChannelHandler(
         EventsRepository eventsRepository,
-        APIEventToEntityConverters eventConverters
+        APIEventToEntityConverters eventConverters,
+        ObjectProvider<AuditPayloadCleanup> payloadCleanup
     ) {
-        return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters);
+        return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters, payloadCleanup);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuditPayloadCleanup.class)
+    @ConditionalOnProperty(
+        name = "activiti.cloud.processing-data.retention-policy",
+        havingValue = "transient",
+        matchIfMissing = false
+    )
+    public AuditPayloadCleanup auditPayloadCleanup(EntityManager entityManager) {
+        return new TransientAuditPayloadCleanup(entityManager);
     }
 
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER)

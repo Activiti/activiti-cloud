@@ -84,6 +84,10 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
         }
     }
 
+    public void clearVariablePayloads() {
+        variableInstance = null;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
