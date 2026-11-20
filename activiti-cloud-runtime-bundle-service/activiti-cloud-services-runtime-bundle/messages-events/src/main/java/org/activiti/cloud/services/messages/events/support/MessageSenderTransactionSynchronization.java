@@ -46,6 +46,7 @@ public class MessageSenderTransactionSynchronization implements TransactionSynch
             }
         } catch (Exception cause) {
             logger.error("Sending bpmn message {} failed due to error: {}", message, cause.getMessage());
+            throw cause;
         }
     }
 }
