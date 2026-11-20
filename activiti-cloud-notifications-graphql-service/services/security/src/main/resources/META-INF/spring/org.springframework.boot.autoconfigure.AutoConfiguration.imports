@@ -1,1 +1,2 @@
 org.activiti.cloud.services.notifications.qraphql.ws.security.WebSocketMessageBrokerSecurityAutoConfiguration
+org.activiti.cloud.services.notifications.qraphql.ws.security.TokenExpiryGraphQlWebSocketAutoConfiguration
