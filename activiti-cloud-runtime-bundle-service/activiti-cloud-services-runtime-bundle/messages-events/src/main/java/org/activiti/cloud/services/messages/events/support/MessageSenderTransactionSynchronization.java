@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.support.TransactionSynchronization;
 
 public class MessageSenderTransactionSynchronization implements TransactionSynchronization {
@@ -45,8 +46,8 @@ public class MessageSenderTransactionSynchronization implements TransactionSynch
                 throw new MessageDispatchingException(message);
             }
         } catch (Exception cause) {
-            logger.error("Sending bpmn message {} failed due to error: {}", message, cause.getMessage());
-            throw cause;
+            logger.warn("Sending bpmn message {} failed due to error: {}", message, cause.getMessage());
+            throw new MessageDeliveryException(message, "Sending bpmn message failed", cause);
         }
     }
 }
