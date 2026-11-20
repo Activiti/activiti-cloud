@@ -25,10 +25,21 @@ public class ProcessInstanceSearchResultImpl extends CloudProcessInstanceImpl im
 
     private long subprocessesCount;
     private long linkedProcessesCount;
+    private boolean hasServiceTaskErrors;
     private String linkedProcessInstanceId;
     private String linkedProcessInstanceType;
     private String type;
     private Set<QueryCloudVariableInstance> variables = new LinkedHashSet<>();
+
+    @Override
+    public boolean getHasServiceTaskErrors() {
+        return hasServiceTaskErrors;
+    }
+
+    @Override
+    public void setHasServiceTaskErrors(boolean hasServiceTaskErrors) {
+        this.hasServiceTaskErrors = hasServiceTaskErrors;
+    }
 
     @Override
     public long getSubprocessesCount() {
@@ -103,6 +114,7 @@ public class ProcessInstanceSearchResultImpl extends CloudProcessInstanceImpl im
         return (
             subprocessesCount == other.subprocessesCount &&
             linkedProcessesCount == other.linkedProcessesCount &&
+            hasServiceTaskErrors == other.hasServiceTaskErrors &&
             Objects.equals(linkedProcessInstanceId, other.linkedProcessInstanceId) &&
             Objects.equals(linkedProcessInstanceType, other.linkedProcessInstanceType) &&
             Objects.equals(type, other.type)
@@ -115,6 +127,7 @@ public class ProcessInstanceSearchResultImpl extends CloudProcessInstanceImpl im
             super.hashCode(),
             subprocessesCount,
             linkedProcessesCount,
+            hasServiceTaskErrors,
             linkedProcessInstanceId,
             linkedProcessInstanceType,
             type
