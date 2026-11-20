@@ -41,7 +41,7 @@ public class IsNotBeforeValidationCheck implements AbastractTimeValidationCheck 
         boolean result = accessToken.getNotBefore() == null || currentTime >= accessToken.getNotBefore().toEpochMilli();
 
         if (!result) {
-            LOGGER.error("Current time {} is before {}", currentTime, accessToken.getNotBefore());
+            LOGGER.debug("Current time {} is before {}", currentTime, accessToken.getNotBefore());
         }
 
         return result;
