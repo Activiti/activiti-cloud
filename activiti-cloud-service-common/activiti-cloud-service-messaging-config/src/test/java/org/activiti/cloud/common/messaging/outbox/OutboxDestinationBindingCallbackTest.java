@@ -19,6 +19,7 @@ package org.activiti.cloud.common.messaging.outbox;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -30,6 +31,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.springframework.cloud.stream.binder.ProducerProperties;
+import org.springframework.cloud.stream.messaging.DirectWithAttributesChannel;
+import org.springframework.integration.channel.ChannelDispatcherAccessor;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.messaging.Message;
@@ -40,32 +43,40 @@ import org.springframework.messaging.support.InterceptableChannel;
 
 class OutboxDestinationBindingCallbackTest {
 
-    private ChannelInterceptor outboxChannelInterceptor;
+    private static OutboxChannelInterceptor outboxChannelInterceptor = mock(OutboxChannelInterceptor.class);
     private OutboxDestinationBindingCallback callback;
+    private OutboxChannelConfigurer outboxChannelConfigurer = new OutboxChannelConfigurer();
 
     @BeforeEach
     void setUp() {
-        outboxChannelInterceptor = mock(ChannelInterceptor.class);
-        callback = new OutboxDestinationBindingCallback(outboxChannelInterceptor);
+        reset(outboxChannelInterceptor);
+        callback = new OutboxDestinationBindingCallback(outboxChannelInterceptor, outboxChannelConfigurer);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("interceptableChannelsProvider")
-    @DisplayName("Should add interceptor to any InterceptableChannel implementation")
-    void shouldAddInterceptorToInterceptableChannels(
+    @DisplayName("Should add interceptor to any DirectChannel implementation with a handler if needed")
+    void shouldAddInterceptorToDirectChannels(
         String description,
         MessageChannel channel,
         String channelName,
         ProducerProperties producerProperties,
-        Object extendedProperties
+        Object extendedProperties,
+        ChannelInterceptor[] channelInterceptors,
+        Integer expectedHandlerCount
     ) {
         // Act
         callback.configure(channelName, channel, producerProperties, extendedProperties);
 
         // Assert
         assertThat(channel).isInstanceOfSatisfying(InterceptableChannel.class, interceptable ->
-            assertThat(interceptable.getInterceptors()).hasSize(1).containsExactly(outboxChannelInterceptor)
+            assertThat(interceptable.getInterceptors()).containsExactly(channelInterceptors)
         );
+
+        if (channel instanceof DirectChannel directChannel) {
+            final var dispatcher = ChannelDispatcherAccessor.getDispatcher(directChannel);
+            assertThat(dispatcher.getHandlerCount()).isEqualTo(expectedHandlerCount);
+        }
     }
 
     @ParameterizedTest(name = "[{index}] Non-interceptable channel: {0}")
@@ -91,14 +102,36 @@ class OutboxDestinationBindingCallbackTest {
                 new DirectChannel(),
                 "orders-outbox",
                 new ProducerProperties(),
-                new Object()
+                new Object(),
+                new ChannelInterceptor[] { outboxChannelInterceptor },
+                1
             ),
-            Arguments.of("PublishSubscribeChannel with null metadata", new PublishSubscribeChannel(), null, null, null),
+            Arguments.of(
+                "DirectWithAttributesChannel with full properties",
+                new DirectWithAttributesChannel(),
+                "orders-outbox",
+                new ProducerProperties(),
+                new Object(),
+                new ChannelInterceptor[] { outboxChannelInterceptor },
+                0
+            ),
+
+            Arguments.of(
+                "PublishSubscribeChannel with null metadata",
+                new PublishSubscribeChannel(),
+                null,
+                null,
+                null,
+                new ChannelInterceptor[] {},
+                null
+            ),
             Arguments.of(
                 "ExecutorSubscribableChannel with empty name",
                 new ExecutorSubscribableChannel(),
                 "",
                 new ProducerProperties(),
+                null,
+                new ChannelInterceptor[] {},
                 null
             )
         );

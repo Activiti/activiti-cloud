@@ -41,13 +41,14 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.util.DynamicPeriodicTrigger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 
 public class OutboxChannelInterceptorFactory
-    implements BiFunction<String, BiFunction<Message<?>, MessageChannel, String>, ChannelInterceptor>, SmartLifecycle
+    implements
+        BiFunction<String, BiFunction<Message<?>, MessageChannel, String>, OutboxChannelInterceptor>,
+        SmartLifecycle
 {
 
     public static final String OUTBOX_ROLE = "Outbox";
@@ -64,7 +65,7 @@ public class OutboxChannelInterceptorFactory
     private final LockRegistry lockRegistry;
     private final Advice outboxMessageHandlerErrorAdvice;
 
-    private final Map<String, ChannelInterceptor> interceptorsMap = new ConcurrentHashMap<>();
+    private final Map<String, OutboxChannelInterceptor> interceptorsMap = new ConcurrentHashMap<>();
     private final Map<String, IntegrationFlowRegistration> flowRegistrationsMap = new ConcurrentHashMap<>();
 
     public OutboxChannelInterceptorFactory(
@@ -86,7 +87,7 @@ public class OutboxChannelInterceptorFactory
     }
 
     @Override
-    public ChannelInterceptor apply(
+    public OutboxChannelInterceptor apply(
         String partitionKey,
         BiFunction<Message<?>, MessageChannel, String> destinationProvider
     ) {
@@ -145,7 +146,7 @@ public class OutboxChannelInterceptorFactory
     private TaskScheduler taskScheduler(String partitionKey) {
         return new ConcurrentTaskScheduler(
             Executors.newSingleThreadScheduledExecutor(
-                Thread.ofPlatform().name(partitionKey.concat("Poller")).factory()
+                Thread.ofPlatform().name(partitionKey.concat("Poller")).daemon().factory()
             )
         );
     }

@@ -119,7 +119,6 @@ class OutboxChannelInterceptorTest {
         Map<String, Object> expectedRetainedHeaders
     ) {
         when(destinationProvider.apply(originalMessage, sourceChannel)).thenReturn(resolvedDestination);
-        when(outboxChannel.send(any())).thenReturn(true);
 
         if (headersToRemove.length > 0) {
             interceptor.withHeadersToRemove(headersToRemove);
@@ -127,13 +126,9 @@ class OutboxChannelInterceptorTest {
 
         Message<?> result = interceptor.preSend(originalMessage, sourceChannel);
 
-        assertThat(result).isNull();
-
-        verify(outboxChannel).send(messageCaptor.capture());
-        Message<?> sentMessage = messageCaptor.getValue();
-
-        assertThat(sentMessage.getPayload()).isEqualTo(originalMessage.getPayload());
-        assertThat(sentMessage.getHeaders())
+        assertThat(result).isNotNull();
+        assertThat(result.getPayload()).isEqualTo(originalMessage.getPayload());
+        assertThat(result.getHeaders())
             .containsEntry(OUTBOX_DESTINATION, resolvedDestination)
             .containsAllEntriesOf(expectedRetainedHeaders)
             .doesNotContainKeys(headersToRemove);
