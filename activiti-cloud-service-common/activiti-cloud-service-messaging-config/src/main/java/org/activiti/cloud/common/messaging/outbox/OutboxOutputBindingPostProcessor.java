@@ -21,7 +21,6 @@ import org.activiti.cloud.common.messaging.config.FunctionAnnotationService;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.Message;
@@ -34,42 +33,35 @@ public class OutboxOutputBindingPostProcessor implements BeanPostProcessor {
     private final FunctionAnnotationService functionAnnotationService;
     private final OutboxChannelInterceptorFactory outboxChannelInterceptorFactory;
     private final BiFunction<Message<?>, MessageChannel, String> outboxDestinationProvider;
+    private final OutboxChannelConfigurer outboxChannelConfigurer;
 
     public OutboxOutputBindingPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         OutboxChannelInterceptorFactory outboxChannelInterceptorFactory,
-        BiFunction<Message<?>, MessageChannel, String> outboxDestinationProvider
+        BiFunction<Message<?>, MessageChannel, String> outboxDestinationProvider,
+        OutboxChannelConfigurer outboxChannelConfigurer
     ) {
         this.functionAnnotationService = functionAnnotationService;
         this.outboxChannelInterceptorFactory = outboxChannelInterceptorFactory;
         this.outboxDestinationProvider = outboxDestinationProvider;
+        this.outboxChannelConfigurer = outboxChannelConfigurer;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
         if (bean instanceof DirectChannel messageChannel) {
-            return Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class))
-                .map(outputBinding -> {
-                    final var channelInterceptor = outboxChannelInterceptorFactory.apply(
-                        beanName,
-                        outboxDestinationProvider
-                    );
+            Optional.ofNullable(
+                functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class)
+            ).ifPresent(outputBinding -> {
+                final var channelInterceptor = outboxChannelInterceptorFactory.apply(
+                    beanName,
+                    outboxDestinationProvider
+                );
 
-                    messageChannel.addInterceptor(channelInterceptor);
+                outboxChannelConfigurer.accept(channelInterceptor, messageChannel);
 
-                    log.info("Added outbox channel interceptor advice to {} message channel", beanName);
-
-                    ProxyFactory proxyFactory = new ProxyFactory();
-                    proxyFactory.setTarget(messageChannel);
-
-                    proxyFactory.setProxyTargetClass(true);
-
-                    proxyFactory.addAdvice(new OutboxChannelInterceptorAdvice(beanName));
-
-                    return proxyFactory;
-                })
-                .map(ProxyFactory::getProxy)
-                .orElse(bean);
+                log.info("Configured outbox channel interceptor advice on {} message channel", beanName);
+            });
         }
         return bean;
     }

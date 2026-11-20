@@ -17,16 +17,20 @@ package org.activiti.cloud.common.messaging.outbox;
 
 import org.springframework.cloud.stream.binder.ProducerProperties;
 import org.springframework.cloud.stream.binding.NewDestinationBindingCallback;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.InterceptableChannel;
 
 public class OutboxDestinationBindingCallback implements NewDestinationBindingCallback<Object> {
 
-    private final ChannelInterceptor outboxChannelInterceptor;
+    private final OutboxChannelInterceptor outboxChannelInterceptor;
+    private final OutboxChannelConfigurer outboxChannelConfigurer;
 
-    public OutboxDestinationBindingCallback(ChannelInterceptor outboxChannelInterceptor) {
+    public OutboxDestinationBindingCallback(
+        OutboxChannelInterceptor outboxChannelInterceptor,
+        OutboxChannelConfigurer outboxChannelConfigurer
+    ) {
         this.outboxChannelInterceptor = outboxChannelInterceptor;
+        this.outboxChannelConfigurer = outboxChannelConfigurer;
     }
 
     @Override
@@ -36,8 +40,8 @@ public class OutboxDestinationBindingCallback implements NewDestinationBindingCa
         ProducerProperties producerProperties,
         Object extendedProducerProperties
     ) {
-        if (channel instanceof InterceptableChannel interceptableChannel) {
-            interceptableChannel.addInterceptor(outboxChannelInterceptor);
+        if (channel instanceof DirectChannel messageChannel) {
+            outboxChannelConfigurer.accept(outboxChannelInterceptor, messageChannel);
         }
     }
 }

@@ -24,10 +24,12 @@ import java.util.function.BiFunction;
 import org.jspecify.annotations.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 
-public class OutboxChannelInterceptor implements ChannelInterceptor {
+public class OutboxChannelInterceptor implements ChannelInterceptor, MessageHandler {
 
     private final MessageChannel outboxChannel;
     private final BiFunction<Message<?>, MessageChannel, String> destinationProvider;
@@ -50,18 +52,21 @@ public class OutboxChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         if (!message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
-            final var result = Optional.ofNullable(destinationProvider.apply(message, channel))
-                .map(outboxDestination ->
-                    MessageBuilder.fromMessage(message)
-                        .setHeader(OUTBOX_DESTINATION, outboxDestination)
-                        .removeHeaders(headersToRemove)
-                        .build()
-                )
-                .map(outboxChannel::send);
+            final var result = Optional.ofNullable(destinationProvider.apply(message, channel)).map(outboxDestination ->
+                MessageBuilder.fromMessage(message)
+                    .setHeader(OUTBOX_DESTINATION, outboxDestination)
+                    .removeHeaders(headersToRemove)
+                    .build()
+            );
 
-            return result.isPresent() ? null : message;
+            return result.isPresent() ? result.get() : message;
         }
 
         return MessageBuilder.fromMessage(message).removeHeader(OUTBOX_DESTINATION).build();
+    }
+
+    @Override
+    public void handleMessage(Message<?> message) throws MessagingException {
+        outboxChannel.send(message);
     }
 }

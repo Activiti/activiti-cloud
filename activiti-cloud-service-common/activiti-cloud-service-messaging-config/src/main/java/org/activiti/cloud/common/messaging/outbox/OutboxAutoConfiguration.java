@@ -196,13 +196,20 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    OutboxChannelConfigurer outboxChannelConfigurer() {
+        return new OutboxChannelConfigurer();
+    }
+
+    @Bean
     NewDestinationBindingCallback<Object> outboxDestinationBindingCallback(
         OutboxChannelInterceptorFactory outboxChannelInterceptorFactory,
-        OutboxDestinationProvider outboxDestinationProvider
+        OutboxDestinationProvider outboxDestinationProvider,
+        OutboxChannelConfigurer outboxChannelConfigurer
     ) {
         final var channelInterceptor = outboxChannelInterceptorFactory.apply("streamBridge", outboxDestinationProvider);
 
-        return new OutboxDestinationBindingCallback(channelInterceptor);
+        return new OutboxDestinationBindingCallback(channelInterceptor, outboxChannelConfigurer);
     }
 
     @Bean
@@ -216,19 +223,15 @@ public class OutboxAutoConfiguration {
     BeanPostProcessor outboxOutputBindingPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         OutboxChannelInterceptorFactory outboxChannelInterceptorFactory,
-        OutboxDestinationProvider outboxDestinationProvider
+        OutboxDestinationProvider outboxDestinationProvider,
+        OutboxChannelConfigurer outboxChannelConfigurer
     ) {
         return new OutboxOutputBindingPostProcessor(
             functionAnnotationService,
             outboxChannelInterceptorFactory,
-            outboxDestinationProvider
+            outboxDestinationProvider,
+            outboxChannelConfigurer
         );
-    }
-
-    @Bean
-    @Role(ROLE_INFRASTRUCTURE)
-    BeanPostProcessor outboxStreamBridgeOperationsPostProcessor() {
-        return new OutboxStreamBridgeOperationsPostProcessor();
     }
 
     @Bean
