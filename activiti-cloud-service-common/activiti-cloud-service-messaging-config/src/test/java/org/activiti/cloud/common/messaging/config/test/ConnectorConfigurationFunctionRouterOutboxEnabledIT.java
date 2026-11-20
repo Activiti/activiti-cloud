@@ -29,9 +29,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.outbox.enabled=true", "spring.sql.init.platform=h2" })
 @Import(SpringIntegrationJdbcTestConfiguration.class)
-public class ConnectorConfigurationFunctionRouterOutboxEnabledIT
-    extends FunctionBindingConfigurationFunctionRouterEnabledIT
-{
+public class ConnectorConfigurationFunctionRouterOutboxEnabledIT extends ConnectorConfigurationFunctionRouterEnabledIT {
 
     @Autowired
     private OutboxManager outboxManager;

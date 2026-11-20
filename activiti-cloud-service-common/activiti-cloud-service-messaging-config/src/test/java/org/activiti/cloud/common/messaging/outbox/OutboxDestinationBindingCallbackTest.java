@@ -113,7 +113,7 @@ class OutboxDestinationBindingCallbackTest {
                 new ProducerProperties(),
                 new Object(),
                 new ChannelInterceptor[] { outboxChannelInterceptor },
-                0
+                2
             ),
 
             Arguments.of(

@@ -25,10 +25,15 @@ public class OutboxChannelConfigurer implements BiConsumer<OutboxChannelIntercep
     @Override
     public void accept(OutboxChannelInterceptor channelInterceptor, DirectChannel messageChannel) {
         final var dispatcher = ChannelDispatcherAccessor.getDispatcher(messageChannel);
-        dispatcher.setLoadBalancingStrategy(new OutboxLoadBalancingStrategy(channelInterceptor));
+        final var outboxLoadBalancingStrategy = new OutboxLoadBalancingStrategy(channelInterceptor);
+
+        dispatcher.setLoadBalancingStrategy(outboxLoadBalancingStrategy);
         dispatcher.setFailover(false);
-        if (!(messageChannel instanceof DirectWithAttributesChannel)) {
-            dispatcher.addHandler(channelInterceptor);
+        dispatcher.addHandler(channelInterceptor);
+
+        if (messageChannel instanceof DirectWithAttributesChannel) {
+            // workaround to bypass this.getDispatcher().getHandlerCount() == 1 condition in subscribe method
+            dispatcher.addHandler(outboxLoadBalancingStrategy);
         }
 
         messageChannel.addInterceptor(channelInterceptor);
