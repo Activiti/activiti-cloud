@@ -36,6 +36,9 @@ class OutboxActuatorEndpointTest {
     @Mock
     private OutboxLifecycleController outboxLifecycleController;
 
+    @Mock
+    private OutboxManager outboxManager;
+
     @InjectMocks
     private OutboxActuatorEndpoint endpoint;
 
@@ -60,7 +63,7 @@ class OutboxActuatorEndpointTest {
         endpoint.smartLifecycleRoleController("start");
 
         // Then
-        verify(outboxLifecycleController).start();
+        verify(outboxManager).start();
         verifyNoMoreInteractions(outboxLifecycleController);
     }
 
@@ -70,7 +73,7 @@ class OutboxActuatorEndpointTest {
         endpoint.smartLifecycleRoleController("stop");
 
         // Then
-        verify(outboxLifecycleController).stop();
+        verify(outboxManager).stop();
         verifyNoMoreInteractions(outboxLifecycleController);
     }
 

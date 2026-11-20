@@ -35,7 +35,7 @@ public class OutboxStreamBridgeAdvice implements MethodInterceptor {
     }
 
     private boolean isNewOutboxDestination(MethodInvocation invocation) {
-        final var index = invocation.getArguments().length <= 3 ? 1 : 2;
+        final var index = invocation.getMethod().getParameterTypes()[1] == String.class ? 2 : 1;
         final var message =
             invocation.getArguments()[index] instanceof Message<?> arg1
                 ? arg1

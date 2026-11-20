@@ -64,6 +64,7 @@ public class HazelcastMessageStoreAutoConfiguration {
 
     @Bean
     @MessagesMetadataStore
+    @ConditionalOnMissingBean(annotation = MessagesMetadataStore.class)
     public ConcurrentMetadataStore metadataStore(HazelcastInstance hazelcastInstance) {
         return new HazelcastMetadataStore(hazelcastInstance);
     }

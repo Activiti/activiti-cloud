@@ -313,7 +313,7 @@ public class MessagesCoreAutoConfiguration {
 
     @Bean
     @MessagesMetadataStore
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(annotation = MessagesMetadataStore.class)
     public ConcurrentMetadataStore metadataStore() {
         return new SimpleMetadataStore();
     }
