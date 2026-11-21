@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.integration.channel;
+package org.activiti.cloud.common.messaging.outbox;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.integration.channel.ChannelDispatcherAccessor;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dispatcher.UnicastingDispatcher;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class ChannelDispatcherAccessorTest {
 
@@ -29,13 +32,13 @@ class ChannelDispatcherAccessorTest {
 
         UnicastingDispatcher dispatcher = ChannelDispatcherAccessor.getDispatcher(channel);
 
-        assertThat(dispatcher).isNotNull().isSameAs(channel.getDispatcher());
+        assertThat(dispatcher).isNotNull().isSameAs(ReflectionTestUtils.getField(channel, "dispatcher"));
     }
 
     @Test
-    void shouldThrowNullPointerExceptionWhenChannelIsNull() {
+    void shouldThrowIllegalArgumentExceptionWhenChannelIsNull() {
         assertThatThrownBy(() -> ChannelDispatcherAccessor.getDispatcher(null)).isInstanceOf(
-            NullPointerException.class
+            IllegalArgumentException.class
         );
     }
 }

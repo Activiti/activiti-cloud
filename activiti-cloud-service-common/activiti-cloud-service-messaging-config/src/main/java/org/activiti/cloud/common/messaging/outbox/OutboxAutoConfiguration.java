@@ -45,6 +45,9 @@ import org.springframework.context.annotation.Role;
 import org.springframework.core.serializer.support.SerializingConverter;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice;
+import org.springframework.integration.jdbc.lock.DefaultLockRepository;
+import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
+import org.springframework.integration.jdbc.lock.LockRepository;
 import org.springframework.integration.jdbc.metadata.JdbcMetadataStore;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
 import org.springframework.integration.jdbc.store.channel.ChannelMessageStorePreparedStatementSetter;
@@ -62,6 +65,7 @@ import org.springframework.integration.support.json.GenericMessageJsonDeserializ
 import org.springframework.integration.support.json.MessageHeadersJsonSerializer;
 import org.springframework.integration.support.json.MimeTypeJsonSerializer;
 import org.springframework.integration.support.json.MutableMessageJsonDeserializer;
+import org.springframework.integration.support.locks.DistributedLock;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -167,7 +171,7 @@ public class OutboxAutoConfiguration {
         PlatformTransactionManager transactionManager,
         IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
-        LockRegistry lockRegistry,
+        @OutboxLockRegistry LockRegistry<DistributedLock> lockRegistry,
         ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice
     ) {
         return new OutboxChannelInterceptorFactory(
@@ -336,6 +340,7 @@ public class OutboxAutoConfiguration {
 
     @Bean
     @OutboxMetadataStore
+    @ConditionalOnMissingBean(annotation = OutboxMetadataStore.class)
     public JdbcMetadataStore outboxMetadataStore(
         DataSource dataSource,
         @Value(
@@ -344,6 +349,33 @@ public class OutboxAutoConfiguration {
     ) {
         JdbcMetadataStore metadataStore = new JdbcMetadataStore(dataSource);
         metadataStore.setRegion(region);
+
         return metadataStore;
+    }
+
+    @Bean
+    @OutboxLockRepository
+    @ConditionalOnMissingBean(annotation = OutboxLockRepository.class)
+    public LockRepository outboxLockRepository(
+        DataSource dataSource,
+        PlatformTransactionManager transactionManager,
+        @Value(
+            "${activiti.cloud.messaging.outbox.lock.region:${spring.application.name:default}_outbox}}"
+        ) String region
+    ) {
+        final var lockRepository = new DefaultLockRepository(dataSource);
+
+        lockRepository.setRegion(region);
+        lockRepository.setTransactionManager(transactionManager);
+        lockRepository.setCheckDatabaseOnStart(true);
+
+        return lockRepository;
+    }
+
+    @Bean
+    @OutboxLockRegistry
+    @ConditionalOnMissingBean(annotation = OutboxLockRegistry.class)
+    LockRegistry<DistributedLock> outboxLockRegistry(@OutboxLockRepository LockRepository outboxLockRepository) {
+        return new JdbcLockRegistry(outboxLockRepository);
     }
 }

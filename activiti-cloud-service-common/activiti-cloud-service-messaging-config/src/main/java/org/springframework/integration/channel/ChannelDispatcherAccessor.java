@@ -17,12 +17,14 @@ package org.springframework.integration.channel;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.integration.dispatcher.UnicastingDispatcher;
+import org.springframework.util.Assert;
 
 public final class ChannelDispatcherAccessor {
 
     private ChannelDispatcherAccessor() {}
 
     public static UnicastingDispatcher getDispatcher(@NonNull DirectChannel channel) {
+        Assert.notNull(channel, "channel must not be null");
         return channel.getDispatcher();
     }
 }

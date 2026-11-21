@@ -15,79 +15,35 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
-import java.util.Map;
-import org.activiti.cloud.common.messaging.outbox.OutboxLifecycleController;
-import org.activiti.cloud.common.messaging.outbox.OutboxManager;
-import org.activiti.cloud.common.messaging.outbox.SpringIntegrationJdbcTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.outbox.enabled=true", "spring.sql.init.platform=h2" })
-@Import(SpringIntegrationJdbcTestConfiguration.class)
+@Import(OutboxTestConfiguration.class)
 public class ConnectorConfigurationFunctionRouterOutboxEnabledIT extends ConnectorConfigurationFunctionRouterEnabledIT {
 
     @Autowired
-    private OutboxManager outboxManager;
-
-    @Autowired
-    private OutboxLifecycleController outboxLifecycleController;
+    private OutboxTestConfiguration delegate;
 
     @Test
     void outboxLifecycleController_allEndpointsRunning() {
-        assertThat(outboxLifecycleController.allEndpointsRunning()).isTrue();
+        delegate.outboxLifecycleController_allEndpointsRunning();
     }
 
     @Test
     void outboxLifecycleController_getEndpoints() {
-        assertThat(outboxLifecycleController.getEndpoints()).containsOnly(
-            "commandResultsOutbox",
-            "integrationResultsOutbox",
-            "auditProducerIncidentsOutbox",
-            "streamBridgeOutbox",
-            "auditProducerOutbox"
-        );
+        delegate.outboxLifecycleController_getEndpoints();
     }
 
     @Test
     void outboxLifecycleController_getEndpointsRunningStatus() {
-        assertThat(outboxLifecycleController.getEndpointsRunningStatus()).containsOnly(
-            Map.entry("auditProducerIncidentsOutbox", true),
-            Map.entry("auditProducerOutbox", true),
-            Map.entry("commandResultsOutbox", true),
-            Map.entry("integrationResultsOutbox", true),
-            Map.entry("streamBridgeOutbox", true)
-        );
+        delegate.outboxLifecycleController_getEndpointsRunningStatus();
     }
 
     @Test
     void outboxManager_manageEndpoints() {
-        outboxManager.stop();
-
-        await().untilAsserted(() -> assertThat(outboxLifecycleController.allEndpointsRunning()).isFalse());
-
-        assertThat(outboxLifecycleController.getEndpointsRunningStatus()).containsOnly(
-            Map.entry("auditProducerIncidentsOutbox", false),
-            Map.entry("auditProducerOutbox", false),
-            Map.entry("commandResultsOutbox", false),
-            Map.entry("integrationResultsOutbox", false),
-            Map.entry("streamBridgeOutbox", false)
-        );
-
-        outboxManager.start();
-
-        await().untilAsserted(() -> assertThat(outboxLifecycleController.allEndpointsRunning()).isTrue());
-
-        assertThat(outboxLifecycleController.getEndpointsRunningStatus()).containsOnly(
-            Map.entry("auditProducerIncidentsOutbox", true),
-            Map.entry("auditProducerOutbox", true),
-            Map.entry("commandResultsOutbox", true),
-            Map.entry("integrationResultsOutbox", true),
-            Map.entry("streamBridgeOutbox", true)
-        );
+        delegate.outboxManager_manageEndpoints();
     }
 }
