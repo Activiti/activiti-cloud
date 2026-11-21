@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -29,21 +31,21 @@ public class ConnectorConfigurationFunctionRouterOutboxEnabledIT extends Connect
 
     @Test
     void outboxLifecycleController_allEndpointsRunning() {
-        delegate.outboxLifecycleController_allEndpointsRunning();
+        assertThatCode(() -> delegate.outboxLifecycleController_allEndpointsRunning()).doesNotThrowAnyException();
     }
 
     @Test
     void outboxLifecycleController_getEndpoints() {
-        delegate.outboxLifecycleController_getEndpoints();
+        assertThatCode(() -> delegate.outboxLifecycleController_getEndpoints()).doesNotThrowAnyException();
     }
 
     @Test
     void outboxLifecycleController_getEndpointsRunningStatus() {
-        delegate.outboxLifecycleController_getEndpointsRunningStatus();
+        assertThatCode(() -> delegate.outboxLifecycleController_getEndpointsRunningStatus()).doesNotThrowAnyException();
     }
 
     @Test
     void outboxManager_manageEndpoints() {
-        delegate.outboxManager_manageEndpoints();
+        assertThatCode(() -> delegate.outboxManager_manageEndpoints()).doesNotThrowAnyException();
     }
 }
