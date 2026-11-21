@@ -253,7 +253,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public MetadataStoreSelector metadataStoreSelector(
-        ConcurrentMetadataStore metadataStore,
+        @MessagesMetadataStore ConcurrentMetadataStore metadataStore,
         MessageProcessor<String> metadataStoreKeyStrategy
     ) {
         return new MetadataStoreSelector(metadataStoreKeyStrategy, metadataStore);
@@ -312,7 +312,8 @@ public class MessagesCoreAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @MessagesMetadataStore
+    @ConditionalOnMissingBean(annotation = MessagesMetadataStore.class)
     public ConcurrentMetadataStore metadataStore() {
         return new SimpleMetadataStore();
     }
