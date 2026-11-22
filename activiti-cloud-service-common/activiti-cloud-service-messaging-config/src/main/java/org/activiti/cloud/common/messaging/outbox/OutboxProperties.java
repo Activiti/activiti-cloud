@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
@@ -48,7 +49,9 @@ public class OutboxProperties {
     private String[] headersToRemove = { "errorChannel", "replyChannel", "sourceData", "amqp_*", "kafka_*" };
 
     @NotNull
-    private Map<Class<? extends Throwable>, Boolean> exceptions = new LinkedHashMap<>();
+    private Map<Class<? extends Throwable>, Boolean> exceptions = new LinkedHashMap<>(
+        Map.ofEntries(Map.entry(DestinationResolutionException.class, false))
+    );
 
     public boolean isEnabled() {
         return enabled;

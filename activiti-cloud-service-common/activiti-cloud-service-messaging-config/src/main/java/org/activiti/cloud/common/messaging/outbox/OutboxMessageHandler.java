@@ -54,10 +54,7 @@ public class OutboxMessageHandler implements MessageHandler {
             .map(outboxDestination -> streamBridge().send(outboxDestination, message))
             .orElseThrow(() ->
                 new DestinationResolutionException(
-                    "Cannot resolve %s message header outbox %s partition".formatted(
-                        message.getHeaders().get(OUTBOX_DESTINATION, String.class),
-                        partitionKey
-                    )
+                    "Cannot resolve %s message header for %s outbox".formatted(OUTBOX_DESTINATION, partitionKey)
                 )
             )
             .booleanValue();

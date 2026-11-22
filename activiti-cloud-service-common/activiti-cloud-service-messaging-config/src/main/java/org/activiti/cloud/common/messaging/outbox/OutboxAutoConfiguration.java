@@ -48,12 +48,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.serializer.support.SerializingConverter;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice;
+import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice.MessageHandlingExpressionEvaluatingAdviceException;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
 import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.integration.jdbc.lock.LockRepository;
@@ -83,6 +85,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.ExceptionTypeFilter;
@@ -268,8 +271,26 @@ public class OutboxAutoConfiguration {
             .filter(
                 ErrorMessage.class,
                 message -> !outboxExceptionsTypeFilter.match(message.getPayload(), true),
-                spec -> spec.throwExceptionOnRejection(true).discardChannel(ERROR_CHANNEL)
+                spec -> spec.throwExceptionOnRejection(false).discardChannel(ERROR_CHANNEL)
             )
+            .enrichHeaders(headers -> headers.errorChannel("errorChannel"))
+            .transform(ErrorMessage.class, source -> {
+                final var exception = NestedExceptionUtils.getMostSpecificCause(source.getPayload());
+
+                if (source.getOriginalMessage() instanceof Message<?> originalMessage) {
+                    return MessageBuilder.fromMessage(originalMessage)
+                        .setHeader("exceptionMessage", exception.getMessage())
+                        .build();
+                } else if (
+                    source.getPayload() instanceof MessageHandlingExpressionEvaluatingAdviceException messageException
+                ) {
+                    return MessageBuilder.fromMessage(messageException.getFailedMessage())
+                        .setHeader("exceptionMessage", exception.getMessage())
+                        .build();
+                }
+
+                throw new IllegalArgumentException("Can't resolve error message failed message");
+            })
             .channel(outboxErrorsChannel)
             .get();
     }
