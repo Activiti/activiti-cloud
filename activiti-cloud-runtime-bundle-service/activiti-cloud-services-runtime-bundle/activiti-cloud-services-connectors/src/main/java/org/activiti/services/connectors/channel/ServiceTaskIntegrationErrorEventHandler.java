@@ -109,8 +109,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
                             return;
                         } catch (ActivitiOptimisticLockingException lockingFailure) {
-                            // Let @Retryable retry with fresh state. Falling through would delete the
-                            // integration context and leave the execution waiting on the service task.
+                            // Let @Retryable retry with fresh state.
                             throw lockingFailure;
                         } catch (Throwable cause) {
                             LOGGER.warn(

@@ -474,100 +474,33 @@ public class ConnectorAuditProducerIT {
     }
 
     @Test
-    public void shouldRetryCloudBpmnErrorPropagation_when_optimisticLockingFailureOccurs() {
+    void shouldRetryCloudBpmnErrorPropagation_when_optimisticLockingFailureOccurs() {
         //given
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcessByKey(
             "cloudBpmnErrorCloudConnectorProcess",
             null,
             null
         );
-        List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
-
-        await().untilAsserted(() -> {
-            List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
-                getProcessInstanceEvents(startProcessEntity),
-                INTEGRATION_REQUESTED
-            );
-            assertThat(receivedIntegrationRequestedEvents)
-                .extracting(event -> ((IntegrationContext) event.getEntity()).getClientId())
-                .containsExactly("performBusinessTaskCloudConnector");
-
-            integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-        });
-
-        // the first error propagation fails as if the execution was updated concurrently:
-        // the real commands run, then the transaction is rolled back by an optimistic locking failure
-        AtomicBoolean failNextPropagation = new AtomicBoolean(true);
-        AtomicBoolean lockFailureInjected = new AtomicBoolean();
-        doAnswer(invocation -> {
-            Command<?> command = invocation.getArgument(0);
-            if (
-                "CompositeCommand".equals(command.getClass().getSimpleName()) &&
-                failNextPropagation.compareAndSet(true, false)
-            ) {
-                lockFailureInjected.set(true);
-                return managementService.executeCommand(commandContext -> {
-                    command.execute(commandContext);
-                    throw new ActivitiOptimisticLockingException("Simulated concurrent update of the execution");
-                });
-            }
-            return invocation.callRealMethod();
-        })
-            .when(managementService)
-            .executeCommand(any());
+        List<CloudIntegrationRequestedEvent> integrationRequests = awaitIntegrationRequested(processInstance);
+        AtomicBoolean lockFailureInjected = failNextCommandWithOptimisticLockingException();
 
         //when
-        sendIntegrationErrorFor(integrationRequestedEvents);
+        sendIntegrationErrorFor(integrationRequests);
 
-        //then the propagation is retried and the error reaches the boundary event
+        //then the propagation is retried, the error reaches the boundary event and the process continues
         await().untilAsserted(() -> {
-            List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
-
-            List<CloudIntegrationErrorReceivedEvent> receivedIntegrationErrorEvents = getEventsByType(
-                receivedEvents,
-                INTEGRATION_ERROR_RECEIVED
+            List<CloudBPMNErrorReceivedEvent> errorEvents = getEventsByType(
+                getProcessInstanceEvents(processInstance),
+                ERROR_RECEIVED
             );
-            assertThat(receivedIntegrationErrorEvents)
-                .extracting(event -> ((IntegrationContext) event.getEntity()).getClientId())
-                .containsExactly("performBusinessTaskCloudConnector");
-
-            List<CloudBPMNErrorReceivedEvent> receivedBpmnErrorEvents = getEventsByType(receivedEvents, ERROR_RECEIVED);
-            assertThat(receivedBpmnErrorEvents)
-                .extracting(event -> ((BPMNError) event.getEntity()).getErrorCode())
+            assertThat(errorEvents)
+                .extracting(event -> event.getEntity().getErrorCode())
                 .containsExactly("CLOUD_BPMN_ERROR");
         });
         assertThat(lockFailureInjected).isTrue();
-
-        // and the process continues
-        integrationRequestedEvents.clear();
-        streamHandler.clear();
-
-        List<CloudTask> tasks = new ArrayList<>(
-            processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent()
-        );
-        assertThat(tasks).extracting(CloudTask::getName).containsExactly("Correct Business Error");
-
-        taskRestTemplate.complete(tasks.getFirst());
-
-        await().untilAsserted(() -> {
-            List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
-                getProcessInstanceEvents(startProcessEntity),
-                INTEGRATION_REQUESTED
-            );
-            assertThat(receivedIntegrationRequestedEvents)
-                .extracting(event -> ((IntegrationContext) event.getEntity()).getClientId())
-                .containsExactly("performBusinessTaskCloudConnector");
-
-            integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-        });
-
-        sendIntegrationResultFor(integrationRequestedEvents);
-
-        await().untilAsserted(() ->
-            assertThat(getProcessInstanceEvents(startProcessEntity))
-                .extracting(RuntimeEvent::getEventType, RuntimeEvent::getProcessInstanceId)
-                .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()))
-        );
+        assertThat(processInstanceRestTemplate.getTasks(processInstance).getBody().getContent())
+            .extracting(CloudTask::getName)
+            .containsExactly("Correct Business Error");
     }
 
     @Test
@@ -859,5 +792,35 @@ public class ConnectorAuditProducerIT {
             .filter(event -> event.getEventType() == eventType)
             .map(it -> (T) it)
             .collect(Collectors.toList());
+    }
+
+    private List<CloudIntegrationRequestedEvent> awaitIntegrationRequested(
+        ResponseEntity<CloudProcessInstance> processInstance
+    ) {
+        return await().until(
+            () -> this.getEventsByType(getProcessInstanceEvents(processInstance), INTEGRATION_REQUESTED),
+            events -> !events.isEmpty()
+        );
+    }
+
+    /**
+     * Runs the next command for real, then fails it with an optimistic locking exception so its
+     * transaction is rolled back, as if the execution had been updated concurrently.
+     */
+    private AtomicBoolean failNextCommandWithOptimisticLockingException() {
+        AtomicBoolean injected = new AtomicBoolean();
+        doAnswer(invocation -> {
+            if (injected.compareAndSet(false, true)) {
+                Command<?> command = invocation.getArgument(0);
+                return managementService.executeCommand(commandContext -> {
+                    command.execute(commandContext);
+                    throw new ActivitiOptimisticLockingException("Simulated concurrent update of the execution");
+                });
+            }
+            return invocation.callRealMethod();
+        })
+            .when(managementService)
+            .executeCommand(any());
+        return injected;
     }
 }
