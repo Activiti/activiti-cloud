@@ -18,6 +18,8 @@ package org.activiti.cloud.common.messaging.outbox;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -44,6 +46,9 @@ public class OutboxProperties {
 
     @NotNull
     private String[] headersToRemove = { "errorChannel", "replyChannel", "sourceData", "amqp_*", "kafka_*" };
+
+    @NotNull
+    private Map<Class<? extends Throwable>, Boolean> exceptions = new LinkedHashMap<>();
 
     public boolean isEnabled() {
         return enabled;
@@ -101,6 +106,14 @@ public class OutboxProperties {
         this.headersToRemove = headersToRemove;
     }
 
+    public Map<Class<? extends Throwable>, Boolean> getExceptions() {
+        return exceptions;
+    }
+
+    public void setExceptions(Map<Class<? extends Throwable>, Boolean> exceptions) {
+        this.exceptions = exceptions;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("OutboxProperties{");
@@ -113,6 +126,7 @@ public class OutboxProperties {
         sb.append(", headersToRemove=").append(
             headersToRemove == null ? "null" : Arrays.asList(headersToRemove).toString()
         );
+        sb.append(", exceptions=").append(exceptions);
         sb.append('}');
         return sb.toString();
     }

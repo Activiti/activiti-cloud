@@ -15,35 +15,21 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
-import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
-
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
-import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.integration.aop.SimpleActiveIdleReceiveMessageAdvice;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.dsl.Pollers;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.dsl.context.IntegrationFlowContext.IntegrationFlowRegistration;
 import org.springframework.integration.store.ChannelMessageStore;
-import org.springframework.integration.support.locks.LockRegistry;
-import org.springframework.integration.util.DynamicPeriodicTrigger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
-import org.springframework.transaction.PlatformTransactionManager;
 
 public class OutboxChannelInterceptorFactory
     implements
@@ -59,11 +45,8 @@ public class OutboxChannelInterceptorFactory
 
     private final OutboxProperties outboxProperties;
     private final ChannelMessageStore channelMessageStore;
-    private final PlatformTransactionManager transactionManager;
     private final IntegrationFlowContext integrationFlowContext;
-    private final ObjectProvider<StreamBridge> streamBridgeProvider;
-    private final LockRegistry lockRegistry;
-    private final Advice outboxMessageHandlerErrorAdvice;
+    private final OutboxIntegrationFlowFactory outboxIntegrationFlowFactory;
 
     private final Map<String, OutboxChannelInterceptor> interceptorsMap = new ConcurrentHashMap<>();
     private final Map<String, IntegrationFlowRegistration> flowRegistrationsMap = new ConcurrentHashMap<>();
@@ -71,19 +54,13 @@ public class OutboxChannelInterceptorFactory
     public OutboxChannelInterceptorFactory(
         OutboxProperties outboxProperties,
         ChannelMessageStore channelMessageStore,
-        PlatformTransactionManager transactionManager,
-        IntegrationFlowContext integrationFlowContext,
-        ObjectProvider<StreamBridge> streamBridgeProvider,
-        LockRegistry lockRegistry,
-        Advice outboxMessageHandlerErrorAdvice
+        OutboxIntegrationFlowFactory outboxIntegrationFlowFactory,
+        IntegrationFlowContext integrationFlowContext
     ) {
         this.outboxProperties = outboxProperties;
         this.channelMessageStore = channelMessageStore;
-        this.transactionManager = transactionManager;
+        this.outboxIntegrationFlowFactory = outboxIntegrationFlowFactory;
         this.integrationFlowContext = integrationFlowContext;
-        this.streamBridgeProvider = streamBridgeProvider;
-        this.lockRegistry = lockRegistry;
-        this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice;
     }
 
     @Override
@@ -92,46 +69,15 @@ public class OutboxChannelInterceptorFactory
         BiFunction<Message<?>, MessageChannel, String> destinationProvider
     ) {
         return interceptorsMap.computeIfAbsent(partitionKey, _ -> {
-            // 1. Isolate the messages by using the partition key for queue messages group
-            final QueueChannel queueChannel = MessageChannels.queue(
-                partitionKey.concat("Queue"),
-                channelMessageStore,
-                partitionKey.concat(OUTBOX_ROLE)
-            ).getObject();
+            final var queueChannel = queueChannel(partitionKey);
+            final var outboxIntegrationFlow = outboxIntegrationFlow(partitionKey, queueChannel);
+            final var outboxIntegrationFlowRegistration = integrationFlowContext
+                .registration(outboxIntegrationFlow)
+                .id(partitionKey.concat("OutboxFlow"))
+                .autoStartup(false)
+                .register();
 
-            final var dynamicPeriodicTrigger = new DynamicPeriodicTrigger(outboxProperties.getPollerActivePeriod());
-
-            // 2. Build a single-threaded flow dedicated to this partition
-            IntegrationFlow partitionFlow = IntegrationFlow.from(queueChannel)
-                .bridge(endpoint ->
-                    endpoint
-                        .id(partitionKey.concat(OUTBOX_ROLE))
-                        .role(OUTBOX_ROLE)
-                        .autoStartup(false)
-                        .taskScheduler(taskScheduler(partitionKey))
-                        .poller(
-                            Pollers.trigger(dynamicPeriodicTrigger)
-                                .maxMessagesPerPoll(1)
-                                .receiveTimeout(Duration.ZERO.toMillis())
-                                .errorChannel(ERROR_CHANNEL)
-                                .advice(pollActiveIdleAdvice(dynamicPeriodicTrigger), pollLockAdvice(partitionKey))
-                                .transactional(transactionManager)
-                        )
-                )
-                // Strict DB transaction boundary per loop
-                .handle(new OutboxMessageHandler(partitionKey, streamBridgeProvider), endpoint ->
-                    endpoint.advice(outboxMessageHandlerErrorAdvice)
-                )
-                .get();
-
-            flowRegistrationsMap.put(
-                partitionKey.concat(OUTBOX_ROLE),
-                integrationFlowContext
-                    .registration(partitionFlow)
-                    .id(partitionKey.concat("OutboxFlow"))
-                    .autoStartup(false)
-                    .register()
-            );
+            flowRegistrationsMap.put(partitionKey.concat(OUTBOX_ROLE), outboxIntegrationFlowRegistration);
 
             return new OutboxChannelInterceptor(queueChannel, destinationProvider).withHeadersToRemove(
                 outboxProperties.getHeadersToRemove()
@@ -139,24 +85,16 @@ public class OutboxChannelInterceptorFactory
         });
     }
 
-    private PollLockAdvice pollLockAdvice(String partitionKey) {
-        return new PollLockAdvice(lockRegistry, partitionKey);
+    private QueueChannel queueChannel(String partitionKey) {
+        return MessageChannels.queue(
+            partitionKey.concat("Queue"),
+            channelMessageStore,
+            partitionKey.concat(OUTBOX_ROLE)
+        ).getObject();
     }
 
-    private TaskScheduler taskScheduler(String partitionKey) {
-        return new ConcurrentTaskScheduler(
-            Executors.newSingleThreadScheduledExecutor(
-                Thread.ofPlatform().name(partitionKey.concat("Poller")).daemon().factory()
-            )
-        );
-    }
-
-    public Advice pollActiveIdleAdvice(DynamicPeriodicTrigger trigger) {
-        final var advice = new SimpleActiveIdleReceiveMessageAdvice(trigger);
-        advice.setActivePollPeriod(outboxProperties.getPollerActivePeriod().toMillis());
-        advice.setIdlePollPeriod(outboxProperties.getPollerIdlePeriod().toMillis());
-
-        return advice;
+    private IntegrationFlow outboxIntegrationFlow(String partitionKey, QueueChannel queueChannel) {
+        return outboxIntegrationFlowFactory.apply(partitionKey, queueChannel);
     }
 
     @Override

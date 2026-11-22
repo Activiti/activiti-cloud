@@ -34,17 +34,14 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.aop.SimpleActiveIdleReceiveMessageAdvice;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.dsl.context.IntegrationFlowContext.IntegrationFlowRegistration;
 import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.support.locks.LockRegistry;
-import org.springframework.integration.util.DynamicPeriodicTrigger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,6 +65,8 @@ class OutboxChannelInterceptorFactoryTest {
     @Mock
     private Advice outboxMessageHandlerErrorAdvice;
 
+    private OutboxIntegrationFlowFactory outboxIntegrationFlowFactory;
+
     @Mock
     private BiFunction<Message<?>, MessageChannel, String> destinationProvider;
 
@@ -83,14 +82,19 @@ class OutboxChannelInterceptorFactoryTest {
         applicationContext = new AnnotationConfigApplicationContext(IntegrationTestConfig.class);
         integrationFlowContext = applicationContext.getBean(IntegrationFlowContext.class);
 
-        factory = new OutboxChannelInterceptorFactory(
+        outboxIntegrationFlowFactory = new OutboxIntegrationFlowFactory(
             outboxProperties,
-            channelMessageStore,
             transactionManager,
-            integrationFlowContext,
             streamBridgeProvider,
             lockRegistry,
             outboxMessageHandlerErrorAdvice
+        );
+
+        factory = new OutboxChannelInterceptorFactory(
+            outboxProperties,
+            channelMessageStore,
+            outboxIntegrationFlowFactory,
+            integrationFlowContext
         );
     }
 
@@ -132,23 +136,6 @@ class OutboxChannelInterceptorFactoryTest {
         // Then
         assertThat(second).isSameAs(first);
         assertThat(integrationFlowContext.getRegistry()).hasSize(1);
-    }
-
-    @Test
-    void shouldConfigurePollActiveIdleAdviceWithConfiguredPeriods() {
-        // Given
-        outboxProperties.setPollerActivePeriod(Duration.ofMillis(50));
-        outboxProperties.setPollerIdlePeriod(Duration.ofSeconds(1));
-
-        DynamicPeriodicTrigger trigger = new DynamicPeriodicTrigger(Duration.ofMillis(250));
-
-        // When
-        Advice advice = factory.pollActiveIdleAdvice(trigger);
-
-        // Then
-        assertThat(advice).isInstanceOf(SimpleActiveIdleReceiveMessageAdvice.class);
-        assertThat(ReflectionTestUtils.getField(advice, "activePollPeriod")).isEqualTo(Duration.ofMillis(50));
-        assertThat(ReflectionTestUtils.getField(advice, "idlePollPeriod")).isEqualTo(Duration.ofSeconds(1));
     }
 
     @Test

@@ -21,7 +21,13 @@ import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.activiti.cloud.common.messaging.config.FunctionAnnotationService;
@@ -43,6 +49,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.serializer.support.SerializingConverter;
+import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
@@ -61,6 +70,7 @@ import org.springframework.integration.support.MutableMessage;
 import org.springframework.integration.support.SmartLifecycleRoleController;
 import org.springframework.integration.support.converter.AllowListDeserializingConverter;
 import org.springframework.integration.support.json.EmbeddedHeadersJsonMessageMapper;
+import org.springframework.integration.support.json.ErrorMessageJsonDeserializer;
 import org.springframework.integration.support.json.GenericMessageJsonDeserializer;
 import org.springframework.integration.support.json.MessageHeadersJsonSerializer;
 import org.springframework.integration.support.json.MimeTypeJsonSerializer;
@@ -70,9 +80,12 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.ExceptionTypeFilter;
 import tools.jackson.databind.DefaultTyping;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -94,12 +107,14 @@ public class OutboxAutoConfiguration {
     ) {
         final var genericMessageDeserializer = new GenericMessageJsonDeserializer();
         final var mutableMessageDeserializer = new MutableMessageJsonDeserializer();
+        final var errorMessageDeserializer = new ErrorMessageJsonDeserializer();
 
         final var messageModule = new SimpleModule("MessageModule")
             .addSerializer(new MessageHeadersJsonSerializer())
             .addSerializer(new MimeTypeJsonSerializer())
             .addDeserializer(GenericMessage.class, genericMessageDeserializer)
-            .addDeserializer(MutableMessage.class, mutableMessageDeserializer);
+            .addDeserializer(MutableMessage.class, mutableMessageDeserializer)
+            .addDeserializer(ErrorMessage.class, errorMessageDeserializer);
 
         final var basicPolymorphicTypeValidator = BasicPolymorphicTypeValidator.builder()
             .allowIfBaseType(Message.class)
@@ -111,7 +126,7 @@ public class OutboxAutoConfiguration {
             basicPolymorphicTypeValidator::allowIfSubType
         );
 
-        var mapper = JsonMapper.builder()
+        var jsonMapper = JsonMapper.builder()
             .activateDefaultTyping(
                 basicPolymorphicTypeValidator.build(),
                 DefaultTyping.NON_FINAL,
@@ -122,10 +137,11 @@ public class OutboxAutoConfiguration {
             .addModules(messageModule)
             .build();
 
-        genericMessageDeserializer.setMapper(mapper);
-        mutableMessageDeserializer.setMapper(mapper);
+        genericMessageDeserializer.setMapper(jsonMapper);
+        mutableMessageDeserializer.setMapper(jsonMapper);
+        errorMessageDeserializer.setMapper(jsonMapper);
 
-        return () -> mapper;
+        return () -> jsonMapper;
     }
 
     @Bean
@@ -165,20 +181,16 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    OutboxChannelInterceptorFactory outboxChannelInterceptorFactory(
+    OutboxIntegrationFlowFactory outboxIntegrationFlowFactory(
         OutboxProperties outboxProperties,
-        ChannelMessageStore outboxChannelMessageStore,
         PlatformTransactionManager transactionManager,
-        IntegrationFlowContext integrationFlowContext,
         ObjectProvider<StreamBridge> streamBridgeProvider,
-        @OutboxLockRegistry LockRegistry<DistributedLock> lockRegistry,
+        @OutboxLockRegistry LockRegistry<? extends Lock> lockRegistry,
         ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice
     ) {
-        return new OutboxChannelInterceptorFactory(
+        return new OutboxIntegrationFlowFactory(
             outboxProperties,
-            outboxChannelMessageStore,
             transactionManager,
-            integrationFlowContext,
             streamBridgeProvider,
             lockRegistry,
             outboxMessageHandlerErrorAdvice
@@ -186,17 +198,80 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice() {
+    OutboxChannelInterceptorFactory outboxChannelInterceptorFactory(
+        OutboxProperties outboxProperties,
+        @OutboxMessageStore ChannelMessageStore outboxChannelMessageStore,
+        OutboxIntegrationFlowFactory outboxIntegrationFlowFactory,
+        IntegrationFlowContext integrationFlowContext
+    ) {
+        return new OutboxChannelInterceptorFactory(
+            outboxProperties,
+            outboxChannelMessageStore,
+            outboxIntegrationFlowFactory,
+            integrationFlowContext
+        );
+    }
+
+    @Bean
+    public ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice(
+        MessageChannel outboxExceptionsChannel
+    ) {
         final var advice = new ExpressionEvaluatingRequestHandlerAdvice();
         // Route to this channel on failure
-        advice.setFailureChannelName(ERROR_CHANNEL);
+        advice.setFailureChannel(outboxExceptionsChannel);
         // Evaluate the root cause / original payload to pass to the error channel
         advice.setOnFailureExpressionString("#exception");
         // CRITICAL: Return true so the flow considers it "handled" and commits the transaction
         advice.setTrapException(true);
 
         return advice;
+    }
+
+    @Bean
+    QueueChannel outboxErrorsChannel(ChannelMessageStore outboxChannelMessageStore) {
+        return MessageChannels.queue(outboxChannelMessageStore, "outboxErrors").getObject();
+    }
+
+    @Bean
+    public MessageChannel outboxExceptionsChannel() {
+        return MessageChannels.direct().getObject();
+    }
+
+    @Bean
+    public ExceptionTypeFilter outboxExceptionsTypeFilter(OutboxProperties outboxProperties) {
+        final Set<Class<? extends Throwable>> includes = outboxProperties
+            .getExceptions()
+            .entrySet()
+            .stream()
+            .filter(Map.Entry::getValue)
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
+
+        final Collection<Class<? extends Throwable>> excludes = outboxProperties
+            .getExceptions()
+            .entrySet()
+            .stream()
+            .filter(Predicate.not(Map.Entry::getValue))
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
+
+        return new ExceptionTypeFilter(includes, excludes, true);
+    }
+
+    @Bean
+    public IntegrationFlow outboxErrorsFlow(
+        MessageChannel outboxExceptionsChannel,
+        QueueChannel outboxErrorsChannel,
+        ExceptionTypeFilter outboxExceptionsTypeFilter
+    ) {
+        return IntegrationFlow.from(outboxExceptionsChannel)
+            .filter(
+                ErrorMessage.class,
+                message -> !outboxExceptionsTypeFilter.match(message.getPayload(), true),
+                spec -> spec.throwExceptionOnRejection(true).discardChannel(ERROR_CHANNEL)
+            )
+            .channel(outboxErrorsChannel)
+            .get();
     }
 
     @Bean
@@ -239,6 +314,8 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
+    @OutboxMessageStore
+    @ConditionalOnMissingBean(annotation = OutboxMessageStore.class)
     JdbcChannelMessageStore outboxChannelMessageStore(
         DataSource dataSource,
         ChannelMessageStorePreparedStatementSetter channelMessageStorePreparedStatementSetter,
