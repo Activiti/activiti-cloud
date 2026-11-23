@@ -36,8 +36,6 @@ import org.springframework.integration.handler.advice.AbstractRequestHandlerAdvi
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.util.DynamicPeriodicTrigger;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 
 public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
@@ -49,6 +47,7 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
     private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry<? extends Lock> lockRegistry;
     private final AbstractRequestHandlerAdvice[] outboxMessageHandlerErrorAdvice;
+    private DisposableConcurrentTaskScheduler taskScheduler;
 
     public OutboxIntegrationFlow(
         String partitionKey,
@@ -68,6 +67,11 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
         this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice.toArray(
             AbstractRequestHandlerAdvice[]::new
         );
+        this.taskScheduler = new DisposableConcurrentTaskScheduler(
+            Executors.newSingleThreadScheduledExecutor(
+                Thread.ofPlatform().name(partitionKey.concat("Poller")).factory()
+            )
+        );
     }
 
     @Override
@@ -82,7 +86,7 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
                     .id(partitionKey.concat(OUTBOX_ROLE))
                     .role(OUTBOX_ROLE)
                     .autoStartup(false)
-                    .taskScheduler(taskScheduler(partitionKey))
+                    .taskScheduler(taskScheduler)
                     .poller(
                         Pollers.trigger(dynamicPeriodicTrigger)
                             .maxMessagesPerPoll(1)
@@ -108,14 +112,6 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
         return new PollLockAdvice(lockRegistry, partitionKey);
     }
 
-    private TaskScheduler taskScheduler(String partitionKey) {
-        return new ConcurrentTaskScheduler(
-            Executors.newSingleThreadScheduledExecutor(
-                Thread.ofPlatform().name(partitionKey.concat("Poller")).factory()
-            )
-        );
-    }
-
     public CircuitBreakerPollerAdvice pollCircuitBreakerAdvice() {
         return new CircuitBreakerPollerAdvice(
             outboxProperties.getCircuitBreakerThreshold(),
@@ -129,5 +125,12 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
         advice.setIdlePollPeriod(outboxProperties.getPollerIdlePeriod().toMillis());
 
         return advice;
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+
+        taskScheduler.destroy();
     }
 }
