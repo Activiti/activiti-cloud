@@ -99,6 +99,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -182,6 +183,41 @@ class TransientPayloadCleanupPersistenceTest {
         verifyOnlyTerminatingProcessPayloadsAreCleared("cancelled", relationship);
     }
 
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { "app" })
+    void should_clearPayloadsRegardlessOfApplicationName(String appName) {
+        for (ProcessAuditEventEntity terminal : List.of(
+            new ProcessCompletedEventEntity(),
+            new ProcessCancelledAuditEventEntity()
+        )) {
+            String processId = UUID.randomUUID().toString();
+            var payloads = seed(processId, appName);
+            terminal.setProcessInstanceId(processId);
+            terminal.setAppName(appName);
+            entityManager.persist(terminal);
+
+            Instant started = Instant.now();
+            cleanup.cleanup(List.of(terminal));
+            Instant finished = Instant.now();
+            entityManager.clear();
+
+            for (AuditEventEntity event : payloads) {
+                var stored = entityManager.find(event.getClass(), event.getId());
+                assertThat(stored.getAppName()).isEqualTo(appName);
+                assertThat(stored.getProcessInstanceId()).isEqualTo(processId);
+                assertThat(stored.getEventId()).isEqualTo(event.getEventId());
+                assertThat(stored.getTimestamp()).isEqualTo(123L);
+                if (stored instanceof VariablePayloadEvent payload) {
+                    assertThat(payload.isVariablePayloadEmpty()).isTrue();
+                    assertCleanupTimestamp(stored, started, finished);
+                } else {
+                    assertThat(stored.getLastVariableCleanup()).isNull();
+                }
+            }
+        }
+    }
+
     @Test
     void should_preservePayloadsForNonTerminalEvents() {
         var payloads = seed("running", "app");
@@ -236,7 +272,7 @@ class TransientPayloadCleanupPersistenceTest {
             .flatMap(List::stream)
             .toList();
         var otherProcess = seed("other-paged", "app");
-        var otherApplication = seed("paged", "other-app");
+        var otherApplication = seed("other-app-paged", "other-app");
         var terminal = new ProcessCompletedEventEntity();
         terminal.setProcessInstanceId("paged");
         terminal.setAppName("app");
@@ -459,7 +495,7 @@ class TransientPayloadCleanupPersistenceTest {
     private void verifyOnlyTerminatingProcessPayloadsAreCleared(String state, String relationship) {
         var payloads = seed("target", "app");
         var otherProcess = seed("other", "app");
-        var otherApplication = seed("target", "other-app");
+        var otherApplication = seed("other-app-target", "other-app");
         ProcessAuditEventEntity terminal = state.equals("completed")
             ? new ProcessCompletedEventEntity()
             : new ProcessCancelledAuditEventEntity();

@@ -18,7 +18,6 @@ package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.p
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willAnswer;
@@ -127,7 +126,7 @@ class AuditPayloadBatchWriterTest {
 
     private void connectWriter() throws SQLException {
         given(entityManager.unwrap(Session.class)).willReturn(session);
-        given(connection.prepareStatement(eq(SQL))).willReturn(statement);
+        given(connection.prepareStatement(SQL)).willReturn(statement);
         willAnswer(invocation -> {
             invocation.getArgument(0, Work.class).execute(connection);
             return null;

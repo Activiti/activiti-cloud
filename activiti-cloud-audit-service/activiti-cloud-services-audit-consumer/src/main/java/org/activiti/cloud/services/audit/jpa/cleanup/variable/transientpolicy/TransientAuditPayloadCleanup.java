@@ -74,7 +74,7 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
         Long lastId = null;
         List<AuditEventEntity> events;
         do {
-            events = this.findEvents(processInstanceId, appName, lastId);
+            events = this.findEvents(processInstanceId, lastId);
             var eventsByStrategy = new LinkedHashMap<AuditPayloadUpdateStrategy, List<AuditEventEntity>>();
             for (AuditEventEntity event : events) {
                 var payloadEvent = (VariablePayloadEvent) event;
@@ -108,11 +108,10 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
         );
     }
 
-    private List<AuditEventEntity> findEvents(String processInstanceId, String appName, Long lastId) {
+    private List<AuditEventEntity> findEvents(String processInstanceId, Long lastId) {
         String query = """
         select e from AuditEvent e
-        where e.appName = :appName
-          and e.processInstanceId = :processInstanceId
+        where e.processInstanceId = :processInstanceId
           and type(e) in (
               VariableCreatedEvent,
               VariableUpdatedEvent,
@@ -134,10 +133,6 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
         } else {
             eventsQuery = entityManager.createQuery(query + " order by e.id", AuditEventEntity.class);
         }
-        return eventsQuery
-            .setParameter("appName", appName)
-            .setParameter("processInstanceId", processInstanceId)
-            .setMaxResults(pageSize)
-            .getResultList();
+        return eventsQuery.setParameter("processInstanceId", processInstanceId).setMaxResults(pageSize).getResultList();
     }
 }

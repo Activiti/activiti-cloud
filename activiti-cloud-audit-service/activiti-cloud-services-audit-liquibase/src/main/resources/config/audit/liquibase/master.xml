@@ -475,23 +475,6 @@
       stripComments="true"/>
   </changeSet>
   <changeSet author="activiti-audit" runInTransaction="false"
-    id="alter24-oracle-schema" dbms="oracle">
-    <preConditions onFail="CONTINUE" onError="HALT">
-      <not>
-        <indexExists indexName="idx_audit_event_process_id" tableName="audit_event"/>
-      </not>
-    </preConditions>
-    <sqlFile dbms="oracle"
-      encoding="utf8"
-      path="changelog/24-alter.oracle.schema.sql"
-      relativeToChangelogFile="true"
-      splitStatements="true"
-      stripComments="true"/>
-    <rollback>
-      <dropIndex indexName="idx_audit_event_process_id" tableName="audit_event"/>
-    </rollback>
-  </changeSet>
-  <changeSet author="activiti-audit" runInTransaction="false"
     id="alter25-schema" dbms="postgresql">
     <preConditions onFail="CONTINUE" onError="HALT">
       <not>

@@ -133,7 +133,8 @@ class TransientAuditPayloadCleanupTest {
         var event = variable("current");
         given(query.getResultList()).willReturn(List.of(event));
 
-        assertThatThrownBy(() -> cleanup.cleanup(List.of(terminal)))
+        List<AuditEventEntity> terminalEvents = List.of(terminal);
+        assertThatThrownBy(() -> cleanup.cleanup(terminalEvents))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("No payload update strategy");
 
@@ -149,7 +150,8 @@ class TransientAuditPayloadCleanupTest {
         given(matchingStrategy.supports(event)).willReturn(true);
         willThrow(new IllegalStateException("write failed")).given(matchingStrategy).update(List.of(event));
 
-        assertThatThrownBy(() -> cleanup.cleanup(List.of(terminal)))
+        List<AuditEventEntity> terminalEvents = List.of(terminal);
+        assertThatThrownBy(() -> cleanup.cleanup(terminalEvents))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("write failed");
     }
@@ -218,7 +220,11 @@ class TransientAuditPayloadCleanupTest {
         var queries = ArgumentCaptor.forClass(String.class);
         then(entityManager).should(times(pageCount)).createQuery(queries.capture(), eq(AuditEventEntity.class));
         assertThat(queries.getAllValues().getFirst()).doesNotContain(":lastId");
-        assertThat(queries.getAllValues()).allSatisfy(sql -> assertThat(sql).contains("order by e.id"));
+        assertThat(queries.getAllValues()).allSatisfy(sql ->
+            assertThat(sql)
+                .contains("order by e.id", "e.processInstanceId = :processInstanceId")
+                .doesNotContain("appName")
+        );
         for (int index = 1; index < pageCount; index++) {
             assertThat(queries.getAllValues().get(index)).contains("e.id > :lastId");
             then(query)
@@ -228,7 +234,7 @@ class TransientAuditPayloadCleanupTest {
         if (pageCount == 1) {
             then(query).should(never()).setParameter(eq("lastId"), any());
         }
-        then(query).should(times(pageCount)).setParameter("appName", "app");
+        then(query).should(never()).setParameter(eq("appName"), any());
         then(query).should(times(pageCount)).setParameter("processInstanceId", "process");
         then(query).should(never()).setFirstResult(anyInt());
         then(unrelatedStrategy).should(never()).update(any());
