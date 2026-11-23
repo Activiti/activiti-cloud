@@ -530,10 +530,8 @@ limitations under the License.]]>
     </pluginManagement>
     <plugins>
       <plugin>
-        <!-- Root project only: in all modules, this declaration would also activate ban-test-dependencies -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <inherited>false</inherited>
         <executions>
           <execution>
             <id>require-maven-version</id>
