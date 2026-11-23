@@ -47,7 +47,6 @@ import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
-import org.springframework.integration.MessageDispatchingException;
 import org.springframework.integration.MessageTimeoutException;
 import org.springframework.integration.aop.SimpleActiveIdleReceiveMessageAdvice;
 import org.springframework.integration.channel.DirectChannel;
@@ -133,8 +132,8 @@ class OutboxAutoConfigurationIT {
     void outboxProperties() {
         assertThat(outboxProperties.isEnabled()).isTrue();
         assertThat(outboxProperties.getRetryableExceptions())
-            .containsEntry(MessageDispatchingException.class, true)
             .containsEntry(DestinationResolutionException.class, false)
+            .containsEntry(OutboxMessageDeliveryException.class, true)
             .containsEntry(MessageTimeoutException.class, true)
             .containsEntry(AmqpException.class, true);
         assertThat(outboxProperties.getCircuitBreakerOpenPeriod()).isEqualTo(Duration.ofSeconds(1));
@@ -143,6 +142,13 @@ class OutboxAutoConfigurationIT {
         assertThat(outboxProperties.getPollerIdlePeriod()).isEqualTo(Duration.ofMillis(50));
         assertThat(outboxProperties.getReconcilePeriod()).isEqualTo(Duration.ofSeconds(1));
         assertThat(outboxProperties.getExcludes()).isNotEmpty();
+        assertThat(outboxProperties.getHeadersToRemove()).containsOnly(
+            "errorChannel",
+            "replyChannel",
+            "sourceData",
+            "amqp_*",
+            "kafka_*"
+        );
     }
 
     @Test
@@ -207,7 +213,7 @@ class OutboxAutoConfigurationIT {
     }
 
     @Test
-    @DisplayName("Should poll message, commit transaction, and send to StreamBridge using OUTBOX_DESTINATION header")
+    @DisplayName("Should poll message, commit transaction, and send to output binding destination")
     void shouldPollAndSendMessageToOutputBindingDestination() {
         String destination = AUDIT_PRODUCER;
         Message<?> testMessage = MessageBuilder.withPayload("outbox-payload".getBytes()).build();
@@ -227,6 +233,31 @@ class OutboxAutoConfigurationIT {
             .actual();
 
         assertThat(result.getPayload()).isEqualTo("outbox-payload".getBytes());
+        assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
+        assertThat(auditProducerQueue.getQueueSize()).isZero();
+    }
+
+    @Test
+    @DisplayName("Should poll message, commit transaction, and send to dynamic destination")
+    void shouldPollAndSendMessageToDynamicDestination() {
+        String destination = "script.EXECUTE";
+        Message<?> testMessage = MessageBuilder.withPayload("script-payload".getBytes()).build();
+
+        streamBridge.send(destination, testMessage);
+
+        await().untilAsserted(() -> {
+            ArgumentCaptor<Message<?>> argumentCaptor = ArgumentCaptor.captor();
+            verify(streamBridge, times(2)).send(eq(destination), argumentCaptor.capture());
+
+            assertThat(argumentCaptor.getValue().getPayload()).isEqualTo("script-payload".getBytes());
+            assertThat(argumentCaptor.getValue().getHeaders()).containsEntry(OUTBOX_DESTINATION, destination);
+        });
+
+        final var result = assertThat(outputDestination.receive(Duration.ofSeconds(1).toMillis(), destination))
+            .isNotNull()
+            .actual();
+
+        assertThat(result.getPayload()).isEqualTo("script-payload".getBytes());
         assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
         assertThat(auditProducerQueue.getQueueSize()).isZero();
     }
