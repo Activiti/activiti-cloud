@@ -239,13 +239,11 @@ class OutboxAutoConfigurationIT {
 
         ArgumentCaptor<Message<?>> argumentCaptor = ArgumentCaptor.captor();
 
-        await()
-            .forever()
-            .untilAsserted(() -> {
-                verify(streamBridge, times(6)).send(eq(destination), argumentCaptor.capture());
-                assertThat(auditProducerQueue.getQueueSize()).isZero();
-                assertThat(outboxDeadLetterQueue.getQueueSize()).isZero();
-            });
+        await().untilAsserted(() -> {
+            verify(streamBridge, times(6)).send(eq(destination), argumentCaptor.capture());
+            assertThat(auditProducerQueue.getQueueSize()).isZero();
+            assertThat(outboxDeadLetterQueue.getQueueSize()).isZero();
+        });
 
         final var result = assertThat(outputDestination.receive(Duration.ofSeconds(1).toMillis(), "engineEvents"))
             .isNotNull()
