@@ -21,8 +21,10 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.springframework.amqp.AmqpException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.integration.MessageDispatchingException;
+import org.springframework.integration.MessageTimeoutException;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.validation.annotation.Validated;
 
@@ -53,7 +55,9 @@ public class OutboxProperties {
     private Map<Class<? extends Throwable>, Boolean> retryableExceptions = new LinkedHashMap<>(
         Map.ofEntries(
             Map.entry(DestinationResolutionException.class, false),
-            Map.entry(MessageDispatchingException.class, true)
+            Map.entry(MessageDispatchingException.class, true),
+            Map.entry(MessageTimeoutException.class, true),
+            Map.entry(AmqpException.class, true)
         )
     );
 

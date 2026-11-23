@@ -22,6 +22,7 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.amqp.AmqpException;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -46,6 +48,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.integration.MessageDispatchingException;
+import org.springframework.integration.MessageTimeoutException;
 import org.springframework.integration.aop.SimpleActiveIdleReceiveMessageAdvice;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
@@ -131,9 +134,15 @@ class OutboxAutoConfigurationIT {
         assertThat(outboxProperties.isEnabled()).isTrue();
         assertThat(outboxProperties.getRetryableExceptions())
             .containsEntry(MessageDispatchingException.class, true)
-            .containsEntry(DestinationResolutionException.class, false);
+            .containsEntry(DestinationResolutionException.class, false)
+            .containsEntry(MessageTimeoutException.class, true)
+            .containsEntry(AmqpException.class, true);
         assertThat(outboxProperties.getCircuitBreakerOpenPeriod()).isEqualTo(Duration.ofSeconds(1));
         assertThat(outboxProperties.getCircuitBreakerThreshold()).isEqualTo(3);
+        assertThat(outboxProperties.getPollerActivePeriod()).isEqualTo(Duration.ofMillis(1));
+        assertThat(outboxProperties.getPollerIdlePeriod()).isEqualTo(Duration.ofMillis(50));
+        assertThat(outboxProperties.getReconcilePeriod()).isEqualTo(Duration.ofSeconds(1));
+        assertThat(outboxProperties.getExcludes()).isNotEmpty();
     }
 
     @Test
@@ -241,6 +250,41 @@ class OutboxAutoConfigurationIT {
 
         await().untilAsserted(() -> {
             verify(streamBridge, times(6)).send(eq(destination), argumentCaptor.capture());
+            assertThat(auditProducerQueue.getQueueSize()).isZero();
+            assertThat(outboxDeadLetterQueue.getQueueSize()).isZero();
+        });
+
+        final var result = assertThat(outputDestination.receive(Duration.ofSeconds(1).toMillis(), "engineEvents"))
+            .isNotNull()
+            .actual();
+        assertThat(result.getPayload()).isEqualTo("outbox-payload".getBytes());
+        assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
+    }
+
+    @Test
+    @DisplayName(
+        "Should rollback transaction, retry and recover when stream bridge dispatch fails with recoverable exceptions"
+    )
+    void shouldPollAndRetryOnRabbitMqBinderExceptionAndRecoverAndSendMessageToOutputBindingDestination() {
+        final var destination = AUDIT_PRODUCER;
+        Message<?> testMessage = MessageBuilder.withPayload("outbox-payload".getBytes()).build();
+
+        doAnswer(invocation -> {
+            throw new AmqpException("publisher error");
+        })
+            .doAnswer(invocation -> {
+                throw new MessageTimeoutException("timeout error");
+            })
+            .doCallRealMethod()
+            .when(streamBridge)
+            .send(eq(destination), any(Message.class));
+
+        auditProducer.send(testMessage);
+
+        ArgumentCaptor<Message<?>> argumentCaptor = ArgumentCaptor.captor();
+
+        await().untilAsserted(() -> {
+            verify(streamBridge, times(3)).send(eq(destination), argumentCaptor.capture());
             assertThat(auditProducerQueue.getQueueSize()).isZero();
             assertThat(outboxDeadLetterQueue.getQueueSize()).isZero();
         });
