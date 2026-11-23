@@ -111,7 +111,7 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
     private TaskScheduler taskScheduler(String partitionKey) {
         return new ConcurrentTaskScheduler(
             Executors.newSingleThreadScheduledExecutor(
-                Thread.ofPlatform().name(partitionKey.concat("Poller")).daemon().factory()
+                Thread.ofPlatform().name(partitionKey.concat("Poller")).factory()
             )
         );
     }
