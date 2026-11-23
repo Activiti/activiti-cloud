@@ -19,9 +19,9 @@ import static org.activiti.cloud.common.messaging.outbox.OutboxChannelIntercepto
 import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
-import org.aopalliance.aop.Advice;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -32,6 +32,7 @@ import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowAdapter;
 import org.springframework.integration.dsl.IntegrationFlowDefinition;
 import org.springframework.integration.dsl.Pollers;
+import org.springframework.integration.handler.advice.AbstractRequestHandlerAdvice;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.util.DynamicPeriodicTrigger;
 import org.springframework.messaging.MessageHandler;
@@ -47,7 +48,7 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
     private final PlatformTransactionManager transactionManager;
     private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry<? extends Lock> lockRegistry;
-    private final Advice outboxMessageHandlerErrorAdvice;
+    private final AbstractRequestHandlerAdvice[] outboxMessageHandlerErrorAdvice;
 
     public OutboxIntegrationFlow(
         String partitionKey,
@@ -56,7 +57,7 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
         PlatformTransactionManager transactionManager,
         ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry<? extends Lock> lockRegistry,
-        Advice outboxMessageHandlerErrorAdvice
+        List<AbstractRequestHandlerAdvice> outboxMessageHandlerErrorAdvice
     ) {
         this.partitionKey = partitionKey;
         this.queueChannel = queueChannel;
@@ -64,7 +65,9 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
         this.transactionManager = transactionManager;
         this.streamBridgeProvider = streamBridgeProvider;
         this.lockRegistry = lockRegistry;
-        this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice;
+        this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice.toArray(
+            AbstractRequestHandlerAdvice[]::new
+        );
     }
 
     @Override

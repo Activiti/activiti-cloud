@@ -50,7 +50,7 @@ public class OutboxProperties {
     private String[] headersToRemove = { "errorChannel", "replyChannel", "sourceData", "amqp_*", "kafka_*" };
 
     @NotNull
-    private Map<Class<? extends Throwable>, Boolean> exceptions = new LinkedHashMap<>(
+    private Map<Class<? extends Throwable>, Boolean> retryableExceptions = new LinkedHashMap<>(
         Map.ofEntries(
             Map.entry(DestinationResolutionException.class, false),
             Map.entry(MessageDispatchingException.class, true)
@@ -119,12 +119,12 @@ public class OutboxProperties {
         this.headersToRemove = headersToRemove;
     }
 
-    public Map<Class<? extends Throwable>, Boolean> getExceptions() {
-        return exceptions;
+    public Map<Class<? extends Throwable>, Boolean> getRetryableExceptions() {
+        return retryableExceptions;
     }
 
-    public void setExceptions(Map<Class<? extends Throwable>, Boolean> exceptions) {
-        this.exceptions = exceptions;
+    public void setRetryableExceptions(Map<Class<? extends Throwable>, Boolean> retryableExceptions) {
+        this.retryableExceptions = retryableExceptions;
     }
 
     public Duration getCircuitBreakerOpenPeriod() {
@@ -155,7 +155,7 @@ public class OutboxProperties {
         sb.append(", headersToRemove=").append(
             headersToRemove == null ? "null" : Arrays.asList(headersToRemove).toString()
         );
-        sb.append(", exceptions=").append(exceptions);
+        sb.append(", exceptions=").append(retryableExceptions);
         sb.append(", circuitBreakerOpenPeriod=").append(circuitBreakerOpenPeriod);
         sb.append(", circuitBreakerThreshold=").append(circuitBreakerThreshold);
         sb.append('}');

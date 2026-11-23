@@ -15,13 +15,14 @@
  */
 package org.activiti.cloud.common.messaging.outbox;
 
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.function.BiFunction;
-import org.aopalliance.aop.Advice;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.handler.advice.AbstractRequestHandlerAdvice;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -31,20 +32,20 @@ public class OutboxIntegrationFlowFactory implements BiFunction<String, QueueCha
     private final PlatformTransactionManager transactionManager;
     private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry<? extends Lock> lockRegistry;
-    private final Advice outboxMessageHandlerErrorAdvice;
+    private final List<AbstractRequestHandlerAdvice> outboxMessageHandlerErrorAdvice;
 
     public OutboxIntegrationFlowFactory(
         OutboxProperties outboxProperties,
         PlatformTransactionManager transactionManager,
         ObjectProvider<StreamBridge> streamBridgeProvider,
         LockRegistry<? extends Lock> lockRegistry,
-        Advice outboxMessageHandlerErrorAdvice
+        AbstractRequestHandlerAdvice[] outboxMessageHandlerErrorAdvice
     ) {
         this.outboxProperties = outboxProperties;
         this.transactionManager = transactionManager;
         this.streamBridgeProvider = streamBridgeProvider;
         this.lockRegistry = lockRegistry;
-        this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice;
+        this.outboxMessageHandlerErrorAdvice = List.of(outboxMessageHandlerErrorAdvice);
     }
 
     @Override

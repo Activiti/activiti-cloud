@@ -129,7 +129,7 @@ class OutboxAutoConfigurationIT {
     @Test
     void outboxProperties() {
         assertThat(outboxProperties.isEnabled()).isTrue();
-        assertThat(outboxProperties.getExceptions())
+        assertThat(outboxProperties.getRetryableExceptions())
             .containsEntry(MessageDispatchingException.class, true)
             .containsEntry(DestinationResolutionException.class, false);
         assertThat(outboxProperties.getCircuitBreakerOpenPeriod()).isEqualTo(Duration.ofSeconds(1));
@@ -201,7 +201,7 @@ class OutboxAutoConfigurationIT {
     @DisplayName("Should poll message, commit transaction, and send to StreamBridge using OUTBOX_DESTINATION header")
     void shouldPollAndSendMessageToOutputBindingDestination() {
         String destination = AUDIT_PRODUCER;
-        Message<String> testMessage = MessageBuilder.withPayload("outbox-payload").build();
+        Message<?> testMessage = MessageBuilder.withPayload("outbox-payload".getBytes()).build();
 
         auditProducer.send(testMessage);
 
@@ -209,7 +209,7 @@ class OutboxAutoConfigurationIT {
             ArgumentCaptor<Message<?>> argumentCaptor = ArgumentCaptor.captor();
             verify(streamBridge).send(eq(destination), argumentCaptor.capture());
 
-            assertThat(argumentCaptor.getValue().getPayload()).isEqualTo("\"outbox-payload\"".getBytes());
+            assertThat(argumentCaptor.getValue().getPayload()).isEqualTo("outbox-payload".getBytes());
             assertThat(argumentCaptor.getValue().getHeaders()).containsEntry(OUTBOX_DESTINATION, destination);
         });
 
@@ -217,14 +217,16 @@ class OutboxAutoConfigurationIT {
             .isNotNull()
             .actual();
 
-        assertThat(result.getPayload()).isEqualTo("\"outbox-payload\"".getBytes());
+        assertThat(result.getPayload()).isEqualTo("outbox-payload".getBytes());
         assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
         assertThat(auditProducerQueue.getQueueSize()).isZero();
     }
 
     @Test
-    @DisplayName("Should rollback transaction and open circuit breaker when stream bridge dispatch fails")
-    void shouldRetryErrorChannelWhenDestinationHeaderIsMissing() {
+    @DisplayName(
+        "Should rollback transaction, open circuit breaker and recover when stream bridge dispatch fails too many times in a row"
+    )
+    void shouldPollAndRetryAndTriggerCircuitBreakerAndRecoverAndSendMessageToOutputBindingDestination() {
         final var destination = AUDIT_PRODUCER;
         Message<?> testMessage = MessageBuilder.withPayload("outbox-payload".getBytes()).build();
 
@@ -254,9 +256,9 @@ class OutboxAutoConfigurationIT {
 
     @Test
     @DisplayName(
-        "Should rollback transaction and route DestinationResolutionException to errorChannel when OUTBOX_DESTINATION is missing"
+        "Should rollback transaction and route DestinationResolutionException to outbox dead letter when OUTBOX_DESTINATION is missing"
     )
-    void shouldRouteErrorToErrorChannelWhenDestinationHeaderIsMissing() {
+    void shouldRouteErrorToDeadLetterChannelWhenDestinationHeaderIsMissing() {
         Message<?> invalidMessage = MessageBuilder.withPayload("outbox-payload".getBytes()).build();
 
         auditProducerQueue.send(invalidMessage);
@@ -267,12 +269,14 @@ class OutboxAutoConfigurationIT {
             assertThat(outboxDeadLetterQueue.getQueueSize()).isEqualTo(1);
         });
 
-        final var failedMessage = outboxDeadLetterQueue.receive();
+        final var dlqMessage = outboxDeadLetterQueue.receive();
 
-        assertThat(failedMessage.getPayload()).isEqualTo("outbox-payload".getBytes());
-        assertThat(failedMessage.getHeaders()).containsEntry(
-            "exceptionMessage",
-            "Cannot resolve outboxDestination message header for auditProducer outbox"
-        );
+        assertThat(dlqMessage.getPayload()).isEqualTo("outbox-payload".getBytes());
+        assertThat(dlqMessage.getHeaders())
+            .containsEntry("x-error-class", "org.springframework.messaging.core.DestinationResolutionException")
+            .containsEntry(
+                "x-error-message",
+                "Cannot resolve outboxDestination message header for auditProducer outbox"
+            );
     }
 }

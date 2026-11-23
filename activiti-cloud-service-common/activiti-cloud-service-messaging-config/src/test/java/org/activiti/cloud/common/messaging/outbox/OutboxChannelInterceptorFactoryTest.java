@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.function.BiFunction;
-import org.aopalliance.aop.Advice;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.dsl.context.IntegrationFlowContext.IntegrationFlowRegistration;
+import org.springframework.integration.handler.advice.AbstractRequestHandlerAdvice;
 import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.messaging.Message;
@@ -63,7 +63,7 @@ class OutboxChannelInterceptorFactoryTest {
     private LockRegistry lockRegistry;
 
     @Mock
-    private Advice outboxMessageHandlerErrorAdvice;
+    private AbstractRequestHandlerAdvice outboxMessageHandlerErrorAdvice;
 
     private OutboxIntegrationFlowFactory outboxIntegrationFlowFactory;
 
@@ -87,7 +87,7 @@ class OutboxChannelInterceptorFactoryTest {
             transactionManager,
             streamBridgeProvider,
             lockRegistry,
-            outboxMessageHandlerErrorAdvice
+            new AbstractRequestHandlerAdvice[] { outboxMessageHandlerErrorAdvice }
         );
 
         factory = new OutboxChannelInterceptorFactory(

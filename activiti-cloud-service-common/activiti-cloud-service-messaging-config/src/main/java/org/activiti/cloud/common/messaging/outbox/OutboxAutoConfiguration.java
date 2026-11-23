@@ -47,13 +47,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.serializer.support.SerializingConverter;
 import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
-import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice;
+import org.springframework.integration.handler.advice.AbstractRequestHandlerAdvice;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
 import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.integration.jdbc.lock.LockRepository;
@@ -80,11 +78,8 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.ExceptionTypeFilter;
@@ -188,7 +183,7 @@ public class OutboxAutoConfiguration {
         PlatformTransactionManager transactionManager,
         ObjectProvider<StreamBridge> streamBridgeProvider,
         @OutboxLockRegistry LockRegistry<? extends Lock> lockRegistry,
-        ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice
+        @OutboxMessageHandlerAdvice AbstractRequestHandlerAdvice[] outboxMessageHandlerErrorAdvice
     ) {
         return new OutboxIntegrationFlowFactory(
             outboxProperties,
@@ -215,34 +210,14 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    public ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice(
-        MessageChannel outboxFailureChannel
-    ) {
-        final var advice = new ExpressionEvaluatingRequestHandlerAdvice();
-        // Route to this channel on failure
-        advice.setFailureChannel(outboxFailureChannel);
-        // Evaluate the root cause / original payload to pass to the error channel
-        advice.setOnFailureExpressionString("#exception");
-        // CRITICAL: Return true so the flow considers it "handled" and commits the transaction
-        advice.setTrapException(true);
-
-        return advice;
-    }
-
-    @Bean
     QueueChannel outboxDeadLetterQueue(ChannelMessageStore outboxChannelMessageStore) {
         return MessageChannels.queue(outboxChannelMessageStore, "outboxDeadLetterQueue").getObject();
     }
 
     @Bean
-    public MessageChannel outboxFailureChannel() {
-        return MessageChannels.direct().getObject();
-    }
-
-    @Bean
     public ExceptionTypeFilter outboxExceptionsTypeFilter(OutboxProperties outboxProperties) {
         final Set<Class<? extends Throwable>> includes = outboxProperties
-            .getExceptions()
+            .getRetryableExceptions()
             .entrySet()
             .stream()
             .filter(Map.Entry::getValue)
@@ -250,7 +225,7 @@ public class OutboxAutoConfiguration {
             .collect(Collectors.toSet());
 
         final Collection<Class<? extends Throwable>> excludes = outboxProperties
-            .getExceptions()
+            .getRetryableExceptions()
             .entrySet()
             .stream()
             .filter(Predicate.not(Map.Entry::getValue))
@@ -261,34 +236,12 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    public IntegrationFlow outboxDeadLetterFlow(
-        MessageChannel outboxFailureChannel,
-        QueueChannel outboxDeadLetterQueue,
-        ExceptionTypeFilter outboxExceptionsTypeFilter
+    @OutboxMessageHandlerAdvice
+    OutboxDeadLetterRoutingAdvice outboxDeadLetterRoutingAdvice(
+        ExceptionTypeFilter outboxExceptionsTypeFilter,
+        QueueChannel outboxDeadLetterChannel
     ) {
-        return IntegrationFlow.from(outboxFailureChannel)
-            .filter(
-                ErrorMessage.class,
-                message -> !outboxExceptionsTypeFilter.match(message.getPayload(), true),
-                spec -> spec.throwExceptionOnRejection(true).discardWithinAdvice(true)
-            )
-            .transform(ErrorMessage.class, source -> {
-                final var cause = NestedExceptionUtils.getMostSpecificCause(source.getPayload());
-
-                if (source.getOriginalMessage() instanceof Message<?> originalMessage) {
-                    return MessageBuilder.fromMessage(originalMessage)
-                        .setHeader("exceptionMessage", cause.getMessage())
-                        .build();
-                } else if (source.getPayload() instanceof MessagingException messageException) {
-                    return MessageBuilder.fromMessage(messageException.getFailedMessage())
-                        .setHeader("exceptionMessage", cause.getMessage())
-                        .build();
-                }
-
-                return null;
-            })
-            .channel(outboxDeadLetterQueue)
-            .get();
+        return new OutboxDeadLetterRoutingAdvice(outboxExceptionsTypeFilter, outboxDeadLetterChannel);
     }
 
     @Bean
