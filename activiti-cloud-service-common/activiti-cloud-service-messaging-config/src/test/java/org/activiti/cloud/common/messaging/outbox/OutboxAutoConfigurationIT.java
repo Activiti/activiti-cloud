@@ -84,7 +84,7 @@ class OutboxAutoConfigurationIT {
     private MessageChannel auditProducer;
 
     @Autowired
-    private QueueChannel outboxErrorsChannel;
+    private QueueChannel outboxDeadLetterQueue;
 
     @Autowired
     private QueueChannel auditProducerQueue;
@@ -242,7 +242,7 @@ class OutboxAutoConfigurationIT {
             .untilAsserted(() -> {
                 verify(streamBridge, times(6)).send(eq(destination), argumentCaptor.capture());
                 assertThat(auditProducerQueue.getQueueSize()).isZero();
-                assertThat(outboxErrorsChannel.getQueueSize()).isZero();
+                assertThat(outboxDeadLetterQueue.getQueueSize()).isZero();
             });
 
         final var result = assertThat(outputDestination.receive(Duration.ofSeconds(1).toMillis(), "engineEvents"))
@@ -264,10 +264,10 @@ class OutboxAutoConfigurationIT {
         await().untilAsserted(() -> {
             verify(streamBridge, never()).send(anyString(), any(Message.class));
             assertThat(auditProducerQueue.getQueueSize()).isZero();
-            assertThat(outboxErrorsChannel.getQueueSize()).isEqualTo(1);
+            assertThat(outboxDeadLetterQueue.getQueueSize()).isEqualTo(1);
         });
 
-        final var failedMessage = outboxErrorsChannel.receive();
+        final var failedMessage = outboxDeadLetterQueue.receive();
 
         assertThat(failedMessage.getPayload()).isEqualTo("outbox-payload".getBytes());
         assertThat(failedMessage.getHeaders()).containsEntry(

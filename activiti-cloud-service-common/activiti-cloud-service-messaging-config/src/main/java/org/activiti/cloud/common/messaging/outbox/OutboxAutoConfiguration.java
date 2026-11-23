@@ -216,11 +216,11 @@ public class OutboxAutoConfiguration {
 
     @Bean
     public ExpressionEvaluatingRequestHandlerAdvice outboxMessageHandlerErrorAdvice(
-        MessageChannel outboxExceptionsChannel
+        MessageChannel outboxFailureChannel
     ) {
         final var advice = new ExpressionEvaluatingRequestHandlerAdvice();
         // Route to this channel on failure
-        advice.setFailureChannel(outboxExceptionsChannel);
+        advice.setFailureChannel(outboxFailureChannel);
         // Evaluate the root cause / original payload to pass to the error channel
         advice.setOnFailureExpressionString("#exception");
         // CRITICAL: Return true so the flow considers it "handled" and commits the transaction
@@ -230,12 +230,12 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    QueueChannel outboxErrorsChannel(ChannelMessageStore outboxChannelMessageStore) {
+    QueueChannel outboxDeadLetterQueue(ChannelMessageStore outboxChannelMessageStore) {
         return MessageChannels.queue(outboxChannelMessageStore, "outboxDeadLetterQueue").getObject();
     }
 
     @Bean
-    public MessageChannel outboxExceptionsChannel() {
+    public MessageChannel outboxFailureChannel() {
         return MessageChannels.direct().getObject();
     }
 
@@ -262,11 +262,11 @@ public class OutboxAutoConfiguration {
 
     @Bean
     public IntegrationFlow outboxDeadLetterFlow(
-        MessageChannel outboxExceptionsChannel,
-        QueueChannel outboxErrorsChannel,
+        MessageChannel outboxFailureChannel,
+        QueueChannel outboxDeadLetterQueue,
         ExceptionTypeFilter outboxExceptionsTypeFilter
     ) {
-        return IntegrationFlow.from(outboxExceptionsChannel)
+        return IntegrationFlow.from(outboxFailureChannel)
             .filter(
                 ErrorMessage.class,
                 message -> !outboxExceptionsTypeFilter.match(message.getPayload(), true),
@@ -287,7 +287,7 @@ public class OutboxAutoConfiguration {
 
                 return null;
             })
-            .channel(outboxErrorsChannel)
+            .channel(outboxDeadLetterQueue)
             .get();
     }
 
