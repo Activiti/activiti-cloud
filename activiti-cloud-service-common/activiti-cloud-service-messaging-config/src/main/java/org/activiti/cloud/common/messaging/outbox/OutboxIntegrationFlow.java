@@ -25,6 +25,7 @@ import org.aopalliance.aop.Advice;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.integration.aop.ReceiveMessageAdvice;
 import org.springframework.integration.aop.SimpleActiveIdleReceiveMessageAdvice;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -84,7 +85,11 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
                             .maxMessagesPerPoll(1)
                             .receiveTimeout(Duration.ZERO.toMillis())
                             .errorChannel(ERROR_CHANNEL)
-                            .advice(pollActiveIdleAdvice(dynamicPeriodicTrigger), pollLockAdvice(partitionKey))
+                            .advice(
+                                pollCircuitBreakerAdvice(),
+                                pollLockAdvice(partitionKey),
+                                pollActiveIdleAdvice(dynamicPeriodicTrigger)
+                            )
                             .transactional(transactionManager)
                     )
             )
@@ -108,7 +113,14 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
         );
     }
 
-    private Advice pollActiveIdleAdvice(DynamicPeriodicTrigger trigger) {
+    public CircuitBreakerPollerAdvice pollCircuitBreakerAdvice() {
+        return new CircuitBreakerPollerAdvice(
+            outboxProperties.getCircuitBreakerThreshold(),
+            outboxProperties.getCircuitBreakerOpenPeriod()
+        );
+    }
+
+    private ReceiveMessageAdvice pollActiveIdleAdvice(DynamicPeriodicTrigger trigger) {
         final var advice = new SimpleActiveIdleReceiveMessageAdvice(trigger);
         advice.setActivePollPeriod(outboxProperties.getPollerActivePeriod().toMillis());
         advice.setIdlePollPeriod(outboxProperties.getPollerIdlePeriod().toMillis());

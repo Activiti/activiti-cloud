@@ -30,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.support.MessageBuilder;
@@ -70,7 +71,7 @@ class OutboxMessageHandlerTest {
     }
 
     @Test
-    void shouldNotThrowExceptionWhenStreamBridgeDropsMessage() {
+    void shouldThrowExceptionWhenStreamBridgeDropsMessage() {
         // Given
         String destination = "my-outbox-binding";
         Message<String> message = MessageBuilder.withPayload("test-payload")
@@ -81,9 +82,7 @@ class OutboxMessageHandlerTest {
         when(streamBridge.send(destination, message)).thenReturn(false);
 
         // When / Then
-        assertThatCode(() -> handler.handleMessage(message)).doesNotThrowAnyException();
-
-        verify(streamBridge).send(destination, message);
+        assertThatThrownBy(() -> handler.handleMessage(message)).isInstanceOf(MessageDispatchingException.class);
     }
 
     @Test

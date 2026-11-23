@@ -17,7 +17,6 @@ package org.activiti.cloud.common.messaging.outbox;
 
 import static org.springframework.beans.factory.config.BeanDefinition.ROLE_INFRASTRUCTURE;
 import static org.springframework.integration.support.json.JacksonMessagingUtils.DEFAULT_TRUSTED_PACKAGES;
-import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.sql.DatabaseMetaData;
@@ -55,7 +54,6 @@ import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice;
-import org.springframework.integration.handler.advice.ExpressionEvaluatingRequestHandlerAdvice.MessageHandlingExpressionEvaluatingAdviceException;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
 import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.integration.jdbc.lock.LockRepository;
@@ -83,6 +81,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
@@ -232,7 +231,7 @@ public class OutboxAutoConfiguration {
 
     @Bean
     QueueChannel outboxErrorsChannel(ChannelMessageStore outboxChannelMessageStore) {
-        return MessageChannels.queue(outboxChannelMessageStore, "outboxErrors").getObject();
+        return MessageChannels.queue(outboxChannelMessageStore, "outboxDeadLetterQueue").getObject();
     }
 
     @Bean
@@ -262,7 +261,7 @@ public class OutboxAutoConfiguration {
     }
 
     @Bean
-    public IntegrationFlow outboxErrorsFlow(
+    public IntegrationFlow outboxDeadLetterFlow(
         MessageChannel outboxExceptionsChannel,
         QueueChannel outboxErrorsChannel,
         ExceptionTypeFilter outboxExceptionsTypeFilter
@@ -271,25 +270,22 @@ public class OutboxAutoConfiguration {
             .filter(
                 ErrorMessage.class,
                 message -> !outboxExceptionsTypeFilter.match(message.getPayload(), true),
-                spec -> spec.throwExceptionOnRejection(false).discardChannel(ERROR_CHANNEL)
+                spec -> spec.throwExceptionOnRejection(true).discardWithinAdvice(true)
             )
-            .enrichHeaders(headers -> headers.errorChannel("errorChannel"))
             .transform(ErrorMessage.class, source -> {
-                final var exception = NestedExceptionUtils.getMostSpecificCause(source.getPayload());
+                final var cause = NestedExceptionUtils.getMostSpecificCause(source.getPayload());
 
                 if (source.getOriginalMessage() instanceof Message<?> originalMessage) {
                     return MessageBuilder.fromMessage(originalMessage)
-                        .setHeader("exceptionMessage", exception.getMessage())
+                        .setHeader("exceptionMessage", cause.getMessage())
                         .build();
-                } else if (
-                    source.getPayload() instanceof MessageHandlingExpressionEvaluatingAdviceException messageException
-                ) {
+                } else if (source.getPayload() instanceof MessagingException messageException) {
                     return MessageBuilder.fromMessage(messageException.getFailedMessage())
-                        .setHeader("exceptionMessage", exception.getMessage())
+                        .setHeader("exceptionMessage", cause.getMessage())
                         .build();
                 }
 
-                throw new IllegalArgumentException("Can't resolve error message failed message");
+                return null;
             })
             .channel(outboxErrorsChannel)
             .get();

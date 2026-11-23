@@ -22,7 +22,9 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
@@ -39,11 +41,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.stream.binder.test.EnableTestBinder;
-import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
+import org.springframework.integration.MessageDispatchingException;
 import org.springframework.integration.aop.SimpleActiveIdleReceiveMessageAdvice;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
@@ -52,6 +54,7 @@ import org.springframework.integration.store.ChannelMessageStore;
 import org.springframework.integration.util.DynamicPeriodicTrigger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
@@ -93,9 +96,6 @@ class OutboxAutoConfigurationIT {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private InputDestination inputDestination;
-
-    @Autowired
     private OutputDestination outputDestination;
 
     @Autowired
@@ -129,6 +129,11 @@ class OutboxAutoConfigurationIT {
     @Test
     void outboxProperties() {
         assertThat(outboxProperties.isEnabled()).isTrue();
+        assertThat(outboxProperties.getExceptions())
+            .containsEntry(MessageDispatchingException.class, true)
+            .containsEntry(DestinationResolutionException.class, false);
+        assertThat(outboxProperties.getCircuitBreakerOpenPeriod()).isEqualTo(Duration.ofSeconds(1));
+        assertThat(outboxProperties.getCircuitBreakerThreshold()).isEqualTo(3);
     }
 
     @Test
@@ -173,9 +178,11 @@ class OutboxAutoConfigurationIT {
         );
 
         List<Advice> adviceChain = (List<Advice>) accessor.getPropertyValue("adviceChain");
-        assertThat(adviceChain).isNotNull().hasSize(3);
+        assertThat(adviceChain).isNotNull().hasSize(4);
 
-        assertThat(adviceChain.get(0)).isInstanceOfSatisfying(
+        assertThat(adviceChain.get(0)).isInstanceOf(CircuitBreakerPollerAdvice.class);
+        assertThat(adviceChain.get(1)).isInstanceOf(PollLockAdvice.class);
+        assertThat(adviceChain.get(2)).isInstanceOfSatisfying(
             SimpleActiveIdleReceiveMessageAdvice.class,
             activeIdleAdvice -> {
                 DirectFieldAccessor adviceAccessor = new DirectFieldAccessor(activeIdleAdvice);
@@ -187,9 +194,7 @@ class OutboxAutoConfigurationIT {
                 );
             }
         );
-
-        assertThat(adviceChain.get(1)).isInstanceOf(PollLockAdvice.class);
-        assertThat(adviceChain.get(2)).isInstanceOf(TransactionInterceptor.class);
+        assertThat(adviceChain.get(3)).isInstanceOf(TransactionInterceptor.class);
     }
 
     @Test
@@ -201,20 +206,50 @@ class OutboxAutoConfigurationIT {
         auditProducer.send(testMessage);
 
         await().untilAsserted(() -> {
-            final var result = assertThat(outputDestination.receive(Duration.ofSeconds(1).toMillis()))
-                .isNotNull()
-                .actual();
-
-            assertThat(result.getPayload()).isEqualTo("\"outbox-payload\"".getBytes());
-            assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
-            assertThat(auditProducerQueue.getQueueSize()).isZero();
-
             ArgumentCaptor<Message<?>> argumentCaptor = ArgumentCaptor.captor();
             verify(streamBridge).send(eq(destination), argumentCaptor.capture());
 
             assertThat(argumentCaptor.getValue().getPayload()).isEqualTo("\"outbox-payload\"".getBytes());
             assertThat(argumentCaptor.getValue().getHeaders()).containsEntry(OUTBOX_DESTINATION, destination);
         });
+
+        final var result = assertThat(outputDestination.receive(Duration.ofSeconds(1).toMillis(), "engineEvents"))
+            .isNotNull()
+            .actual();
+
+        assertThat(result.getPayload()).isEqualTo("\"outbox-payload\"".getBytes());
+        assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
+        assertThat(auditProducerQueue.getQueueSize()).isZero();
+    }
+
+    @Test
+    @DisplayName("Should rollback transaction and open circuit breaker when stream bridge dispatch fails")
+    void shouldRetryErrorChannelWhenDestinationHeaderIsMissing() {
+        final var destination = AUDIT_PRODUCER;
+        Message<?> testMessage = MessageBuilder.withPayload("outbox-payload".getBytes()).build();
+
+        doReturn(false, false, false, false, false)
+            .doCallRealMethod()
+            .when(streamBridge)
+            .send(eq(destination), any(Message.class));
+
+        auditProducer.send(testMessage);
+
+        ArgumentCaptor<Message<?>> argumentCaptor = ArgumentCaptor.captor();
+
+        await()
+            .forever()
+            .untilAsserted(() -> {
+                verify(streamBridge, times(6)).send(eq(destination), argumentCaptor.capture());
+                assertThat(auditProducerQueue.getQueueSize()).isZero();
+                assertThat(outboxErrorsChannel.getQueueSize()).isZero();
+            });
+
+        final var result = assertThat(outputDestination.receive(Duration.ofSeconds(1).toMillis(), "engineEvents"))
+            .isNotNull()
+            .actual();
+        assertThat(result.getPayload()).isEqualTo("outbox-payload".getBytes());
+        assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
     }
 
     @Test

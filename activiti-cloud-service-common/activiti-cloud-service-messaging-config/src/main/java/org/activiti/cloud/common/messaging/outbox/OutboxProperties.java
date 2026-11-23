@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.validation.annotation.Validated;
 
@@ -50,8 +51,17 @@ public class OutboxProperties {
 
     @NotNull
     private Map<Class<? extends Throwable>, Boolean> exceptions = new LinkedHashMap<>(
-        Map.ofEntries(Map.entry(DestinationResolutionException.class, false))
+        Map.ofEntries(
+            Map.entry(DestinationResolutionException.class, false),
+            Map.entry(MessageDispatchingException.class, true)
+        )
     );
+
+    @NotNull
+    private Duration circuitBreakerOpenPeriod = Duration.ofSeconds(1);
+
+    @NotNull
+    private Integer circuitBreakerThreshold = 3;
 
     public boolean isEnabled() {
         return enabled;
@@ -117,6 +127,22 @@ public class OutboxProperties {
         this.exceptions = exceptions;
     }
 
+    public Duration getCircuitBreakerOpenPeriod() {
+        return circuitBreakerOpenPeriod;
+    }
+
+    public void setCircuitBreakerOpenPeriod(Duration circuitBreakerOpenPeriod) {
+        this.circuitBreakerOpenPeriod = circuitBreakerOpenPeriod;
+    }
+
+    public Integer getCircuitBreakerThreshold() {
+        return circuitBreakerThreshold;
+    }
+
+    public void setCircuitBreakerThreshold(Integer circuitBreakerThreshold) {
+        this.circuitBreakerThreshold = circuitBreakerThreshold;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("OutboxProperties{");
@@ -130,6 +156,8 @@ public class OutboxProperties {
             headersToRemove == null ? "null" : Arrays.asList(headersToRemove).toString()
         );
         sb.append(", exceptions=").append(exceptions);
+        sb.append(", circuitBreakerOpenPeriod=").append(circuitBreakerOpenPeriod);
+        sb.append(", circuitBreakerThreshold=").append(circuitBreakerThreshold);
         sb.append('}');
         return sb.toString();
     }
