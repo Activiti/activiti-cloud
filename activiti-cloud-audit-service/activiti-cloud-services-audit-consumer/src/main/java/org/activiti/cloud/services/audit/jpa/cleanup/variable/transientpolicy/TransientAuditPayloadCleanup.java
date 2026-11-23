@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,10 +38,17 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
 
     private final List<AuditPayloadUpdateStrategy> payloadUpdateStrategies;
 
+    private final int pageSize;
+
     public TransientAuditPayloadCleanup(
         EntityManager entityManager,
-        List<AuditPayloadUpdateStrategy> payloadUpdateStrategies
+        List<AuditPayloadUpdateStrategy> payloadUpdateStrategies,
+        int pageSize
     ) {
+        if (pageSize <= 0) {
+            throw new IllegalArgumentException("pageSize must be greater than zero");
+        }
+        this.pageSize = pageSize;
         this.entityManager = entityManager;
         this.payloadUpdateStrategies = List.copyOf(payloadUpdateStrategies);
     }
@@ -61,33 +70,14 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
 
     private void cleanProcess(String processInstanceId, String appName) {
         LOGGER.debug("Starting Audit payload cleanup for processInstanceId={} appName={}", processInstanceId, appName);
-        var events = entityManager
-            .createQuery(
-                """
-                select e from AuditEvent e
-                where e.appName = :appName
-                  and e.processInstanceId = :processInstanceId
-                  and type(e) in (
-                      VariableCreatedEvent,
-                      VariableUpdatedEvent,
-                      VariableDeletedEvent,
-                      IntegrationRequestSentEvent,
-                      IntegrationResultReceivedEvent,
-                      IntegrationErrorReceivedEvent,
-                      MessageWaitingEvent,
-                      MessageSentEvent,
-                      MessageReceivedEvent,
-                      SignalReceivedEvent
-                  )
-                """,
-                AuditEventEntity.class
-            )
-            .setParameter("appName", appName)
-            .setParameter("processInstanceId", processInstanceId)
-            .getResultList();
-        var eventsUpdated = new LinkedHashMap<String, Integer>();
-        for (AuditEventEntity event : events) {
-            if (event instanceof VariablePayloadEvent payloadEvent) {
+        var eventsProcessed = new LinkedHashMap<String, Integer>();
+        Long lastId = null;
+        List<AuditEventEntity> events;
+        do {
+            events = this.findEvents(processInstanceId, appName, lastId);
+            var eventsByStrategy = new LinkedHashMap<AuditPayloadUpdateStrategy, List<AuditEventEntity>>();
+            for (AuditEventEntity event : events) {
+                var payloadEvent = (VariablePayloadEvent) event;
                 if (payloadEvent.isVariablePayloadEmpty()) {
                     continue;
                 }
@@ -99,15 +89,55 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
                         new IllegalStateException("No payload update strategy for " + event.getClass().getName())
                     );
                 payloadEvent.clearVariablePayloads();
-                int updated = strategy.update(event);
-                eventsUpdated.merge(strategy.getClass().getSimpleName(), updated, Integer::sum);
+                eventsByStrategy.computeIfAbsent(strategy, _ -> new ArrayList<>()).add(event);
             }
-        }
+            eventsByStrategy.forEach((strategy, batch) -> {
+                strategy.update(batch);
+                eventsProcessed.merge(strategy.getClass().getSimpleName(), batch.size(), Integer::sum);
+            });
+            if (!events.isEmpty()) {
+                lastId = events.getLast().getId();
+            }
+            entityManager.clear();
+        } while (events.size() == pageSize);
         LOGGER.info(
-            "Executed Audit payload cleanup for processInstanceId={} appName={}: eventsUpdated={}",
+            "Executed Audit payload cleanup for processInstanceId={} appName={}: eventsProcessed={}",
             processInstanceId,
             appName,
-            eventsUpdated
+            eventsProcessed
         );
+    }
+
+    private List<AuditEventEntity> findEvents(String processInstanceId, String appName, Long lastId) {
+        String query = """
+        select e from AuditEvent e
+        where e.appName = :appName
+          and e.processInstanceId = :processInstanceId
+          and type(e) in (
+              VariableCreatedEvent,
+              VariableUpdatedEvent,
+              VariableDeletedEvent,
+              IntegrationRequestSentEvent,
+              IntegrationResultReceivedEvent,
+              IntegrationErrorReceivedEvent,
+              MessageWaitingEvent,
+              MessageSentEvent,
+              MessageReceivedEvent,
+              SignalReceivedEvent
+          )
+        """;
+        TypedQuery<AuditEventEntity> eventsQuery;
+        if (lastId != null) {
+            eventsQuery = entityManager
+                .createQuery(query + " and e.id > :lastId order by e.id", AuditEventEntity.class)
+                .setParameter("lastId", lastId);
+        } else {
+            eventsQuery = entityManager.createQuery(query + " order by e.id", AuditEventEntity.class);
+        }
+        return eventsQuery
+            .setParameter("appName", appName)
+            .setParameter("processInstanceId", processInstanceId)
+            .setMaxResults(pageSize)
+            .getResultList();
     }
 }

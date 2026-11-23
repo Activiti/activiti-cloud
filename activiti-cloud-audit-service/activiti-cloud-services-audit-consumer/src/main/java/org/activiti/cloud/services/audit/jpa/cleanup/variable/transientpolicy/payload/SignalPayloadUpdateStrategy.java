@@ -15,19 +15,21 @@
  */
 package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload;
 
-import jakarta.persistence.EntityManager;
+import java.util.List;
 import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEntity;
 
 public class SignalPayloadUpdateStrategy implements AuditPayloadUpdateStrategy {
 
-    private final EntityManager entityManager;
+    private static final String QUERY = "update audit_event set signal = ? where id = ?";
+
+    private final AuditPayloadBatchWriter payloadBatchWriter;
 
     private final SignalJpaJsonConverter converter = new SignalJpaJsonConverter();
 
-    public SignalPayloadUpdateStrategy(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public SignalPayloadUpdateStrategy(AuditPayloadBatchWriter payloadBatchWriter) {
+        this.payloadBatchWriter = payloadBatchWriter;
     }
 
     @Override
@@ -36,20 +38,14 @@ public class SignalPayloadUpdateStrategy implements AuditPayloadUpdateStrategy {
     }
 
     @Override
-    public int update(AuditEventEntity event) {
-        var payloadEvent = (SignalReceivedAuditEventEntity) event;
-        String payload = converter.convertToDatabaseColumn(payloadEvent.getSignal());
-
-        return entityManager
-            .createNativeQuery(
-                """
-                update audit_event
-                set signal = :payload
-                where id = :id
-                """
+    public void update(List<AuditEventEntity> events) {
+        payloadBatchWriter.update(
+            QUERY,
+            events,
+            List.of(
+                event -> converter.convertToDatabaseColumn(((SignalReceivedAuditEventEntity) event).getSignal()),
+                AuditEventEntity::getId
             )
-            .setParameter("payload", payload)
-            .setParameter("id", event.getId())
-            .executeUpdate();
+        );
     }
 }

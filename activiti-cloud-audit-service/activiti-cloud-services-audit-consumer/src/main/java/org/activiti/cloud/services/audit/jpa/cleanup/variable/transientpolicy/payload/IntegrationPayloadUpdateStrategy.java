@@ -15,19 +15,21 @@
  */
 package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload;
 
-import jakarta.persistence.EntityManager;
+import java.util.List;
 import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationEventEntity;
 
 public class IntegrationPayloadUpdateStrategy implements AuditPayloadUpdateStrategy {
 
-    private final EntityManager entityManager;
+    private static final String QUERY = "update audit_event set integration_context = ? where id = ?";
+
+    private final AuditPayloadBatchWriter payloadBatchWriter;
 
     private final IntegrationContextJpaJsonConverter converter = new IntegrationContextJpaJsonConverter();
 
-    public IntegrationPayloadUpdateStrategy(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public IntegrationPayloadUpdateStrategy(AuditPayloadBatchWriter payloadBatchWriter) {
+        this.payloadBatchWriter = payloadBatchWriter;
     }
 
     @Override
@@ -36,20 +38,14 @@ public class IntegrationPayloadUpdateStrategy implements AuditPayloadUpdateStrat
     }
 
     @Override
-    public int update(AuditEventEntity event) {
-        var payloadEvent = (IntegrationEventEntity) event;
-        String payload = converter.convertToDatabaseColumn(payloadEvent.getIntegrationContext());
-
-        return entityManager
-            .createNativeQuery(
-                """
-                update audit_event
-                set integration_context = :payload
-                where id = :id
-                """
+    public void update(List<AuditEventEntity> events) {
+        payloadBatchWriter.update(
+            QUERY,
+            events,
+            List.of(
+                event -> converter.convertToDatabaseColumn(((IntegrationEventEntity) event).getIntegrationContext()),
+                AuditEventEntity::getId
             )
-            .setParameter("payload", payload)
-            .setParameter("id", event.getId())
-            .executeUpdate();
+        );
     }
 }

@@ -27,6 +27,7 @@ import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.TransientAuditPayloadCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadBatchWriter;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.IntegrationPayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.MessagePayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.SignalPayloadUpdateStrategy;
@@ -67,21 +68,37 @@ public class AuditJPAStreamsAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuditPayloadCleanup.class)
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(
-        name = "activiti.cloud.processing-data.retention-policy",
+        name = "activiti.cloud.processing-data.variables.retention-policy",
         havingValue = "transient",
         matchIfMissing = false
     )
-    public AuditPayloadCleanup auditPayloadCleanup(EntityManager entityManager) {
+    public AuditPayloadBatchWriter auditPayloadBatchWriter(EntityManager entityManager) {
+        return new AuditPayloadBatchWriter(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuditPayloadCleanup.class)
+    @ConditionalOnProperty(
+        name = "activiti.cloud.processing-data.variables.retention-policy",
+        havingValue = "transient",
+        matchIfMissing = false
+    )
+    public AuditPayloadCleanup auditPayloadCleanup(
+        EntityManager entityManager,
+        AuditPayloadBatchWriter payloadBatchWriter,
+        @Value("${activiti.cloud.processing-data.variables.cleanup-batch-size:100}") int pageSize
+    ) {
         return new TransientAuditPayloadCleanup(
             entityManager,
             List.of(
-                new VariablePayloadUpdateStrategy(entityManager),
-                new IntegrationPayloadUpdateStrategy(entityManager),
-                new MessagePayloadUpdateStrategy(entityManager),
-                new SignalPayloadUpdateStrategy(entityManager)
-            )
+                new VariablePayloadUpdateStrategy(payloadBatchWriter),
+                new IntegrationPayloadUpdateStrategy(payloadBatchWriter),
+                new MessagePayloadUpdateStrategy(payloadBatchWriter),
+                new SignalPayloadUpdateStrategy(payloadBatchWriter)
+            ),
+            pageSize
         );
     }
 

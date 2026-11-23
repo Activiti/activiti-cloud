@@ -16,6 +16,11 @@
 package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willAnswer;
+import static org.mockito.Mockito.mock;
 
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManager;
@@ -23,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.BPMNSignal;
@@ -44,6 +51,9 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequeste
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadBatchWriter;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.VariablePayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
 import org.activiti.cloud.services.audit.jpa.converters.MessageReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.MessageSentEventConverter;
@@ -73,6 +83,7 @@ import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEnti
 import org.activiti.cloud.services.audit.jpa.events.VariableAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableCreatedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableDeletedEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.VariablePayloadEvent;
 import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableValue;
 import org.activiti.cloud.services.audit.jpa.streams.config.AuditJPAStreamsAutoConfiguration;
@@ -95,6 +106,7 @@ class TransientPayloadCleanupPersistenceTest {
     private EntityManager entityManager;
     private HikariDataSource dataSource;
     private AuditPayloadCleanup cleanup;
+    private AuditPayloadBatchWriter payloadBatchWriter;
 
     private final APIEventToEntityConverters eventConverters = new APIEventToEntityConverters(
         Set.of(
@@ -135,7 +147,9 @@ class TransientPayloadCleanupPersistenceTest {
     void beginTransaction() {
         entityManager = factory.getObject().createEntityManager();
         entityManager.getTransaction().begin();
-        cleanup = new AuditJPAStreamsAutoConfiguration().auditPayloadCleanup(entityManager);
+        var configuration = new AuditJPAStreamsAutoConfiguration();
+        payloadBatchWriter = configuration.auditPayloadBatchWriter(entityManager);
+        cleanup = configuration.auditPayloadCleanup(entityManager, payloadBatchWriter, 100);
     }
 
     @AfterEach
@@ -162,6 +176,165 @@ class TransientPayloadCleanupPersistenceTest {
     @ValueSource(strings = { "root", "child", "linked" })
     void should_clearOnlyCancelledProcessPayloads(String relationship) {
         verifyOnlyTerminatingProcessPayloadsAreCleared("cancelled", relationship);
+    }
+
+    @Test
+    void should_preservePayloadsForNonTerminalEvents() {
+        var payloads = seed("running", "app");
+        var payload = payloads.getFirst();
+        var running = new ProcessCreatedAuditEventEntity();
+        running.setProcessInstanceId("running");
+        running.setAppName("app");
+
+        cleanup.cleanup(List.of(running));
+        entityManager.clear();
+
+        assertThat(
+            (Object) entityManager
+                .find(VariableCreatedEventEntity.class, payload.getId())
+                .getVariableInstance()
+                .getValue()
+        ).isEqualTo("secret");
+        assertMessageAndSignalPayloadsRetained(payloads);
+    }
+
+    @Test
+    void should_rollbackRedactionWithTransaction() {
+        var payloads = seed("rollback", "app");
+        var payload = payloads.getFirst();
+        entityManager.getTransaction().commit();
+        entityManager.getTransaction().begin();
+        var terminal = new ProcessCompletedEventEntity();
+        terminal.setProcessInstanceId("rollback");
+        terminal.setAppName("app");
+
+        cleanup.cleanup(List.of(terminal));
+        entityManager.getTransaction().rollback();
+        entityManager.clear();
+        entityManager.getTransaction().begin();
+
+        assertThat(
+            (Object) entityManager
+                .find(VariableCreatedEventEntity.class, payload.getId())
+                .getVariableInstance()
+                .getValue()
+        ).isEqualTo("secret");
+        assertMessageAndSignalPayloadsRetained(payloads);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 10, 11, 21 })
+    void should_persistAllPayloadFamiliesAcrossPageBoundaries(int histories) {
+        List<AuditEventEntity> events = IntStream.range(0, histories)
+            .mapToObj(_ -> seed("paged", "app"))
+            .flatMap(List::stream)
+            .toList();
+        var otherProcess = seed("other-paged", "app");
+        var otherApplication = seed("paged", "other-app");
+        var terminal = new ProcessCompletedEventEntity();
+        terminal.setProcessInstanceId("paged");
+        terminal.setAppName("app");
+
+        cleanup.cleanup(List.of(terminal));
+        entityManager.clear();
+
+        for (AuditEventEntity event : events) {
+            var stored = entityManager.find(event.getClass(), event.getId());
+            assertThat(stored.getEventId()).isEqualTo(event.getEventId());
+            assertThat(stored.getTimestamp()).isEqualTo(123L);
+            assertThat(stored.getProcessInstanceId()).isEqualTo("paged");
+            assertThat(stored.getAppName()).isEqualTo("app");
+            if (stored instanceof VariablePayloadEvent payload) {
+                assertThat(payload.isVariablePayloadEmpty()).isTrue();
+            }
+            if (stored instanceof VariableAuditEventEntity variable) {
+                assertThat(variable.getVariableInstance().getName()).isEqualTo("payload");
+                assertThat(variable.getVariableInstance().getProcessInstanceId()).isEqualTo("paged");
+            }
+            if (stored instanceof IntegrationEventEntity integration) {
+                assertThat(integration.getIntegrationContext().getId()).isEqualTo("context-paged");
+            }
+            if (stored instanceof MessageAuditEventEntity message) {
+                assertMessageMetadata(message.getMessage(), "paged");
+            }
+            if (stored instanceof SignalReceivedAuditEventEntity signal) {
+                assertSignalMetadata(signal.getSignal(), "paged");
+            }
+        }
+        for (List<AuditEventEntity> isolated : List.of(otherProcess, otherApplication)) {
+            assertThat(
+                (Object) entityManager
+                    .find(VariableCreatedEventEntity.class, isolated.getFirst().getId())
+                    .getVariableInstance()
+                    .getValue()
+            ).isEqualTo("secret");
+            assertMessageAndSignalPayloadsRetained(isolated);
+        }
+    }
+
+    @Test
+    void should_rollbackEarlierPageWrites_whenLaterBatchFails() {
+        var events = IntStream.range(0, 101)
+            .mapToObj(index -> {
+                var event = new VariableCreatedEventEntity();
+                event.setVariableInstance(
+                    new VariableInstanceImpl<>("payload", "string", "secret", "failed-batch", null)
+                );
+                event.setProcessInstanceId("failed-batch");
+                event.setAppName("app");
+                entityManager.persist(event);
+                return event;
+            })
+            .toList();
+        entityManager.getTransaction().commit();
+        entityManager.getTransaction().begin();
+        var delegate = new VariablePayloadUpdateStrategy(payloadBatchWriter);
+        var failingStrategy = mock(AuditPayloadUpdateStrategy.class);
+        var batches = new AtomicInteger();
+        given(failingStrategy.supports(any())).willReturn(true);
+        willAnswer(invocation -> {
+            if (batches.incrementAndGet() == 2) {
+                throw new IllegalStateException("later batch failed");
+            }
+            delegate.update(invocation.getArgument(0));
+            return null;
+        })
+            .given(failingStrategy)
+            .update(any());
+        var failingCleanup = new TransientAuditPayloadCleanup(entityManager, List.of(failingStrategy), 100);
+        var terminal = new ProcessCompletedEventEntity();
+        terminal.setProcessInstanceId("failed-batch");
+        terminal.setAppName("app");
+
+        assertThatThrownBy(() -> failingCleanup.cleanup(List.of(terminal)))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("later batch failed");
+        assertThat(batches.get()).isEqualTo(2);
+        entityManager.clear();
+        assertThat(
+            (Object) entityManager
+                .find(VariableCreatedEventEntity.class, events.getFirst().getId())
+                .getVariableInstance()
+                .getValue()
+        ).isNull();
+        assertThat(
+            (Object) entityManager
+                .find(VariableCreatedEventEntity.class, events.getLast().getId())
+                .getVariableInstance()
+                .getValue()
+        ).isEqualTo("secret");
+        entityManager.getTransaction().rollback();
+        entityManager.clear();
+        entityManager.getTransaction().begin();
+
+        for (var event : events) {
+            assertThat(
+                (Object) entityManager
+                    .find(VariableCreatedEventEntity.class, event.getId())
+                    .getVariableInstance()
+                    .getValue()
+            ).isEqualTo("secret");
+        }
     }
 
     private void verifyOnlyTerminatingProcessPayloadsAreCleared(String state, String relationship) {
@@ -272,50 +445,6 @@ class TransientPayloadCleanupPersistenceTest {
         assertMessageAndSignalPayloadsRetained(otherApplication);
         assertThat(entityManager.find(terminal.getClass(), terminal.getId())).isNotNull();
         cleanup.cleanup(List.of(terminal));
-    }
-
-    @Test
-    void should_preservePayloadsForNonTerminalEvents() {
-        var payloads = seed("running", "app");
-        var payload = payloads.getFirst();
-        var running = new ProcessCreatedAuditEventEntity();
-        running.setProcessInstanceId("running");
-        running.setAppName("app");
-
-        cleanup.cleanup(List.of(running));
-        entityManager.clear();
-
-        assertThat(
-            (Object) entityManager
-                .find(VariableCreatedEventEntity.class, payload.getId())
-                .getVariableInstance()
-                .getValue()
-        ).isEqualTo("secret");
-        assertMessageAndSignalPayloadsRetained(payloads);
-    }
-
-    @Test
-    void should_rollbackRedactionWithTransaction() {
-        var payloads = seed("rollback", "app");
-        var payload = payloads.getFirst();
-        entityManager.getTransaction().commit();
-        entityManager.getTransaction().begin();
-        var terminal = new ProcessCompletedEventEntity();
-        terminal.setProcessInstanceId("rollback");
-        terminal.setAppName("app");
-
-        cleanup.cleanup(List.of(terminal));
-        entityManager.getTransaction().rollback();
-        entityManager.clear();
-        entityManager.getTransaction().begin();
-
-        assertThat(
-            (Object) entityManager
-                .find(VariableCreatedEventEntity.class, payload.getId())
-                .getVariableInstance()
-                .getValue()
-        ).isEqualTo("secret");
-        assertMessageAndSignalPayloadsRetained(payloads);
     }
 
     private List<AuditEventEntity> seed(String processId, String appName) {

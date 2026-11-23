@@ -15,19 +15,22 @@
  */
 package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload;
 
-import jakarta.persistence.EntityManager;
+import java.util.List;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableAuditEventEntity;
 
 public class VariablePayloadUpdateStrategy implements AuditPayloadUpdateStrategy {
 
-    private final EntityManager entityManager;
+    private static final String QUERY =
+        "update audit_event set variable_instance = ?, variable_previous_value = null where id = ?";
+
+    private final AuditPayloadBatchWriter payloadBatchWriter;
 
     private final VariableJpaJsonConverter converter = new VariableJpaJsonConverter();
 
-    public VariablePayloadUpdateStrategy(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public VariablePayloadUpdateStrategy(AuditPayloadBatchWriter payloadBatchWriter) {
+        this.payloadBatchWriter = payloadBatchWriter;
     }
 
     @Override
@@ -36,21 +39,14 @@ public class VariablePayloadUpdateStrategy implements AuditPayloadUpdateStrategy
     }
 
     @Override
-    public int update(AuditEventEntity event) {
-        var payloadEvent = (VariableAuditEventEntity) event;
-        String payload = converter.convertToDatabaseColumn(payloadEvent.getVariableInstance());
-
-        return entityManager
-            .createNativeQuery(
-                """
-                update audit_event
-                set variable_instance = :payload,
-                    variable_previous_value = null
-                where id = :id
-                """
+    public void update(List<AuditEventEntity> events) {
+        payloadBatchWriter.update(
+            QUERY,
+            events,
+            List.of(
+                event -> converter.convertToDatabaseColumn(((VariableAuditEventEntity) event).getVariableInstance()),
+                AuditEventEntity::getId
             )
-            .setParameter("payload", payload)
-            .setParameter("id", event.getId())
-            .executeUpdate();
+        );
     }
 }

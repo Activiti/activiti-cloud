@@ -111,7 +111,7 @@ public class EventHandlersAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(QueryPayloadCleanup.class)
     @ConditionalOnProperty(
-        name = "activiti.cloud.processing-data.retention-policy",
+        name = "activiti.cloud.processing-data.variables.retention-policy",
         havingValue = "transient",
         matchIfMissing = false
     )
