@@ -84,6 +84,7 @@ public class CircuitBreakerPollerAdvice implements MethodInterceptor {
         return false;
     }
 
+    @SuppressWarnings("java:S1452")
     protected Message<?> afterReceive(Message<?> result) {
         // If the outbox table was empty during a HALF_OPEN probe, reset back to HALF_OPEN or CLOSED
         if (result == null && state.get() == State.HALF_OPEN) {
@@ -98,7 +99,7 @@ public class CircuitBreakerPollerAdvice implements MethodInterceptor {
         state.set(State.CLOSED);
     }
 
-    private void openCircuitIfThresholdReached() throws Throwable {
+    private void openCircuitIfThresholdReached() {
         if (state.get() == State.HALF_OPEN || consecutiveFailures.incrementAndGet() >= failureThreshold) {
             openedAtMillis.set(System.currentTimeMillis());
             state.set(State.OPEN);
