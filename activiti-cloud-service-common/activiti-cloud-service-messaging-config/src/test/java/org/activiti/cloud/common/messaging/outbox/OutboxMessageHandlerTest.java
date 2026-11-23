@@ -30,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.support.MessageBuilder;
@@ -82,7 +81,7 @@ class OutboxMessageHandlerTest {
         when(streamBridge.send(destination, message)).thenReturn(false);
 
         // When / Then
-        assertThatThrownBy(() -> handler.handleMessage(message)).isInstanceOf(MessageDispatchingException.class);
+        assertThatThrownBy(() -> handler.handleMessage(message)).isInstanceOf(OutboxMessageDeliveryException.class);
     }
 
     @Test

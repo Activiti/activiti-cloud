@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
@@ -61,9 +60,9 @@ public class OutboxMessageHandler implements MessageHandler {
             .booleanValue();
 
         if (!sent) {
-            throw new MessageDispatchingException(
+            throw new OutboxMessageDeliveryException(
                 message,
-                "Outbox %s message %s has been dropped".formatted(partitionKey, message)
+                "Outbox %s message has been dropped".formatted(partitionKey)
             );
         }
     }
