@@ -21,7 +21,6 @@ import java.util.Objects;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
-import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +28,19 @@ public class TransientQueryPayloadCleanup implements QueryPayloadCleanup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransientQueryPayloadCleanup.class);
     private static final String PROCESS_INSTANCE_ID = "processInstanceId";
+    public static final String DELETE_VARIABLE_LINK = """
+    delete from task_process_variable
+    where process_variable_id in (select id from process_variable where process_instance_id = :processInstanceId)
+    """;
+    public static final String DELETE_TASK_VARIABLE =
+        "delete from TaskVariable v where v.processInstanceId = :processInstanceId";
+    public static final String DELETE_PROCESS_VARIABLE =
+        "delete from ProcessVariable v where v.processInstanceId = :processInstanceId";
+    public static final String CLEAR_INTEGRATION_CONTEXT = """
+    update integration_context
+    set inbound_variables = '{}', out_bound_variables = '{}'
+    where process_instance_id = :processInstanceId
+    """;
 
     private final EntityManager entityManager;
 
@@ -55,53 +67,45 @@ public class TransientQueryPayloadCleanup implements QueryPayloadCleanup {
         int deletedTaskVariables = getDeletedTaskVariables(processInstanceId);
         int deletedProcessVariables = getDeletedProcessVariables(processInstanceId);
 
-        var integrationContexts = getIntegrationContexts(processInstanceId);
-        integrationContexts.forEach(IntegrationContextEntity::clearVariablePayloads);
-        entityManager.flush();
+        int clearedIntegrationContexts = clearIntegrationVariablePayloads(processInstanceId);
 
         entityManager.clear();
         LOGGER.info(
             "Flushed Query payload cleanup for processInstanceId={}: deletedVariableLinks={}, " +
-                "deletedTaskVariables={}, deletedProcessVariables={}, integrationContextsProcessed={}",
+                "deletedTaskVariables={}, deletedProcessVariables={}, clearedIntegrationContexts={}",
             processInstanceId,
             deletedVariableLinks,
             deletedTaskVariables,
             deletedProcessVariables,
-            integrationContexts.size()
+            clearedIntegrationContexts
         );
     }
 
     private int getDeletedVariableLinks(String processInstanceId) {
         return entityManager
-            .createNativeQuery(
-                "delete from task_process_variable where process_variable_id in " +
-                    "(select id from process_variable where process_instance_id = :processInstanceId)"
-            )
+            .createNativeQuery(DELETE_VARIABLE_LINK)
             .setParameter(PROCESS_INSTANCE_ID, processInstanceId)
             .executeUpdate();
     }
 
     private int getDeletedTaskVariables(String processInstanceId) {
         return entityManager
-            .createQuery("delete from TaskVariable v where v.processInstanceId = :processInstanceId")
+            .createQuery(DELETE_TASK_VARIABLE)
             .setParameter(PROCESS_INSTANCE_ID, processInstanceId)
             .executeUpdate();
     }
 
     private int getDeletedProcessVariables(String processInstanceId) {
         return entityManager
-            .createQuery("delete from ProcessVariable v where v.processInstanceId = :processInstanceId")
+            .createQuery(DELETE_PROCESS_VARIABLE)
             .setParameter(PROCESS_INSTANCE_ID, processInstanceId)
             .executeUpdate();
     }
 
-    private List<IntegrationContextEntity> getIntegrationContexts(String processInstanceId) {
+    private int clearIntegrationVariablePayloads(String processInstanceId) {
         return entityManager
-            .createQuery(
-                "select c from IntegrationContext c where c.processInstanceId = :processInstanceId",
-                IntegrationContextEntity.class
-            )
+            .createNativeQuery(CLEAR_INTEGRATION_CONTEXT)
             .setParameter(PROCESS_INSTANCE_ID, processInstanceId)
-            .getResultList();
+            .executeUpdate();
     }
 }

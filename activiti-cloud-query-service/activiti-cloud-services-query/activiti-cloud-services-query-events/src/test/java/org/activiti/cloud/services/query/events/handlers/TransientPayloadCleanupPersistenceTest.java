@@ -33,6 +33,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.VariableValueJsonConverter;
+import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -73,6 +74,8 @@ class TransientPayloadCleanupPersistenceTest {
                 "hibernate.physical_naming_strategy",
                 PhysicalNamingStrategySnakeCaseImpl.class.getName(),
                 "hibernate.hbm2ddl.halt_on_error",
+                "true",
+                "hibernate.generate_statistics",
                 "true"
             )
         );
@@ -168,6 +171,90 @@ class TransientPayloadCleanupPersistenceTest {
         assertThat(count("TaskVariable", "running")).isEqualTo(1);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "completed", "cancelled" })
+    void should_clearAllIntegrationContexts_withoutLoadingEntities(String state) {
+        seed("target");
+        seed("other");
+        for (int i = 0; i < 110; i++) {
+            var context = new IntegrationContextEntity();
+            context.setId("bulk-" + i);
+            context.setProcessInstanceId("target");
+            context.setInBoundVariables(new HashMap<>(Map.of("input", "secret")));
+            context.setOutBoundVariables(new HashMap<>(Map.of("output", "secret")));
+            context.setErrorMessage("execution error");
+            entityManager.persist(context);
+        }
+        var process = new ProcessInstanceImpl();
+        process.setId("target");
+        CloudRuntimeEvent<?, ?> terminal = state.equals("completed")
+            ? new CloudProcessCompletedEventImpl(process)
+            : new CloudProcessCancelledEventImpl(process);
+        entityManager.flush();
+        entityManager.clear();
+        var statistics = factory.getObject().unwrap(SessionFactory.class).getStatistics();
+        statistics.clear();
+
+        new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(terminal));
+
+        assertThat(statistics.getEntityLoadCount()).isZero();
+        assertThat(
+            entityManager
+                .createNativeQuery(
+                    """
+                    select count(*) from integration_context
+                    where process_instance_id = 'target'
+                      and inbound_variables = '{}' and out_bound_variables = '{}'
+                      and error_message = 'execution error'
+                    """,
+                    Long.class
+                )
+                .getSingleResult()
+        ).isEqualTo(111L);
+        var other = entityManager.find(IntegrationContextEntity.class, "integration-other");
+        assertThat(other.getInBoundVariables()).containsEntry("input", "secret");
+        assertThat(other.getOutBoundVariables()).containsEntry("output", "secret");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "sql-null", "json-null", "empty", "inbound", "outbound" })
+    void should_normalizeIntegrationVariableMaps(String payloadState) {
+        seed("target");
+        String inbound = switch (payloadState) {
+            case "sql-null", "outbound" -> null;
+            case "json-null" -> "null";
+            case "inbound" -> "{\"input\":\"secret\"}";
+            default -> "{}";
+        };
+        String outbound = switch (payloadState) {
+            case "sql-null", "inbound" -> null;
+            case "json-null" -> "null";
+            case "outbound" -> "{\"output\":\"secret\"}";
+            default -> "{}";
+        };
+        entityManager
+            .createNativeQuery(
+                """
+                update integration_context
+                set inbound_variables = :inbound, out_bound_variables = :outbound
+                where id = 'integration-target'
+                """
+            )
+            .setParameter("inbound", inbound)
+            .setParameter("outbound", outbound)
+            .executeUpdate();
+        entityManager.clear();
+        var process = new ProcessInstanceImpl();
+        process.setId("target");
+
+        new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(new CloudProcessCompletedEventImpl(process)));
+
+        var context = entityManager.find(IntegrationContextEntity.class, "integration-target");
+        assertThat(context.getInBoundVariables()).isEmpty();
+        assertThat(context.getOutBoundVariables()).isEmpty();
+        assertThat(context.getErrorMessage()).isEqualTo("execution error");
+    }
+
     @Test
     void should_rollbackPayloadCleanupWithTransaction() {
         seed("rollback");
@@ -182,9 +269,14 @@ class TransientPayloadCleanupPersistenceTest {
         entityManager.getTransaction().begin();
 
         assertThat(count("ProcessVariable", "rollback")).isEqualTo(1);
+        assertThat(count("TaskVariable", "rollback")).isEqualTo(1);
         assertThat(
             entityManager.find(IntegrationContextEntity.class, "integration-rollback").getInBoundVariables()
         ).containsEntry("input", "secret");
+        assertThat(
+            entityManager.find(IntegrationContextEntity.class, "integration-rollback").getOutBoundVariables()
+        ).containsEntry("output", "secret");
+        assertThat(entityManager.find(TaskEntity.class, "task-rollback").getProcessVariables()).hasSize(1);
     }
 
     private long count(String entity, String processId) {
