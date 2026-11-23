@@ -33,6 +33,7 @@ public class OutboxChannelConfigurer implements BiConsumer<OutboxChannelIntercep
 
         if (messageChannel instanceof DirectWithAttributesChannel) {
             // workaround to bypass this.getDispatcher().getHandlerCount() == 1 condition in subscribe method
+            // See https://github.com/spring-cloud/spring-cloud-stream/commit/6fc3b85481f9af8a217740a7518555e85ce2025a#diff-73a587c245940bd82a1326a04669dd892f1dc33ff95b9440bcda507d3d0701cf
             dispatcher.addHandler(outboxLoadBalancingStrategy);
         }
 
