@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -23,7 +25,7 @@ import org.activiti.cloud.services.audit.jpa.events.VariableAuditEventEntity;
 public class VariablePayloadUpdateStrategy implements AuditPayloadUpdateStrategy {
 
     private static final String QUERY =
-        "update audit_event set variable_instance = ?, variable_previous_value = null where id = ?";
+        "update audit_event set variable_instance = ?, variable_previous_value = null, last_variable_cleanup = ? where id = ?";
 
     private final AuditPayloadBatchWriter payloadBatchWriter;
 
@@ -40,11 +42,13 @@ public class VariablePayloadUpdateStrategy implements AuditPayloadUpdateStrategy
 
     @Override
     public void update(List<AuditEventEntity> events) {
+        OffsetDateTime cleanupTime = OffsetDateTime.now(ZoneOffset.UTC);
         payloadBatchWriter.update(
             QUERY,
             events,
             List.of(
                 event -> converter.convertToDatabaseColumn(((VariableAuditEventEntity) event).getVariableInstance()),
+                _ -> cleanupTime,
                 AuditEventEntity::getId
             )
         );
