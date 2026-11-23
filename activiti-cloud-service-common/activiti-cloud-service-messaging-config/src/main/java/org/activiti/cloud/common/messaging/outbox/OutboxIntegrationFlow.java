@@ -47,7 +47,7 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
     private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry<? extends Lock> lockRegistry;
     private final AbstractRequestHandlerAdvice[] outboxMessageHandlerErrorAdvice;
-    private DisposableConcurrentTaskScheduler taskScheduler;
+    private final DisposableConcurrentTaskScheduler taskScheduler;
 
     public OutboxIntegrationFlow(
         String partitionKey,

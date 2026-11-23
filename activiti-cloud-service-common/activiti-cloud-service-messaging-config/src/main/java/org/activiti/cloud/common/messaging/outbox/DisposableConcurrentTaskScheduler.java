@@ -41,7 +41,7 @@ class DisposableConcurrentTaskScheduler extends ConcurrentTaskScheduler implemen
             if (!this.scheduledExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
                 this.scheduledExecutor.shutdownNow();
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             this.scheduledExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
