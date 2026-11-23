@@ -22,9 +22,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 
 public class CircuitBreakerPollerAdvice implements MethodInterceptor {
+
+    private static final Logger log = LoggerFactory.getLogger(CircuitBreakerPollerAdvice.class);
 
     public enum State {
         CLOSED,
@@ -48,24 +52,26 @@ public class CircuitBreakerPollerAdvice implements MethodInterceptor {
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Object target = invocation.getThis();
 
+        log.debug("Invoking poller circuit breaker advice on target: {}", target);
+
         Message<?> result = null;
-        if (beforeReceive(target)) {
+        if (beforeReceive()) {
             try {
                 result = (Message<?>) invocation.proceed();
-                onSuccess(result);
+                closeAndResetCircuit();
             } catch (Throwable error) {
-                onFailure(error);
+                openCircuitIfThresholdReached();
 
                 throw error;
             }
         }
-        return afterReceive(result, target);
+        return afterReceive(result);
     }
 
-    protected boolean beforeReceive(Object source) {
+    protected boolean beforeReceive() {
         State current = state.get();
         if (current == State.CLOSED) {
-            return true; // Proceed with channel.receive()
+            return true; // Proceed with receive
         }
         if (current == State.OPEN) {
             if (System.currentTimeMillis() - openedAtMillis.get() >= openDurationMillis) {
@@ -78,7 +84,7 @@ public class CircuitBreakerPollerAdvice implements MethodInterceptor {
         return false;
     }
 
-    protected Message<?> afterReceive(Message<?> result, Object source) {
+    protected Message<?> afterReceive(Message<?> result) {
         // If the outbox table was empty during a HALF_OPEN probe, reset back to HALF_OPEN or CLOSED
         if (result == null && state.get() == State.HALF_OPEN) {
             state.set(State.CLOSED);
@@ -87,12 +93,12 @@ public class CircuitBreakerPollerAdvice implements MethodInterceptor {
         return result;
     }
 
-    protected void onSuccess(@Nullable Message<?> result) {
+    private void closeAndResetCircuit() {
         consecutiveFailures.set(0);
         state.set(State.CLOSED);
     }
 
-    protected void onFailure(Throwable error) throws Throwable {
+    private void openCircuitIfThresholdReached() throws Throwable {
         if (state.get() == State.HALF_OPEN || consecutiveFailures.incrementAndGet() >= failureThreshold) {
             openedAtMillis.set(System.currentTimeMillis());
             state.set(State.OPEN);

@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.aopalliance.intercept.MethodInvocation;
+import org.awaitility.Awaitility;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
@@ -102,7 +103,7 @@ class CircuitBreakerPollerAdviceTest {
         // Trip circuit to OPEN
         assertThatThrownBy(() -> advice.invoke(StubMethodInvocation.throwing(boom))).isSameAs(boom);
 
-        Thread.sleep(70);
+        sleep(Duration.ofMillis(70));
 
         // First call after openDuration acts as HALF_OPEN probe and closes the circuit
         var probeMsg = new GenericMessage<>("recovered");
@@ -120,7 +121,7 @@ class CircuitBreakerPollerAdviceTest {
 
         assertThatThrownBy(() -> advice.invoke(StubMethodInvocation.throwing(boom))).isSameAs(boom);
 
-        Thread.sleep(70);
+        sleep(Duration.ofMillis(70));
 
         // Empty poll (null result) during HALF_OPEN probe resets circuit to CLOSED
         var emptyProbe = StubMethodInvocation.returning(null);
@@ -142,7 +143,7 @@ class CircuitBreakerPollerAdviceTest {
             assertThatThrownBy(() -> advice.invoke(StubMethodInvocation.throwing(boom))).isSameAs(boom);
         }
 
-        Thread.sleep(70);
+        sleep(Duration.ofMillis(70));
 
         // Single failure during HALF_OPEN immediately trips back to OPEN
         assertThatThrownBy(() -> advice.invoke(StubMethodInvocation.throwing(boom))).isSameAs(boom);
@@ -160,7 +161,7 @@ class CircuitBreakerPollerAdviceTest {
 
         assertThatThrownBy(() -> advice.invoke(StubMethodInvocation.throwing(boom))).isSameAs(boom);
 
-        Thread.sleep(70);
+        sleep(Duration.ofMillis(70));
 
         // Simulate an in-flight probe inside proceed() attempting a concurrent call
         var concurrentCallBlocked = new AtomicBoolean(false);
@@ -235,5 +236,12 @@ class CircuitBreakerPollerAdviceTest {
         public AccessibleObject getStaticPart() {
             throw new UnsupportedOperationException("Not needed for test");
         }
+    }
+
+    private void sleep(Duration duration) {
+        Awaitility.await()
+            .pollInSameThread()
+            .pollDelay(duration)
+            .until(() -> true);
     }
 }
