@@ -26,7 +26,7 @@ import org.springframework.messaging.Message;
 
 public class CircuitBreakerPollerAdvice implements MethodInterceptor {
 
-    private enum State {
+    public enum State {
         CLOSED,
         OPEN,
         HALF_OPEN,
@@ -62,7 +62,7 @@ public class CircuitBreakerPollerAdvice implements MethodInterceptor {
         return afterReceive(result, target);
     }
 
-    public boolean beforeReceive(Object source) {
+    protected boolean beforeReceive(Object source) {
         State current = state.get();
         if (current == State.CLOSED) {
             return true; // Proceed with channel.receive()
@@ -78,7 +78,7 @@ public class CircuitBreakerPollerAdvice implements MethodInterceptor {
         return false;
     }
 
-    public Message<?> afterReceive(Message<?> result, Object source) {
+    protected Message<?> afterReceive(Message<?> result, Object source) {
         // If the outbox table was empty during a HALF_OPEN probe, reset back to HALF_OPEN or CLOSED
         if (result == null && state.get() == State.HALF_OPEN) {
             state.set(State.CLOSED);
@@ -87,12 +87,12 @@ public class CircuitBreakerPollerAdvice implements MethodInterceptor {
         return result;
     }
 
-    public void onSuccess(@Nullable Message<?> result) {
+    protected void onSuccess(@Nullable Message<?> result) {
         consecutiveFailures.set(0);
         state.set(State.CLOSED);
     }
 
-    public void onFailure(Throwable error) throws Throwable {
+    protected void onFailure(Throwable error) throws Throwable {
         if (state.get() == State.HALF_OPEN || consecutiveFailures.incrementAndGet() >= failureThreshold) {
             openedAtMillis.set(System.currentTimeMillis());
             state.set(State.OPEN);
