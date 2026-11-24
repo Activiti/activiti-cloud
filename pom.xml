@@ -228,7 +228,7 @@
     <org-json.version>20260814</org-json.version>
 
     <!-- dependencies versions -->
-    <hibernate.version>7.4.15.Final</hibernate.version>
+    <hibernate.version>7.4.17.Final</hibernate.version>
     <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
     <byte-buddy.version>1.18.17</byte-buddy.version>
     <!-- End Temporary Dependency -->
