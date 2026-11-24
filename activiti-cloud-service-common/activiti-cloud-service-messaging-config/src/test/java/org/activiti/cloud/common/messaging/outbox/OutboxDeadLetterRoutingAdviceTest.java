@@ -30,6 +30,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.core.Ordered;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
@@ -53,6 +54,13 @@ class OutboxDeadLetterRoutingAdviceTest {
         ProxyFactory proxyFactory = new ProxyFactory(delegate);
         proxyFactory.addAdvice(advice);
         return (MessageHandler) proxyFactory.getProxy();
+    }
+
+    @Test
+    void shouldImplement_OrderedWithHighestPrecedence() {
+        assertThat(advice).isInstanceOfSatisfying(Ordered.class, ordered ->
+            assertThat(ordered.getOrder()).isEqualTo(Ordered.HIGHEST_PRECEDENCE)
+        );
     }
 
     @Test

@@ -19,13 +19,14 @@ package org.activiti.cloud.common.messaging.outbox;
 import java.util.Optional;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.core.Ordered;
 import org.springframework.integration.handler.advice.AbstractRequestHandlerAdvice;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.ExceptionTypeFilter;
 
-public class OutboxDeadLetterRoutingAdvice extends AbstractRequestHandlerAdvice {
+public class OutboxDeadLetterRoutingAdvice extends AbstractRequestHandlerAdvice implements Ordered {
 
     private final ExceptionTypeFilter outboxExceptionsTypeFilter;
     private final MessageChannel deadLetterChannel;
@@ -76,5 +77,10 @@ public class OutboxDeadLetterRoutingAdvice extends AbstractRequestHandlerAdvice 
             return false;
         }
         return outboxExceptionsTypeFilter.match(throwable, true);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
