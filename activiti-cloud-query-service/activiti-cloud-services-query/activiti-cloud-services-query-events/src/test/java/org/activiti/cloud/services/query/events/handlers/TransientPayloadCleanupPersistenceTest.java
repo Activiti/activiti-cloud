@@ -18,6 +18,9 @@ package org.activiti.cloud.services.query.events.handlers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +134,10 @@ class TransientPayloadCleanupPersistenceTest {
             : new CloudProcessCancelledEventImpl(process);
         var cleanup = new TransientQueryPayloadCleanup(entityManager);
 
+        Instant started = Instant.now();
         cleanup.cleanup(List.of(terminal, terminal));
+        Instant finished = Instant.now();
+        assertCleanupTimestamp("target", started, finished);
 
         cleanup.cleanup(List.of(terminal));
 
@@ -151,6 +157,7 @@ class TransientPayloadCleanupPersistenceTest {
         assertThat(context.getErrorMessage()).isEqualTo("execution error");
         assertThat(entityManager.find(TaskEntity.class, "task-target")).isNotNull();
         for (String other : List.of("parent", "child", "linked")) {
+            assertThat(entityManager.find(ProcessInstanceEntity.class, other).getLastVariableCleanup()).isNull();
             assertThat(count("ProcessVariable", other)).isEqualTo(1);
             assertThat(count("TaskVariable", other)).isEqualTo(1);
             assertThat(
@@ -167,6 +174,7 @@ class TransientPayloadCleanupPersistenceTest {
 
         new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(new CloudProcessStartedEventImpl(process)));
 
+        assertThat(entityManager.find(ProcessInstanceEntity.class, "running").getLastVariableCleanup()).isNull();
         assertThat(count("ProcessVariable", "running")).isEqualTo(1);
         assertThat(count("TaskVariable", "running")).isEqualTo(1);
     }
@@ -198,6 +206,11 @@ class TransientPayloadCleanupPersistenceTest {
         new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(terminal));
 
         assertThat(statistics.getEntityLoadCount()).isZero();
+        assertThat(
+            entityManager
+                .createNativeQuery("select last_variable_cleanup from process_instance where id = 'target'")
+                .getSingleResult()
+        ).isNotNull();
         assertThat(
             entityManager
                 .createNativeQuery(
@@ -255,28 +268,108 @@ class TransientPayloadCleanupPersistenceTest {
         assertThat(context.getErrorMessage()).isEqualTo("execution error");
     }
 
-    @Test
-    void should_rollbackPayloadCleanupWithTransaction() {
-        seed("rollback");
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void should_rollbackPayloadCleanupAndTimestampWithTransaction(boolean cleanedPreviously) {
+        String processId = "rollback-" + cleanedPreviously;
+        seed(processId);
+        Instant previous = cleanedPreviously ? Instant.parse("2000-01-01T00:00:00Z") : null;
+        if (previous != null) {
+            entityManager
+                .createNativeQuery("update process_instance set last_variable_cleanup = :previous where id = :id")
+                .setParameter("previous", previous.atOffset(ZoneOffset.UTC))
+                .setParameter("id", processId)
+                .executeUpdate();
+        }
         entityManager.getTransaction().commit();
         entityManager.getTransaction().begin();
         var process = new ProcessInstanceImpl();
-        process.setId("rollback");
+        process.setId(processId);
 
+        Instant started = Instant.now();
         new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(new CloudProcessCompletedEventImpl(process)));
+        Instant finished = Instant.now();
+        assertCleanupTimestamp(processId, started, finished);
+        assertThat(count("ProcessVariable", processId)).isZero();
+        assertThat(count("TaskVariable", processId)).isZero();
         entityManager.getTransaction().rollback();
         entityManager.clear();
         entityManager.getTransaction().begin();
 
-        assertThat(count("ProcessVariable", "rollback")).isEqualTo(1);
-        assertThat(count("TaskVariable", "rollback")).isEqualTo(1);
+        assertThat(entityManager.find(ProcessInstanceEntity.class, processId).getLastVariableCleanup()).isEqualTo(
+            previous
+        );
+        assertThat(count("ProcessVariable", processId)).isEqualTo(1);
+        assertThat(count("TaskVariable", processId)).isEqualTo(1);
         assertThat(
-            entityManager.find(IntegrationContextEntity.class, "integration-rollback").getInBoundVariables()
+            entityManager.find(IntegrationContextEntity.class, "integration-" + processId).getInBoundVariables()
         ).containsEntry("input", "secret");
         assertThat(
-            entityManager.find(IntegrationContextEntity.class, "integration-rollback").getOutBoundVariables()
+            entityManager.find(IntegrationContextEntity.class, "integration-" + processId).getOutBoundVariables()
         ).containsEntry("output", "secret");
-        assertThat(entityManager.find(TaskEntity.class, "task-rollback").getProcessVariables()).hasSize(1);
+        assertThat(entityManager.find(TaskEntity.class, "task-" + processId).getProcessVariables()).hasSize(1);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "completed", "cancelled" })
+    void should_recordCleanupTimestamp_whenProcessHasNoPayloads(String state) {
+        var process = new ProcessInstanceEntity();
+        process.setId("empty");
+        entityManager.persist(process);
+        entityManager.flush();
+        assertThat(process.getLastVariableCleanup()).isNull();
+        var terminal = terminalEvent("empty", state);
+
+        Instant started = Instant.now();
+        new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(terminal));
+        Instant finished = Instant.now();
+
+        assertCleanupTimestamp("empty", started, finished);
+        assertThat(count("ProcessVariable", "empty")).isZero();
+        assertThat(count("TaskVariable", "empty")).isZero();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "completed", "cancelled" })
+    void should_refreshCleanupTimestamp_whenCleanupRunsAgain(String state) {
+        seed("repeated");
+        var terminal = terminalEvent("repeated", state);
+        var cleanup = new TransientQueryPayloadCleanup(entityManager);
+        cleanup.cleanup(List.of(terminal));
+        Instant previous = Instant.parse("2000-01-01T00:00:00Z");
+        entityManager
+            .createNativeQuery("update process_instance set last_variable_cleanup = :previous where id = 'repeated'")
+            .setParameter("previous", previous.atOffset(ZoneOffset.UTC))
+            .executeUpdate();
+        entityManager.clear();
+
+        Instant started = Instant.now();
+        cleanup.cleanup(List.of(terminal));
+        Instant finished = Instant.now();
+
+        assertCleanupTimestamp("repeated", started, finished);
+        assertThat(entityManager.find(ProcessInstanceEntity.class, "repeated").getLastVariableCleanup()).isAfter(
+            previous
+        );
+    }
+
+    private CloudRuntimeEvent<?, ?> terminalEvent(String processId, String state) {
+        var process = new ProcessInstanceImpl();
+        process.setId(processId);
+        return state.equals("completed")
+            ? new CloudProcessCompletedEventImpl(process)
+            : new CloudProcessCancelledEventImpl(process);
+    }
+
+    private void assertCleanupTimestamp(String processId, Instant started, Instant finished) {
+        var process = entityManager.find(ProcessInstanceEntity.class, processId);
+        assertThat(process.getLastVariableCleanup()).isBetween(started.minusMillis(1), finished.plusMillis(1));
+        var stored = (OffsetDateTime) entityManager
+            .createNativeQuery("select last_variable_cleanup from process_instance where id = :id")
+            .setParameter("id", processId)
+            .getSingleResult();
+        assertThat(stored.getOffset()).isEqualTo(ZoneOffset.UTC);
+        assertThat(stored.toInstant()).isEqualTo(process.getLastVariableCleanup());
     }
 
     private long count(String entity, String processId) {

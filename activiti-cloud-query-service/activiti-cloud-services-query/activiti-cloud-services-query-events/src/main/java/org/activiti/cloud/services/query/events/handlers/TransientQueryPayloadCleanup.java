@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -40,6 +42,12 @@ public class TransientQueryPayloadCleanup implements QueryPayloadCleanup {
     update integration_context
     set inbound_variables = '{}', out_bound_variables = '{}'
     where process_instance_id = :processInstanceId
+    """;
+
+    public static final String UPDATE_LAST_VARIABLE_CLEANUP = """
+    update process_instance
+    set last_variable_cleanup = :cleanupTime
+    where id = :processInstanceId
     """;
 
     private final EntityManager entityManager;
@@ -68,6 +76,12 @@ public class TransientQueryPayloadCleanup implements QueryPayloadCleanup {
         int deletedProcessVariables = getDeletedProcessVariables(processInstanceId);
 
         int clearedIntegrationContexts = clearIntegrationVariablePayloads(processInstanceId);
+
+        entityManager
+            .createNativeQuery(UPDATE_LAST_VARIABLE_CLEANUP)
+            .setParameter("cleanupTime", OffsetDateTime.now(ZoneOffset.UTC))
+            .setParameter(PROCESS_INSTANCE_ID, processInstanceId)
+            .executeUpdate();
 
         entityManager.clear();
         LOGGER.info(

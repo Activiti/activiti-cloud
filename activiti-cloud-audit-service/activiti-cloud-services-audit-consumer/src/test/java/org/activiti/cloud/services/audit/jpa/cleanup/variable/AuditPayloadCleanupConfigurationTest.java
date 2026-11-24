@@ -123,9 +123,7 @@ class AuditPayloadCleanupConfigurationTest {
                 then(replacement)
                     .should()
                     .update(
-                        eq(
-                            "update audit_event set variable_instance = ?, variable_previous_value = null, last_variable_cleanup = ? where id = ?"
-                        ),
+                        eq("update audit_event set variable_instance = ?, variable_previous_value = null where id = ?"),
                         eq(List.of(event)),
                         anyList()
                     );

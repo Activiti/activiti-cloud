@@ -24,10 +24,6 @@ import static org.mockito.Mockito.mock;
 
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManager;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -197,9 +193,8 @@ class TransientPayloadCleanupPersistenceTest {
             terminal.setAppName(appName);
             entityManager.persist(terminal);
 
-            Instant started = Instant.now();
             cleanup.cleanup(List.of(terminal));
-            Instant finished = Instant.now();
+
             entityManager.clear();
 
             for (AuditEventEntity event : payloads) {
@@ -210,9 +205,6 @@ class TransientPayloadCleanupPersistenceTest {
                 assertThat(stored.getTimestamp()).isEqualTo(123L);
                 if (stored instanceof VariablePayloadEvent payload) {
                     assertThat(payload.isVariablePayloadEmpty()).isTrue();
-                    assertCleanupTimestamp(stored, started, finished);
-                } else {
-                    assertThat(stored.getLastVariableCleanup()).isNull();
                 }
             }
         }
@@ -236,7 +228,6 @@ class TransientPayloadCleanupPersistenceTest {
                 .getValue()
         ).isEqualTo("secret");
         assertMessageAndSignalPayloadsRetained(payloads);
-        assertNoCleanupTimestamps(payloads);
     }
 
     @Test
@@ -261,7 +252,6 @@ class TransientPayloadCleanupPersistenceTest {
                 .getValue()
         ).isEqualTo("secret");
         assertMessageAndSignalPayloadsRetained(payloads);
-        assertNoCleanupTimestamps(payloads);
     }
 
     @ParameterizedTest
@@ -277,9 +267,8 @@ class TransientPayloadCleanupPersistenceTest {
         terminal.setProcessInstanceId("paged");
         terminal.setAppName("app");
 
-        Instant started = Instant.now();
         cleanup.cleanup(List.of(terminal));
-        Instant finished = Instant.now();
+
         entityManager.clear();
 
         for (AuditEventEntity event : events) {
@@ -290,9 +279,6 @@ class TransientPayloadCleanupPersistenceTest {
             assertThat(stored.getAppName()).isEqualTo("app");
             if (stored instanceof VariablePayloadEvent payload) {
                 assertThat(payload.isVariablePayloadEmpty()).isTrue();
-                assertCleanupTimestamp(stored, started, finished);
-            } else {
-                assertThat(stored.getLastVariableCleanup()).isNull();
             }
             if (stored instanceof VariableAuditEventEntity variable) {
                 assertThat(variable.getVariableInstance().getName()).isEqualTo("payload");
@@ -316,7 +302,6 @@ class TransientPayloadCleanupPersistenceTest {
                     .getValue()
             ).isEqualTo("secret");
             assertMessageAndSignalPayloadsRetained(isolated);
-            assertNoCleanupTimestamps(isolated);
         }
     }
 
@@ -371,12 +356,6 @@ class TransientPayloadCleanupPersistenceTest {
                 .getVariableInstance()
                 .getValue()
         ).isEqualTo("secret");
-        assertThat(
-            entityManager.find(VariableCreatedEventEntity.class, events.getFirst().getId()).getLastVariableCleanup()
-        ).isNotNull();
-        assertThat(
-            entityManager.find(VariableCreatedEventEntity.class, events.getLast().getId()).getLastVariableCleanup()
-        ).isNull();
         entityManager.getTransaction().rollback();
         entityManager.clear();
         entityManager.getTransaction().begin();
@@ -389,20 +368,11 @@ class TransientPayloadCleanupPersistenceTest {
                     .getValue()
             ).isEqualTo("secret");
         }
-        assertNoCleanupTimestamps(events);
-    }
-
-    @Test
-    void should_leaveCleanupTimestampNullForNewEvents() {
-        var events = seed("not-cleaned", "app");
-        entityManager.clear();
-
-        assertNoCleanupTimestamps(events);
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "variable", "integration", "message", "signal" })
-    void should_refreshTimestampWhenPayloadIsCleanedAgain(String family) {
+    void should_redactRestoredPayloadWithTransaction(String family) {
         String processId = "refreshed-" + family;
         var events = seed(processId, "app");
         AuditEventEntity event = switch (family) {
@@ -443,53 +413,27 @@ class TransientPayloadCleanupPersistenceTest {
         terminal.setProcessInstanceId(processId);
         terminal.setAppName("app");
         cleanup.cleanup(List.of(terminal));
-        assertThat(entityManager.find(event.getClass(), event.getId()).getLastVariableCleanup()).isNotNull();
-        Instant previous = Instant.parse("2000-01-01T00:00:00Z");
         entityManager
-            .createNativeQuery(
-                "update audit_event set " + column + " = :payload, last_variable_cleanup = :previous where id = :id"
-            )
+            .createNativeQuery("update audit_event set " + column + " = :payload where id = :id")
             .setParameter("payload", original)
-            .setParameter("previous", previous.atOffset(ZoneOffset.UTC))
             .setParameter("id", event.getId())
             .executeUpdate();
         entityManager.clear();
-        assertThat(entityManager.find(event.getClass(), event.getId()).getLastVariableCleanup()).isEqualTo(previous);
         entityManager.getTransaction().commit();
         entityManager.getTransaction().begin();
 
-        Instant started = Instant.now();
         cleanup.cleanup(List.of(terminal));
-        Instant finished = Instant.now();
+
         entityManager.clear();
 
         var stored = entityManager.find(event.getClass(), event.getId());
-        assertCleanupTimestamp(stored, started, finished);
-        assertThat(stored.getLastVariableCleanup()).isAfter(previous);
         assertThat(((VariablePayloadEvent) stored).isVariablePayloadEmpty()).isTrue();
         entityManager.getTransaction().rollback();
         entityManager.clear();
         entityManager.getTransaction().begin();
 
         var restored = entityManager.find(event.getClass(), event.getId());
-        assertThat(restored.getLastVariableCleanup()).isEqualTo(previous);
         assertThat(((VariablePayloadEvent) restored).isVariablePayloadEmpty()).isFalse();
-    }
-
-    private void assertCleanupTimestamp(AuditEventEntity event, Instant started, Instant finished) {
-        assertThat(event.getLastVariableCleanup()).isBetween(started.minusMillis(1), finished.plusMillis(1));
-        var stored = (OffsetDateTime) entityManager
-            .createNativeQuery("select last_variable_cleanup from audit_event where id = :id")
-            .setParameter("id", event.getId())
-            .getSingleResult();
-        assertThat(stored.getOffset()).isEqualTo(ZoneOffset.UTC);
-        assertThat(stored.toInstant()).isEqualTo(event.getLastVariableCleanup());
-    }
-
-    private void assertNoCleanupTimestamps(List<? extends AuditEventEntity> events) {
-        for (AuditEventEntity event : events) {
-            assertThat(entityManager.find(event.getClass(), event.getId()).getLastVariableCleanup()).isNull();
-        }
     }
 
     private void verifyOnlyTerminatingProcessPayloadsAreCleared(String state, String relationship) {
@@ -509,10 +453,8 @@ class TransientPayloadCleanupPersistenceTest {
         terminal.setAppName("app");
         entityManager.persist(terminal);
 
-        Instant started = Instant.now();
         cleanup.cleanup(List.of(terminal, terminal));
-        Instant finished = Instant.now();
-        var cleanupTimes = new HashMap<Long, Instant>();
+
         entityManager.flush();
         entityManager.clear();
 
@@ -520,12 +462,6 @@ class TransientPayloadCleanupPersistenceTest {
             var stored = entityManager.find(event.getClass(), event.getId());
             assertThat(stored.getTimestamp()).isEqualTo(123L);
             assertThat(stored.getProcessInstanceId()).isEqualTo("target");
-            cleanupTimes.put(stored.getId(), stored.getLastVariableCleanup());
-            if (stored instanceof VariablePayloadEvent) {
-                assertCleanupTimestamp(stored, started, finished);
-            } else {
-                assertThat(stored.getLastVariableCleanup()).isNull();
-            }
             if (stored instanceof VariableAuditEventEntity variable) {
                 var instance = variable.getVariableInstance();
                 assertThat(instance).isNotNull();
@@ -607,15 +543,14 @@ class TransientPayloadCleanupPersistenceTest {
         }
         assertMessageAndSignalPayloadsRetained(otherProcess);
         assertMessageAndSignalPayloadsRetained(otherApplication);
-        assertNoCleanupTimestamps(otherProcess);
-        assertNoCleanupTimestamps(otherApplication);
-        assertThat(entityManager.find(terminal.getClass(), terminal.getId()).getLastVariableCleanup()).isNull();
+
         cleanup.cleanup(List.of(terminal));
         entityManager.clear();
         for (AuditEventEntity event : payloads) {
-            assertThat(entityManager.find(event.getClass(), event.getId()).getLastVariableCleanup()).isEqualTo(
-                cleanupTimes.get(event.getId())
-            );
+            var stored = entityManager.find(event.getClass(), event.getId());
+            if (stored instanceof VariablePayloadEvent payload) {
+                assertThat(payload.isVariablePayloadEmpty()).isTrue();
+            }
         }
     }
 

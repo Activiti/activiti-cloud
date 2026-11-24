@@ -1386,4 +1386,12 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query" id="alter56-schema" dbms="postgresql,oracle,h2">
+    <addColumn tableName="process_instance">
+      <column name="last_variable_cleanup" type="TIMESTAMP(6) WITH TIME ZONE"/>
+    </addColumn>
+    <rollback>
+      <dropColumn tableName="process_instance" columnName="last_variable_cleanup"/>
+    </rollback>
+  </changeSet>
 </databaseChangeLog>

@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +23,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.SequenceGenerator;
-import java.time.Instant;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.hibernate.annotations.Immutable;
@@ -42,9 +40,6 @@ public abstract class AuditEventEntity {
 
     private String eventId;
     private Long timestamp;
-
-    @Column(insertable = false, updatable = false)
-    private Instant lastVariableCleanup;
 
     private String eventType;
 
@@ -100,10 +95,6 @@ public abstract class AuditEventEntity {
 
     public Long getTimestamp() {
         return timestamp;
-    }
-
-    public Instant getLastVariableCleanup() {
-        return lastVariableCleanup;
     }
 
     public String getEventType() {
