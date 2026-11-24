@@ -16,6 +16,7 @@
 package org.activiti.services.connectors.channel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -37,6 +38,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.BpmnError;
@@ -251,6 +253,42 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         assertThat(compositeCommand.getCommands()).hasSize(2);
         assertThat(compositeCommand.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
+    }
+
+    @Test
+    public void should_rethrowOptimisticLockingException_when_propagatingCloudBpmnErrorFails() {
+        //given
+        IntegrationError integrationErrorEvent = givenCloudBpmnErrorForWaitingExecution();
+        ActivitiOptimisticLockingException lockingFailure = new ActivitiOptimisticLockingException("concurrent update");
+        when(managementService.executeCommand(any())).thenThrow(lockingFailure);
+
+        //when
+        assertThatThrownBy(() -> handler.receive(integrationErrorEvent)).isSameAs(lockingFailure);
+
+        //then the fallback that deletes the integration context is not executed
+        verify(managementService).executeCommand(commandArgumentCaptor.capture());
+        assertThat(commandArgumentCaptor.getValue().getCommands()).anyMatch(
+            PropagateCloudBpmnErrorCmd.class::isInstance
+        );
+    }
+
+    private IntegrationError givenCloudBpmnErrorForWaitingExecution() {
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(
+            integrationContextEntity
+        );
+
+        ExecutionEntity executionEntity = mock(ExecutionEntity.class);
+        given(executionEntity.getActivityId()).willReturn(CLIENT_ID);
+
+        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list()).thenReturn(
+            Collections.singletonList(executionEntity)
+        );
+
+        return new IntegrationErrorImpl(
+            new IntegrationRequestImpl(buildIntegrationContext()),
+            new CloudBpmnError("Test Error")
+        );
     }
 
     @Test

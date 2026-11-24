@@ -22,15 +22,22 @@ import static org.activiti.api.process.model.events.IntegrationEvent.Integration
 import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED;
 import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED;
 import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.services.connectors.channel.IntegrationErrorCommands.propagatesCloudBpmnError;
 import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER;
 import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.api.model.shared.event.RuntimeEvent;
@@ -54,6 +61,10 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.engine.ActivitiOptimisticLockingException;
+import org.activiti.engine.ManagementService;
+import org.activiti.engine.impl.interceptor.Command;
+import org.activiti.services.connectors.channel.IntegrationErrorCommands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +80,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @ActiveProfiles(ConnectorAuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -123,6 +135,9 @@ public class ConnectorAuditProducerIT {
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
+
+    @MockitoSpyBean
+    private ManagementService managementService;
 
     @Value("integrationResult_${spring.application.name}")
     private String integrationResultDestination;
@@ -464,6 +479,38 @@ public class ConnectorAuditProducerIT {
     }
 
     @Test
+    void shouldRetryCloudBpmnErrorPropagation_when_optimisticLockingFailureOccurs() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcessByKey(
+            "cloudBpmnErrorCloudConnectorProcess",
+            null,
+            null
+        );
+        List<CloudIntegrationRequestedEvent> integrationRequests = awaitIntegrationRequested(processInstance);
+        failFirstPropagationWithOptimisticLockingException();
+
+        //when
+        sendIntegrationErrorFor(integrationRequests);
+
+        //then the propagation is retried, the error reaches the boundary event and the process continues
+        await().untilAsserted(() -> {
+            List<CloudBPMNErrorReceivedEvent> errorEvents = getEventsByType(
+                getProcessInstanceEvents(processInstance),
+                ERROR_RECEIVED
+            );
+            assertThat(errorEvents)
+                .extracting(event -> event.getEntity().getErrorCode())
+                .containsExactly("CLOUD_BPMN_ERROR");
+        });
+        verify(managementService, atLeast(2)).executeCommand(
+            argThat(IntegrationErrorCommands::propagatesCloudBpmnError)
+        );
+        assertThat(processInstanceRestTemplate.getTasks(processInstance).getBody().getContent())
+            .extracting(CloudTask::getName)
+            .containsExactly("Correct Business Error");
+    }
+
+    @Test
     public void shouldProduceIntegrationCloudBpmnErrorEventsForCloudBpmnTerminateEndEventProcess() {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
@@ -752,5 +799,30 @@ public class ConnectorAuditProducerIT {
             .filter(event -> event.getEventType() == eventType)
             .map(it -> (T) it)
             .collect(Collectors.toList());
+    }
+
+    private List<CloudIntegrationRequestedEvent> awaitIntegrationRequested(
+        ResponseEntity<CloudProcessInstance> processInstance
+    ) {
+        return await().until(
+            () -> this.getEventsByType(getProcessInstanceEvents(processInstance), INTEGRATION_REQUESTED),
+            events -> !events.isEmpty()
+        );
+    }
+
+    private void failFirstPropagationWithOptimisticLockingException() {
+        AtomicBoolean injected = new AtomicBoolean();
+        doAnswer(invocation -> {
+            Command<?> command = invocation.getArgument(0);
+            if (propagatesCloudBpmnError(command) && injected.compareAndSet(false, true)) {
+                return managementService.executeCommand(commandContext -> {
+                    command.execute(commandContext);
+                    throw new ActivitiOptimisticLockingException("Simulated concurrent update of the execution");
+                });
+            }
+            return invocation.callRealMethod();
+        })
+            .when(managementService)
+            .executeCommand(any());
     }
 }

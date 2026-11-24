@@ -108,8 +108,16 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
                             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
                             return;
+                        } catch (ActivitiOptimisticLockingException lockingFailure) {
+                            // Let @Retryable retry with fresh state.
+                            throw lockingFailure;
                         } catch (Throwable cause) {
-                            LOGGER.info("Error propagating CloudBpmnError: {}", cause.getMessage());
+                            LOGGER.warn(
+                                "Error propagating CloudBpmnError for execution id `{}`, flow node id `{}`",
+                                execution.getId(),
+                                clientId,
+                                cause
+                            );
                             // cleaned the commands list from PropagateCloudBpmnErrorCmd and AggregateIntegrationErrorReceivedClosingEventCmd
                             commands = restoreCommandList(commands);
                         }
