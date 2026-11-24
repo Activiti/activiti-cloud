@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.aopalliance.aop.Advice;
 import org.junit.jupiter.api.BeforeEach;
@@ -131,11 +132,9 @@ class OutboxAutoConfigurationIT {
     @Test
     void outboxProperties() {
         assertThat(outboxProperties.isEnabled()).isTrue();
-        assertThat(outboxProperties.getRetryableExceptions())
-            .containsEntry(DestinationResolutionException.class, false)
-            .containsEntry(OutboxMessageDeliveryException.class, true)
-            .containsEntry(MessageTimeoutException.class, true)
-            .containsEntry(AmqpException.class, true);
+        assertThat(outboxProperties.getRetryableExceptions()).containsOnly(
+            Map.entry(DestinationResolutionException.class, false)
+        );
         assertThat(outboxProperties.getCircuitBreakerOpenPeriod()).isEqualTo(Duration.ofSeconds(1));
         assertThat(outboxProperties.getCircuitBreakerThreshold()).isEqualTo(3);
         assertThat(outboxProperties.getPollerActivePeriod()).isEqualTo(Duration.ofMillis(1));
