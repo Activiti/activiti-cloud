@@ -68,7 +68,12 @@ public class TransientQueryPayloadCleanup implements QueryPayloadCleanup {
     }
 
     private void cleanProcess(String processInstanceId) {
-        LOGGER.debug("Starting Query payload cleanup for processInstanceId={}", processInstanceId);
+        long startTime = System.currentTimeMillis();
+        LOGGER.info(
+            "Starting Query payload cleanup for processInstanceId={} startTime={}",
+            processInstanceId,
+            startTime
+        );
         entityManager.flush();
 
         int deletedVariableLinks = getDeletedVariableLinks(processInstanceId);
@@ -84,14 +89,19 @@ public class TransientQueryPayloadCleanup implements QueryPayloadCleanup {
             .executeUpdate();
 
         entityManager.clear();
+        long endTime = System.currentTimeMillis();
         LOGGER.info(
             "Flushed Query payload cleanup for processInstanceId={}: deletedVariableLinks={}, " +
-                "deletedTaskVariables={}, deletedProcessVariables={}, clearedIntegrationContexts={}",
+                "deletedTaskVariables={}, deletedProcessVariables={}, clearedIntegrationContexts={}, " +
+                "startTime={}, endTime={}, elapsedMs={}",
             processInstanceId,
             deletedVariableLinks,
             deletedTaskVariables,
             deletedProcessVariables,
-            clearedIntegrationContexts
+            clearedIntegrationContexts,
+            startTime,
+            endTime,
+            endTime - startTime
         );
     }
 

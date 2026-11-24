@@ -69,7 +69,13 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
     }
 
     private void cleanProcess(String processInstanceId, String appName) {
-        LOGGER.debug("Starting Audit payload cleanup for processInstanceId={} appName={}", processInstanceId, appName);
+        long startTime = System.currentTimeMillis();
+        LOGGER.info(
+            "Starting Audit payload cleanup for processInstanceId={} appName={} startTime={}",
+            processInstanceId,
+            appName,
+            startTime
+        );
         var eventsProcessed = new LinkedHashMap<String, Integer>();
         Long lastId = null;
         List<AuditEventEntity> events;
@@ -100,11 +106,16 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
             }
             entityManager.clear();
         } while (events.size() == pageSize);
+        long endTime = System.currentTimeMillis();
         LOGGER.info(
-            "Executed Audit payload cleanup for processInstanceId={} appName={}: eventsProcessed={}",
+            "Executed Audit payload cleanup for processInstanceId={} appName={}: eventsProcessed={}, " +
+                "startTime={}, endTime={}, elapsedMs={}",
             processInstanceId,
             appName,
-            eventsProcessed
+            eventsProcessed,
+            startTime,
+            endTime,
+            endTime - startTime
         );
     }
 
