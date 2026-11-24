@@ -28,31 +28,67 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("activiti.cloud.messaging.outbox")
 public class OutboxProperties {
 
+    /**
+     * Opt in to the outbox auto-configuration. Default is always false.
+     * Enabling the outbox requires the Spring Integration JDBC tables
+     * and a configured datasource/transaction manager;
+     * The runtime bundle includes PostgreSQL Liquibase migrations.
+     */
     private boolean enabled = false;
 
+    /**
+     * Regex patterns for output channel names that should bypass the outbox. Default is ^$ (matches only an empty name).
+     */
     @NotNull
     private Pattern[] excludes = { Pattern.compile("^$") };
 
+    /**
+     * If set, writes true/false as the desired poller state at startup; if unset, existing persisted state is retained
+     * (and absent state means start). Default is unset.
+     */
     private Boolean autoStartup; // null by default
 
+    /**
+     * Interval for reconciling pollers with desired state. Default is 1s.
+     */
     @NotNull
     private Duration reconcilePeriod = Duration.ofSeconds(1);
 
+    /**
+     * Poll frequency when messages are present. Default is 1ms.
+     */
     @NotNull
     private Duration pollerActivePeriod = Duration.ofMillis(1);
 
+    /**
+     * Poll frequency when messages are absent. Default is 50ms
+     * The packaged messaging properties mark DestinationResolutionException non-retryable by default.
+     */
     @NotNull
     private Duration pollerIdlePeriod = Duration.ofMillis(50);
 
+    /**
+     * Transient headers stripped before persistence.
+     */
     @NotNull
     private String[] headersToRemove = { "errorChannel", "replyChannel", "sourceData", "amqp_*", "kafka_*" };
 
+    /**
+     * Map of FQN of exception classes, if true, then roll back and retry or, if false, route to dead-letter queue.
+     * Matches true if the set is empty
+     */
     @NotNull
     private Map<Class<? extends Throwable>, Boolean> retryableExceptions = new LinkedHashMap<>();
 
+    /**
+     * Time period after consecutive failures before opening a probe again. Default is 1s.
+     */
     @NotNull
     private Duration circuitBreakerOpenPeriod = Duration.ofSeconds(1);
 
+    /**
+     * Consecutive failures before opening the poll circuit. Default is 3.
+     */
     @NotNull
     private Integer circuitBreakerThreshold = 3;
 
