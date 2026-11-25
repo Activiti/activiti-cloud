@@ -339,7 +339,8 @@ class TransientPayloadCleanupPersistenceTest {
         terminal.setProcessInstanceId("failed-batch");
         terminal.setAppName("app");
 
-        assertThatThrownBy(() -> failingCleanup.cleanup(List.of(terminal)))
+        List<AuditEventEntity> terminalEvents = List.of(terminal);
+        assertThatThrownBy(() -> failingCleanup.cleanup(terminalEvents))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("later batch failed");
         assertThat(batches.get()).isEqualTo(2);
