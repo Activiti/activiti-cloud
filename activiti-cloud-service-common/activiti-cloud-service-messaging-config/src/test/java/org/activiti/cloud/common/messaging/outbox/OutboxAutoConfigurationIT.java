@@ -60,7 +60,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
@@ -171,7 +170,7 @@ class OutboxAutoConfigurationIT {
 
         DirectFieldAccessor endpointAccessor = new DirectFieldAccessor(endpoint);
         TaskScheduler scheduler = (TaskScheduler) endpointAccessor.getPropertyValue("taskScheduler");
-        assertThat(scheduler).isInstanceOf(ConcurrentTaskScheduler.class);
+        assertThat(scheduler).isInstanceOf(OutboxTaskScheduler.class);
     }
 
     @Test

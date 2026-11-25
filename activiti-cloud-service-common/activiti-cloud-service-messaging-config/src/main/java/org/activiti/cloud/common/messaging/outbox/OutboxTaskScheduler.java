@@ -16,22 +16,34 @@
 
 package org.activiti.cloud.common.messaging.outbox;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
-class DisposableConcurrentTaskScheduler extends ConcurrentTaskScheduler implements DisposableBean {
+class OutboxTaskScheduler extends ConcurrentTaskScheduler implements AutoCloseable {
 
     private final ScheduledExecutorService scheduledExecutor;
 
-    public DisposableConcurrentTaskScheduler(ScheduledExecutorService scheduledExecutor) {
+    public OutboxTaskScheduler(String partitionKey) {
+        this(
+            Executors.newSingleThreadScheduledExecutor(
+                Thread.ofPlatform().name(partitionKey.concat("Poller")).daemon().factory()
+            )
+        );
+    }
+
+    protected OutboxTaskScheduler(ScheduledExecutorService scheduledExecutor) {
         super(scheduledExecutor);
         this.scheduledExecutor = scheduledExecutor;
     }
 
+    protected ScheduledExecutorService getScheduledExecutor() {
+        return scheduledExecutor;
+    }
+
     @Override
-    public void destroy() {
+    public void close() {
         if (this.scheduledExecutor.isTerminated()) {
             return;
         }

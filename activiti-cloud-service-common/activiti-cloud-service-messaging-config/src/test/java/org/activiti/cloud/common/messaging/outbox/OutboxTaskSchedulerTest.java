@@ -20,19 +20,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
-class DisposableConcurrentTaskSchedulerTest {
+class OutboxTaskSchedulerTest {
 
     @Test
-    void shouldScheduleTasksAndShutdownExecutorCleanlyOnDestroy() throws Exception {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        DisposableConcurrentTaskScheduler scheduler = new DisposableConcurrentTaskScheduler(executor);
+    void shouldScheduleTasksAndShutdownExecutorCleanlyOnClose() throws Exception {
+        OutboxTaskScheduler scheduler = new OutboxTaskScheduler("streamBridge");
+        ScheduledExecutorService executor = scheduler.getScheduledExecutor();
         CountDownLatch taskExecuted = new CountDownLatch(1);
 
         scheduler.schedule(taskExecuted::countDown, Instant.now());
@@ -40,7 +39,7 @@ class DisposableConcurrentTaskSchedulerTest {
         assertThat(taskExecuted.await(2, TimeUnit.SECONDS)).isTrue();
         assertThat(executor.isShutdown()).isFalse();
 
-        scheduler.destroy();
+        scheduler.close();
 
         assertThat(executor.isShutdown()).isTrue();
         assertThat(executor.isTerminated()).isTrue();
@@ -60,8 +59,8 @@ class DisposableConcurrentTaskSchedulerTest {
         assertThat(executor.awaitTermination(2, TimeUnit.SECONDS)).isTrue();
         assertThat(shutdownCalls).hasValue(1);
 
-        DisposableConcurrentTaskScheduler scheduler = new DisposableConcurrentTaskScheduler(executor);
-        scheduler.destroy();
+        OutboxTaskScheduler scheduler = new OutboxTaskScheduler(executor);
+        scheduler.close();
 
         assertThat(shutdownCalls).hasValue(1);
         assertThat(executor.isTerminated()).isTrue();

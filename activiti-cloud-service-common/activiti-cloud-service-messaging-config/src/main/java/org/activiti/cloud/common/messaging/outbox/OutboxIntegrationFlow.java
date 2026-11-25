@@ -20,7 +20,6 @@ import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
@@ -47,7 +46,7 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
     private final ObjectProvider<StreamBridge> streamBridgeProvider;
     private final LockRegistry<? extends Lock> lockRegistry;
     private final AbstractRequestHandlerAdvice[] outboxMessageHandlerErrorAdvice;
-    private final DisposableConcurrentTaskScheduler taskScheduler;
+    private final OutboxTaskScheduler taskScheduler;
 
     public OutboxIntegrationFlow(
         String partitionKey,
@@ -67,11 +66,7 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
         this.outboxMessageHandlerErrorAdvice = outboxMessageHandlerErrorAdvice.toArray(
             AbstractRequestHandlerAdvice[]::new
         );
-        this.taskScheduler = new DisposableConcurrentTaskScheduler(
-            Executors.newSingleThreadScheduledExecutor(
-                Thread.ofPlatform().name(partitionKey.concat("Poller")).factory()
-            )
-        );
+        this.taskScheduler = new OutboxTaskScheduler(partitionKey);
     }
 
     @Override
@@ -131,6 +126,6 @@ public class OutboxIntegrationFlow extends IntegrationFlowAdapter {
     public void stop() {
         super.stop();
 
-        taskScheduler.destroy();
+        taskScheduler.close();
     }
 }
