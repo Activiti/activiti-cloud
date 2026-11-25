@@ -181,14 +181,19 @@ class GraphQlWebSocketHandlerAutoConfigurationTest {
     }
 
     @Test
-    void should_useApplicationWebSocketHandlerWithoutDecoration_when_applicationDefinesItsOwn() {
-        contextRunner.withUserConfiguration(CustomWebSocketHandlerConfiguration.class).run(context -> {
-            assertThat(context).hasSingleBean(GraphQlWebSocketHandler.class);
-            assertThat(context).doesNotHaveBean(DecoratingGraphQlWebSocketHandler.class);
-            assertThat(endpointChain(context)).containsExactly(
-                context.getBean("customGraphQlWebSocketHandler", WebSocketHandler.class)
-            );
-        });
+    void should_backOffWithLivenessCheck_when_applicationDefinesItsOwnHandlerWithoutKeepAliveProperty() {
+        contextRunner
+            .withUserConfiguration(CustomWebSocketHandlerConfiguration.class)
+            .withPropertyValues("spring.graphql.websocket.keep-alive=")
+            .run(context -> {
+                assertThat(context).hasNotFailed();
+                assertThat(context).hasSingleBean(GraphQlWebSocketHandler.class);
+                assertThat(context).doesNotHaveBean(DecoratingGraphQlWebSocketHandler.class);
+                assertThat(context).doesNotHaveBean(GraphQlWebSocketLivenessMonitor.class);
+                assertThat(endpointChain(context)).containsExactly(
+                    context.getBean("customGraphQlWebSocketHandler", WebSocketHandler.class)
+                );
+            });
     }
 
     @Test

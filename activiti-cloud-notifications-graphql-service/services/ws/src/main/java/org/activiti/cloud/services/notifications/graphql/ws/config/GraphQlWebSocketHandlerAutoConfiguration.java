@@ -52,6 +52,7 @@ import org.springframework.web.socket.WebSocketHandler;
     name = "jakarta.websocket.server.ServerContainer"
 )
 @ConditionalOnBean(ExecutionGraphQlService.class)
+@ConditionalOnMissingBean(GraphQlWebSocketHandler.class)
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.ws.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(GraphQlCorsProperties.class)
 @Import(GraphQlWebSocketLivenessConfiguration.class)
@@ -61,7 +62,6 @@ public class GraphQlWebSocketHandlerAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(WEBSOCKET_PATH_PROPERTY)
-    @ConditionalOnMissingBean(GraphQlWebSocketHandler.class)
     public DecoratingGraphQlWebSocketHandler graphQlWebSocketHandler(
         WebGraphQlHandler webGraphQlHandler,
         GraphQlProperties properties,
