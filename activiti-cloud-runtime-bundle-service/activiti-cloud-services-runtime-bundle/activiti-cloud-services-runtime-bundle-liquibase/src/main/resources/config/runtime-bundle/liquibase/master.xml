@@ -91,18 +91,4 @@
              stripComments="true"/>
   </changeSet>
 
-  <changeSet id="spring-int-channel-message-tuneup" author="runtime-bundle" dbms="postgresql">
-    <preConditions onFail="CONTINUE">
-      <and>
-        <tableExists tableName="INT_CHANNEL_MESSAGE"/>
-      </and>
-    </preConditions>
-    <sqlFile dbms="postgresql"
-             encoding="utf8"
-             path="changelog/spring-int-channel-message-tuneup.pg.sql"
-             relativeToChangelogFile="true"
-             splitStatements="true"
-             stripComments="true"/>
-  </changeSet>
-
 </databaseChangeLog>
