@@ -16,10 +16,13 @@
 package org.activiti.cloud.services.notifications.graphql.ws.liveness;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +47,7 @@ class LivenessGraphQlWebSocketHandlerTest {
         delegate = mock(WebSocketHandler.class);
         session = mock(WebSocketSession.class);
         handler = new LivenessGraphQlWebSocketHandler(delegate, monitor);
+        when(monitor.messageReceived(session)).thenReturn(true);
     }
 
     @Test
@@ -62,6 +66,16 @@ class LivenessGraphQlWebSocketHandlerTest {
 
         assertThatThrownBy(() -> handler.handleMessage(session, PONG)).isInstanceOf(IllegalStateException.class);
         verify(monitor).messageHandled(session);
+    }
+
+    @Test
+    void should_dropMessage_when_monitorRejectsItBecauseSessionIsClosing() throws Exception {
+        when(monitor.messageReceived(session)).thenReturn(false);
+
+        handler.handleMessage(session, PONG);
+
+        verify(delegate, never()).handleMessage(any(), any());
+        verify(monitor, never()).messageHandled(session);
     }
 
     @Test

@@ -296,6 +296,43 @@ class GraphQlWebSocketLivenessMonitorTest {
     }
 
     @Test
+    void should_notCloseSession_when_messageIsInProgressWhileCloseRuns() throws Exception {
+        List<Runnable> queuedCloses = new ArrayList<>();
+        GraphQlWebSocketLivenessMonitor queueingMonitor = new GraphQlWebSocketLivenessMonitor(
+            TIMEOUT,
+            Duration.ofSeconds(1),
+            nanoTime,
+            queuedCloses::add
+        );
+        queueingMonitor.messageReceived(session);
+        queueingMonitor.messageHandled(session);
+        nanoTime.advance(TIMEOUT);
+        queueingMonitor.checkSessions();
+        boolean admitted = queueingMonitor.messageReceived(session);
+        nanoTime.advance(TIMEOUT);
+
+        queuedCloses.get(0).run();
+
+        assertThat(admitted).isTrue();
+        verify(session, never()).close(any(CloseStatus.class));
+    }
+
+    @Test
+    void should_rejectNewMessages_when_closeIsCommitted() throws Exception {
+        doThrow(new IOException("broken pipe")).when(session).close(any(CloseStatus.class));
+        monitor.messageReceived(session);
+        monitor.messageHandled(session);
+        nanoTime.advance(TIMEOUT);
+        monitor.checkSessions();
+
+        boolean admitted = monitor.messageReceived(session);
+        monitor.checkSessions();
+
+        assertThat(admitted).isFalse();
+        verify(session, times(2)).close(GraphQlWebSocketLivenessMonitor.PING_TIMEOUT_STATUS);
+    }
+
+    @Test
     void should_closeRemainingSessionOnNextCheck_when_closeExecutorRejectedTask() throws Exception {
         List<WebSocketSession> closedSessions = new ArrayList<>();
         WebSocketSession otherSession = mock(WebSocketSession.class);

@@ -35,7 +35,9 @@ public class LivenessGraphQlWebSocketHandler extends WebSocketHandlerDecorator {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        livenessMonitor.messageReceived(session);
+        if (!livenessMonitor.messageReceived(session)) {
+            return;
+        }
         try {
             super.handleMessage(session, message);
         } finally {

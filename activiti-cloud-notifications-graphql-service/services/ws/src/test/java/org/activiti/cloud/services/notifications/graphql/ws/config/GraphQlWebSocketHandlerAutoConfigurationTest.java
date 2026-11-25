@@ -67,7 +67,7 @@ class GraphQlWebSocketHandlerAutoConfigurationTest {
             assertThat(context).hasSingleBean(DecoratingGraphQlWebSocketHandler.class);
             assertThat(context).hasSingleBean(GraphQlWebSocketLivenessMonitor.class);
             assertThat(context.getBean(GraphQlWebSocketLivenessMonitor.class).getTimeout()).isEqualTo(
-                Duration.ofSeconds(10)
+                Duration.ofSeconds(60)
             );
             assertThat(endpointChain(context)).hasExactlyElementsOfTypes(
                 LivenessGraphQlWebSocketHandler.class,
@@ -116,8 +116,8 @@ class GraphQlWebSocketHandlerAutoConfigurationTest {
             "timeout=-PT10S      | timeout must be positive",
             "check-interval=PT0S | check-interval must be positive",
             "check-interval=-PT1S| check-interval must be positive",
-            "check-interval=PT10S| must be shorter than",
-            "check-interval=PT11S| must be shorter than",
+            "check-interval=PT60S| must be shorter than",
+            "check-interval=PT61S| must be shorter than",
         }
     )
     void should_failStartup_when_livenessDurationsAreInvalid(String property, String expectedMessage) {

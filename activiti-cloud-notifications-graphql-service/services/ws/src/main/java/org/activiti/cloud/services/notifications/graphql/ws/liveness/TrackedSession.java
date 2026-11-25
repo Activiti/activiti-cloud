@@ -17,15 +17,15 @@ package org.activiti.cloud.services.notifications.graphql.ws.liveness;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.web.socket.WebSocketSession;
 
 final class TrackedSession {
 
     private final WebSocketSession session;
-    private final AtomicBoolean closing = new AtomicBoolean();
-    private final AtomicInteger messagesInProgress = new AtomicInteger();
-    private volatile long lastMessageAt;
+    private final AtomicBoolean closeScheduled = new AtomicBoolean();
+    private long lastMessageAt;
+    private int messagesInProgress;
+    private boolean closeCommitted;
 
     TrackedSession(WebSocketSession session, long lastMessageAt) {
         this.session = session;
@@ -36,29 +36,40 @@ final class TrackedSession {
         return session;
     }
 
-    void messageStarted(long now) {
+    synchronized boolean messageStarted(long now) {
+        if (closeCommitted) {
+            return false;
+        }
         lastMessageAt = now;
-        messagesInProgress.incrementAndGet();
+        messagesInProgress++;
+        return true;
     }
 
-    void messageFinished(long now) {
+    synchronized void messageFinished(long now) {
         lastMessageAt = now;
-        messagesInProgress.updateAndGet(count -> Math.max(0, count - 1));
+        messagesInProgress = Math.max(0, messagesInProgress - 1);
     }
 
-    Duration silenceAt(long now) {
+    synchronized Duration silenceAt(long now) {
         return Duration.ofNanos(now - lastMessageAt);
     }
 
-    boolean isSilentFor(Duration timeout, long now) {
-        return messagesInProgress.get() == 0 && silenceAt(now).compareTo(timeout) >= 0;
+    synchronized boolean isSilentFor(Duration timeout, long now) {
+        return messagesInProgress == 0 && silenceAt(now).compareTo(timeout) >= 0;
     }
 
-    boolean markClosing() {
-        return closing.compareAndSet(false, true);
+    synchronized boolean commitClose(Duration timeout, long now) {
+        if (!closeCommitted) {
+            closeCommitted = isSilentFor(timeout, now);
+        }
+        return closeCommitted;
     }
 
-    void unmarkClosing() {
-        closing.set(false);
+    boolean markCloseScheduled() {
+        return closeScheduled.compareAndSet(false, true);
+    }
+
+    void unmarkCloseScheduled() {
+        closeScheduled.set(false);
     }
 }

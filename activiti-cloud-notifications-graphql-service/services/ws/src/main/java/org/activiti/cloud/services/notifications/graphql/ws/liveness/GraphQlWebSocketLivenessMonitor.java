@@ -60,9 +60,9 @@ public class GraphQlWebSocketLivenessMonitor implements SmartLifecycle {
         return timeout;
     }
 
-    public void messageReceived(WebSocketSession session) {
+    public boolean messageReceived(WebSocketSession session) {
         long now = nanoTime.getAsLong();
-        sessions.computeIfAbsent(session.getId(), id -> new TrackedSession(session, now)).messageStarted(now);
+        return sessions.computeIfAbsent(session.getId(), id -> new TrackedSession(session, now)).messageStarted(now);
     }
 
     public void messageHandled(WebSocketSession session) {
@@ -81,11 +81,11 @@ public class GraphQlWebSocketLivenessMonitor implements SmartLifecycle {
         sessions.forEach((sessionId, trackedSession) -> {
             if (!trackedSession.session().isOpen()) {
                 sessions.remove(sessionId, trackedSession);
-            } else if (trackedSession.isSilentFor(timeout, now) && trackedSession.markClosing()) {
+            } else if (trackedSession.isSilentFor(timeout, now) && trackedSession.markCloseScheduled()) {
                 try {
                     closeExecutor.execute(() -> close(trackedSession));
                 } catch (RejectedExecutionException e) {
-                    trackedSession.unmarkClosing();
+                    trackedSession.unmarkCloseScheduled();
                     LOGGER.debug("Closing silent GraphQL WebSocket session {} rejected, will retry", sessionId, e);
                 }
             }
@@ -94,9 +94,9 @@ public class GraphQlWebSocketLivenessMonitor implements SmartLifecycle {
 
     private void close(TrackedSession trackedSession) {
         long now = nanoTime.getAsLong();
-        // A message may have arrived since the session was found silent
-        if (!trackedSession.isSilentFor(timeout, now)) {
-            trackedSession.unmarkClosing();
+        // A message may have arrived since the session was found silent; once committed, no new message is admitted
+        if (!trackedSession.commitClose(timeout, now)) {
+            trackedSession.unmarkCloseScheduled();
             return;
         }
         WebSocketSession session = trackedSession.session();
@@ -108,7 +108,7 @@ public class GraphQlWebSocketLivenessMonitor implements SmartLifecycle {
         try {
             session.close(PING_TIMEOUT_STATUS);
         } catch (IOException | RuntimeException e) {
-            trackedSession.unmarkClosing();
+            trackedSession.unmarkCloseScheduled();
             LOGGER.debug("Error while closing silent GraphQL WebSocket session {}", session.getId(), e);
         }
     }
