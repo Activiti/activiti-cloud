@@ -136,8 +136,8 @@ class OutboxAutoConfigurationIT {
         );
         assertThat(outboxProperties.getCircuitBreakerOpenPeriod()).isEqualTo(Duration.ofSeconds(1));
         assertThat(outboxProperties.getCircuitBreakerThreshold()).isEqualTo(3);
-        assertThat(outboxProperties.getPollerActivePeriod()).isEqualTo(Duration.ofMillis(1));
-        assertThat(outboxProperties.getPollerIdlePeriod()).isEqualTo(Duration.ofMillis(50));
+        assertThat(outboxProperties.getPollerActivePeriod()).isEqualTo(Duration.ofMillis(10));
+        assertThat(outboxProperties.getPollerIdlePeriod()).isEqualTo(Duration.ofMillis(100));
         assertThat(outboxProperties.getReconcilePeriod()).isEqualTo(Duration.ofSeconds(1));
         assertThat(outboxProperties.getExcludes()).isNotEmpty();
         assertThat(outboxProperties.getHeadersToRemove()).containsOnly(

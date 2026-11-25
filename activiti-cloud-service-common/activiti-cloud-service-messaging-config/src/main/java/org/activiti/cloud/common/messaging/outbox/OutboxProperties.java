@@ -55,17 +55,16 @@ public class OutboxProperties {
     private Duration reconcilePeriod = Duration.ofSeconds(1);
 
     /**
-     * Poll frequency when messages are present. Default is 1ms.
+     * Poll frequency when messages are present. Default is 10ms.
      */
     @NotNull
-    private Duration pollerActivePeriod = Duration.ofMillis(1);
+    private Duration pollerActivePeriod = Duration.ofMillis(10);
 
     /**
-     * Poll frequency when messages are absent. Default is 50ms
-     * The packaged messaging properties mark DestinationResolutionException non-retryable by default.
+     * Poll frequency when messages are absent. Default is 100ms
      */
     @NotNull
-    private Duration pollerIdlePeriod = Duration.ofMillis(50);
+    private Duration pollerIdlePeriod = Duration.ofMillis(100);
 
     /**
      * Transient headers stripped before persistence.
@@ -76,6 +75,7 @@ public class OutboxProperties {
     /**
      * Map of FQN of exception classes, if true, then roll back and retry or, if false, route to dead-letter queue.
      * Matches true if the set is empty
+     * The packaged messaging properties mark DestinationResolutionException non-retryable by default.
      */
     @NotNull
     private Map<Class<? extends Throwable>, Boolean> retryableExceptions = new LinkedHashMap<>();
@@ -87,7 +87,7 @@ public class OutboxProperties {
     private Duration circuitBreakerOpenPeriod = Duration.ofSeconds(1);
 
     /**
-     * Consecutive failures before opening the poll circuit. Default is 3.
+     * Consecutive failures threshold before opening the poll circuit. Default is 3.
      */
     @NotNull
     private Integer circuitBreakerThreshold = 3;
