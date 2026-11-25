@@ -31,7 +31,7 @@ class OutboxTaskSchedulerTest {
     @Test
     void shouldScheduleTasksAndShutdownExecutorCleanlyOnClose() throws Exception {
         OutboxTaskScheduler scheduler = new OutboxTaskScheduler("streamBridge");
-        ScheduledExecutorService executor = scheduler.getScheduledExecutor();
+        ScheduledExecutorService executor = scheduler.getScheduledExecutorService();
         CountDownLatch taskExecuted = new CountDownLatch(1);
 
         scheduler.schedule(taskExecuted::countDown, Instant.now());

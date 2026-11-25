@@ -38,7 +38,7 @@ class OutboxTaskScheduler extends ConcurrentTaskScheduler implements AutoCloseab
         this.scheduledExecutor = scheduledExecutor;
     }
 
-    protected ScheduledExecutorService getScheduledExecutor() {
+    protected ScheduledExecutorService getScheduledExecutorService() {
         return scheduledExecutor;
     }
 
