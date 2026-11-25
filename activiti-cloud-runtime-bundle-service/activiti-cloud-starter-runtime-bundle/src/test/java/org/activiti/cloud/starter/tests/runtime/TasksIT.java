@@ -18,11 +18,13 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -36,22 +38,27 @@ import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.activiti.cloud.api.process.model.impl.CandidateUser;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
+import org.activiti.cloud.services.rest.api.payload.AssignTaskWithReasonPayload;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.CollectionModel;
@@ -59,9 +66,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -95,6 +104,13 @@ public class TasksIT {
     private VariablesUtil variablesUtil;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
+    private String assignmentHistoryTaskId;
+
+    @Autowired
+    private OutputDestination outputDestination;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUp() {
@@ -107,6 +123,15 @@ public class TasksIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
+        }
+    }
+
+    @AfterEach
+    void cleanUpAssignmentHistoryTask() {
+        if (assignmentHistoryTaskId != null) {
+            identityTokenProducer.withTestUser("testadmin");
+            taskRestTemplate.adminComplete(taskRestTemplate.adminGetTask(assignmentHistoryTaskId).getBody());
+            assignmentHistoryTaskId = null;
         }
     }
 
@@ -524,6 +549,70 @@ public class TasksIT {
         assertThat(assignResponseEntity).isNotNull();
         assertThat(assignResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(assignResponseEntity.getBody().getAssignee()).isEqualTo("hruser");
+    }
+
+    @Test
+    public void assignmentRequestsShouldPublishReasonAndActorForQueryHistory() {
+        ResponseEntity<CloudProcessInstance> processInstanceEntity = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS)
+        );
+        String taskId = processInstanceRestTemplate
+            .getTasks(processInstanceEntity)
+            .getBody()
+            .getContent()
+            .iterator()
+            .next()
+            .getId();
+        assignmentHistoryTaskId = taskId;
+        identityTokenProducer.withTestUser("testadmin");
+        outputDestination.clear();
+
+        AssignTaskWithReasonPayload firstAssignment = new AssignTaskWithReasonPayload();
+        firstAssignment.setTaskId(taskId);
+        firstAssignment.setAssignee("assignment-history-user-1");
+        firstAssignment.setReason("Initial assignment");
+        assertThat(taskRestTemplate.adminAssignTask(firstAssignment).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        AssignTaskWithReasonPayload unchangedAssignment = new AssignTaskWithReasonPayload();
+        unchangedAssignment.setTaskId(taskId);
+        unchangedAssignment.setAssignee("assignment-history-user-1");
+        unchangedAssignment.setReason("No change");
+        assertThat(taskRestTemplate.adminAssignTask(unchangedAssignment).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        AssignTaskWithReasonPayload reassignment = new AssignTaskWithReasonPayload();
+        reassignment.setTaskId(taskId);
+        reassignment.setAssignee("assignment-history-user-2");
+        reassignment.setReason("Reassigned work");
+        assertThat(taskRestTemplate.adminAssignTask(reassignment).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        List<CloudTaskAssignedEvent> events = new ArrayList<>();
+        Message<byte[]> message;
+        while ((message = outputDestination.receive(1000, "engineEvents")) != null) {
+            for (CloudRuntimeEvent<?, ?> event : objectMapper.readValue(
+                message.getPayload(),
+                CloudRuntimeEvent[].class
+            )) {
+                if (event instanceof CloudTaskAssignedEvent assigned && taskId.equals(assigned.getEntity().getId())) {
+                    events.add(assigned);
+                }
+            }
+        }
+
+        assertThat(events)
+            .extracting(
+                CloudTaskAssignedEvent::getAssignmentAction,
+                event -> event.getEntity().getAssignee(),
+                CloudTaskAssignedEvent::getReason
+            )
+            .containsExactly(
+                tuple("ASSIGNED", "assignment-history-user-1", "Initial assignment"),
+                tuple("ASSIGNED", "assignment-history-user-2", "Reassigned work")
+            );
+        assertThat(events)
+            .extracting(CloudTaskAssignedEvent::getActor)
+            .doesNotContainNull()
+            .doesNotContain("service_user")
+            .containsOnly(events.getFirst().getActor());
     }
 
     @Test

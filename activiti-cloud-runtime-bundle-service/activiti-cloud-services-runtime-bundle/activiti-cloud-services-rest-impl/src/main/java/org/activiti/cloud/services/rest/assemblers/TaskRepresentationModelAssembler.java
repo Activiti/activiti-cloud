@@ -59,9 +59,11 @@ public class TaskRepresentationModelAssembler implements RepresentationModelAsse
         List<Link> links = new ArrayList<>();
         links.add(linkTo(methodOn(TaskControllerImpl.class).getTaskById(cloudTask.getId())).withSelfRel());
         if (ASSIGNED != cloudTask.getStatus()) {
-            links.add(linkTo(methodOn(TaskControllerImpl.class).claimTask(cloudTask.getId())).withRel("claim"));
+            links.add(linkTo(methodOn(TaskControllerImpl.class).claimTask(cloudTask.getId(), null)).withRel("claim"));
         } else {
-            links.add(linkTo(methodOn(TaskControllerImpl.class).releaseTask(cloudTask.getId())).withRel("release"));
+            links.add(
+                linkTo(methodOn(TaskControllerImpl.class).releaseTask(cloudTask.getId(), null)).withRel("release")
+            );
             links.add(
                 linkTo(methodOn(TaskControllerImpl.class).completeTask(cloudTask.getId(), null)).withRel("complete")
             );

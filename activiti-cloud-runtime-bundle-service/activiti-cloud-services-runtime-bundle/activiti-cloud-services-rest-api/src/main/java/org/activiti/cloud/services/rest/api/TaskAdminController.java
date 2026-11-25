@@ -18,11 +18,13 @@ package org.activiti.cloud.services.rest.api;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import org.activiti.api.task.model.payloads.AssignTaskPayload;
-import org.activiti.api.task.model.payloads.AssignTasksPayload;
+import jakarta.validation.Valid;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.rest.api.payload.AssignTaskWithReasonPayload;
+import org.activiti.cloud.services.rest.api.payload.AssignTasksWithReasonPayload;
+import org.activiti.cloud.services.rest.api.payload.AssignmentReasonPayload;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
@@ -58,7 +60,8 @@ public interface TaskAdminController {
 
     @PostMapping(value = "/{taskId}/release")
     EntityModel<CloudTask> releaseTask(
-        @Parameter(description = "Enter the taskId to release task") @PathVariable("taskId") String taskId
+        @Parameter(description = "Enter the taskId to release task") @PathVariable("taskId") String taskId,
+        @Valid @RequestBody(required = false) AssignmentReasonPayload assignmentReasonPayload
     );
 
     @RequestMapping(value = "/{taskId}", method = RequestMethod.DELETE)
@@ -69,9 +72,9 @@ public interface TaskAdminController {
     @RequestMapping(value = "/{taskId}/assign", method = RequestMethod.POST)
     EntityModel<CloudTask> assign(
         @Parameter(description = "Enter the taskId to assign") @PathVariable("taskId") String taskId,
-        @RequestBody AssignTaskPayload assignTaskPayload
+        @Valid @RequestBody AssignTaskWithReasonPayload assignTaskPayload
     );
 
     @PostMapping(value = "/assign", consumes = APPLICATION_JSON_VALUE)
-    PagedModel<EntityModel<CloudTask>> assign(@RequestBody AssignTasksPayload assignTasksPayload);
+    PagedModel<EntityModel<CloudTask>> assign(@Valid @RequestBody AssignTasksWithReasonPayload assignTasksPayload);
 }

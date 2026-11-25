@@ -30,18 +30,22 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.Collections;
+import java.util.List;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.api.task.model.payloads.AssignTaskPayload;
-import org.activiti.api.task.model.payloads.AssignTasksPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.events.assignment.TaskAssignmentHistoryContext;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
+import org.activiti.cloud.services.rest.api.payload.AssignTaskWithReasonPayload;
+import org.activiti.cloud.services.rest.api.payload.AssignTasksWithReasonPayload;
+import org.activiti.cloud.services.rest.api.payload.AssignmentReasonPayload;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,10 +123,19 @@ public class TaskAdminControllerImpl implements TaskAdminController {
 
     @Override
     @SuppressWarnings("java:S6856")
-    public EntityModel<CloudTask> releaseTask(@PathVariable String taskId) {
+    public EntityModel<CloudTask> releaseTask(
+        @PathVariable String taskId,
+        @RequestBody(required = false) AssignmentReasonPayload assignmentReasonPayload
+    ) {
         TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "release", taskId);
-        return taskRepresentationModelAssembler.toModel(
-            taskAdminRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
+        return TaskAssignmentHistoryContext.withChange(
+            "RELEASED",
+            assignmentReasonPayload == null ? null : assignmentReasonPayload.getReason(),
+            Collections.singleton(taskId),
+            () ->
+                taskRepresentationModelAssembler.toModel(
+                    taskAdminRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
+                )
         );
     }
 
@@ -141,23 +154,38 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     @Override
     public EntityModel<CloudTask> assign(
         @PathVariable String taskId,
-        @RequestBody AssignTaskPayload assignTaskPayload
+        @RequestBody AssignTaskWithReasonPayload assignTaskPayload
     ) {
         TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "assign", taskId);
         if (assignTaskPayload != null) {
             assignTaskPayload.setTaskId(taskId);
         }
-        return taskRepresentationModelAssembler.toModel(taskAdminRuntime.assign(assignTaskPayload));
+        return TaskAssignmentHistoryContext.withChange(
+            "ASSIGNED",
+            assignTaskPayload == null ? null : assignTaskPayload.getReason(),
+            Collections.singleton(taskId),
+            () -> taskRepresentationModelAssembler.toModel(taskAdminRuntime.assign(assignTaskPayload))
+        );
     }
 
     @Override
-    public PagedModel<EntityModel<CloudTask>> assign(@RequestBody AssignTasksPayload assignTasksPayload) {
+    public PagedModel<EntityModel<CloudTask>> assign(@RequestBody AssignTasksWithReasonPayload assignTasksPayload) {
         TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "assign multiple tasks");
-        Page<Task> tasks = taskAdminRuntime.assignMultiple(assignTasksPayload);
-        Pageable pageable = tasks.getTotalItems() == 0 ? Pageable.unpaged() : Pageable.ofSize(tasks.getTotalItems());
-        return pagedCollectionModelAssembler.toModel(
-            pageConverter.toSpringPage(pageable, tasks),
-            taskRepresentationModelAssembler
+        return TaskAssignmentHistoryContext.withChange(
+            "ASSIGNED",
+            assignTasksPayload == null ? null : assignTasksPayload.getReason(),
+            assignTasksPayload == null || assignTasksPayload.getTaskIds() == null
+                ? List.of()
+                : assignTasksPayload.getTaskIds(),
+            () -> {
+                Page<Task> tasks = taskAdminRuntime.assignMultiple(assignTasksPayload);
+                Pageable pageable =
+                    tasks.getTotalItems() == 0 ? Pageable.unpaged() : Pageable.ofSize(tasks.getTotalItems());
+                return pagedCollectionModelAssembler.toModel(
+                    pageConverter.toSpringPage(pageable, tasks),
+                    taskRepresentationModelAssembler
+                );
+            }
         );
     }
 }

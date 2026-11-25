@@ -21,6 +21,9 @@ import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 
 public class CloudTaskAssignedEventImpl extends CloudTaskEventImpl implements CloudTaskAssignedEvent {
 
+    private String reason;
+    private String assignmentAction;
+
     public CloudTaskAssignedEventImpl() {}
 
     public CloudTaskAssignedEventImpl(Task task) {
@@ -34,5 +37,23 @@ public class CloudTaskAssignedEventImpl extends CloudTaskEventImpl implements Cl
     @Override
     public TaskRuntimeEvent.TaskEvents getEventType() {
         return TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
+    }
+
+    @Override
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    @Override
+    public String getAssignmentAction() {
+        return assignmentAction;
+    }
+
+    public void setAssignmentAction(String assignmentAction) {
+        this.assignmentAction = assignmentAction;
     }
 }

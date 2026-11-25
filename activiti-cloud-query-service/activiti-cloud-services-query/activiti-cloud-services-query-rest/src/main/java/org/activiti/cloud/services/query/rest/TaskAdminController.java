@@ -34,8 +34,10 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.TaskAssignmentHistoryRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
+import org.activiti.cloud.services.query.model.TaskAssignmentHistoryEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -65,6 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TaskAdminController extends TaskControllerAdvice {
 
     private final TaskRepository taskRepository;
+    private final TaskAssignmentHistoryRepository taskAssignmentHistoryRepository;
 
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
@@ -77,9 +80,11 @@ public class TaskAdminController extends TaskControllerAdvice {
         TaskRepository taskRepository,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         EntityFinder entityFinder,
-        TaskControllerHelper taskControllerHelper
+        TaskControllerHelper taskControllerHelper,
+        TaskAssignmentHistoryRepository taskAssignmentHistoryRepository
     ) {
         this.taskRepository = taskRepository;
+        this.taskAssignmentHistoryRepository = taskAssignmentHistoryRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.entityFinder = entityFinder;
         this.taskControllerHelper = taskControllerHelper;
@@ -211,6 +216,13 @@ public class TaskAdminController extends TaskControllerAdvice {
                   .map(TaskCandidateUserEntity::getUserId)
                   .collect(Collectors.toList())
             : null;
+    }
+
+    @Operation(summary = "Get task assignment history, newest first")
+    @RequestMapping(value = "/{taskId}/assignment-history", method = RequestMethod.GET)
+    public List<TaskAssignmentHistoryEntity> getAssignmentHistory(@PathVariable String taskId) {
+        entityFinder.findById(taskRepository, taskId, "Unable to find taskEntity for the given id:'" + taskId + "'");
+        return taskAssignmentHistoryRepository.findByTaskIdOrderByTimestampDescIdDesc(taskId);
     }
 
     @RequestMapping(value = "/{taskId}/candidate-groups", method = RequestMethod.GET)

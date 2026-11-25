@@ -47,6 +47,9 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
+import org.activiti.cloud.services.rest.api.payload.AssignTaskWithReasonPayload;
+import org.activiti.cloud.services.rest.api.payload.AssignTasksWithReasonPayload;
+import org.activiti.cloud.services.rest.api.payload.AssignmentReasonPayload;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
@@ -190,9 +193,41 @@ class TaskAdminControllerImplIT {
     }
 
     @Test
+    void releaseTaskWithReason() throws Exception {
+        given(taskAdminRuntime.release(any())).willReturn(buildTask("my task", Task.TaskStatus.CREATED));
+        AssignmentReasonPayload assignmentReasonPayload = new AssignmentReasonPayload();
+        assignmentReasonPayload.setReason("Work is complete");
+
+        this.mockMvc
+            .perform(
+                post("/admin/v1/tasks/{taskId}/release", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(assignmentReasonPayload))
+            )
+            .andExpect(status().isOk());
+    }
+
+    @Test
     void assignTask() throws Exception {
         given(taskAdminRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
         AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
+
+        this.mockMvc
+            .perform(
+                post("/admin/v1/tasks/{taskId}/assign", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(assignTaskCmd))
+            )
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void assignTaskWithReason() throws Exception {
+        given(taskAdminRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
+        AssignTaskWithReasonPayload assignTaskCmd = new AssignTaskWithReasonPayload();
+        assignTaskCmd.setTaskId("1");
+        assignTaskCmd.setAssignee("assignee");
+        assignTaskCmd.setReason("Reassigning work");
 
         this.mockMvc
             .perform(
@@ -210,6 +245,23 @@ class TaskAdminControllerImplIT {
             .withTaskId("1")
             .withAssignee("assignee")
             .build();
+
+        this.mockMvc
+            .perform(
+                post("/admin/v1/tasks/assign")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(assignTasksCmd))
+            )
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void assignMultipleTasksWithReason() throws Exception {
+        given(taskAdminRuntime.assignMultiple(any())).willReturn(new PageImpl(List.of(buildDefaultAssignedTask()), 1));
+        AssignTasksWithReasonPayload assignTasksCmd = new AssignTasksWithReasonPayload();
+        assignTasksCmd.setTaskIds(List.of("1"));
+        assignTasksCmd.setAssignee("assignee");
+        assignTasksCmd.setReason("Team workload change");
 
         this.mockMvc
             .perform(

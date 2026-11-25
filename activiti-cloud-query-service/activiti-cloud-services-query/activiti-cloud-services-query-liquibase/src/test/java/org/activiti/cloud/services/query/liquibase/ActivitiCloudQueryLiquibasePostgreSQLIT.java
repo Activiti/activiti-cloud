@@ -16,10 +16,12 @@
 package org.activiti.cloud.services.query.liquibase;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -59,5 +61,42 @@ class ActivitiCloudQueryLiquibasePostgreSQLIT {
             "pg_get_expr",
             "((parent_id IS NULL) AND ((linked_process_instance_id IS NULL) OR (linked_process_instance_type IS NULL)))"
         );
+    }
+
+    @Test
+    void shouldCreateAssignmentHistoryTableWithReasonLimitAndOrderedIndex() {
+        assertThat(jdbcTemplate.queryForList("SELECT * FROM task_assignment_history")).isEmpty();
+        assertThat(jdbcTemplate.queryForList("SELECT * FROM task_assignment_event_receipt")).isEmpty();
+        assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT indexdef FROM pg_indexes WHERE indexname = 'idx_task_assignment_history_task_time'",
+                String.class
+            )
+        ).contains("(task_id, \"timestamp\" DESC, id DESC)");
+
+        jdbcTemplate.update(
+            "INSERT INTO task_assignment_history (id, task_id, action, timestamp, reason) VALUES (?, ?, ?, ?, ?)",
+            "assignment-event",
+            "task-id",
+            "ASSIGNED",
+            100L,
+            "a".repeat(255)
+        );
+        assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT reason FROM task_assignment_history WHERE id = 'assignment-event'",
+                String.class
+            )
+        ).hasSize(255);
+        assertThatThrownBy(() ->
+            jdbcTemplate.update(
+                "INSERT INTO task_assignment_history (id, task_id, action, timestamp, reason) VALUES (?, ?, ?, ?, ?)",
+                "too-long-event",
+                "task-id",
+                "ASSIGNED",
+                200L,
+                "a".repeat(256)
+            )
+        ).isInstanceOf(DataIntegrityViolationException.class);
     }
 }

@@ -29,6 +29,8 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.activiti.cloud.services.query.model.TaskAssignmentEventReceiptEntity;
+import org.activiti.cloud.services.query.model.TaskAssignmentHistoryEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -66,6 +68,22 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
         );
 
         if (ALLOWED_STATUS.contains(processInstanceEntity.getStatus())) {
+            remove(
+                TaskAssignmentHistoryEntity.class,
+                "taskId",
+                TaskEntity.class,
+                "id",
+                "processInstanceId",
+                eventProcessInstanceId
+            );
+            remove(
+                TaskAssignmentEventReceiptEntity.class,
+                "taskId",
+                TaskEntity.class,
+                "id",
+                "processInstanceId",
+                eventProcessInstanceId
+            );
             remove(
                 TaskCandidateUserEntity.class,
                 "taskId",

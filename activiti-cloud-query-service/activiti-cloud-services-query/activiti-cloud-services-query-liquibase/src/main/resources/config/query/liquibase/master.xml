@@ -1320,4 +1320,58 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query"
+             id="alter53-h2-schema" dbms="h2">
+    <sqlFile dbms="h2"
+             encoding="utf8"
+             path="changelog/53-alter.h2.schema.9.2.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="h2"
+               encoding="utf8"
+               path="changelog/53-rollback.h2.schema.9.2.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter53-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/53-alter.pg.schema.9.2.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/53-rollback.pg.schema.9.2.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query"
+             id="alter53-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/53-alter.oracle.schema.9.2.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="oracle"
+               encoding="utf8"
+               path="changelog/53-rollback.oracle.schema.9.2.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>

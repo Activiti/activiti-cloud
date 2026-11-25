@@ -20,7 +20,7 @@ import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskEventImpl;
 
 public class TaskAuditServiceInfoAppender {
 
@@ -31,7 +31,7 @@ public class TaskAuditServiceInfoAppender {
     }
 
     public CloudRuntimeEventImpl<Task, TaskRuntimeEvent.TaskEvents> appendAuditServiceInfoTo(
-        CloudTaskCompletedEventImpl cloudRuntimeEvent
+        CloudTaskEventImpl cloudRuntimeEvent
     ) {
         securityContextPrincipalProvider
             .getCurrentPrincipal()

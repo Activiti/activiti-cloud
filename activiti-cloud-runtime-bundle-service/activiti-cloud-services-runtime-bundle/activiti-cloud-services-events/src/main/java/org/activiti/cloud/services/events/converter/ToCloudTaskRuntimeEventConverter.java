@@ -48,6 +48,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
+import org.activiti.cloud.services.events.assignment.TaskAssignmentHistoryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +71,7 @@ public class ToCloudTaskRuntimeEventConverter {
     public CloudTaskCreatedEvent from(TaskCreatedEvent event) {
         CloudTaskCreatedEventImpl cloudEvent = new CloudTaskCreatedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        auditServiceInfoAppender.appendAuditServiceInfoTo(cloudEvent);
         return cloudEvent;
     }
 
@@ -81,7 +83,13 @@ public class ToCloudTaskRuntimeEventConverter {
 
     public CloudTaskAssignedEvent from(TaskAssignedEvent event) {
         CloudTaskAssignedEventImpl cloudEvent = new CloudTaskAssignedEventImpl(event.getEntity());
+        TaskAssignmentHistoryContext.Change change = TaskAssignmentHistoryContext.currentChange();
+        if (change != null && change.taskIds().contains(event.getEntity().getId())) {
+            cloudEvent.setReason(change.reason());
+            cloudEvent.setAssignmentAction(change.action());
+        }
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        auditServiceInfoAppender.appendAuditServiceInfoTo(cloudEvent);
         return cloudEvent;
     }
 

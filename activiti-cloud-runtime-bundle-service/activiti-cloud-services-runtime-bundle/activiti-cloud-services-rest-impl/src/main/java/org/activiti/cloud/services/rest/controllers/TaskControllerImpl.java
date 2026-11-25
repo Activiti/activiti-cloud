@@ -30,10 +30,10 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.Collections;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
-import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
@@ -44,7 +44,10 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.events.assignment.TaskAssignmentHistoryContext;
 import org.activiti.cloud.services.rest.api.TaskController;
+import org.activiti.cloud.services.rest.api.payload.AssignTaskWithReasonPayload;
+import org.activiti.cloud.services.rest.api.payload.AssignmentReasonPayload;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,18 +123,36 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
-    public EntityModel<CloudTask> claimTask(@PathVariable String taskId) {
+    public EntityModel<CloudTask> claimTask(
+        @PathVariable String taskId,
+        @RequestBody(required = false) AssignmentReasonPayload assignmentReasonPayload
+    ) {
         TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "claim", taskId);
-        return taskRepresentationModelAssembler.toModel(
-            taskRuntime.claim(TaskPayloadBuilder.claim().withTaskId(taskId).build())
+        return TaskAssignmentHistoryContext.withChange(
+            "CLAIMED",
+            assignmentReasonPayload == null ? null : assignmentReasonPayload.getReason(),
+            Collections.singleton(taskId),
+            () ->
+                taskRepresentationModelAssembler.toModel(
+                    taskRuntime.claim(TaskPayloadBuilder.claim().withTaskId(taskId).build())
+                )
         );
     }
 
     @Override
-    public EntityModel<CloudTask> releaseTask(@PathVariable String taskId) {
+    public EntityModel<CloudTask> releaseTask(
+        @PathVariable String taskId,
+        @RequestBody(required = false) AssignmentReasonPayload assignmentReasonPayload
+    ) {
         TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "release", taskId);
-        return taskRepresentationModelAssembler.toModel(
-            taskRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
+        return TaskAssignmentHistoryContext.withChange(
+            "RELEASED",
+            assignmentReasonPayload == null ? null : assignmentReasonPayload.getReason(),
+            Collections.singleton(taskId),
+            () ->
+                taskRepresentationModelAssembler.toModel(
+                    taskRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
+                )
         );
     }
 
@@ -202,12 +223,17 @@ public class TaskControllerImpl implements TaskController {
     @Override
     public EntityModel<CloudTask> assign(
         @PathVariable String taskId,
-        @RequestBody AssignTaskPayload assignTaskPayload
+        @RequestBody AssignTaskWithReasonPayload assignTaskPayload
     ) {
         TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "assign", taskId);
         if (assignTaskPayload != null) {
             assignTaskPayload.setTaskId(taskId);
         }
-        return taskRepresentationModelAssembler.toModel(taskRuntime.assign(assignTaskPayload));
+        return TaskAssignmentHistoryContext.withChange(
+            "ASSIGNED",
+            assignTaskPayload == null ? null : assignTaskPayload.getReason(),
+            Collections.singleton(taskId),
+            () -> taskRepresentationModelAssembler.toModel(taskRuntime.assign(assignTaskPayload))
+        );
     }
 }

@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.events.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,7 +24,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
@@ -42,6 +45,7 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.services.events.assignment.TaskAssignmentHistoryContext;
 import org.activiti.runtime.api.event.impl.TaskActivatedImpl;
 import org.activiti.runtime.api.event.impl.TaskAssignedEventImpl;
 import org.activiti.runtime.api.event.impl.TaskCancelledImpl;
@@ -233,6 +237,80 @@ class ToCloudTaskRuntimeEventConverterTest {
             .returns("11", e -> e.getEntity().getId())
             .returns("myProcessDef", CloudTaskAssignedEvent::getProcessDefinitionId);
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+    }
+
+    @Test
+    void shouldIncludeRequestMetadataAndActorInAssignmentEvents() {
+        when(securityContextPrincipalProvider.getCurrentPrincipal()).thenReturn(Optional.of(() -> USERNAME_GUID));
+        TaskImpl task = new TaskImpl();
+        task.setId("task-id");
+        task.setAssignee(USERNAME);
+
+        CloudTaskAssignedEvent event = TaskAssignmentHistoryContext.withChange(
+            "CLAIMED",
+            "Workload",
+            Set.of(task.getId()),
+            () -> converter.from(new TaskAssignedEventImpl(task))
+        );
+
+        assertThat(event)
+            .returns("Workload", CloudTaskAssignedEvent::getReason)
+            .returns("CLAIMED", CloudTaskAssignedEvent::getAssignmentAction)
+            .returns(USERNAME_GUID, CloudTaskAssignedEvent::getActor);
+        assertThat(TaskAssignmentHistoryContext.currentChange()).isNull();
+    }
+
+    @Test
+    void shouldNotApplyRequestMetadataToOtherTasks() {
+        TaskImpl task = new TaskImpl();
+        task.setId("other-task");
+
+        CloudTaskAssignedEvent event = TaskAssignmentHistoryContext.withChange(
+            "CLAIMED",
+            "Workload",
+            Set.of("requested-task"),
+            () -> converter.from(new TaskAssignedEventImpl(task))
+        );
+
+        assertThat(event.getReason()).isNull();
+        assertThat(event.getAssignmentAction()).isNull();
+        assertThat(event.getActor()).isEqualTo("service_user");
+    }
+
+    @Test
+    void shouldClearRequestMetadataWhenAnOperationFails() {
+        assertThatThrownBy(() ->
+            TaskAssignmentHistoryContext.withChange("CLAIMED", "Workload", Set.of("task"), () -> {
+                throw new IllegalStateException("Assignment failed");
+            })
+        ).isInstanceOf(IllegalStateException.class);
+
+        assertThat(TaskAssignmentHistoryContext.currentChange()).isNull();
+    }
+
+    @Test
+    void shouldCarryTheSameReasonForEachTaskInABulkAssignment() {
+        TaskImpl first = new TaskImpl();
+        first.setId("first");
+        TaskImpl second = new TaskImpl();
+        second.setId("second");
+
+        List<CloudTaskAssignedEvent> events = TaskAssignmentHistoryContext.withChange(
+            "ASSIGNED",
+            "Team workload",
+            Set.of(first.getId(), second.getId()),
+            () ->
+                List.of(
+                    converter.from(new TaskAssignedEventImpl(first)),
+                    converter.from(new TaskAssignedEventImpl(second))
+                )
+        );
+
+        assertThat(events)
+            .extracting(CloudTaskAssignedEvent::getReason)
+            .containsExactly("Team workload", "Team workload");
+        assertThat(events).extracting(CloudTaskAssignedEvent::getAssignmentAction).containsOnly("ASSIGNED");
+        assertThat(TaskAssignmentHistoryContext.currentChange()).isNull();
     }
 
     @Test

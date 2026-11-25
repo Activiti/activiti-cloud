@@ -27,6 +27,7 @@ import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.TaskAssignmentHistoryEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,6 +103,31 @@ public class TaskCreatedEventHandlerTest {
         verify(entityManager).persist(captor.capture());
 
         assertThat(captor.getValue().isAllowSelfService()).isNull();
+    }
+
+    @Test
+    void handleShouldRecordAnInitialAutomaticAssignment() {
+        TaskImpl task = buildTask();
+        task.setAssignee("automatic-assignee");
+        CloudTaskCreatedEventImpl event = new CloudTaskCreatedEventImpl(task);
+        event.setActor("service_user");
+        when(entityManagerFinder.findProcessInstanceWithTasks(task.getProcessInstanceId())).thenReturn(
+            Optional.of(buildProcessInstanceEntity())
+        );
+
+        handler.handle(event);
+
+        ArgumentCaptor<TaskAssignmentHistoryEntity> captor = ArgumentCaptor.forClass(TaskAssignmentHistoryEntity.class);
+        verify(entityManager).persist(captor.capture());
+        assertThat(captor.getValue())
+            .returns(event.getId(), TaskAssignmentHistoryEntity::getId)
+            .returns(task.getId(), TaskAssignmentHistoryEntity::getTaskId)
+            .returns(null, TaskAssignmentHistoryEntity::getPreviousAssignee)
+            .returns("automatic-assignee", TaskAssignmentHistoryEntity::getNewAssignee)
+            .returns("ASSIGNED", TaskAssignmentHistoryEntity::getAction)
+            .returns("service_user", TaskAssignmentHistoryEntity::getActor)
+            .returns(event.getTimestamp(), TaskAssignmentHistoryEntity::getTimestamp)
+            .returns(null, TaskAssignmentHistoryEntity::getReason);
     }
 
     private ProcessInstanceEntity buildProcessInstanceEntity() {

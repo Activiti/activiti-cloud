@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,6 +151,56 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
                 assertThat(result.wasNull()).isFalse();
                 result.getBoolean("allow_self_service_declared");
                 assertThat(result.wasNull()).isTrue();
+            }
+        }
+    }
+
+    @Test
+    void shouldCreateAssignmentHistoryTableAndOrderedIndex() throws Exception {
+        try (Connection connection = dataSource.getConnection()) {
+            List<String> columns = new ArrayList<>();
+            try (ResultSet result = connection.getMetaData().getColumns(null, null, "TASK_ASSIGNMENT_HISTORY", null)) {
+                while (result.next()) {
+                    columns.add(result.getString("COLUMN_NAME"));
+                    if ("REASON".equals(result.getString("COLUMN_NAME"))) {
+                        assertThat(result.getInt("COLUMN_SIZE")).isEqualTo(255);
+                        assertThat(result.getString("IS_NULLABLE")).isEqualTo("YES");
+                    }
+                }
+            }
+            assertThat(columns).containsExactlyInAnyOrder(
+                "ID",
+                "TASK_ID",
+                "ACTOR",
+                "PREVIOUS_ASSIGNEE",
+                "NEW_ASSIGNEE",
+                "ACTION",
+                "TIMESTAMP",
+                "REASON"
+            );
+            List<String> indexColumns = new ArrayList<>();
+            try (
+                ResultSet indexes = connection
+                    .getMetaData()
+                    .getIndexInfo(null, null, "TASK_ASSIGNMENT_HISTORY", false, false)
+            ) {
+                while (indexes.next()) {
+                    if ("IDX_TASK_ASSIGNMENT_HISTORY_TASK_TIME".equalsIgnoreCase(indexes.getString("INDEX_NAME"))) {
+                        indexColumns.add(indexes.getString("COLUMN_NAME") + ":" + indexes.getString("ASC_OR_DESC"));
+                    }
+                }
+            }
+            assertThat(indexColumns).containsExactly("TASK_ID:A", "TIMESTAMP:D", "ID:D");
+            try (
+                ResultSet columnsResult = connection
+                    .getMetaData()
+                    .getColumns(null, null, "TASK_ASSIGNMENT_EVENT_RECEIPT", null)
+            ) {
+                List<String> receiptColumns = new ArrayList<>();
+                while (columnsResult.next()) {
+                    receiptColumns.add(columnsResult.getString("COLUMN_NAME"));
+                }
+                assertThat(receiptColumns).containsExactlyInAnyOrder("ID", "TASK_ID");
             }
         }
     }

@@ -17,12 +17,15 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.model.TaskAssignmentEventReceiptEntity;
+import org.activiti.cloud.services.query.model.TaskAssignmentHistoryEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 
 public class TaskAssignedEventHandler implements QueryEventHandler {
@@ -36,12 +39,32 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskAssignedEvent taskAssignedEvent = (CloudTaskAssignedEvent) event;
+        if (entityManager.find(TaskAssignmentEventReceiptEntity.class, event.getId()) != null) {
+            return;
+        }
         Task eventTask = taskAssignedEvent.getEntity();
         Optional<TaskEntity> findResult = Optional.ofNullable(entityManager.find(TaskEntity.class, eventTask.getId()));
         TaskEntity queryTaskEntity = findResult.orElseThrow(() ->
             new QueryException("Unable to find task with id: " + eventTask.getId())
         );
         String assignee = eventTask.getAssignee();
+        entityManager.persist(new TaskAssignmentEventReceiptEntity(event.getId(), eventTask.getId()));
+        String previousAssignee = queryTaskEntity.getAssignee();
+        if (!Objects.equals(previousAssignee, assignee)) {
+            String action = taskAssignedEvent.getAssignmentAction();
+            entityManager.persist(
+                new TaskAssignmentHistoryEntity(
+                    event.getId(),
+                    eventTask.getId(),
+                    event.getActor(),
+                    previousAssignee,
+                    assignee,
+                    action != null ? action : assignee == null || assignee.isEmpty() ? "RELEASED" : "ASSIGNED",
+                    event.getTimestamp(),
+                    taskAssignedEvent.getReason()
+                )
+            );
+        }
         queryTaskEntity.setAssignee(assignee);
         if (assignee != null && !assignee.isEmpty()) {
             queryTaskEntity.setStatus(Task.TaskStatus.ASSIGNED);

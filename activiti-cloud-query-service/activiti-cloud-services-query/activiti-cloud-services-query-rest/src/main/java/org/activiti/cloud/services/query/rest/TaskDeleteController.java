@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
+import org.activiti.cloud.services.query.app.repository.TaskAssignmentEventReceiptRepository;
+import org.activiti.cloud.services.query.app.repository.TaskAssignmentHistoryRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -54,6 +56,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class TaskDeleteController {
 
     private final TaskRepository taskRepository;
+    private final TaskAssignmentHistoryRepository taskAssignmentHistoryRepository;
+    private final TaskAssignmentEventReceiptRepository taskAssignmentEventReceiptRepository;
 
     private final TaskCandidateUserRepository taskCandidateUserRepository;
 
@@ -69,9 +73,13 @@ public class TaskDeleteController {
         TaskCandidateUserRepository taskCandidateUserRepository,
         TaskCandidateGroupRepository taskCandidateGroupRepository,
         TaskVariableRepository taskVariableRepository,
-        TaskRepresentationModelAssembler taskRepresentationModelAssembler
+        TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+        TaskAssignmentHistoryRepository taskAssignmentHistoryRepository,
+        TaskAssignmentEventReceiptRepository taskAssignmentEventReceiptRepository
     ) {
         this.taskRepository = taskRepository;
+        this.taskAssignmentHistoryRepository = taskAssignmentHistoryRepository;
+        this.taskAssignmentEventReceiptRepository = taskAssignmentEventReceiptRepository;
         this.taskCandidateUserRepository = taskCandidateUserRepository;
         this.taskCandidateGroupRepository = taskCandidateGroupRepository;
         this.taskVariableRepository = taskVariableRepository;
@@ -91,6 +99,10 @@ public class TaskDeleteController {
         Set<String> taskIds = tasks.stream().map(TaskEntity::getId).collect(Collectors.toSet());
 
         if (!taskIds.isEmpty()) {
+            taskAssignmentHistoryRepository.deleteAll(taskAssignmentHistoryRepository.findByTaskIdIn(taskIds));
+            taskAssignmentEventReceiptRepository.deleteAll(
+                taskAssignmentEventReceiptRepository.findByTaskIdIn(taskIds)
+            );
             taskCandidateUserRepository.deleteAll(taskCandidateUserRepository.findByTaskIdIn(taskIds));
             taskCandidateGroupRepository.deleteAll(taskCandidateGroupRepository.findByTaskIdIn(taskIds));
             taskVariableRepository.deleteAll(taskVariableRepository.findByTaskIdIn(taskIds));

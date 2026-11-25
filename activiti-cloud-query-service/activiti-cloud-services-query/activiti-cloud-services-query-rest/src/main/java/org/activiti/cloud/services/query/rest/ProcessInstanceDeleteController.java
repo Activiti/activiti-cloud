@@ -33,6 +33,8 @@ import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskAssignmentEventReceiptRepository;
+import org.activiti.cloud.services.query.app.repository.TaskAssignmentHistoryRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -64,6 +66,8 @@ public class ProcessInstanceDeleteController {
     private final ProcessInstanceRepository processInstanceRepository;
 
     private final TaskRepository taskRepository;
+    private final TaskAssignmentHistoryRepository taskAssignmentHistoryRepository;
+    private final TaskAssignmentEventReceiptRepository taskAssignmentEventReceiptRepository;
 
     private final VariableRepository variableRepository;
 
@@ -92,10 +96,14 @@ public class ProcessInstanceDeleteController {
         TaskCandidateUserRepository taskCandidateUserRepository,
         TaskCandidateGroupRepository taskCandidateGroupRepository,
         TaskVariableRepository taskVariableRepository,
-        ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler
+        ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+        TaskAssignmentHistoryRepository taskAssignmentHistoryRepository,
+        TaskAssignmentEventReceiptRepository taskAssignmentEventReceiptRepository
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.taskRepository = taskRepository;
+        this.taskAssignmentHistoryRepository = taskAssignmentHistoryRepository;
+        this.taskAssignmentEventReceiptRepository = taskAssignmentEventReceiptRepository;
         this.variableRepository = variableRepository;
         this.serviceTaskRepository = serviceTaskRepository;
         this.bpmnActivityRepository = bpmnActivityRepository;
@@ -156,6 +164,8 @@ public class ProcessInstanceDeleteController {
         }
 
         Set<String> taskIds = tasks.stream().map(TaskEntity::getId).collect(Collectors.toSet());
+        taskAssignmentHistoryRepository.deleteAll(taskAssignmentHistoryRepository.findByTaskIdIn(taskIds));
+        taskAssignmentEventReceiptRepository.deleteAll(taskAssignmentEventReceiptRepository.findByTaskIdIn(taskIds));
         taskCandidateUserRepository.deleteAll(taskCandidateUserRepository.findByTaskIdIn(taskIds));
         taskCandidateGroupRepository.deleteAll(taskCandidateGroupRepository.findByTaskIdIn(taskIds));
         taskVariableRepository.deleteAll(taskVariableRepository.findByTaskIdIn(taskIds));

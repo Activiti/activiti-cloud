@@ -21,6 +21,7 @@ import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.model.TaskAssignmentHistoryEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,21 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
                 }
 
                 persistIntoDatabase(event, queryTaskEntity);
+                String assignee = queryTaskEntity.getAssignee();
+                if (assignee != null && !assignee.isEmpty()) {
+                    entityManager.persist(
+                        new TaskAssignmentHistoryEntity(
+                            event.getId(),
+                            taskId,
+                            event.getActor(),
+                            null,
+                            assignee,
+                            "ASSIGNED",
+                            event.getTimestamp(),
+                            null
+                        )
+                    );
+                }
             }
         );
     }

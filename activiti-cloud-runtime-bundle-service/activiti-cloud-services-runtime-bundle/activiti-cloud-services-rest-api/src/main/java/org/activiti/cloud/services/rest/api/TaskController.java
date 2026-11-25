@@ -18,13 +18,15 @@ package org.activiti.cloud.services.rest.api;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import org.activiti.api.task.model.payloads.AssignTaskPayload;
+import jakarta.validation.Valid;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskIdentificationStrategy;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.rest.api.payload.AssignTaskWithReasonPayload;
+import org.activiti.cloud.services.rest.api.payload.AssignmentReasonPayload;
 import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -55,12 +57,14 @@ public interface TaskController {
 
     @PostMapping(value = "/v1/tasks/{taskId}/claim")
     EntityModel<CloudTask> claimTask(
-        @Parameter(description = "Enter the taskId to claim task") @PathVariable(value = "taskId") String taskId
+        @Parameter(description = "Enter the taskId to claim task") @PathVariable(value = "taskId") String taskId,
+        @Valid @RequestBody(required = false) AssignmentReasonPayload assignmentReasonPayload
     );
 
     @PostMapping(value = "/v1/tasks/{taskId}/release")
     EntityModel<CloudTask> releaseTask(
-        @Parameter(description = "Enter the taskId to release task") @PathVariable(value = "taskId") String taskId
+        @Parameter(description = "Enter the taskId to release task") @PathVariable(value = "taskId") String taskId,
+        @Valid @RequestBody(required = false) AssignmentReasonPayload assignmentReasonPayload
     );
 
     @PostMapping(value = "/v1/tasks/{taskId}/complete", consumes = APPLICATION_JSON_VALUE)
@@ -101,6 +105,6 @@ public interface TaskController {
     @PostMapping(value = "/v1/tasks/{taskId}/assign", consumes = APPLICATION_JSON_VALUE)
     EntityModel<CloudTask> assign(
         @Parameter(description = "Enter the taskId to assign task pay load") @PathVariable("taskId") String taskId,
-        @RequestBody AssignTaskPayload assignTaskPayload
+        @Valid @RequestBody AssignTaskWithReasonPayload assignTaskPayload
     );
 }
