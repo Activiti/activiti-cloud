@@ -16,15 +16,20 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import java.util.List;
+import java.util.function.Function;
 import org.activiti.cloud.services.query.model.QServiceTaskEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.springframework.data.core.PropertyPath;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.query.QueryUtils;
@@ -40,6 +45,15 @@ final class ServiceTaskSorting {
     );
 
     private ServiceTaskSorting() {}
+
+    static <T> Page<T> sorted(Pageable pageable, Function<Pageable, Page<T>> finder) {
+        Pageable resolved = resolve(pageable);
+        Page<T> page = finder.apply(resolved);
+        if (resolved == pageable) {
+            return page;
+        }
+        return new PageImpl<>(page.getContent(), pageable, page.getTotalElements());
+    }
 
     static Pageable resolve(Pageable pageable) {
         if (pageable.getSort().getOrderFor(SERVICE_TASK_TYPE) == null) {
@@ -57,9 +71,16 @@ final class ServiceTaskSorting {
     private static OrderSpecifier<?> toOrderSpecifier(Sort.Order order) {
         Order direction = order.isAscending() ? Order.ASC : Order.DESC;
         Expression expression = SERVICE_TASK_TYPE.equals(order.getProperty())
-            ? QServiceTaskEntity.serviceTaskEntity.serviceTaskType.coalesce(ServiceTaskEntity.DEFAULT_SERVICE_TASK_TYPE)
+            ? buildServiceTaskTypeFrom(order)
             : buildPropertyPathFrom(order);
         return new OrderSpecifier(direction, expression, toNullHandling(order.getNullHandling()));
+    }
+
+    private static Expression<?> buildServiceTaskTypeFrom(Sort.Order order) {
+        ComparableExpressionBase<String> coalesced = QServiceTaskEntity.serviceTaskEntity.serviceTaskType.coalesce(
+            ServiceTaskEntity.DEFAULT_SERVICE_TASK_TYPE
+        );
+        return order.isIgnoreCase() ? Expressions.stringOperation(Ops.LOWER, coalesced) : coalesced;
     }
 
     private static Expression<?> buildPropertyPathFrom(Sort.Order order) {

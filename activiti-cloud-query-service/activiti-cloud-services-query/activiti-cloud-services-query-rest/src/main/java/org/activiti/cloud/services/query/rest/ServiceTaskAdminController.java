@@ -77,7 +77,7 @@ public class ServiceTaskAdminController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            serviceTaskRepository.findAll(predicate, ServiceTaskSorting.resolve(pageable)),
+            ServiceTaskSorting.sorted(pageable, resolved -> serviceTaskRepository.findAll(predicate, resolved)),
             representationModelAssembler
         );
     }

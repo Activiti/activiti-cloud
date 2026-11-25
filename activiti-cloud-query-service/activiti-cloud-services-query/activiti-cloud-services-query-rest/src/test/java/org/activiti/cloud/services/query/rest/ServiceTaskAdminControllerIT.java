@@ -19,8 +19,11 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.query.rest.TaskControllerIT.CURRENT_USER;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
@@ -36,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
@@ -244,6 +248,80 @@ class ServiceTaskAdminControllerIT {
             .then()
             .statusCode(200)
             .body(SERVICE_TASKS_ID_ROOT, contains("default", "zendesk"));
+    }
+
+    @Test
+    void should_keepServiceTaskTypeInPaginationLinks_when_sortedByServiceTaskType() {
+        queryTestUtils.buildServiceTask().withId("1").withServiceTaskType("Agent: Run").save();
+
+        queryTestUtils.buildServiceTask().withId("2").withServiceTaskType("Rest Connector: GET").save();
+
+        queryTestUtils.buildServiceTask().withId("3").withServiceTaskType("Zendesk Connector: CREATE").save();
+
+        //the sort is rewritten to a coalesce expression for the query, which must not reach the generated links
+        given()
+            .param("page", 0)
+            .param("size", 2)
+            .param("sort", "serviceTaskType,asc")
+            .accept(MediaTypes.HAL_JSON_VALUE)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body("_links.next.href", allOf(containsString("serviceTaskType"), not(containsString("coalesce"))));
+    }
+
+    @Test
+    void should_sortByAnotherColumn_when_serviceTaskTypeIsNotPartOfTheSort() {
+        queryTestUtils.buildServiceTask().withId("1").withStartedDate(new Date(2000)).save();
+
+        queryTestUtils.buildServiceTask().withId("2").withStartedDate(new Date(3000)).save();
+
+        queryTestUtils.buildServiceTask().withId("3").withStartedDate(new Date(1000)).save();
+
+        given()
+            .param("sort", "startedDate,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("2", "1", "3"));
+    }
+
+    @Test
+    void should_sortBySecondaryDateColumn_when_sortedByServiceTaskTypeAndStartedDate() {
+        //same type everywhere, so the date decides the order and exercises a non String column
+        queryTestUtils
+            .buildServiceTask()
+            .withId("1")
+            .withServiceTaskType("Agent: Run")
+            .withStartedDate(new Date(2000))
+            .save();
+
+        queryTestUtils
+            .buildServiceTask()
+            .withId("2")
+            .withServiceTaskType("Agent: Run")
+            .withStartedDate(new Date(3000))
+            .save();
+
+        queryTestUtils
+            .buildServiceTask()
+            .withId("3")
+            .withServiceTaskType("Agent: Run")
+            .withStartedDate(new Date(1000))
+            .save();
+
+        given()
+            .param("sort", "serviceTaskType,asc")
+            .param("sort", "startedDate,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("2", "1", "3"));
     }
 
     @Test
