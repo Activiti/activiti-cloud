@@ -19,6 +19,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.query.rest.TaskControllerIT.CURRENT_USER;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -167,6 +168,82 @@ class ServiceTaskAdminControllerIT {
             .then()
             .statusCode(200)
             .body(ENTRIES_ROOT, hasSize(0));
+    }
+
+    @Test
+    void should_sortServiceTasksWithNullTypeAsDefaultType_when_sortedByServiceTaskTypeAscending() {
+        queryTestUtils.buildServiceTask().withId("zendesk").withServiceTaskType("Zendesk Connector: CREATE").save();
+
+        queryTestUtils.buildServiceTask().withId("default").save();
+
+        queryTestUtils.buildServiceTask().withId("agent").withServiceTaskType("Agent: Run").save();
+
+        given()
+            .param("sort", "serviceTaskType,asc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("agent", "default", "zendesk"));
+    }
+
+    @Test
+    void should_sortServiceTasksWithNullTypeAsDefaultType_when_sortedByServiceTaskTypeDescending() {
+        queryTestUtils.buildServiceTask().withId("zendesk").withServiceTaskType("Zendesk Connector: CREATE").save();
+
+        queryTestUtils.buildServiceTask().withId("default").save();
+
+        queryTestUtils.buildServiceTask().withId("agent").withServiceTaskType("Agent: Run").save();
+
+        given()
+            .param("sort", "serviceTaskType,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("zendesk", "default", "agent"));
+    }
+
+    @Test
+    void should_applySecondarySort_when_sortedByServiceTaskTypeAndAnotherProperty() {
+        queryTestUtils.buildServiceTask().withId("1").save();
+
+        queryTestUtils.buildServiceTask().withId("2").save();
+
+        queryTestUtils.buildServiceTask().withId("3").withServiceTaskType("Agent: Run").save();
+
+        given()
+            .param("sort", "serviceTaskType,asc")
+            .param("sort", "id,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("3", "2", "1"));
+    }
+
+    @Test
+    void should_honourSkipCount_when_sortedByServiceTaskType() {
+        queryTestUtils.buildServiceTask().withId("zendesk").withServiceTaskType("Zendesk Connector: CREATE").save();
+
+        queryTestUtils.buildServiceTask().withId("default").save();
+
+        queryTestUtils.buildServiceTask().withId("agent").withServiceTaskType("Agent: Run").save();
+
+        //ascending order is agent, default, zendesk, and skipCount is not a multiple of maxItems
+        given()
+            .param("skipCount", 1)
+            .param("maxItems", 2)
+            .param("sort", "serviceTaskType,asc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("default", "zendesk"));
     }
 
     @Test

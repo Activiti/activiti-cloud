@@ -76,7 +76,7 @@ public class ProcessInstanceServiceTasksAdminController {
     ) {
         Predicate filter = serviceTaskEntity.processInstanceId.eq(processInstanceId).and(predicate);
 
-        Page<ServiceTaskEntity> page = taskRepository.findAll(filter, pageable);
+        Page<ServiceTaskEntity> page = taskRepository.findAll(filter, ServiceTaskSorting.resolve(pageable));
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 }
