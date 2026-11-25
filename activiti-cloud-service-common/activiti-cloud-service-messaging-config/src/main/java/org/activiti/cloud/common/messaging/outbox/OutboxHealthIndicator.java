@@ -16,15 +16,20 @@
 package org.activiti.cloud.common.messaging.outbox;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.integration.jdbc.store.JdbcChannelMessageStore;
+import org.springframework.scheduling.annotation.Scheduled;
 
 public class OutboxHealthIndicator implements HealthIndicator {
 
     private final JdbcChannelMessageStore jdbcChannelMessageStore;
     private final OutboxLifecycleController outboxLifecycleController;
+
+    private Map<String, Object> storeDetails = Map.of();
 
     // Inject your specific queue channel bean
     public OutboxHealthIndicator(
@@ -35,11 +40,28 @@ public class OutboxHealthIndicator implements HealthIndicator {
         this.outboxLifecycleController = outboxLifecycleController;
     }
 
+    @Scheduled(fixedDelayString = "${activiti.cloud.messaging.outbox.health.fixed-delay:1m}")
+    void refreshStoreDetails() {
+        this.storeDetails = Map.copyOf(storeDetails());
+    }
+
     @Override
     public Health health() {
         final var endpoints = outboxLifecycleController.getEndpointsRunningStatus();
 
-        final var messageGroups = endpoints
+        return Health.up()
+            .withDetail("running", endpoints.values().stream().allMatch(Boolean.TRUE::equals))
+            .withDetail(
+                "store",
+                Optional.of(storeDetails).filter(Predicate.not(Map::isEmpty)).orElseGet(this::storeDetails)
+            )
+            .withDetail("pollers", endpoints)
+            .build();
+    }
+
+    private Map<String, Object> storeDetails() {
+        final var messageGroups = outboxLifecycleController
+            .getEndpointsRunningStatus()
             .keySet()
             .stream()
             .map(key -> Map.entry(key, jdbcChannelMessageStore.messageGroupSize(key)))
@@ -47,10 +69,6 @@ public class OutboxHealthIndicator implements HealthIndicator {
 
         final var messages = messageGroups.values().stream().mapToInt(Integer::intValue).sum();
 
-        return Health.up()
-            .withDetail("running", endpoints.values().stream().allMatch(Boolean.TRUE::equals))
-            .withDetail("store", Map.of("messages", messages, "groups", messageGroups))
-            .withDetail("pollers", endpoints)
-            .build();
+        return Map.of("messages", messages, "groups", messageGroups);
     }
 }
