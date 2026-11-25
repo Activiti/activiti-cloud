@@ -124,7 +124,7 @@ class ServiceTaskSortingTest {
         assertThat(orderSpecifiers).hasSize(2);
         assertThat(orderSpecifiers.get(0).getOrder()).isEqualTo(Order.ASC);
         assertThat(orderSpecifiers.get(1).getOrder()).isEqualTo(Order.DESC);
-        assertThat(orderSpecifiers.get(1).getTarget().toString()).isEqualTo("serviceTaskEntity.startedDate");
+        assertThat(orderSpecifiers.get(1).getTarget()).hasToString("serviceTaskEntity.startedDate");
     }
 
     @Test
@@ -139,7 +139,7 @@ class ServiceTaskSortingTest {
             (QSort) ServiceTaskSorting.resolve(pageable).getSort()
         ).getOrderSpecifiers();
 
-        assertThat(orderSpecifiers.get(1).getTarget().toString()).isEqualTo(
+        assertThat(orderSpecifiers.get(1).getTarget()).hasToString(
             "serviceTaskEntity.integrationContexts.connectorType"
         );
     }
