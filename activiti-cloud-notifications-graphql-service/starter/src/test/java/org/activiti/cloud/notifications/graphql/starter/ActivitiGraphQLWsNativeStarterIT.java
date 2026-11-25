@@ -104,6 +104,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
@@ -115,7 +116,11 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 @AutoConfigureTestRestTemplate
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = { GrapqhQLApplication.class })
+@SpringBootTest(
+    webEnvironment = WebEnvironment.RANDOM_PORT,
+    classes = { GrapqhQLApplication.class },
+    properties = "spring.activiti.cloud.services.notifications.graphql.ws.liveness.timeout=PT10S"
+)
 @ContextConfiguration(
     classes = { EngineEventsConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
@@ -338,7 +343,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                                 i
                                     .receive()
                                     .asString()
-                                    .filter(this::isPing)
+                                    .filter(message -> hasType(message, GraphQlWebSocketMessageType.PING))
                                     .doOnNext(ping -> pingsAnswered.incrementAndGet())
                                     .map(ping -> pongMessage)
                             )
@@ -365,11 +370,111 @@ class ActivitiGraphQLWsNativeStarterIT {
         assertThat(pingsAnswered.get()).isGreaterThanOrEqualTo(2);
     }
 
-    private boolean isPing(String message) {
-        return (
-            objectMapper.readValue(message, GraphQlWebSocketMessage.class).resolvedType() ==
-            GraphQlWebSocketMessageType.PING
+    @Test
+    void should_keepSessionOpen_when_subscriptionStreamsEventsContinuously() {
+        String initMessage = connectionInitMessage(TESTADMIN);
+        String subscribeMessage = objectMapper.writeValueAsString(
+            Map.of(
+                "id",
+                "1",
+                "type",
+                "subscribe",
+                "payload",
+                Map.of(
+                    "query",
+                    "subscription { engineEvents(appName: [\"default-app\"], eventType: PROCESS_DEPLOYED) " +
+                        "{ processDefinitionKey eventType } }"
+                )
+            )
         );
+        String pongMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.pong(null));
+        Duration livenessTimeout = graphQlWebSocketLivenessProperties.getTimeout();
+        AtomicInteger eventsReceived = new AtomicInteger();
+        AtomicInteger pingsAnswered = new AtomicInteger();
+
+        Mono<WebSocketCloseStatus> closeStatus = HttpClient.create()
+            .baseUrl("ws://localhost:" + port)
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) ->
+                Flux.merge(
+                    o
+                        .sendString(
+                            Flux.concat(
+                                Mono.just(initMessage),
+                                Mono.just(subscribeMessage),
+                                i
+                                    .receive()
+                                    .asString()
+                                    .doOnNext(message -> {
+                                        if (hasType(message, GraphQlWebSocketMessageType.NEXT)) {
+                                            eventsReceived.incrementAndGet();
+                                        }
+                                    })
+                                    .filter(message -> hasType(message, GraphQlWebSocketMessageType.PING))
+                                    .doOnNext(ping -> pingsAnswered.incrementAndGet())
+                                    .map(ping -> pongMessage)
+                            )
+                        )
+                        .then()
+                        .then(Mono.<WebSocketCloseStatus>never()),
+                    i
+                        .receiveCloseStatus()
+                        .switchIfEmpty(
+                            Mono.<WebSocketCloseStatus>error(
+                                new IllegalStateException("Connection terminated without close frame")
+                            )
+                        )
+                )
+            )
+            .next();
+        Disposable eventPublisher = Flux.interval(Duration.ofMillis(500), Duration.ofSeconds(1)).subscribe(tick ->
+            sendEvents(processDeployedEvent()).run()
+        );
+
+        try {
+            StepVerifier.create(closeStatus)
+                .expectSubscription()
+                .expectNoEvent(livenessTimeout.plusSeconds(5))
+                .thenCancel()
+                .verify(livenessTimeout.plus(TIMEOUT));
+        } finally {
+            eventPublisher.dispose();
+        }
+
+        assertThat(eventsReceived.get()).isGreaterThanOrEqualTo((int) livenessTimeout.toSeconds());
+        assertThat(pingsAnswered.get()).isGreaterThanOrEqualTo(2);
+    }
+
+    private boolean hasType(String message, GraphQlWebSocketMessageType type) {
+        return objectMapper.readValue(message, GraphQlWebSocketMessage.class).resolvedType() == type;
+    }
+
+    private Runnable sendEvents(CloudRuntimeEvent... events) {
+        return () ->
+            producerChannel
+                .output()
+                .send(
+                    MessageBuilder.withPayload(Arrays.array(events)).setHeader("routingKey", "eventProducer").build()
+                );
+    }
+
+    private static CloudProcessDeployedEventImpl processDeployedEvent() {
+        CloudProcessDeployedEventImpl event = new CloudProcessDeployedEventImpl(
+            "id",
+            new Date().getTime(),
+            new ProcessDefinitionEntity()
+        );
+        event.setAppName("default-app");
+        event.setServiceName("rb-my-app");
+        event.setServiceFullName("serviceFullName");
+        event.setServiceType("runtime-bundle");
+        event.setServiceVersion("");
+        event.setProcessDefinitionId("processDefinitionId");
+        event.setProcessDefinitionKey("processDefinitionKey");
+        event.setProcessDefinitionVersion(1);
+        event.setBusinessKey("businessKey");
+        return event;
     }
 
     private String connectionInitMessage(String user) {
@@ -471,17 +576,6 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .expectNext(messages)
                 .thenCancel()
                 .verify(TIMEOUT);
-        }
-
-        private Runnable sendEvents(CloudRuntimeEvent... events) {
-            return () ->
-                producerChannel
-                    .output()
-                    .send(
-                        MessageBuilder.withPayload(Arrays.array(events))
-                            .setHeader("routingKey", "eventProducer")
-                            .build()
-                    );
         }
 
         @Test
