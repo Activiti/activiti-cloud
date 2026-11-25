@@ -382,8 +382,10 @@ class GraphQlWebSocketLivenessMonitorTest {
         );
     }
 
-    private static void recordClosesTo(WebSocketSession recordedSession, List<WebSocketSession> closedSessions)
-        throws IOException {
+    private static void recordClosesTo(
+        WebSocketSession recordedSession,
+        List<WebSocketSession> closedSessions
+    ) throws IOException {
         doAnswer(invocation -> {
             closedSessions.add(recordedSession);
             return null;
