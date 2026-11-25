@@ -29,9 +29,6 @@ Requires the following secrets to be set:
 | DOCKERHUB_PASSWORD           | Docker Hub repository password     |
 | NEXUS_USERNAME               | Maven repository username (CI)     |
 | NEXUS_PASSWORD               | Maven repository password (CI)     |
-| RANCHER2_URL                 | Rancher URL for tests              |
-| RANCHER2_ACCESS_KEY          | Rancher access key for tests       |
-| RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
 | SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
 
 CI publishes Maven artifacts to Nexus and Cloudsmith: preview snapshots go to `activiti-snapshots`, and develop alpha releases go to `activiti-releases`.

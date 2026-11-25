@@ -20,12 +20,6 @@ on:
         required: true
       ACCEPTANCE_TESTADMIN_PASSWORD:
         required: true
-      RANCHER2_URL:
-        required: true
-      RANCHER2_ACCESS_KEY:
-        required: true
-      RANCHER2_SECRET_KEY:
-        required: true
       REPORT_PORTAL_TOKEN:
         required: true
       REPORT_PORTAL_URL:
@@ -42,6 +36,9 @@ jobs:
   test:
     name: playwright (${{ matrix.profile }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     concurrency:
       group: playwright-activiti-slot-${{ matrix.concurrency-slot }}
       queue: max
@@ -87,23 +84,19 @@ jobs:
         with:
           profile: ${{ matrix.profile }}
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@bda439f5f36b99b262ebdcd3613869bddb064c8e # v5.2.0
-        with:
-          version: v1.19.6
-
       - name: Set up Helm
         uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5.1.0
         with:
           version: v3.5.2
 
-      - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@16298278308f674c76542d61658da190e975e31c # v19.16.0
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: ${{ env.CLUSTER_NAME }}
+          aws-region: us-east-2
+          role-to-assume: ${{ vars.ACTIVITI_EKS_ROLE_ARN }}
+
+      - name: Set up kubeconfig
+        run: aws eks update-kubeconfig --name "$CLUSTER_NAME"
 
       - uses: ./.github/actions/setup-env-for-broker
         with:

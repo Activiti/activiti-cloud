@@ -346,6 +346,9 @@ jobs:
       needs.pre-checks.outputs.skip != 'true'
       && needs.pre-checks.outputs.skip-tests != 'true'
       && needs.maven-build.result == 'success'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/_reusable-playwright-tests.yml
     with:
       ref: ${{ needs.create-tag.outputs.ref }}
@@ -356,9 +359,6 @@ jobs:
       ACCEPTANCE_HRADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_HRADMIN_PASSWORD }}
       ACCEPTANCE_PROCESSADMINUSER_PASSWORD: ${{ secrets.ACCEPTANCE_PROCESSADMINUSER_PASSWORD }}
       ACCEPTANCE_TESTADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
-      RANCHER2_URL: ${{ secrets.RANCHER2_URL }}
-      RANCHER2_ACCESS_KEY: ${{ secrets.RANCHER2_ACCESS_KEY }}
-      RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
       REPORT_PORTAL_TOKEN: ${{ secrets.REPORT_PORTAL_TOKEN }}
       REPORT_PORTAL_URL: ${{ secrets.REPORT_PORTAL_URL }}
 
