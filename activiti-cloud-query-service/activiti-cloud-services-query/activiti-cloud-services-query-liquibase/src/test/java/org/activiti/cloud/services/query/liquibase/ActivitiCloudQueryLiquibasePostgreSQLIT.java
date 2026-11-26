@@ -54,14 +54,15 @@ class ActivitiCloudQueryLiquibasePostgreSQLIT {
             """
         );
 
-        assertThat(index.get("pg_get_indexdef"))
+        assertThat(index)
+            .containsEntry(
+                "pg_get_expr",
+                "((parent_id IS NULL) AND ((linked_process_instance_id IS NULL) OR (linked_process_instance_type IS NULL)))"
+            )
+            .containsEntry("indisvalid", true)
+            .extractingByKey("pg_get_indexdef")
             .asString()
             .contains("start_date DESC NULLS LAST", "INCLUDE (id, name)");
-        assertThat(index).containsEntry(
-            "pg_get_expr",
-            "((parent_id IS NULL) AND ((linked_process_instance_id IS NULL) OR (linked_process_instance_type IS NULL)))"
-        );
-        assertThat(index).containsEntry("indisvalid", true);
     }
 
     @Test
