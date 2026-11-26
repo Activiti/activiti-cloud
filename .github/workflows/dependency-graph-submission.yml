@@ -34,6 +34,3 @@ jobs:
           java-version: '25'
           maven-version: ${{ env.MAVEN_VERSION }}
           maven-args: -Dmaven.wagon.http.pool=false
-          # The Cloudsmith settings read CLOUDSMITH_USERNAME and CLOUDSMITH_API_KEY, not these inputs.
-          maven-username: ""
-          maven-password: ""
