@@ -333,6 +333,20 @@ class GraphQlWebSocketLivenessMonitorTest {
     }
 
     @Test
+    void should_rejectNewMessages_when_closedSessionIsNoLongerTracked() throws Exception {
+        monitor.messageReceived(session);
+        monitor.messageHandled(session);
+        nanoTime.advance(TIMEOUT);
+        monitor.checkSessions();
+        when(session.isOpen()).thenReturn(false);
+        monitor.checkSessions();
+
+        boolean admitted = monitor.messageReceived(session);
+
+        assertThat(admitted).isFalse();
+    }
+
+    @Test
     void should_closeRemainingSessionOnNextCheck_when_closeExecutorRejectedTask() throws Exception {
         List<WebSocketSession> closedSessions = new ArrayList<>();
         WebSocketSession otherSession = mock(WebSocketSession.class);

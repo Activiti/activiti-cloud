@@ -61,6 +61,10 @@ public class GraphQlWebSocketLivenessMonitor implements SmartLifecycle {
     }
 
     public boolean messageReceived(WebSocketSession session) {
+        // A session being closed may already be untracked, so a new entry must not readmit its messages
+        if (!session.isOpen()) {
+            return false;
+        }
         long now = nanoTime.getAsLong();
         return sessions.computeIfAbsent(session.getId(), id -> new TrackedSession(session, now)).messageStarted(now);
     }

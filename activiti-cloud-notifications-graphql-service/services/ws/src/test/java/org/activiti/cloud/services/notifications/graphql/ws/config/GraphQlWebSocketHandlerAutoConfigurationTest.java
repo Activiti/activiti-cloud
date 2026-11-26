@@ -29,6 +29,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.graphql.autoconfigure.GraphQlAutoConfiguration;
 import org.springframework.boot.graphql.autoconfigure.servlet.GraphQlWebMvcAutoConfiguration;
@@ -137,6 +138,18 @@ class GraphQlWebSocketHandlerAutoConfigurationTest {
             assertThat(context.getStartupFailure())
                 .rootCause()
                 .hasMessageContaining("requires spring.graphql.websocket.keep-alive");
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "PT0S", "PT60S", "PT61S" })
+    void should_failStartup_when_keepAliveIsNotShorterThanLivenessTimeout(String keepAlive) {
+        contextRunner.withPropertyValues("spring.graphql.websocket.keep-alive=" + keepAlive).run(context -> {
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure())
+                .rootCause()
+                .hasMessageContaining("spring.graphql.websocket.keep-alive")
+                .hasMessageContaining("must be positive and shorter than " + LIVENESS + ".timeout");
         });
     }
 

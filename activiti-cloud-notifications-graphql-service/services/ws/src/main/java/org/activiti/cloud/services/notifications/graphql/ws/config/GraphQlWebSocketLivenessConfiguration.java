@@ -62,6 +62,17 @@ class GraphQlWebSocketLivenessConfiguration {
                     ".enabled=false"
             );
         }
+        if (!keepAlive.isPositive() || keepAlive.compareTo(timeout) >= 0) {
+            throw new IllegalStateException(
+                "spring.graphql.websocket.keep-alive (" +
+                    keepAlive +
+                    ") must be positive and shorter than " +
+                    GraphQlWebSocketLivenessProperties.PREFIX +
+                    ".timeout (" +
+                    timeout +
+                    ")"
+            );
+        }
         return new GraphQlWebSocketLivenessMonitor(
             timeout,
             checkInterval,

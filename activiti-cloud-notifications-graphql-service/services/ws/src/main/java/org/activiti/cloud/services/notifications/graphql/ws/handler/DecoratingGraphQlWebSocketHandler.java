@@ -20,7 +20,6 @@ import java.util.List;
 import org.springframework.graphql.server.WebGraphQlHandler;
 import org.springframework.graphql.server.webmvc.GraphQlWebSocketHandler;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
@@ -39,7 +38,6 @@ public class DecoratingGraphQlWebSocketHandler extends GraphQlWebSocketHandler {
         List<GraphQlWebSocketHandlerDecoratorFactory> decoratorFactories
     ) {
         super(graphQlHandler, converter, connectionInitTimeout, keepAliveDuration, corsConfiguration);
-        Assert.notNull(decoratorFactories, "decoratorFactories must not be null");
         this.decoratorFactories = List.copyOf(decoratorFactories);
     }
 
