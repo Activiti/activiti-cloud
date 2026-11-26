@@ -66,6 +66,24 @@ class ActivitiCloudQueryLiquibasePostgreSQLIT {
     }
 
     @Test
+    void shouldCreateUnassignedTaskStatusCoveringIndex() {
+        var index = jdbcTemplate.queryForMap(
+            """
+            SELECT pg_get_indexdef(indexrelid), pg_get_expr(indpred, indrelid), indisvalid
+            FROM pg_index
+            WHERE indexrelid = 'idx_task_status_unassigned'::regclass
+            """
+        );
+
+        assertThat(index)
+            .containsEntry("pg_get_expr", "(assignee IS NULL)")
+            .containsEntry("indisvalid", true)
+            .extractingByKey("pg_get_indexdef")
+            .asString()
+            .contains("USING btree (status) INCLUDE (id)");
+    }
+
+    @Test
     void shouldDropRootUnlinkedStartDateIndexReplacedByCoveringIndex() {
         String oldIndex = jdbcTemplate.queryForObject(
             "SELECT to_regclass('pi_root_unlinked_startdate_idx')::text",
