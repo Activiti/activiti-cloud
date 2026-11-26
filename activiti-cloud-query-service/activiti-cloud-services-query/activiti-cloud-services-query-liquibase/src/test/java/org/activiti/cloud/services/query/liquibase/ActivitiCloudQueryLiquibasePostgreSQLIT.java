@@ -45,19 +45,32 @@ class ActivitiCloudQueryLiquibasePostgreSQLIT {
     }
 
     @Test
-    void shouldCreateRootUnlinkedStartDateIndexForProcessInstance() {
+    void shouldCreateRootUnlinkedStartDateCoveringIndexForProcessInstance() {
         var index = jdbcTemplate.queryForMap(
             """
-            SELECT pg_get_indexdef(indexrelid), pg_get_expr(indpred, indrelid)
+            SELECT pg_get_indexdef(indexrelid), pg_get_expr(indpred, indrelid), indisvalid
             FROM pg_index
-            WHERE indexrelid = 'pi_root_unlinked_startdate_idx'::regclass
+            WHERE indexrelid = 'pi_root_unlinked_startdate_name_idx'::regclass
             """
         );
 
-        assertThat(index.get("pg_get_indexdef")).asString().contains("start_date DESC NULLS LAST");
+        assertThat(index.get("pg_get_indexdef"))
+            .asString()
+            .contains("start_date DESC NULLS LAST", "INCLUDE (id, name)");
         assertThat(index).containsEntry(
             "pg_get_expr",
             "((parent_id IS NULL) AND ((linked_process_instance_id IS NULL) OR (linked_process_instance_type IS NULL)))"
         );
+        assertThat(index).containsEntry("indisvalid", true);
+    }
+
+    @Test
+    void shouldDropRootUnlinkedStartDateIndexReplacedByCoveringIndex() {
+        String oldIndex = jdbcTemplate.queryForObject(
+            "SELECT to_regclass('pi_root_unlinked_startdate_idx')::text",
+            String.class
+        );
+
+        assertThat(oldIndex).isNull();
     }
 }
