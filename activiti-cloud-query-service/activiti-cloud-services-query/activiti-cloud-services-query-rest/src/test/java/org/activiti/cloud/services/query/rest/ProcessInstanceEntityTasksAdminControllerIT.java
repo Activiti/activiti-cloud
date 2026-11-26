@@ -57,6 +57,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @WebMvcTest(ProcessInstanceTasksAdminController.class)
 @EnableSpringDataWebSupport
@@ -108,6 +109,9 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
 
     @MockitoBean
     private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
+    private PlatformTransactionManager transactionManager;
 
     @MockitoBean
     private EntityManagerFactory entityManagerFactory;

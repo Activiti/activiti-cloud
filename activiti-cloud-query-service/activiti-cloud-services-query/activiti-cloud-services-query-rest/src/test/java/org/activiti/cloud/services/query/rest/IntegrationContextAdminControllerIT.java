@@ -48,6 +48,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @WebMvcTest(IntegrationContextAdminController.class)
 @Import({
@@ -102,6 +103,9 @@ class IntegrationContextAdminControllerIT {
 
     @MockitoBean
     private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
+    private PlatformTransactionManager transactionManager;
 
     @MockitoBean
     private EntityManagerFactory entityManagerFactory;

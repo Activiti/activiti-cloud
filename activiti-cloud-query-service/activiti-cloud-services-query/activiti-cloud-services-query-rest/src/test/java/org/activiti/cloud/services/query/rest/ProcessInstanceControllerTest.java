@@ -73,6 +73,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @WebMvcTest(ProcessInstanceController.class)
 @Import({
@@ -129,10 +130,16 @@ class ProcessInstanceControllerTest {
     private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
 
     @MockitoBean
+    private PlatformTransactionManager transactionManager;
+
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @MockitoBean
     private ProcessInstanceService processInstanceService;
+
+    @MockitoBean
+    private ProcessInstanceLinkService processInstanceLinkService;
 
     @MockitoBean
     private ApplicationRepository applicationRepository;
@@ -280,7 +287,7 @@ class ProcessInstanceControllerTest {
     void should_return_InternalServerError_when_linkProcessInstances() throws Exception {
         RuntimeException generic = new RuntimeException("boom");
         doThrow(generic)
-            .when(processInstanceService)
+            .when(processInstanceLinkService)
             .linkProcessInstances(
                 "mainProcessInstanceId",
                 List.of("orphanProcessInstanceId1", "orphanProcessInstanceId2"),

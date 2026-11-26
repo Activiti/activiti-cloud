@@ -35,6 +35,7 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.ApplicationAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
+import org.activiti.cloud.services.query.rest.ProcessInstanceLinkService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.ProcessVariableService;
@@ -77,6 +78,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @AutoConfiguration
 public class QueryRestWebMvcAutoConfiguration {
@@ -390,6 +394,33 @@ public class QueryRestWebMvcAutoConfiguration {
         );
     }
 
+    @Bean(destroyMethod = "shutdown")
+    @ConditionalOnMissingBean
+    public ProcessInstanceLinkService processInstanceLinkService(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository,
+        PlatformTransactionManager transactionManager,
+        SecurityManager securityManager,
+        @Value("${query.process-instance-link.retry.max-attempts:1}") int maxRetries,
+        @Value("${query.process-instance-link.retry.delay-seconds:60}") int retryDelaySeconds
+    ) {
+        var retryScheduler = new ThreadPoolTaskScheduler();
+        retryScheduler.setPoolSize(1);
+        retryScheduler.setThreadNamePrefix("process-instance-link-retry-");
+        retryScheduler.setDaemon(true);
+        retryScheduler.setWaitForTasksToCompleteOnShutdown(true);
+        retryScheduler.initialize();
+        return new ProcessInstanceLinkService(
+            processInstanceRepository,
+            processInstanceHierarchyRepository,
+            new TransactionTemplate(transactionManager),
+            securityManager,
+            maxRetries,
+            retryDelaySeconds,
+            retryScheduler
+        );
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public ApplicationAdminService applicationAdminService(ApplicationRepository applicationRepository) {
@@ -416,12 +447,14 @@ public class QueryRestWebMvcAutoConfiguration {
     public ProcessInstanceControllerHelper processInstanceControllerHelper(
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceService processInstanceService,
-        ProcessInstanceSearchService processInstanceSearchService
+        ProcessInstanceSearchService processInstanceSearchService,
+        ProcessInstanceLinkService processInstanceLinkService
     ) {
         return new ProcessInstanceControllerHelper(
             processInstanceRepository,
             processInstanceService,
-            processInstanceSearchService
+            processInstanceSearchService,
+            processInstanceLinkService
         );
     }
 
