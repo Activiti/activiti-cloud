@@ -144,37 +144,28 @@ public class OutboxAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper(
-        Supplier<JsonMapper> outboxJsonObjectMapperProvider
+        Supplier<JsonMapper> outboxJsonObjectMapperProvider,
+        @Value("${activiti.cloud.messaging.outbox.store.message-header-patterns:*}") String[] headerPatterns
     ) {
-        return new EmbeddedHeadersJsonMessageMapper(outboxJsonObjectMapperProvider.get(), "*");
+        return new EmbeddedHeadersJsonMessageMapper(outboxJsonObjectMapperProvider.get(), headerPatterns);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    AllowListDeserializingConverter allowListDeserializingConverter(
-        EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper
-    ) {
-        return new AllowListDeserializingConverter(new OutboxMessageDeserializer(embeddedHeadersJsonMessageMapper));
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    MessageRowMapper messageRowMapperProvider(AllowListDeserializingConverter allowListDeserializingConverter) {
-        return new MessageRowMapper(allowListDeserializingConverter);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    SerializingConverter serializingConverter(EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper) {
-        return new SerializingConverter(new OutboxMessageSerializer(embeddedHeadersJsonMessageMapper));
+    MessageRowMapper messageRowMapperProvider(EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper) {
+        final var deserializer = new AllowListDeserializingConverter(
+            new OutboxMessageDeserializer(embeddedHeadersJsonMessageMapper)
+        );
+        return new MessageRowMapper(deserializer);
     }
 
     @Bean
     @ConditionalOnMissingBean
     ChannelMessageStorePreparedStatementSetter channelMessageStorePreparedStatementSetterProvider(
-        SerializingConverter serializingConverter
+        EmbeddedHeadersJsonMessageMapper embeddedHeadersJsonMessageMapper
     ) {
-        return new ChannelMessageStorePreparedStatementSetter(serializingConverter);
+        final var serializer = new SerializingConverter(new OutboxMessageSerializer(embeddedHeadersJsonMessageMapper));
+        return new ChannelMessageStorePreparedStatementSetter(serializer);
     }
 
     @Bean
