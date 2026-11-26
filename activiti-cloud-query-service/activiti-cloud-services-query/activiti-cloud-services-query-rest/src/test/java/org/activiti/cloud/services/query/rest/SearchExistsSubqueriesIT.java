@@ -21,6 +21,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetu
 import static org.activiti.cloud.services.query.rest.SearchExistsSubqueriesIT.CURRENT_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -109,6 +110,14 @@ class SearchExistsSubqueriesIT {
     private static final String PROCESS_INSTANCE_ID_1 = "processInstanceId1";
     private static final String PROCESS_INSTANCE_ID_2 = "processInstanceId2";
     private static final String PROCESS_INSTANCE_ID_3 = "processInstanceId3";
+    private static final String OTHER_USER = "otheruser";
+    private static final String CURRENT_USER_GROUP = "testgroup";
+    private static final String VISIBLE_AS_INITIATOR = "visibleAsInitiator";
+    private static final String VISIBLE_AS_ASSIGNEE = "visibleAsAssignee";
+    private static final String VISIBLE_AS_CANDIDATE_USER = "visibleAsCandidateUser";
+    private static final String VISIBLE_THROUGH_EVERY_ROUTE = "visibleThroughEveryRoute";
+    private static final String INVISIBLE_AS_OWNER = "invisibleAsOwner";
+    private static final String INVISIBLE_AS_CANDIDATE_GROUP = "invisibleAsCandidateGroup";
 
     @Container
     @ServiceConnection
@@ -707,6 +716,134 @@ class SearchExistsSubqueriesIT {
 
         String countSql = CapturedStatements.findSelectFrom("from process_instance ");
         assertThat(countSql).contains("count(").doesNotContain("over()").doesNotContain("group by");
+    }
+
+    private void givenProcessInstancesVisibleThroughEachRouteAndInvisibleOnes() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(VISIBLE_AS_INITIATOR)
+            .withInitiator(CURRENT_USER)
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(VISIBLE_AS_ASSIGNEE)
+            .withInitiator(OTHER_USER)
+            .withTasks(queryTestUtils.buildTask().withAssignee(CURRENT_USER))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(VISIBLE_AS_CANDIDATE_USER)
+            .withInitiator(OTHER_USER)
+            .withTasks(queryTestUtils.buildTask().withAssignee(OTHER_USER).withTaskCandidateUsers(CURRENT_USER))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(VISIBLE_THROUGH_EVERY_ROUTE)
+            .withInitiator(CURRENT_USER)
+            .withTasks(
+                queryTestUtils.buildTask().withAssignee(CURRENT_USER).withTaskCandidateUsers(CURRENT_USER),
+                queryTestUtils.buildTask().withAssignee(CURRENT_USER).withTaskCandidateUsers(CURRENT_USER, OTHER_USER)
+            )
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(INVISIBLE_AS_OWNER)
+            .withInitiator(OTHER_USER)
+            .withTasks(queryTestUtils.buildTask().withAssignee(OTHER_USER).withOwner(CURRENT_USER))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(INVISIBLE_AS_CANDIDATE_GROUP)
+            .withInitiator(OTHER_USER)
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateGroups(CURRENT_USER_GROUP))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(OTHER_USER).buildAndSave();
+    }
+
+    @ParameterizedTest(name = "existsSubqueries={0}")
+    @ValueSource(booleans = { false, true })
+    @WithMockUser(username = CURRENT_USER, authorities = { "ROLE_ACTIVITI_USER", "GROUP_" + CURRENT_USER_GROUP })
+    void should_restrictProcessInstancesToInitiatorAssigneeOrCandidateUser_regardlessOfTheToggle(
+        boolean existsSubqueriesEnabled
+    ) {
+        setExistsSubqueriesEnabled(existsSubqueriesEnabled);
+        givenProcessInstancesVisibleThroughEachRouteAndInvisibleOnes();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(PROCESS_INSTANCE_SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
+            .body(
+                PROCESS_INSTANCE_IDS_JSON_PATH,
+                containsInAnyOrder(
+                    VISIBLE_AS_INITIATOR,
+                    VISIBLE_AS_ASSIGNEE,
+                    VISIBLE_AS_CANDIDATE_USER,
+                    VISIBLE_THROUGH_EVERY_ROUTE
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(PROCESS_INSTANCE_COUNT_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+    }
+
+    @Test
+    void should_restrictProcessInstancesWithUnionOfVisibleIds_whenToggleIsOn() {
+        setExistsSubqueriesEnabled(true);
+        givenProcessInstancesVisibleThroughEachRouteAndInvisibleOnes();
+        CapturedStatements.clear();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(PROCESS_INSTANCE_SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4));
+
+        assertUnionOfVisibleIds(CapturedStatements.findSelectFrom(" union "));
+    }
+
+    @Test
+    void should_countProcessInstancesWithUnionOfVisibleIds_whenToggleIsOn() {
+        setExistsSubqueriesEnabled(true);
+        givenProcessInstancesVisibleThroughEachRouteAndInvisibleOnes();
+        CapturedStatements.clear();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(PROCESS_INSTANCE_COUNT_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+
+        String countSql = CapturedStatements.findSelectFrom(" union ");
+        assertThat(countSql).contains("count(");
+        assertUnionOfVisibleIds(countSql);
+    }
+
+    private static void assertUnionOfVisibleIds(String sql) {
+        assertThat(sql)
+            .containsPattern("\\w+\\.id in\\s*\\(")
+            .containsPattern("select \\w+\\.id from process_instance \\w+ where \\w+\\.initiator=\\?")
+            .containsPattern("select \\w+\\.process_instance_id from task \\w+ where \\w+\\.assignee=\\?")
+            .containsPattern("select \\w+\\.process_instance_id from task_candidate_user \\w+ join task \\w+ on")
+            .doesNotContain("union all")
+            .doesNotContain("exists");
+        assertThat(sql.split("\\bunion\\b", -1)).hasSize(3);
     }
 
     /**
