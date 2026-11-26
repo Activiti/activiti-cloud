@@ -17,6 +17,7 @@ package org.activiti.cloud.common.messaging.outbox;
 
 public final class OutboxHeaders {
 
+    public static final String OUTBOX_UUID = "outboxUUID";
     public static final String OUTBOX_DESTINATION = "outboxDestination";
 
     private OutboxHeaders() {

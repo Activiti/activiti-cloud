@@ -16,6 +16,7 @@
 package org.activiti.cloud.common.messaging.outbox;
 
 import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_DESTINATION;
+import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -63,6 +65,15 @@ class OutboxChannelInterceptorTest {
         interceptor = new OutboxChannelInterceptor(outboxChannel, destinationProvider);
     }
 
+    @Test
+    void handleMessage_sendToOutboxChannel() {
+        Message<String> message = MessageBuilder.withPayload("payload").build();
+
+        interceptor.handleMessage(message);
+
+        verify(outboxChannel).send(message);
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("passthroughScenarios")
     void preSend_whenPassthroughConditionMet_returnsOriginalMessage(
@@ -86,11 +97,13 @@ class OutboxChannelInterceptorTest {
             verify(destinationProvider).apply(originalMessage, sourceChannel);
         } else {
             verify(destinationProvider, never()).apply(any(), any());
+            assertThat(result.getHeaders()).containsKey(OUTBOX_UUID);
         }
     }
 
     static Stream<Arguments> passthroughScenarios() {
         Message<String> withExistingHeader = MessageBuilder.withPayload("payload-1")
+            .setHeader(OUTBOX_UUID, "existing.id")
             .setHeader(OUTBOX_DESTINATION, "existing.destination")
             .build();
 
@@ -130,6 +143,7 @@ class OutboxChannelInterceptorTest {
         assertThat(result.getPayload()).isEqualTo(originalMessage.getPayload());
         assertThat(result.getHeaders())
             .containsEntry(OUTBOX_DESTINATION, resolvedDestination)
+            .containsKey(OUTBOX_UUID)
             .containsAllEntriesOf(expectedRetainedHeaders)
             .doesNotContainKeys(headersToRemove);
     }
