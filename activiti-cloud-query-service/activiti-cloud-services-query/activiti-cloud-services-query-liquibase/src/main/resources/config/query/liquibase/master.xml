@@ -1362,4 +1362,28 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter55-schema" dbms="postgresql">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT count(*) FROM pg_index
+        WHERE indexrelid = to_regclass('idx_task_status_unassigned') AND indisvalid
+      </sqlCheck>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/55-alter.pg.schema.9.2.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/55-rollback.pg.schema.9.2.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>
