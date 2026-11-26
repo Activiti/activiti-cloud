@@ -333,7 +333,7 @@ class GraphQlWebSocketLivenessMonitorTest {
     }
 
     @Test
-    void should_rejectNewMessages_when_closedSessionIsNoLongerTracked() throws Exception {
+    void should_rejectNewMessages_when_closedSessionIsNoLongerTracked() {
         monitor.messageReceived(session);
         monitor.messageHandled(session);
         nanoTime.advance(TIMEOUT);
