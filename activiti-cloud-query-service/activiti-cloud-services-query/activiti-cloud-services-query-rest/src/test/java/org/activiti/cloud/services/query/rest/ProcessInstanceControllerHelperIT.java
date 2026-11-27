@@ -18,18 +18,25 @@ package org.activiti.cloud.services.query.rest;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 
 import com.querydsl.core.types.Predicate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
+import org.activiti.cloud.services.query.app.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.LinkProcessInstancesRequest;
@@ -48,13 +55,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @SpringBootTest(
-    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
+    properties = {
+        "spring.main.banner-mode=off",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "query.process-instance-link.retry.max-attempts=0",
+    }
 )
 @TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
@@ -76,6 +88,9 @@ class ProcessInstanceControllerHelperIT {
     @Autowired
     private ProcessInstanceRepository processInstanceRepository;
 
+    @MockitoSpyBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
     @MockitoBean
     private SecurityManager securityManager;
 
@@ -84,6 +99,7 @@ class ProcessInstanceControllerHelperIT {
 
     @BeforeEach
     void setUp() {
+        processInstanceHierarchyRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
 
@@ -358,7 +374,8 @@ class ProcessInstanceControllerHelperIT {
         }
 
         @Test
-        void shouldThrowExceptionWhenLinkingProcessInstancesWithInvalidMainProcessInstanceId() {
+        void should_notLinkAndNotThrow_when_mainProcessInstanceIdIsInvalid() {
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
             ProcessInstanceEntity orphanProcessInstance = buildProcessInstanceEntity();
             orphanProcessInstance.setInitiator(TEST_USER);
             orphanProcessInstance.setLinkedProcessInstanceType("form-type");
@@ -370,11 +387,142 @@ class ProcessInstanceControllerHelperIT {
 
             String invalidMainProcessInstanceId = UUID.randomUUID().toString();
 
-            assertThatThrownBy(() ->
-                processInstanceControllerHelper.linkProcessInstances(request, invalidMainProcessInstanceId)
-            )
-                .isInstanceOf(QueryEntityNotFoundException.class)
-                .hasMessage("Unable to find process for the given id:'" + invalidMainProcessInstanceId + "'");
+            processInstanceControllerHelper.linkProcessInstances(request, invalidMainProcessInstanceId);
+
+            assertThat(
+                processInstanceRepository
+                    .findById(orphanProcessInstance.getId())
+                    .orElseThrow()
+                    .getLinkedProcessInstanceId()
+            ).isNull();
+        }
+
+        @Test
+        void should_registerHierarchyAndCountRelatedProcesses_when_orphanWithSubtreeIsLinked() {
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+            ProcessInstanceEntity main = saveProcess(null);
+            ProcessInstanceEntity orphan = saveProcess("form-type");
+            ProcessInstanceEntity child = saveProcess(null);
+            saveSelfRow(main);
+            saveSelfRow(orphan);
+            saveSelfRow(child);
+            saveHierarchyRow(orphan, child, 1, ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS);
+
+            link(main, orphan);
+
+            assertThat(processInstanceHierarchyRepository.findByDescendantId(child.getId()))
+                .extracting(
+                    ProcessInstanceHierarchyEntity::getAncestorId,
+                    ProcessInstanceHierarchyEntity::getDepth,
+                    ProcessInstanceHierarchyEntity::getRelationType
+                )
+                .containsExactlyInAnyOrder(
+                    tuple(child.getId(), 0, ProcessInstanceHierarchyEntity.RELATION_SELF),
+                    tuple(orphan.getId(), 1, ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS),
+                    tuple(main.getId(), 2, ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS)
+                );
+            assertThat(relatedTo(main)).containsExactlyInAnyOrder(main.getId(), orphan.getId(), child.getId());
+            assertThat(relatedCounts(main))
+                .containsEntry(ProcessInstanceHierarchyEntity.RELATION_LINKED, 1L)
+                .containsEntry(ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, 1L);
+        }
+
+        @Test
+        void should_replaceLongerHierarchyRow_when_childIsLinkedInLaterRequest() {
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+            ProcessInstanceEntity main = saveProcess(null);
+            ProcessInstanceEntity parent = saveProcess("form-type");
+            ProcessInstanceEntity child = saveProcess("form-type");
+            saveSelfRow(main);
+            saveSelfRow(parent);
+            saveSelfRow(child);
+            saveHierarchyRow(parent, child, 1, ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS);
+
+            link(main, parent);
+            link(main, child);
+
+            assertThat(processInstanceHierarchyRepository.findByDescendantId(child.getId()))
+                .extracting(
+                    ProcessInstanceHierarchyEntity::getAncestorId,
+                    ProcessInstanceHierarchyEntity::getDepth,
+                    ProcessInstanceHierarchyEntity::getRelationType
+                )
+                .contains(tuple(main.getId(), 1, ProcessInstanceHierarchyEntity.RELATION_LINKED));
+            assertThat(relatedCounts(main))
+                .containsEntry(ProcessInstanceHierarchyEntity.RELATION_LINKED, 2L)
+                .doesNotContainKey(ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS);
+        }
+
+        @Test
+        void should_rollbackLinkAndHierarchyTogether_when_hierarchyRegistrationFails() {
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+            ProcessInstanceEntity main = saveProcess(null);
+            ProcessInstanceEntity orphan = saveProcess("form-type");
+            saveSelfRow(main);
+            saveSelfRow(orphan);
+            doThrow(new IllegalStateException("hierarchy failure"))
+                .when(processInstanceHierarchyRepository)
+                .saveAll(any());
+
+            link(main, orphan);
+
+            assertThat(
+                processInstanceRepository.findById(orphan.getId()).orElseThrow().getLinkedProcessInstanceId()
+            ).isNull();
+            assertThat(processInstanceHierarchyRepository.findByDescendantId(orphan.getId()))
+                .extracting(ProcessInstanceHierarchyEntity::getAncestorId)
+                .containsExactly(orphan.getId());
+        }
+
+        private ProcessInstanceEntity saveProcess(String linkType) {
+            ProcessInstanceEntity entity = buildProcessInstanceEntity();
+            entity.setInitiator(TEST_USER);
+            entity.setLinkedProcessInstanceType(linkType);
+            return processInstanceRepository.save(entity);
+        }
+
+        private void saveSelfRow(ProcessInstanceEntity process) {
+            saveHierarchyRow(process, process, 0, ProcessInstanceHierarchyEntity.RELATION_SELF);
+        }
+
+        private void saveHierarchyRow(
+            ProcessInstanceEntity ancestor,
+            ProcessInstanceEntity descendant,
+            int depth,
+            String relationType
+        ) {
+            processInstanceHierarchyRepository.save(
+                new ProcessInstanceHierarchyEntity(ancestor.getId(), descendant.getId(), depth, relationType)
+            );
+        }
+
+        private void link(ProcessInstanceEntity main, ProcessInstanceEntity orphan) {
+            var request = new LinkProcessInstancesRequest();
+            request.setProcessInstanceIds(List.of(orphan.getId()));
+            request.setLinkProcessInstanceType("form-type");
+            processInstanceControllerHelper.linkProcessInstances(request, main.getId());
+        }
+
+        private Set<String> relatedTo(ProcessInstanceEntity process) {
+            var searchRequest = new ProcessInstanceSearchRequest();
+            searchRequest.setProcessRelatedTo(Set.of(process.getId()));
+            return processInstanceRepository
+                .findAll(ProcessInstanceSpecification.unrestricted(searchRequest))
+                .stream()
+                .map(ProcessInstanceEntity::getId)
+                .collect(Collectors.toSet());
+        }
+
+        private Map<String, Long> relatedCounts(ProcessInstanceEntity process) {
+            return processInstanceHierarchyRepository
+                .countRelatedByAncestor(List.of(process.getId()))
+                .stream()
+                .collect(
+                    Collectors.toMap(
+                        ProcessInstanceHierarchyRepository.RelatedProcessCountProjection::getRelationType,
+                        ProcessInstanceHierarchyRepository.RelatedProcessCountProjection::getRelatedCount
+                    )
+                );
         }
     }
 }

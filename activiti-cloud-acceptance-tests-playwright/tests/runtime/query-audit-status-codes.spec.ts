@@ -32,16 +32,18 @@ activiti.describe('Runtime — Query and Audit Status Codes', () => {
             expect(statuses).toEqual(checks.map(() => 404));
         });
 
-        await activiti.step('When user query link targets an unknown process instance', async () => {
-            const checks = queryServiceTestUser.statusChecks.buildNotFoundPostStatusChecks(FAKE_ID, LINK_TYPE);
-            const statuses = await queryServiceTestUser.runStatusChecks(checks);
-            expect(statuses).toEqual(checks.map(() => 404));
-        });
-
         await activiti.step('When admin query GET endpoints reference unknown ids', async () => {
             const checks = queryAdminServiceTestAdmin.statusChecks.buildNotFoundGetStatusChecks(FAKE_ID);
             const statuses = await queryAdminServiceTestAdmin.runStatusChecks(checks);
             expect(statuses).toEqual(checks.map(() => 404));
+        });
+    });
+
+    activiti('should return 200 when linking to an unknown main process instance', async ({ queryServiceTestUser }) => {
+        await activiti.step('When user query link targets an unknown process instance', async () => {
+            const checks = queryServiceTestUser.statusChecks.buildUnknownMainProcessLinkPostStatusChecks(FAKE_ID, LINK_TYPE);
+            const statuses = await queryServiceTestUser.runStatusChecks(checks);
+            expect(statuses).toEqual(checks.map(() => 200));
         });
     });
 

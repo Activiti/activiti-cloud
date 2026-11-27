@@ -20,6 +20,7 @@ import java.util.List;
 import org.activiti.cloud.services.query.app.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.ProcessInstanceLinkService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.payload.LinkProcessInstancesRequest;
@@ -31,15 +32,18 @@ public class ProcessInstanceControllerHelper {
     private final ProcessInstanceRepository processInstanceRepository;
     private final ProcessInstanceService processInstanceService;
     private final ProcessInstanceSearchService processInstanceSearchService;
+    private final ProcessInstanceLinkService processInstanceLinkService;
 
     public ProcessInstanceControllerHelper(
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceService processInstanceService,
-        ProcessInstanceSearchService processInstanceSearchService
+        ProcessInstanceSearchService processInstanceSearchService,
+        ProcessInstanceLinkService processInstanceLinkService
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceService = processInstanceService;
         this.processInstanceSearchService = processInstanceSearchService;
+        this.processInstanceLinkService = processInstanceLinkService;
     }
 
     public Page<ProcessInstanceEntity> findAllProcessInstances(Predicate predicate, Pageable pageable) {
@@ -99,7 +103,7 @@ public class ProcessInstanceControllerHelper {
     }
 
     public void linkProcessInstances(LinkProcessInstancesRequest request, String mainProcessInstanceId) {
-        processInstanceService.linkProcessInstances(
+        processInstanceLinkService.linkProcessInstances(
             mainProcessInstanceId,
             request.getProcessInstanceIds(),
             request.getLinkProcessInstanceType()

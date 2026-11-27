@@ -137,7 +137,7 @@ export class QueryStatusChecks {
         ];
     }
 
-    buildNotFoundPostStatusChecks(fakeResourceId: string, linkType: string): readonly HttpStatusCheck<QueryService>[] {
+    buildUnknownMainProcessLinkPostStatusChecks(fakeResourceId: string, linkType: string): readonly HttpStatusCheck<QueryService>[] {
         return [
             BaseService.postStatusCheck<QueryService>('process instance link', `${QUERY_V1_BASE}/process-instances/${fakeResourceId}/link`, {
                 processInstanceIds: [fakeResourceId],
