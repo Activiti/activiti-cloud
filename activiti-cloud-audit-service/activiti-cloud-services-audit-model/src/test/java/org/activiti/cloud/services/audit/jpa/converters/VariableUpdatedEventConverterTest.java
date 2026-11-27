@@ -22,12 +22,46 @@ import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class VariableUpdatedEventConverterTest {
 
     private final VariableUpdatedEventConverter variableUpdatedEventConverter = new VariableUpdatedEventConverter(
         new EventContextInfoAppender()
     );
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void should_convertRedactedEventWithMetadata(boolean taskVariable) {
+        var variable = buildVariableInstance();
+        variable.setTaskId(taskVariable ? "taskId" : null);
+        var cloudEvent = buildCloudUpdateInstance(variable);
+        cloudEvent.setEphemeralVariable(true);
+        var entity = new VariableUpdatedEventEntity(cloudEvent);
+
+        entity.clearVariablePayloads();
+        var event = (CloudVariableUpdatedEventImpl<?>) variableUpdatedEventConverter.convertToAPI(entity);
+
+        assertThat(event.getId()).isEqualTo(cloudEvent.getId());
+        assertThat(event.getTimestamp()).isEqualTo(cloudEvent.getTimestamp());
+        assertThat(event.getEventType()).isEqualTo(cloudEvent.getEventType());
+        assertThat(event.getAppName()).isEqualTo(cloudEvent.getAppName());
+        assertThat(event.getMessageId()).isEqualTo(cloudEvent.getMessageId());
+        assertThat(event.getSequenceNumber()).isEqualTo(cloudEvent.getSequenceNumber());
+        assertThat(event.getProcessInstanceId()).isEqualTo(cloudEvent.getProcessInstanceId());
+        assertThat(event.getProcessDefinitionId()).isEqualTo(cloudEvent.getProcessDefinitionId());
+        assertThat(event.getParentProcessInstanceId()).isEqualTo(cloudEvent.getParentProcessInstanceId());
+        assertThat(event.getEntityId()).isEqualTo(cloudEvent.getEntityId());
+        assertThat(event.isEphemeralVariable()).isTrue();
+        assertThat(event.getEntity().getName()).isEqualTo(variable.getName());
+        assertThat(event.getEntity().getType()).isEqualTo(variable.getType());
+        assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(variable.getProcessInstanceId());
+        assertThat(event.getEntity().getTaskId()).isEqualTo(variable.getTaskId());
+        assertThat(event.getEntity().isTaskVariable()).isEqualTo(taskVariable);
+        assertThat((Object) event.getEntity().getValue()).isNull();
+        assertThat(event.getPreviousValue()).isNull();
+    }
 
     @Test
     void should_supportVariableUpdatedEvent() {

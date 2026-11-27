@@ -27,9 +27,11 @@ import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -102,13 +104,15 @@ public class QueryConsumerAutoConfiguration {
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
         IntegrationFlow queryEventsQueueIntegrationFlow,
-        @Value("${activiti.cloud.query.consumer.message-handler.chunk-size:100}") Integer chunkSize
+        @Value("${activiti.cloud.query.consumer.message-handler.chunk-size:100}") Integer chunkSize,
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
         return new QueryConsumerMessageHandler(
             eventHandlerContext,
             optimizer,
             entityManager,
-            queryEventsQueueIntegrationFlow.getInputChannel()
+            queryEventsQueueIntegrationFlow.getInputChannel(),
+            payloadCleanup
         ).chunkSize(chunkSize);
     }
 

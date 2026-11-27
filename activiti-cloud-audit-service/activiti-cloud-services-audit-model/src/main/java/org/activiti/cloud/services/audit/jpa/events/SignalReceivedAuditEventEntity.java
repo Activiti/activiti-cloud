@@ -19,13 +19,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import java.util.HashMap;
 import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
 
 @Entity(name = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
 @DiscriminatorValue(value = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
-public class SignalReceivedAuditEventEntity extends AuditEventEntity {
+public class SignalReceivedAuditEventEntity extends AuditEventEntity implements VariablePayloadEvent {
 
     protected static final String SIGNAL_RECEIVED_EVENT = "SignalReceivedEvent";
 
@@ -46,6 +47,25 @@ public class SignalReceivedAuditEventEntity extends AuditEventEntity {
 
     public void setSignal(BPMNSignal signal) {
         this.signal = signal;
+    }
+
+    @Override
+    public boolean isVariablePayloadEmpty() {
+        if (signal == null || signal.getSignalPayload() == null) {
+            return true;
+        }
+        var variables = signal.getSignalPayload().getVariables();
+        return variables == null || variables.isEmpty();
+    }
+
+    @Override
+    public void clearVariablePayloads() {
+        if (signal != null && signal.getSignalPayload() != null) {
+            var payload = signal.getSignalPayload();
+            if (payload.getVariables() != null) {
+                payload.setVariables(new HashMap<>());
+            }
+        }
     }
 
     @Override

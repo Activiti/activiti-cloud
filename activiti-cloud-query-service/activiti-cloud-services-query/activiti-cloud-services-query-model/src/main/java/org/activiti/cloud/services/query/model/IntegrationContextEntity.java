@@ -216,6 +216,11 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         return inBoundVariables;
     }
 
+    public void clearVariablePayloads() {
+        inBoundVariables = new HashMap<>();
+        outBoundVariables = new HashMap<>();
+    }
+
     public void setInBoundVariables(Map<String, Object> inboundVariables) {
         this.inBoundVariables = inboundVariables;
     }

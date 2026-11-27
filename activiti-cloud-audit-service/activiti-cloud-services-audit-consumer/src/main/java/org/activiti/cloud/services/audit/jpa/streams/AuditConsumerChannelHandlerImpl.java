@@ -24,10 +24,12 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.RuntimeVariableCleanup;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.transaction.annotation.Propagation;
@@ -42,13 +44,16 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
     private final EventsRepository eventsRepository;
 
     private final APIEventToEntityConverters eventConverters;
+    private final ObjectProvider<RuntimeVariableCleanup> payloadCleanup;
 
     public AuditConsumerChannelHandlerImpl(
         EventsRepository eventsRepository,
-        APIEventToEntityConverters eventConverters
+        APIEventToEntityConverters eventConverters,
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
         this.eventsRepository = eventsRepository;
         this.eventConverters = eventConverters;
+        this.payloadCleanup = payloadCleanup;
     }
 
     @SuppressWarnings("unchecked")
@@ -73,6 +78,7 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
             }
         }
         eventsRepository.saveAll(entities);
+        payloadCleanup.ifAvailable(strategy -> strategy.cleanup(entities));
 
         return entities;
     }

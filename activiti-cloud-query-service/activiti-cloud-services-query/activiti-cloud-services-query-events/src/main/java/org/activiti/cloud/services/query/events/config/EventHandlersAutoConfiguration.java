@@ -68,8 +68,12 @@ import org.activiti.cloud.services.query.events.handlers.TaskVariableUpdater;
 import org.activiti.cloud.services.query.events.handlers.VariableCreatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.VariableDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHandler;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.transientpolicy.TransientRuntimeVariableCleanup;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
@@ -80,9 +84,10 @@ public class EventHandlersAutoConfiguration {
     public QueryConsumerChannelHandler queryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer fetchingOptimizer,
-        EntityManager entityManager
+        EntityManager entityManager,
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
-        return new QueryConsumerChannelHandler(eventHandlerContext, fetchingOptimizer, entityManager);
+        return new QueryConsumerChannelHandler(eventHandlerContext, fetchingOptimizer, entityManager, payloadCleanup);
     }
 
     @Bean
@@ -101,6 +106,17 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessDeployedEventHandler processDeployedEventHandler(EntityManager entityManager) {
         return new ProcessDeployedEventHandler(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RuntimeVariableCleanup.class)
+    @ConditionalOnProperty(
+        name = "activiti.cloud.processing-data.variables.retention-policy",
+        havingValue = "transient",
+        matchIfMissing = false
+    )
+    public RuntimeVariableCleanup queryPayloadCleanup(EntityManager entityManager) {
+        return new TransientRuntimeVariableCleanup(entityManager);
     }
 
     @Bean

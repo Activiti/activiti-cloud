@@ -1825,6 +1825,13 @@
             "format" : "date-time"
           }
         }, {
+          "name" : "lastVariableCleanup",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
           "name" : "suspendedDate",
           "in" : "query",
           "schema" : {
@@ -2116,6 +2123,13 @@
             "format" : "date-time"
           }
         }, {
+          "name" : "lastVariableCleanup",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
           "name" : "suspendedDate",
           "in" : "query",
           "schema" : {
@@ -2384,6 +2398,13 @@
           }
         }, {
           "name" : "completedDate",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "name" : "lastVariableCleanup",
           "in" : "query",
           "schema" : {
             "type" : "string",
@@ -3660,6 +3681,13 @@
             "format" : "date-time"
           }
         }, {
+          "name" : "lastVariableCleanup",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
           "name" : "suspendedDate",
           "in" : "query",
           "schema" : {
@@ -4264,6 +4292,13 @@
           }
         }, {
           "name" : "completedDate",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "name" : "lastVariableCleanup",
           "in" : "query",
           "schema" : {
             "type" : "string",
@@ -6029,6 +6064,13 @@
             "format" : "date-time"
           }
         }, {
+          "name" : "lastVariableCleanup",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
           "name" : "suspendedDate",
           "in" : "query",
           "schema" : {
@@ -6868,6 +6910,13 @@
           }
         }, {
           "name" : "completedDate",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "name" : "lastVariableCleanup",
           "in" : "query",
           "schema" : {
             "type" : "string",

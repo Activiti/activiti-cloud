@@ -38,6 +38,17 @@ public class VariableUpdatedEventEntity extends VariableAuditEventEntity {
         this.previousValue = new VariableValue<>(cloudEvent.getPreviousValue());
     }
 
+    @Override
+    public boolean isVariablePayloadEmpty() {
+        return super.isVariablePayloadEmpty() && previousValue == null;
+    }
+
+    @Override
+    public void clearVariablePayloads() {
+        super.clearVariablePayloads();
+        previousValue = null;
+    }
+
     public VariableValue<?> getPreviousValue() {
         return previousValue;
     }

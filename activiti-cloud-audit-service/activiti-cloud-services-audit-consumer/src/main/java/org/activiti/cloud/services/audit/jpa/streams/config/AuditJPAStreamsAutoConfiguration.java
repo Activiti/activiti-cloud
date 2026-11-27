@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.streams.config;
 
+import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +25,22 @@ import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.RuntimeVariableCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.TransientRuntimeVariableCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.IntegrationPayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.MessagePayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.PayloadBatchWriter;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.SignalPayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.VariablePayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.streams.AuditConsumerChannelHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -51,9 +61,45 @@ public class AuditJPAStreamsAutoConfiguration {
     @ConditionalOnMissingBean
     public AuditConsumerChannelHandler auditConsumerChannelHandler(
         EventsRepository eventsRepository,
-        APIEventToEntityConverters eventConverters
+        APIEventToEntityConverters eventConverters,
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
-        return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters);
+        return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters, payloadCleanup);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(
+        name = "activiti.cloud.processing-data.variables.retention-policy",
+        havingValue = "transient",
+        matchIfMissing = false
+    )
+    public PayloadBatchWriter auditPayloadBatchWriter(EntityManager entityManager) {
+        return new PayloadBatchWriter(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RuntimeVariableCleanup.class)
+    @ConditionalOnProperty(
+        name = "activiti.cloud.processing-data.variables.retention-policy",
+        havingValue = "transient",
+        matchIfMissing = false
+    )
+    public RuntimeVariableCleanup auditPayloadCleanup(
+        EntityManager entityManager,
+        PayloadBatchWriter payloadBatchWriter,
+        @Value("${activiti.cloud.processing-data.variables.cleanup-batch-size:100}") int pageSize
+    ) {
+        return new TransientRuntimeVariableCleanup(
+            entityManager,
+            List.of(
+                new VariablePayloadUpdateStrategy(payloadBatchWriter),
+                new IntegrationPayloadUpdateStrategy(payloadBatchWriter),
+                new MessagePayloadUpdateStrategy(payloadBatchWriter),
+                new SignalPayloadUpdateStrategy(payloadBatchWriter)
+            ),
+            pageSize
+        );
     }
 
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER)

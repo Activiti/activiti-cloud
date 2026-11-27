@@ -40,6 +40,7 @@ public abstract class AuditEventEntity {
 
     private String eventId;
     private Long timestamp;
+
     private String eventType;
 
     /* Cloud Data */

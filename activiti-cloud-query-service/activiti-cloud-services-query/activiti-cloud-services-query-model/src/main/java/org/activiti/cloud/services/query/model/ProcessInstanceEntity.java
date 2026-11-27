@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -40,6 +41,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
+import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -113,6 +115,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Temporal(TIMESTAMP)
     private Date completedDate;
+
+    @Column(insertable = false, updatable = false)
+    private Instant lastVariableCleanup;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Temporal(TIMESTAMP)
@@ -469,6 +474,10 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     public void setStartTo(Date startTo) {
         this.startTo = startTo;
+    }
+
+    public Instant getLastVariableCleanup() {
+        return lastVariableCleanup;
     }
 
     @Override
