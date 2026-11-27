@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { timeouts } from '../../../config/runtime/timeouts';
 import { resolveNotificationsEndpoints } from '../connection/endpoints';
 import { GraphQlWebSocketClient } from '../ws/graphql-websocket.client';
 import { normalizeBearer, settleAfterSubscribe } from './subscription-utils';
+import { webSocketLogger } from '../../../helpers/logging/logger-builder';
 
 export interface PushedCountMessage {
     count: number;
@@ -33,10 +33,6 @@ export interface PushedCountsSubscriptionOptions {
 }
 
 export interface PushedCountsSubscription {
-    waitForCountUpdate(predicate: (count: PushedCountMessage) => boolean, timeoutMs?: number): Promise<PushedCountMessage>;
-    waitForAssignedTasksCount(predicate: (count: number) => boolean, timeoutMs?: number): Promise<PushedCountMessage>;
-    waitForQueuedTasksCount(predicate: (count: number) => boolean, timeoutMs?: number): Promise<PushedCountMessage>;
-    waitForRunningProcessesCount(predicate: (count: number) => boolean, timeoutMs?: number): Promise<PushedCountMessage>;
     getLatestCounts(): Record<string, PushedCountMessage>;
     close(): void;
 }
@@ -60,7 +56,7 @@ export async function openPushedCountsSubscription(
     const {
         accessToken,
         countTypes,
-        readyTimeoutMs = 15_000,
+        readyTimeoutMs = 30_000,
     } = options;
 
     const { webSocketGraphqlUrl, hostHeader } = resolveNotificationsEndpoints();
@@ -68,6 +64,9 @@ export async function openPushedCountsSubscription(
     countTypes.forEach((type) => {
         countUpdates[type] = [];
     });
+
+    webSocketLogger.info(`Opening pushed counts subscription for: ${countTypes.join(', ')}`);
+    webSocketLogger.debug(`WebSocket URL: ${webSocketGraphqlUrl}`);
 
     const ws = new GraphQlWebSocketClient(
         webSocketGraphqlUrl,
@@ -77,18 +76,26 @@ export async function openPushedCountsSubscription(
 
     ws.onNext((data) => {
         const payload = data as Record<string, PushedCountMessage> | undefined;
+        webSocketLogger.debug(`Received pushed counts message: ${JSON.stringify(payload)}`);
         if (payload) {
             countTypes.forEach((type) => {
                 if (payload[type]) {
                     countUpdates[type].push(payload[type]);
+                    webSocketLogger.debug(`Updated ${type}: ${payload[type].count} (as of ${payload[type].asOf})`);
                 }
             });
         }
     });
 
+    ws.onError((error) => {
+        const errorMsg = `WebSocket error: ${error.message}`;
+        webSocketLogger.error(errorMsg);
+    });
+
     ws.connect();
 
     try {
+        webSocketLogger.debug(`Subscribing to ${countTypes.length} count types...`);
         await Promise.all(
             countTypes.map((countType) =>
                 ws.subscribe(
@@ -101,22 +108,41 @@ export async function openPushedCountsSubscription(
                 )
             )
         );
+        webSocketLogger.debug(`All subscriptions sent to backend`);
     } catch (error) {
+        webSocketLogger.error(`Subscription failed: ${error}`);
         ws.close();
         throw error;
     }
 
     await settleAfterSubscribe();
 
+    webSocketLogger.debug(`Waiting for initial message batch (timeout: ${readyTimeoutMs}ms)...`);
+    const startTime = Date.now();
+    let allTypesReceived = false;
+
+    while (!allTypesReceived && (Date.now() - startTime) < readyTimeoutMs) {
+        allTypesReceived = countTypes.every((type) => countUpdates[type].length > 0);
+        if (!allTypesReceived) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+    }
+
+    if (allTypesReceived) {
+        webSocketLogger.info(`All count types received initial message, clearing counters to capture only new updates`);
+    } else {
+        const received = countTypes.filter((type) => countUpdates[type].length > 0).join(', ') || 'none';
+        webSocketLogger.warn(
+            `Timeout waiting for initial message batch. Received: ${received}. ` +
+            `Subscription may still work, proceeding anyway.`
+        );
+    }
+
+    countTypes.forEach((type) => {
+        countUpdates[type] = [];
+    });
+
     return {
-        waitForCountUpdate: (predicate, timeoutMs = timeouts.engineEvents.wait) =>
-            waitForPredicate(countUpdates, predicate, timeoutMs),
-        waitForAssignedTasksCount: (predicate, timeoutMs) =>
-            waitForCountPredicate(countUpdates, 'assignedTasks', predicate, timeoutMs),
-        waitForQueuedTasksCount: (predicate, timeoutMs) =>
-            waitForCountPredicate(countUpdates, 'queuedTasks', predicate, timeoutMs),
-        waitForRunningProcessesCount: (predicate, timeoutMs) =>
-            waitForCountPredicate(countUpdates, 'runningProcesses', predicate, timeoutMs),
         getLatestCounts: () => {
             const latest: Record<string, PushedCountMessage> = {};
             countTypes.forEach((type) => {
@@ -129,47 +155,4 @@ export async function openPushedCountsSubscription(
         },
         close: () => ws.close(),
     };
-}
-
-async function waitForPredicate(
-    countUpdates: Record<string, PushedCountMessage[]>,
-    predicate: (count: PushedCountMessage) => boolean,
-    timeoutMs: number
-): Promise<PushedCountMessage> {
-    const startTime = Date.now();
-    const pollInterval = 100;
-
-    while (Date.now() - startTime < timeoutMs) {
-        for (const updates of Object.values(countUpdates)) {
-            for (const update of updates) {
-                if (predicate(update)) {
-                    return update;
-                }
-            }
-        }
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    }
-
-    throw new Error(`Timeout waiting for count predicate after ${timeoutMs}ms`);
-}
-
-async function waitForCountPredicate(
-    countUpdates: Record<string, PushedCountMessage[]>,
-    countType: string,
-    predicate: (count: number) => boolean,
-    timeoutMs: number = timeouts.engineEvents.wait
-): Promise<PushedCountMessage> {
-    const startTime = Date.now();
-    const pollInterval = 100;
-
-    while (Date.now() - startTime < timeoutMs) {
-        const updates = countUpdates[countType] ?? [];
-        for (const update of updates) {
-            if (predicate(update.count)) {
-                return update;
-            }
-        }
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    }
-    throw new Error(`Timeout waiting for ${countType} count predicate after ${timeoutMs}ms`);
 }

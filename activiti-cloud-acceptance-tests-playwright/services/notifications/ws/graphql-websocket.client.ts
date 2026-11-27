@@ -46,6 +46,7 @@ export class GraphQlWebSocketClient {
     private connectionAcknowledged = false;
     private readonly nextHandlers: GraphQlNextHandler[] = [];
     private readonly errorHandlers: GraphQlErrorHandler[] = [];
+    private keepAliveIntervalId: NodeJS.Timeout | undefined;
 
     constructor(
         private readonly url: string,
@@ -64,11 +65,15 @@ export class GraphQlWebSocketClient {
         }
 
         this.ws = new WebSocket(this.url, GRAPHQL_WS_SUBPROTOCOL, { headers });
-        this.ws.on('open', () => this.sendConnectionInit());
+        this.ws.on('open', () => {
+            this.sendConnectionInit();
+            this.startKeepAlive();
+        });
         this.ws.on('message', (raw) => this.handleMessage(raw));
         this.ws.on('error', (error) => this.notifyError(formatGraphqlWsError(error)));
         this.ws.on('close', (code, reason) => {
             webSocketLogger.debug(`closed WebSocket closed: code=${code} reason=${reason.toString()}`);
+            this.stopKeepAlive();
         });
     }
 
@@ -108,6 +113,7 @@ export class GraphQlWebSocketClient {
     }
 
     close(): void {
+        this.stopKeepAlive();
         if (this.ws?.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ type: MESSAGE.CONNECTION_TERMINATE }));
             this.ws.close();
@@ -169,6 +175,23 @@ export class GraphQlWebSocketClient {
     private notifyError(error: Error): void {
         webSocketLogger.error(`connection error: ${error.message}`);
         this.errorHandlers.forEach((handler) => handler(error));
+    }
+
+    private startKeepAlive(): void {
+        this.stopKeepAlive();
+        this.keepAliveIntervalId = setInterval(() => {
+            if (this.ws?.readyState === WebSocket.OPEN) {
+                webSocketLogger.debug('sending keep-alive ping');
+                this.ws.send(JSON.stringify({ type: MESSAGE.PING, payload: {} }));
+            }
+        }, 30_000);
+    }
+
+    private stopKeepAlive(): void {
+        if (this.keepAliveIntervalId) {
+            clearInterval(this.keepAliveIntervalId);
+            this.keepAliveIntervalId = undefined;
+        }
     }
 }
 
