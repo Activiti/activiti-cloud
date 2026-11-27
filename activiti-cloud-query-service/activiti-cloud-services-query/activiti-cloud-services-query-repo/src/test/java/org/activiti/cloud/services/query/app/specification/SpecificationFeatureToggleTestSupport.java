@@ -15,15 +15,20 @@
  */
 package org.activiti.cloud.services.query.app.specification;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import java.util.List;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.QueryFeatureToggles;
+import org.hibernate.query.sqm.NodeBuilder;
+import org.hibernate.query.sqm.tree.select.SqmSubQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.mockito.Answers;
 
@@ -54,12 +59,16 @@ abstract class SpecificationFeatureToggleTestSupport {
         @SuppressWarnings("unchecked")
         Root<T> root = mock(Root.class, Answers.RETURNS_DEEP_STUBS);
         CriteriaQuery<?> query = mock(CriteriaQuery.class, Answers.RETURNS_DEEP_STUBS);
-        CriteriaBuilder cb = mock(CriteriaBuilder.class, Answers.RETURNS_DEEP_STUBS);
+        NodeBuilder cb = mock(NodeBuilder.class, Answers.RETURNS_DEEP_STUBS);
         // toPredicate needs these to drive control flow without NPEs
         lenient()
             .when(query.getResultType())
             .thenAnswer(inv -> Object.class);
         lenient().when(query.getGroupList()).thenReturn(List.of());
+        lenient()
+            .doReturn(mock(SqmSubQuery.class))
+            .when(cb)
+            .union(anyBoolean(), any(Subquery.class), any(Subquery.class), any(Subquery.class));
         return new CriteriaContext<>(root, query, cb);
     }
 

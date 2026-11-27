@@ -36,6 +36,9 @@ import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
+import org.hibernate.query.criteria.JpaSubQuery;
+import org.hibernate.query.sqm.NodeBuilder;
+import org.hibernate.query.sqm.tree.select.SqmSubQuery;
 import org.springframework.util.CollectionUtils;
 
 @CountOverFullWindow
@@ -319,32 +322,43 @@ public class ProcessInstanceSpecification
     }
 
     /**
-     * New implementation that adds the user-restriction predicate using correlated {@code EXISTS}
-     * subqueries against {@code task} and {@code task_candidate_user}. Activated when
-     * {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is enabled. Avoids duplicate rows so the outer query
-     * does not need {@code SELECT DISTINCT}, which typically yields better execution plans.
+     * New implementation that adds the user-restriction predicate as an {@code IN} over the
+     * {@code UNION} of the ids of the process instances visible to the user. Activated when
+     * {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is enabled. Generates:
+     * <pre>{@code
+     * pi.id IN (
+     *     SELECT p.id FROM process_instance p WHERE p.initiator = :userId
+     *   UNION
+     *     SELECT t.process_instance_id FROM task t WHERE t.assignee = :userId
+     *   UNION
+     *     SELECT t.process_instance_id FROM task_candidate_user c JOIN task t ON t.id = c.task_id
+     *     WHERE c.user_id = :userId)
+     * }</pre>
+     * The branches are uncorrelated, so each one can use its own index
+     * ({@code idx_process_instance_initiator_status}, {@code idx_task_assignee}, {@code tcu_userId_idx})
+     * instead of checking every process instance with the requested status against an {@code OR}
+     * of correlated {@code EXISTS}. Avoids duplicate rows so the outer query does not need
+     * {@code SELECT DISTINCT}.
      */
     private void applyUserRestrictionFilterWithExistsSubqueries(
         Root<ProcessInstanceEntity> root,
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
-        // EXISTS (SELECT t.id FROM task t WHERE t.process_instance_id = pi.id AND t.assignee = userId)
+        NodeBuilder nodeBuilder = (NodeBuilder) criteriaBuilder;
+
+        Subquery<String> initiatorSubquery = query.subquery(String.class);
+        Root<ProcessInstanceEntity> initiatorRoot = initiatorSubquery.from(ProcessInstanceEntity.class);
+        initiatorSubquery
+            .select(initiatorRoot.get(ProcessInstanceEntity_.id))
+            .where(criteriaBuilder.equal(initiatorRoot.get(ProcessInstanceEntity_.initiator), userId));
+
         Subquery<String> assigneeSubquery = query.subquery(String.class);
         Root<TaskEntity> assigneeTaskRoot = assigneeSubquery.from(TaskEntity.class);
         assigneeSubquery
-            .select(assigneeTaskRoot.get(TaskEntity_.id))
-            .where(
-                criteriaBuilder.equal(
-                    assigneeTaskRoot.get(TaskEntity_.processInstanceId),
-                    root.get(ProcessInstanceEntity_.id)
-                ),
-                criteriaBuilder.equal(assigneeTaskRoot.get(TaskEntity_.assignee), userId)
-            );
+            .select(assigneeTaskRoot.get(TaskEntity_.processInstanceId))
+            .where(criteriaBuilder.equal(assigneeTaskRoot.get(TaskEntity_.assignee), userId));
 
-        // EXISTS (SELECT tcu.taskId FROM task_candidate_user tcu
-        //         JOIN task t ON tcu.task_id = t.id
-        //         WHERE t.process_instance_id = pi.id AND tcu.user_id = userId)
         Subquery<String> candidateUserSubquery = query.subquery(String.class);
         Root<TaskCandidateUserEntity> tcuRoot = candidateUserSubquery.from(TaskCandidateUserEntity.class);
         Join<TaskCandidateUserEntity, TaskEntity> tcuTaskJoin = tcuRoot.join(
@@ -352,21 +366,18 @@ public class ProcessInstanceSpecification
             JoinType.INNER
         );
         candidateUserSubquery
-            .select(tcuRoot.get(TaskCandidateUserEntity_.taskId))
-            .where(
-                criteriaBuilder.equal(
-                    tcuTaskJoin.get(TaskEntity_.processInstanceId),
-                    root.get(ProcessInstanceEntity_.id)
-                ),
-                criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.userId), userId)
-            );
+            .select(tcuTaskJoin.get(TaskEntity_.processInstanceId))
+            .where(criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.userId), userId));
+
+        JpaSubQuery<String> visibleProcessInstanceIds = nodeBuilder.union(
+            false,
+            initiatorSubquery,
+            assigneeSubquery,
+            candidateUserSubquery
+        );
 
         predicates.add(
-            criteriaBuilder.or(
-                criteriaBuilder.equal(root.get(ProcessInstanceEntity_.initiator), userId),
-                criteriaBuilder.exists(assigneeSubquery),
-                criteriaBuilder.exists(candidateUserSubquery)
-            )
+            nodeBuilder.in(root.get(ProcessInstanceEntity_.id), (SqmSubQuery<String>) visibleProcessInstanceIds)
         );
     }
 

@@ -57,6 +57,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @WebMvcTest(ProcessInstanceBpmnActivitiesAdminController.class)
 @EnableSpringDataWebSupport
@@ -84,6 +85,9 @@ class ProcessInstanceBpmnActivitiesAdminControllerIT {
 
     @MockitoBean
     private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @MockitoBean
+    private PlatformTransactionManager transactionManager;
 
     @MockitoBean
     private TaskRepository taskRepository;

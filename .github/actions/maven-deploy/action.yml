@@ -22,7 +22,7 @@ runs:
   using: composite
   steps:
     - name: Deploy to Nexus
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@3bbbfc459dd15452e68e3cefcbc56596d88d71ee # v19.15.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@16298278308f674c76542d61658da190e975e31c # v19.16.0
       env:
         MAVEN_USERNAME: ${{ inputs.nexus-username }}
         MAVEN_PASSWORD: ${{ inputs.nexus-password }}
@@ -37,7 +37,7 @@ runs:
           -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
 
     - name: Authenticate with Cloudsmith
-      uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@3bbbfc459dd15452e68e3cefcbc56596d88d71ee # v19.15.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@16298278308f674c76542d61658da190e975e31c # v19.16.0
       with:
         oidc-namespace: ${{ inputs.cloudsmith-namespace }}
 
