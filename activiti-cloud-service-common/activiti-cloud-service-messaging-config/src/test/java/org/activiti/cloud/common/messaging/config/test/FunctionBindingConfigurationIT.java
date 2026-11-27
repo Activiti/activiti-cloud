@@ -66,7 +66,11 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
     }
 )
-@Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
+@Import({
+    TestChannelBinderConfiguration.class,
+    TestBindingsChannelsConfiguration.class,
+    FunctionBindingConfigurationIT.ApplicationConfig.class,
+})
 public class FunctionBindingConfigurationIT {
 
     static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
