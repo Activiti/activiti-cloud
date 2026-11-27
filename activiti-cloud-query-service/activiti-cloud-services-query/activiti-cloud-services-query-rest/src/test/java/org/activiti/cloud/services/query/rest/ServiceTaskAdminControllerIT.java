@@ -36,6 +36,8 @@ import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -172,6 +174,51 @@ class ServiceTaskAdminControllerIT {
             .then()
             .statusCode(200)
             .body(ENTRIES_ROOT, hasSize(0));
+    }
+
+    //the types are the ones generated for the processes of the connectors acceptance tests project
+    @ParameterizedTest
+    @CsvSource({
+        "Script, script",
+        "Agent, agent",
+        "Connector, rest|hxpContent|openAi",
+        "connector, rest|hxpContent|openAi",
+    })
+    void should_returnServiceTasksOfCategory_when_filteredByServiceTaskTypeCategory(
+        String category,
+        String expectedIds
+    ) {
+        queryTestUtils.buildServiceTask().withId("script").withServiceTaskType("Script: Execute").save();
+        queryTestUtils
+            .buildServiceTask()
+            .withId("agent")
+            .withServiceTaskType("Agentic Task Connector: AI_AGENT")
+            .save();
+        queryTestUtils.buildServiceTask().withId("rest").withServiceTaskType("Rest Connector: GET").save();
+        queryTestUtils.buildServiceTask().withId("dmn").withServiceTaskType("DMN Connector: Execute Table").save();
+        queryTestUtils
+            .buildServiceTask()
+            .withId("hxpContent")
+            .withServiceTaskType("Hxp Content Service: Create Content")
+            .save();
+        queryTestUtils
+            .buildServiceTask()
+            .withId("openAi")
+            .withServiceTaskType("Open AI Connector: SEND_REQUEST")
+            .save();
+        //neither the built-in DMN and set variables tasks nor the ones of unknown type belong to a category
+        queryTestUtils.buildServiceTask().withId("setVariables").withServiceTaskType("Set Variables: Execute").save();
+        queryTestUtils.buildServiceTask().withId("unresolved").withServiceTaskType("ServiceTask").save();
+        queryTestUtils.buildServiceTask().withId("default").save();
+
+        given()
+            .param("serviceTaskType", category)
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, containsInAnyOrder((Object[]) expectedIds.split("\\|")));
     }
 
     @Test
