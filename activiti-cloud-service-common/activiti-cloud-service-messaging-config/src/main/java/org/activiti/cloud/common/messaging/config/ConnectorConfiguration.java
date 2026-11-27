@@ -411,7 +411,10 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                 int retryCount = getRetryCount(headers);
                 if (retryCount < maxRetry - 1) {
                     final var retryTimer = retryTimers.computeIfAbsent(destination, Timer::new);
-                    retryTimer.schedule(new StreamBridgeSendTask(destination, newMessage), retryDelay);
+                    retryTimer.schedule(
+                        new StreamBridgeSendTask(destination, newMessage),
+                        Duration.ofSeconds(retryDelay).toMillis()
+                    );
                 } else {
                     LOGGER.error("Cannot retry message because retry limited exceeded: {}", maxRetry);
                 }
@@ -434,7 +437,11 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
         @Override
         public void run() {
-            getStreamBridge().send(destination, message);
+            try {
+                getStreamBridge().send(destination, message);
+            } catch (Exception e) {
+                LOGGER.warn("Error {} sending message to destination {}", e.getMessage(), destination);
+            }
         }
     }
 
