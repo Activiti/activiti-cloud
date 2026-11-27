@@ -19,7 +19,11 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.query.rest.TaskControllerIT.CURRENT_USER;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
@@ -32,9 +36,12 @@ import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
@@ -167,6 +174,201 @@ class ServiceTaskAdminControllerIT {
             .then()
             .statusCode(200)
             .body(ENTRIES_ROOT, hasSize(0));
+    }
+
+    //the types are the ones generated for the processes of the connectors acceptance tests project
+    @ParameterizedTest
+    @CsvSource({
+        "Script, script",
+        "Agent, agent",
+        "Connector, rest|hxpContent|openAi",
+        "connector, rest|hxpContent|openAi",
+    })
+    void should_returnServiceTasksOfCategory_when_filteredByServiceTaskTypeCategory(
+        String category,
+        String expectedIds
+    ) {
+        queryTestUtils.buildServiceTask().withId("script").withServiceTaskType("Script: Execute").save();
+        queryTestUtils
+            .buildServiceTask()
+            .withId("agent")
+            .withServiceTaskType("Agentic Task Connector: AI_AGENT")
+            .save();
+        queryTestUtils.buildServiceTask().withId("rest").withServiceTaskType("Rest Connector: GET").save();
+        queryTestUtils.buildServiceTask().withId("dmn").withServiceTaskType("DMN Connector: Execute Table").save();
+        queryTestUtils
+            .buildServiceTask()
+            .withId("hxpContent")
+            .withServiceTaskType("Hxp Content Service: Create Content")
+            .save();
+        queryTestUtils
+            .buildServiceTask()
+            .withId("openAi")
+            .withServiceTaskType("Open AI Connector: SEND_REQUEST")
+            .save();
+        //neither the built-in DMN and set variables tasks nor the ones of unknown type belong to a category
+        queryTestUtils.buildServiceTask().withId("setVariables").withServiceTaskType("Set Variables: Execute").save();
+        queryTestUtils.buildServiceTask().withId("unresolved").withServiceTaskType("ServiceTask").save();
+        queryTestUtils.buildServiceTask().withId("default").save();
+
+        given()
+            .param("serviceTaskType", category)
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, containsInAnyOrder((Object[]) expectedIds.split("\\|")));
+    }
+
+    @Test
+    void should_sortServiceTasksWithNullTypeAsDefaultType_when_sortedByServiceTaskTypeAscending() {
+        queryTestUtils.buildServiceTask().withId("zendesk").withServiceTaskType("Zendesk Connector: CREATE").save();
+
+        queryTestUtils.buildServiceTask().withId("default").save();
+
+        queryTestUtils.buildServiceTask().withId("agent").withServiceTaskType("Agent: Run").save();
+
+        given()
+            .param("sort", "serviceTaskType,asc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("agent", "default", "zendesk"));
+    }
+
+    @Test
+    void should_sortServiceTasksWithNullTypeAsDefaultType_when_sortedByServiceTaskTypeDescending() {
+        queryTestUtils.buildServiceTask().withId("zendesk").withServiceTaskType("Zendesk Connector: CREATE").save();
+
+        queryTestUtils.buildServiceTask().withId("default").save();
+
+        queryTestUtils.buildServiceTask().withId("agent").withServiceTaskType("Agent: Run").save();
+
+        given()
+            .param("sort", "serviceTaskType,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("zendesk", "default", "agent"));
+    }
+
+    @Test
+    void should_applySecondarySort_when_sortedByServiceTaskTypeAndAnotherProperty() {
+        queryTestUtils.buildServiceTask().withId("1").save();
+
+        queryTestUtils.buildServiceTask().withId("2").save();
+
+        queryTestUtils.buildServiceTask().withId("3").withServiceTaskType("Agent: Run").save();
+
+        given()
+            .param("sort", "serviceTaskType,asc")
+            .param("sort", "id,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("3", "2", "1"));
+    }
+
+    @Test
+    void should_honourSkipCount_when_sortedByServiceTaskType() {
+        queryTestUtils.buildServiceTask().withId("zendesk").withServiceTaskType("Zendesk Connector: CREATE").save();
+
+        queryTestUtils.buildServiceTask().withId("default").save();
+
+        queryTestUtils.buildServiceTask().withId("agent").withServiceTaskType("Agent: Run").save();
+
+        //ascending order is agent, default, zendesk, and skipCount is not a multiple of maxItems
+        given()
+            .param("skipCount", 1)
+            .param("maxItems", 2)
+            .param("sort", "serviceTaskType,asc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("default", "zendesk"));
+    }
+
+    @Test
+    void should_keepServiceTaskTypeInPaginationLinks_when_sortedByServiceTaskType() {
+        queryTestUtils.buildServiceTask().withId("1").withServiceTaskType("Agent: Run").save();
+
+        queryTestUtils.buildServiceTask().withId("2").withServiceTaskType("Rest Connector: GET").save();
+
+        queryTestUtils.buildServiceTask().withId("3").withServiceTaskType("Zendesk Connector: CREATE").save();
+
+        //the sort is rewritten to a coalesce expression for the query, which must not reach the generated links
+        given()
+            .param("page", 0)
+            .param("size", 2)
+            .param("sort", "serviceTaskType,asc")
+            .accept(MediaTypes.HAL_JSON_VALUE)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body("_links.next.href", allOf(containsString("serviceTaskType"), not(containsString("coalesce"))));
+    }
+
+    @Test
+    void should_sortByAnotherColumn_when_serviceTaskTypeIsNotPartOfTheSort() {
+        queryTestUtils.buildServiceTask().withId("1").withStartedDate(new Date(2000)).save();
+
+        queryTestUtils.buildServiceTask().withId("2").withStartedDate(new Date(3000)).save();
+
+        queryTestUtils.buildServiceTask().withId("3").withStartedDate(new Date(1000)).save();
+
+        given()
+            .param("sort", "startedDate,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("2", "1", "3"));
+    }
+
+    @Test
+    void should_sortBySecondaryDateColumn_when_sortedByServiceTaskTypeAndStartedDate() {
+        //same type everywhere, so the date decides the order and exercises a non String column
+        queryTestUtils
+            .buildServiceTask()
+            .withId("1")
+            .withServiceTaskType("Agent: Run")
+            .withStartedDate(new Date(2000))
+            .save();
+
+        queryTestUtils
+            .buildServiceTask()
+            .withId("2")
+            .withServiceTaskType("Agent: Run")
+            .withStartedDate(new Date(3000))
+            .save();
+
+        queryTestUtils
+            .buildServiceTask()
+            .withId("3")
+            .withServiceTaskType("Agent: Run")
+            .withStartedDate(new Date(1000))
+            .save();
+
+        given()
+            .param("sort", "serviceTaskType,asc")
+            .param("sort", "startedDate,desc")
+            .accept(MediaType.APPLICATION_JSON)
+            .when()
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(SERVICE_TASKS_ID_ROOT, contains("2", "1", "3"));
     }
 
     @Test
