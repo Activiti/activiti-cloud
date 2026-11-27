@@ -74,12 +74,6 @@ export async function openPushedCountsSubscription(
         hostHeader
     );
 
-    let resolveInitialMessages: (() => void) | undefined;
-    let errorMessages: string[] = [];
-    const initialMessagesPromise = new Promise<void>((resolve) => {
-        resolveInitialMessages = resolve;
-    });
-
     ws.onNext((data) => {
         const payload = data as Record<string, PushedCountMessage> | undefined;
         webSocketLogger.debug(`Received pushed counts message: ${JSON.stringify(payload)}`);
@@ -90,19 +84,12 @@ export async function openPushedCountsSubscription(
                     webSocketLogger.debug(`Updated ${type}: ${payload[type].count} (as of ${payload[type].asOf})`);
                 }
             });
-
-            const allReceived = countTypes.every((type) => countUpdates[type].length > 0);
-            if (allReceived && resolveInitialMessages) {
-                webSocketLogger.info(`All pushed count types received, subscription ready`);
-                resolveInitialMessages();
-            }
         }
     });
 
     ws.onError((error) => {
         const errorMsg = `WebSocket error: ${error.message}`;
         webSocketLogger.error(errorMsg);
-        errorMessages.push(errorMsg);
     });
 
     ws.connect();
@@ -129,27 +116,6 @@ export async function openPushedCountsSubscription(
     }
 
     await settleAfterSubscribe();
-    webSocketLogger.debug(`Waiting for initial messages (timeout: ${readyTimeoutMs}ms)...`);
-
-    try {
-        await Promise.race([
-            initialMessagesPromise,
-            new Promise<void>((_, reject) =>
-                setTimeout(
-                    () => reject(new Error(
-                        `Timeout waiting for initial pushed count messages after ${readyTimeoutMs}ms. ` +
-                        `${errorMessages.length > 0 ? 'WebSocket errors: ' + errorMessages.join('; ') + ' - ' : ''}` +
-                        `Ensure the pushed-counts feature is enabled on the query service. ` +
-                        `Received messages for: ${countTypes.filter((type) => countUpdates[type].length > 0).join(', ') || 'none'}`
-                    )),
-                    readyTimeoutMs
-                )
-            ),
-        ]);
-    } catch (error) {
-        ws.close();
-        throw error;
-    }
 
     return {
         getLatestCounts: () => {
