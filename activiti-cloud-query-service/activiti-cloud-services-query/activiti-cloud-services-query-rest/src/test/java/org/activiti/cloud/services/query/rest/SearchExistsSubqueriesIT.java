@@ -719,11 +719,7 @@ class SearchExistsSubqueriesIT {
     }
 
     private void givenProcessInstancesVisibleThroughEachRouteAndInvisibleOnes() {
-        queryTestUtils
-            .buildProcessInstance()
-            .withId(VISIBLE_AS_INITIATOR)
-            .withInitiator(CURRENT_USER)
-            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withId(VISIBLE_AS_INITIATOR).withInitiator(CURRENT_USER).buildAndSave();
         queryTestUtils
             .buildProcessInstance()
             .withId(VISIBLE_AS_ASSIGNEE)
