@@ -68,6 +68,7 @@ jobs:
     permissions:
       actions: read
       contents: write
+      id-token: write
     outputs:
       version: ${{ steps.export-version.outputs.version }}
       ref: ${{ steps.export-ref.outputs.ref }}
@@ -76,12 +77,17 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
+      # maven-tag runs Maven with --settings settings.xml, so its mirror needs Cloudsmith credentials.
+      - name: Authenticate with Cloudsmith
+        if: github.event_name == 'push'
+        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@16298278308f674c76542d61658da190e975e31c # v19.16.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+          verify-auth: "true"
+
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@16298278308f674c76542d61658da190e975e31c # v19.16.0
         if: github.event_name == 'push'
         id: tag
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
           java-version: '25'
           maven-version: ${{ env.MAVEN_VERSION }}
@@ -122,6 +128,9 @@ jobs:
       - pre-checks
       - create-tag
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -156,10 +165,13 @@ jobs:
           )
           echo "modules=$MODULES" >> "$GITHUB_OUTPUT"
 
+      - name: Authenticate with Cloudsmith
+        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@16298278308f674c76542d61658da190e975e31c # v19.16.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+          verify-auth: "true"
+
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@16298278308f674c76542d61658da190e975e31c # v19.16.0
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
           java-version: '25'
           java-distribution: 'corretto'
@@ -210,14 +222,15 @@ jobs:
       - create-tag
       - scan-image-dirs
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/_reusable-maven-build.yml
     with:
       matrix-json: ${{ needs.scan-image-dirs.outputs.transformed-json }}
       ref: ${{ needs.create-tag.outputs.ref }}
     secrets:
       BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
 
@@ -227,16 +240,22 @@ jobs:
       - pre-checks
       - create-tag
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
+      - name: Authenticate with Cloudsmith
+        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@16298278308f674c76542d61658da190e975e31c # v19.16.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+          verify-auth: "true"
+
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@16298278308f674c76542d61658da190e975e31c # v19.16.0
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
           java-version: '25'
           java-distribution: 'corretto'
@@ -256,14 +275,15 @@ jobs:
     if: >-
       needs.pre-checks.outputs.skip != 'true'
       && needs.pre-checks.outputs.skip-tests != 'true'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/_reusable-maven-test.yml
     with:
       matrix-json: ${{ needs.scan-image-dirs.outputs.transformed-json }}
       ref: ${{ needs.create-tag.outputs.ref }}
     secrets:
       BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
   slow-tests-report:
     runs-on: ubuntu-latest
@@ -315,6 +335,10 @@ jobs:
       && needs.maven-build.result == 'success'
       && needs.maven-build-dependencies-bom.result == 'success'
       && needs.maven-test.result == 'success'
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -323,10 +347,13 @@ jobs:
           # analyse the diff instead of falling back to a whole-file analysis
           fetch-depth: 0
 
+      - name: Authenticate with Cloudsmith
+        uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@16298278308f674c76542d61658da190e975e31c # v19.16.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+          verify-auth: "true"
+
       - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@16298278308f674c76542d61658da190e975e31c # v19.16.0
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           sonar-project: Activiti_activiti-cloud
@@ -451,8 +478,6 @@ jobs:
         with:
           version: ${{ needs.create-tag.outputs.version }}
           maven-version: ${{ env.MAVEN_VERSION }}
-          nexus-username: ${{ secrets.NEXUS_USERNAME }}
-          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
           cloudsmith-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
   publish:
@@ -496,8 +521,6 @@ jobs:
         with:
           version: ${{ needs.create-tag.outputs.version }}
           maven-version: ${{ env.MAVEN_VERSION }}
-          nexus-username: ${{ secrets.NEXUS_USERNAME }}
-          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
           cloudsmith-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
   propagate-maven:

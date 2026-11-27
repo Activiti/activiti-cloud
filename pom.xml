@@ -242,15 +242,6 @@
   </properties>
   <repositories>
     <repository>
-      <id>central</id>
-      <name>Central Repository</name>
-      <url>https://repo.maven.apache.org/maven2</url>
-      <layout>default</layout>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
       <id>activiti-releases</id>
       <url>https://dl.cloudsmith.io/basic/hyland/activiti-releases/maven/</url>
       <releases>
@@ -270,6 +261,15 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
@@ -283,11 +283,6 @@
       <releases>
         <updatePolicy>never</updatePolicy>
       </releases>
-    </pluginRepository>
-    <pluginRepository>
-      <id>alfresco-internal-plugin</id>
-      <name>Alfresco Internal Repository</name>
-      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
     </pluginRepository>
   </pluginRepositories>
   <build>
@@ -534,6 +529,26 @@ limitations under the License.]]>
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>require-maven-version</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <!-- The .mvn/rrf repository filters need Maven Resolver 2 -->
+                  <version>[3.10,)</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
