@@ -50,9 +50,9 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorRec
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadBatchWriter;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.RuntimeVariableCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.PayloadBatchWriter;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.PayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.VariablePayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
 import org.activiti.cloud.services.audit.jpa.converters.MessageReceivedEventConverter;
@@ -106,8 +106,8 @@ class TransientPayloadCleanupPersistenceTest {
     private LocalContainerEntityManagerFactoryBean factory;
     private EntityManager entityManager;
     private HikariDataSource dataSource;
-    private AuditPayloadCleanup cleanup;
-    private AuditPayloadBatchWriter payloadBatchWriter;
+    private RuntimeVariableCleanup cleanup;
+    private PayloadBatchWriter payloadBatchWriter;
 
     private final APIEventToEntityConverters eventConverters = new APIEventToEntityConverters(
         Set.of(
@@ -322,7 +322,7 @@ class TransientPayloadCleanupPersistenceTest {
         entityManager.getTransaction().commit();
         entityManager.getTransaction().begin();
         var delegate = new VariablePayloadUpdateStrategy(payloadBatchWriter);
-        var failingStrategy = mock(AuditPayloadUpdateStrategy.class);
+        var failingStrategy = mock(PayloadUpdateStrategy.class);
         var batches = new AtomicInteger();
         given(failingStrategy.supports(any())).willReturn(true);
         willAnswer(invocation -> {
@@ -334,7 +334,7 @@ class TransientPayloadCleanupPersistenceTest {
         })
             .given(failingStrategy)
             .update(any());
-        var failingCleanup = new TransientAuditPayloadCleanup(entityManager, List.of(failingStrategy), 100);
+        var failingCleanup = new TransientRuntimeVariableCleanup(entityManager, List.of(failingStrategy), 100);
         var terminal = new ProcessCompletedEventEntity();
         terminal.setProcessInstanceId("failed-batch");
         terminal.setAppName("app");

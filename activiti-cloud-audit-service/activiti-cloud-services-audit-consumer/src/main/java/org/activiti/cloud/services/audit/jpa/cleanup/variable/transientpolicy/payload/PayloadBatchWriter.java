@@ -21,11 +21,11 @@ import java.util.function.Function;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.hibernate.Session;
 
-public class AuditPayloadBatchWriter {
+public class PayloadBatchWriter {
 
     private final EntityManager entityManager;
 
-    public AuditPayloadBatchWriter(EntityManager entityManager) {
+    public PayloadBatchWriter(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.events.handlers;
+package org.activiti.cloud.services.query.events.handlers.cleanup.variable.transientpolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -132,7 +132,7 @@ class TransientPayloadCleanupPersistenceTest {
         CloudRuntimeEvent<?, ?> terminal = state.equals("completed")
             ? new CloudProcessCompletedEventImpl(process)
             : new CloudProcessCancelledEventImpl(process);
-        var cleanup = new TransientQueryPayloadCleanup(entityManager);
+        var cleanup = new TransientRuntimeVariableCleanup(entityManager);
 
         Instant started = Instant.now();
         cleanup.cleanup(List.of(terminal, terminal));
@@ -172,7 +172,7 @@ class TransientPayloadCleanupPersistenceTest {
         var process = new ProcessInstanceImpl();
         process.setId("running");
 
-        new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(new CloudProcessStartedEventImpl(process)));
+        new TransientRuntimeVariableCleanup(entityManager).cleanup(List.of(new CloudProcessStartedEventImpl(process)));
 
         assertThat(entityManager.find(ProcessInstanceEntity.class, "running").getLastVariableCleanup()).isNull();
         assertThat(count("ProcessVariable", "running")).isEqualTo(1);
@@ -203,7 +203,7 @@ class TransientPayloadCleanupPersistenceTest {
         var statistics = factory.getObject().unwrap(SessionFactory.class).getStatistics();
         statistics.clear();
 
-        new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(terminal));
+        new TransientRuntimeVariableCleanup(entityManager).cleanup(List.of(terminal));
 
         assertThat(statistics.getEntityLoadCount()).isZero();
         assertThat(
@@ -260,7 +260,9 @@ class TransientPayloadCleanupPersistenceTest {
         var process = new ProcessInstanceImpl();
         process.setId("target");
 
-        new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(new CloudProcessCompletedEventImpl(process)));
+        new TransientRuntimeVariableCleanup(entityManager).cleanup(
+            List.of(new CloudProcessCompletedEventImpl(process))
+        );
 
         var context = entityManager.find(IntegrationContextEntity.class, "integration-target");
         assertThat(context.getInBoundVariables()).isEmpty();
@@ -287,7 +289,9 @@ class TransientPayloadCleanupPersistenceTest {
         process.setId(processId);
 
         Instant started = Instant.now();
-        new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(new CloudProcessCompletedEventImpl(process)));
+        new TransientRuntimeVariableCleanup(entityManager).cleanup(
+            List.of(new CloudProcessCompletedEventImpl(process))
+        );
         Instant finished = Instant.now();
         assertCleanupTimestamp(processId, started, finished);
         assertThat(count("ProcessVariable", processId)).isZero();
@@ -321,7 +325,7 @@ class TransientPayloadCleanupPersistenceTest {
         var terminal = terminalEvent("empty", state);
 
         Instant started = Instant.now();
-        new TransientQueryPayloadCleanup(entityManager).cleanup(List.of(terminal));
+        new TransientRuntimeVariableCleanup(entityManager).cleanup(List.of(terminal));
         Instant finished = Instant.now();
 
         assertCleanupTimestamp("empty", started, finished);
@@ -334,7 +338,7 @@ class TransientPayloadCleanupPersistenceTest {
     void should_refreshCleanupTimestamp_whenCleanupRunsAgain(String state) {
         seed("repeated");
         var terminal = terminalEvent("repeated", state);
-        var cleanup = new TransientQueryPayloadCleanup(entityManager);
+        var cleanup = new TransientRuntimeVariableCleanup(entityManager);
         cleanup.cleanup(List.of(terminal));
         Instant previous = Instant.parse("2000-01-01T00:00:00Z");
         entityManager

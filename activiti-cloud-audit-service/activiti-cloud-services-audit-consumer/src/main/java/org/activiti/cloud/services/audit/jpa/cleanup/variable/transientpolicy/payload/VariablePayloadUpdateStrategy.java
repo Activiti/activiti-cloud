@@ -20,16 +20,16 @@ import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConv
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableAuditEventEntity;
 
-public class VariablePayloadUpdateStrategy implements AuditPayloadUpdateStrategy {
+public class VariablePayloadUpdateStrategy implements PayloadUpdateStrategy {
 
     private static final String QUERY =
         "update audit_event set variable_instance = ?, variable_previous_value = null where id = ?";
 
-    private final AuditPayloadBatchWriter payloadBatchWriter;
+    private final PayloadBatchWriter payloadBatchWriter;
 
     private final VariableJpaJsonConverter converter = new VariableJpaJsonConverter();
 
-    public VariablePayloadUpdateStrategy(AuditPayloadBatchWriter payloadBatchWriter) {
+    public VariablePayloadUpdateStrategy(PayloadBatchWriter payloadBatchWriter) {
         this.payloadBatchWriter = payloadBatchWriter;
     }
 

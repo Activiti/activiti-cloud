@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.PayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationRequestSentEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.MessageSentAuditEventEntity;
@@ -56,7 +56,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class TransientAuditPayloadCleanupTest {
+class TransientRuntimeVariableCleanupTest {
 
     @Mock
     private EntityManager entityManager;
@@ -65,17 +65,17 @@ class TransientAuditPayloadCleanupTest {
     private TypedQuery<AuditEventEntity> query;
 
     @Mock
-    private AuditPayloadUpdateStrategy unrelatedStrategy;
+    private PayloadUpdateStrategy unrelatedStrategy;
 
     @Mock
-    private AuditPayloadUpdateStrategy matchingStrategy;
+    private PayloadUpdateStrategy matchingStrategy;
 
-    private TransientAuditPayloadCleanup cleanup;
+    private TransientRuntimeVariableCleanup cleanup;
     private ProcessCompletedEventEntity terminal;
 
     @BeforeEach
     void setUp() {
-        cleanup = new TransientAuditPayloadCleanup(entityManager, List.of(unrelatedStrategy, matchingStrategy), 100);
+        cleanup = new TransientRuntimeVariableCleanup(entityManager, List.of(unrelatedStrategy, matchingStrategy), 100);
         terminal = new ProcessCompletedEventEntity();
         terminal.setProcessInstanceId("process");
         terminal.setAppName("app");
@@ -181,7 +181,7 @@ class TransientAuditPayloadCleanupTest {
     }
 
     private void verifyPagination(int eventCount, int batchSize) {
-        cleanup = new TransientAuditPayloadCleanup(
+        cleanup = new TransientRuntimeVariableCleanup(
             entityManager,
             List.of(unrelatedStrategy, matchingStrategy),
             batchSize

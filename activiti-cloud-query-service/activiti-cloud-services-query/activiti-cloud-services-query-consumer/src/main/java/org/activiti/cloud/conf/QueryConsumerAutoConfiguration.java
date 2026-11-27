@@ -27,7 +27,7 @@ import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
-import org.activiti.cloud.services.query.events.handlers.QueryPayloadCleanup;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -105,7 +105,7 @@ public class QueryConsumerAutoConfiguration {
         EntityManager entityManager,
         IntegrationFlow queryEventsQueueIntegrationFlow,
         @Value("${activiti.cloud.query.consumer.message-handler.chunk-size:100}") Integer chunkSize,
-        ObjectProvider<QueryPayloadCleanup> payloadCleanup
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
         return new QueryConsumerMessageHandler(
             eventHandlerContext,

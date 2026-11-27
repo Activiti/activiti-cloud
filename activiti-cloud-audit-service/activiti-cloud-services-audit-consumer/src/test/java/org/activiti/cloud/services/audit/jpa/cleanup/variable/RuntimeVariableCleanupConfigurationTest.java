@@ -29,8 +29,8 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.TransientAuditPayloadCleanup;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadBatchWriter;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.TransientRuntimeVariableCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.PayloadBatchWriter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableCreatedEventEntity;
@@ -41,7 +41,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-class AuditPayloadCleanupConfigurationTest {
+class RuntimeVariableCleanupConfigurationTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
         .withUserConfiguration(AuditJPAStreamsAutoConfiguration.class)
@@ -54,8 +54,8 @@ class AuditPayloadCleanupConfigurationTest {
         runner.run(context ->
             assertThat(context)
                 .hasNotFailed()
-                .doesNotHaveBean(AuditPayloadCleanup.class)
-                .doesNotHaveBean(AuditPayloadBatchWriter.class)
+                .doesNotHaveBean(RuntimeVariableCleanup.class)
+                .doesNotHaveBean(PayloadBatchWriter.class)
         );
     }
 
@@ -68,43 +68,43 @@ class AuditPayloadCleanupConfigurationTest {
                 assertThat(context).hasNotFailed();
                 if (policy.equals("transient")) {
                     assertThat(context)
-                        .hasSingleBean(AuditPayloadCleanup.class)
-                        .hasSingleBean(AuditPayloadBatchWriter.class);
-                    assertThat(context.getBean(AuditPayloadCleanup.class)).isInstanceOf(
-                        TransientAuditPayloadCleanup.class
+                        .hasSingleBean(RuntimeVariableCleanup.class)
+                        .hasSingleBean(PayloadBatchWriter.class);
+                    assertThat(context.getBean(RuntimeVariableCleanup.class)).isInstanceOf(
+                        TransientRuntimeVariableCleanup.class
                     );
                 } else {
                     assertThat(context)
-                        .doesNotHaveBean(AuditPayloadCleanup.class)
-                        .doesNotHaveBean(AuditPayloadBatchWriter.class);
+                        .doesNotHaveBean(RuntimeVariableCleanup.class)
+                        .doesNotHaveBean(PayloadBatchWriter.class);
                 }
             });
     }
 
     @Test
     void should_allowReplacementStrategy() {
-        var replacement = mock(AuditPayloadCleanup.class);
+        var replacement = mock(RuntimeVariableCleanup.class);
         runner
             .withPropertyValues("activiti.cloud.processing-data.variables.retention-policy=transient")
-            .withBean("replacementCleanup", AuditPayloadCleanup.class, () -> replacement)
+            .withBean("replacementCleanup", RuntimeVariableCleanup.class, () -> replacement)
             .run(context -> {
-                assertThat(context).hasNotFailed().hasSingleBean(AuditPayloadCleanup.class);
-                assertThat(context.getBean(AuditPayloadCleanup.class)).isSameAs(replacement);
+                assertThat(context).hasNotFailed().hasSingleBean(RuntimeVariableCleanup.class);
+                assertThat(context.getBean(RuntimeVariableCleanup.class)).isSameAs(replacement);
             });
     }
 
     @Test
     void should_useReplacementBatchWriter() {
-        var replacement = mock(AuditPayloadBatchWriter.class);
+        var replacement = mock(PayloadBatchWriter.class);
         runner
             .withPropertyValues("activiti.cloud.processing-data.variables.retention-policy=transient")
-            .withBean("replacementWriter", AuditPayloadBatchWriter.class, () -> replacement)
+            .withBean("replacementWriter", PayloadBatchWriter.class, () -> replacement)
             .run(context -> {
                 assertThat(context)
                     .hasNotFailed()
-                    .hasSingleBean(AuditPayloadBatchWriter.class)
-                    .hasSingleBean(AuditPayloadCleanup.class);
-                assertThat(context.getBean(AuditPayloadBatchWriter.class)).isSameAs(replacement);
+                    .hasSingleBean(PayloadBatchWriter.class)
+                    .hasSingleBean(RuntimeVariableCleanup.class);
+                assertThat(context.getBean(PayloadBatchWriter.class)).isSameAs(replacement);
                 var entityManager = context.getBean(EntityManager.class);
                 TypedQuery<AuditEventEntity> query = mock(TypedQuery.class);
                 given(entityManager.createQuery(anyString(), eq(AuditEventEntity.class))).willReturn(query);
@@ -118,7 +118,7 @@ class AuditPayloadCleanupConfigurationTest {
                 terminal.setProcessInstanceId("process");
                 terminal.setAppName("app");
 
-                context.getBean(AuditPayloadCleanup.class).cleanup(List.of(terminal));
+                context.getBean(RuntimeVariableCleanup.class).cleanup(List.of(terminal));
 
                 then(replacement)
                     .should()
@@ -151,7 +151,7 @@ class AuditPayloadCleanupConfigurationTest {
                 terminal.setProcessInstanceId("process");
                 terminal.setAppName("app");
 
-                context.getBean(AuditPayloadCleanup.class).cleanup(List.of(terminal));
+                context.getBean(RuntimeVariableCleanup.class).cleanup(List.of(terminal));
 
                 then(query).should().setMaxResults(batchSize);
             });

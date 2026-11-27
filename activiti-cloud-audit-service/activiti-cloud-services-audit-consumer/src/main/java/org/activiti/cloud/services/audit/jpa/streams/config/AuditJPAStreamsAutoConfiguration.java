@@ -25,11 +25,11 @@ import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.TransientAuditPayloadCleanup;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadBatchWriter;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.RuntimeVariableCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.TransientRuntimeVariableCleanup;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.IntegrationPayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.MessagePayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.PayloadBatchWriter;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.SignalPayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.VariablePayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
@@ -62,7 +62,7 @@ public class AuditJPAStreamsAutoConfiguration {
     public AuditConsumerChannelHandler auditConsumerChannelHandler(
         EventsRepository eventsRepository,
         APIEventToEntityConverters eventConverters,
-        ObjectProvider<AuditPayloadCleanup> payloadCleanup
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
         return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters, payloadCleanup);
     }
@@ -74,23 +74,23 @@ public class AuditJPAStreamsAutoConfiguration {
         havingValue = "transient",
         matchIfMissing = false
     )
-    public AuditPayloadBatchWriter auditPayloadBatchWriter(EntityManager entityManager) {
-        return new AuditPayloadBatchWriter(entityManager);
+    public PayloadBatchWriter auditPayloadBatchWriter(EntityManager entityManager) {
+        return new PayloadBatchWriter(entityManager);
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuditPayloadCleanup.class)
+    @ConditionalOnMissingBean(RuntimeVariableCleanup.class)
     @ConditionalOnProperty(
         name = "activiti.cloud.processing-data.variables.retention-policy",
         havingValue = "transient",
         matchIfMissing = false
     )
-    public AuditPayloadCleanup auditPayloadCleanup(
+    public RuntimeVariableCleanup auditPayloadCleanup(
         EntityManager entityManager,
-        AuditPayloadBatchWriter payloadBatchWriter,
+        PayloadBatchWriter payloadBatchWriter,
         @Value("${activiti.cloud.processing-data.variables.cleanup-batch-size:100}") int pageSize
     ) {
-        return new TransientAuditPayloadCleanup(
+        return new TransientRuntimeVariableCleanup(
             entityManager,
             List.of(
                 new VariablePayloadUpdateStrategy(payloadBatchWriter),

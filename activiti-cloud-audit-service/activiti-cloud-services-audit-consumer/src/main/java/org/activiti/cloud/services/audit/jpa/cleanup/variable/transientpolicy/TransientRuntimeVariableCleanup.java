@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.AuditPayloadUpdateStrategy;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.RuntimeVariableCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.payload.PayloadUpdateStrategy;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCancelledAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
@@ -30,19 +30,19 @@ import org.activiti.cloud.services.audit.jpa.events.VariablePayloadEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
+public class TransientRuntimeVariableCleanup implements RuntimeVariableCleanup {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransientAuditPayloadCleanup.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransientRuntimeVariableCleanup.class);
 
     private final EntityManager entityManager;
 
-    private final List<AuditPayloadUpdateStrategy> payloadUpdateStrategies;
+    private final List<PayloadUpdateStrategy> payloadUpdateStrategies;
 
     private final int pageSize;
 
-    public TransientAuditPayloadCleanup(
+    public TransientRuntimeVariableCleanup(
         EntityManager entityManager,
-        List<AuditPayloadUpdateStrategy> payloadUpdateStrategies,
+        List<PayloadUpdateStrategy> payloadUpdateStrategies,
         int pageSize
     ) {
         if (pageSize <= 0) {
@@ -81,7 +81,7 @@ public class TransientAuditPayloadCleanup implements AuditPayloadCleanup {
         List<AuditEventEntity> events;
         do {
             events = this.findEvents(processInstanceId, lastId);
-            var eventsByStrategy = new LinkedHashMap<AuditPayloadUpdateStrategy, List<AuditEventEntity>>();
+            var eventsByStrategy = new LinkedHashMap<PayloadUpdateStrategy, List<AuditEventEntity>>();
             for (AuditEventEntity event : events) {
                 var payloadEvent = (VariablePayloadEvent) event;
                 if (payloadEvent.isVariablePayloadEmpty()) {

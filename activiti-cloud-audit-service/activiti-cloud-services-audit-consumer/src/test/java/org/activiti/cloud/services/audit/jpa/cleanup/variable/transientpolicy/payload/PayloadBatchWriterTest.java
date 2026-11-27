@@ -44,7 +44,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AuditPayloadBatchWriterTest {
+class PayloadBatchWriterTest {
 
     private static final String SQL = "update audit_event set variable_instance = ? where id = ?";
 
@@ -60,11 +60,11 @@ class AuditPayloadBatchWriterTest {
     @Mock
     private PreparedStatement statement;
 
-    private AuditPayloadBatchWriter writer;
+    private PayloadBatchWriter writer;
 
     @BeforeEach
     void createWriter() {
-        writer = new AuditPayloadBatchWriter(entityManager);
+        writer = new PayloadBatchWriter(entityManager);
     }
 
     @ParameterizedTest

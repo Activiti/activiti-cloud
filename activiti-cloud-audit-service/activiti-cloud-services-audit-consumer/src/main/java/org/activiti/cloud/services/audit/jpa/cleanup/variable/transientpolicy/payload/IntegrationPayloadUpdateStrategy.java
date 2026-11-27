@@ -20,15 +20,15 @@ import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJ
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationEventEntity;
 
-public class IntegrationPayloadUpdateStrategy implements AuditPayloadUpdateStrategy {
+public class IntegrationPayloadUpdateStrategy implements PayloadUpdateStrategy {
 
     private static final String QUERY = "update audit_event set integration_context = ? where id = ?";
 
-    private final AuditPayloadBatchWriter payloadBatchWriter;
+    private final PayloadBatchWriter payloadBatchWriter;
 
     private final IntegrationContextJpaJsonConverter converter = new IntegrationContextJpaJsonConverter();
 
-    public IntegrationPayloadUpdateStrategy(AuditPayloadBatchWriter payloadBatchWriter) {
+    public IntegrationPayloadUpdateStrategy(PayloadBatchWriter payloadBatchWriter) {
         this.payloadBatchWriter = payloadBatchWriter;
     }
 

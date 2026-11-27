@@ -29,7 +29,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEvent
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
-import org.activiti.cloud.services.query.events.handlers.QueryPayloadCleanup;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -85,7 +85,7 @@ class QueryConsumerAutoConfigurationTest {
     @ValueSource(booleans = { true, false })
     void should_createHandlerWithOptionalPayloadCleanup(boolean cleanupEnabled) {
         var beans = new DefaultListableBeanFactory();
-        var payloadCleanup = mock(QueryPayloadCleanup.class);
+        var payloadCleanup = mock(RuntimeVariableCleanup.class);
         if (cleanupEnabled) {
             beans.registerSingleton("payloadCleanup", payloadCleanup);
         }
@@ -99,7 +99,7 @@ class QueryConsumerAutoConfigurationTest {
             mock(EntityManager.class),
             flow,
             100,
-            beans.getBeanProvider(QueryPayloadCleanup.class)
+            beans.getBeanProvider(RuntimeVariableCleanup.class)
         );
         List<CloudRuntimeEvent<?, ?>> events = List.of(new CloudProcessCreatedEventImpl());
         var message = MessageBuilder.withPayload(events).build();

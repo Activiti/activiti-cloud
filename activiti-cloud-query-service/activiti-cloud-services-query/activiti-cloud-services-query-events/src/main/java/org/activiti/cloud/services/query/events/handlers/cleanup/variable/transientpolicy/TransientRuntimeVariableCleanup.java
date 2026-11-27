@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.events.handlers;
+package org.activiti.cloud.services.query.events.handlers.cleanup.variable.transientpolicy;
 
 import jakarta.persistence.EntityManager;
 import java.time.OffsetDateTime;
@@ -23,12 +23,13 @@ import java.util.Objects;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TransientQueryPayloadCleanup implements QueryPayloadCleanup {
+public class TransientRuntimeVariableCleanup implements RuntimeVariableCleanup {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransientQueryPayloadCleanup.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransientRuntimeVariableCleanup.class);
     private static final String PROCESS_INSTANCE_ID = "processInstanceId";
     public static final String DELETE_VARIABLE_LINK = """
     delete from task_process_variable
@@ -52,7 +53,7 @@ public class TransientQueryPayloadCleanup implements QueryPayloadCleanup {
 
     private final EntityManager entityManager;
 
-    public TransientQueryPayloadCleanup(EntityManager entityManager) {
+    public TransientRuntimeVariableCleanup(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

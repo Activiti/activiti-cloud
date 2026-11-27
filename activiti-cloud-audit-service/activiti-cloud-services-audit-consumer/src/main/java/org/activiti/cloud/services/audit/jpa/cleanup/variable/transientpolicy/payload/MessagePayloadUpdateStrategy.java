@@ -20,15 +20,15 @@ import org.activiti.cloud.services.audit.jpa.converters.json.MessageJpaJsonConve
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.MessageAuditEventEntity;
 
-public class MessagePayloadUpdateStrategy implements AuditPayloadUpdateStrategy {
+public class MessagePayloadUpdateStrategy implements PayloadUpdateStrategy {
 
     private static final String QUERY = "update audit_event set message = ? where id = ?";
 
-    private final AuditPayloadBatchWriter payloadBatchWriter;
+    private final PayloadBatchWriter payloadBatchWriter;
 
     private final MessageJpaJsonConverter converter = new MessageJpaJsonConverter();
 
-    public MessagePayloadUpdateStrategy(AuditPayloadBatchWriter payloadBatchWriter) {
+    public MessagePayloadUpdateStrategy(PayloadBatchWriter payloadBatchWriter) {
         this.payloadBatchWriter = payloadBatchWriter;
     }
 

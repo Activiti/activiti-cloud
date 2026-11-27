@@ -50,7 +50,6 @@ import org.activiti.cloud.services.query.events.handlers.ProcessVariableUpdater;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
-import org.activiti.cloud.services.query.events.handlers.QueryPayloadCleanup;
 import org.activiti.cloud.services.query.events.handlers.TaskActivatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskAssignedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskCancelledEventHandler;
@@ -66,10 +65,11 @@ import org.activiti.cloud.services.query.events.handlers.TaskVariableCreatedEven
 import org.activiti.cloud.services.query.events.handlers.TaskVariableDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskVariableUpdatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.TaskVariableUpdater;
-import org.activiti.cloud.services.query.events.handlers.TransientQueryPayloadCleanup;
 import org.activiti.cloud.services.query.events.handlers.VariableCreatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.VariableDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHandler;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.transientpolicy.TransientRuntimeVariableCleanup;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -85,7 +85,7 @@ public class EventHandlersAutoConfiguration {
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer fetchingOptimizer,
         EntityManager entityManager,
-        ObjectProvider<QueryPayloadCleanup> payloadCleanup
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
         return new QueryConsumerChannelHandler(eventHandlerContext, fetchingOptimizer, entityManager, payloadCleanup);
     }
@@ -109,14 +109,14 @@ public class EventHandlersAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(QueryPayloadCleanup.class)
+    @ConditionalOnMissingBean(RuntimeVariableCleanup.class)
     @ConditionalOnProperty(
         name = "activiti.cloud.processing-data.variables.retention-policy",
         havingValue = "transient",
         matchIfMissing = false
     )
-    public QueryPayloadCleanup queryPayloadCleanup(EntityManager entityManager) {
-        return new TransientQueryPayloadCleanup(entityManager);
+    public RuntimeVariableCleanup queryPayloadCleanup(EntityManager entityManager) {
+        return new TransientRuntimeVariableCleanup(entityManager);
     }
 
     @Bean

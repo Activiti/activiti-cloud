@@ -29,18 +29,18 @@ import java.util.Map;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.RuntimeVariableCleanup;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-class AuditPayloadCleanupBatchTest {
+class RuntimeVariableCleanupBatchTest {
 
     private final EventsRepository repository = mock(EventsRepository.class);
     private final APIEventToEntityConverters converters = mock(APIEventToEntityConverters.class);
     private final EventToEntityConverter converter = mock(EventToEntityConverter.class);
-    private final AuditPayloadCleanup strategy = mock(AuditPayloadCleanup.class);
+    private final RuntimeVariableCleanup strategy = mock(RuntimeVariableCleanup.class);
     private final DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
 
     @Test
@@ -106,7 +106,7 @@ class AuditPayloadCleanupBatchTest {
         return new AuditConsumerChannelHandlerImpl(
             repository,
             converters,
-            beans.getBeanProvider(AuditPayloadCleanup.class)
+            beans.getBeanProvider(RuntimeVariableCleanup.class)
         );
     }
 }

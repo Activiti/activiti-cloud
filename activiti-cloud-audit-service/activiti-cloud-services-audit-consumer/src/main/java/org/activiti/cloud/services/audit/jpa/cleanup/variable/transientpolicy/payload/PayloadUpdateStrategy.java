@@ -18,7 +18,7 @@ package org.activiti.cloud.services.audit.jpa.cleanup.variable.transientpolicy.p
 import java.util.List;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 
-public interface AuditPayloadUpdateStrategy {
+public interface PayloadUpdateStrategy {
     boolean supports(AuditEventEntity event);
 
     void update(List<AuditEventEntity> events);

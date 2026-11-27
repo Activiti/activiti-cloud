@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.events.handlers;
+package org.activiti.cloud.services.audit.jpa.cleanup.variable;
 
 import java.util.List;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 
-public interface QueryPayloadCleanup {
-    void cleanup(List<CloudRuntimeEvent<?, ?>> events);
+public interface RuntimeVariableCleanup {
+    void cleanup(List<AuditEventEntity> receivedEvents);
 }

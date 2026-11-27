@@ -24,7 +24,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.RuntimeVariableCleanup;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.slf4j.Logger;
@@ -44,12 +44,12 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
     private final EventsRepository eventsRepository;
 
     private final APIEventToEntityConverters eventConverters;
-    private final ObjectProvider<AuditPayloadCleanup> payloadCleanup;
+    private final ObjectProvider<RuntimeVariableCleanup> payloadCleanup;
 
     public AuditConsumerChannelHandlerImpl(
         EventsRepository eventsRepository,
         APIEventToEntityConverters eventConverters,
-        ObjectProvider<AuditPayloadCleanup> payloadCleanup
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
         this.eventsRepository = eventsRepository;
         this.eventConverters = eventConverters;

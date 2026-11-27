@@ -31,16 +31,17 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-class QueryPayloadCleanupBatchTest {
+class RuntimeVariableCleanupBatchTest {
 
     private final QueryEventHandlerContext handlers = mock(QueryEventHandlerContext.class);
     private final QueryEventHandlerContextOptimizer optimizer = mock(QueryEventHandlerContextOptimizer.class);
     private final EntityManager entityManager = mock(EntityManager.class);
-    private final QueryPayloadCleanup strategy = mock(QueryPayloadCleanup.class);
+    private final RuntimeVariableCleanup strategy = mock(RuntimeVariableCleanup.class);
     private final DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
 
     @BeforeEach
@@ -110,7 +111,7 @@ class QueryPayloadCleanupBatchTest {
             handlers,
             optimizer,
             entityManager,
-            beans.getBeanProvider(QueryPayloadCleanup.class)
+            beans.getBeanProvider(RuntimeVariableCleanup.class)
         );
     }
 }

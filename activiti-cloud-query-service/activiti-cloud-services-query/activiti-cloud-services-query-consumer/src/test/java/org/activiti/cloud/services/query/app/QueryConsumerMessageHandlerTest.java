@@ -34,7 +34,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
-import org.activiti.cloud.services.query.events.handlers.QueryPayloadCleanup;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,7 +67,7 @@ public class QueryConsumerMessageHandlerTest {
     private MessageChannel queryEventsChannel;
 
     @Mock
-    private QueryPayloadCleanup payloadCleanup;
+    private RuntimeVariableCleanup payloadCleanup;
 
     private final DefaultListableBeanFactory beans = new DefaultListableBeanFactory();
 
@@ -78,7 +78,7 @@ public class QueryConsumerMessageHandlerTest {
             optimizer,
             entityManager,
             queryEventsChannel,
-            beans.getBeanProvider(QueryPayloadCleanup.class)
+            beans.getBeanProvider(RuntimeVariableCleanup.class)
         );
     }
 

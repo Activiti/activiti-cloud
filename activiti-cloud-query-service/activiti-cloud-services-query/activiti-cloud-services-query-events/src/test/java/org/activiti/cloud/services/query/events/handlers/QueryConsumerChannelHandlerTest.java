@@ -31,6 +31,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,7 +45,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 class QueryConsumerChannelHandlerTest {
 
     @Mock
-    private ObjectProvider<QueryPayloadCleanup> payloadCleanup;
+    private ObjectProvider<RuntimeVariableCleanup> payloadCleanup;
 
     @InjectMocks
     private QueryConsumerChannelHandler consumer;

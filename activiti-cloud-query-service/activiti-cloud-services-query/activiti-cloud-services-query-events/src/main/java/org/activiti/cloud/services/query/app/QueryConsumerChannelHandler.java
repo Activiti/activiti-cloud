@@ -25,7 +25,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
-import org.activiti.cloud.services.query.events.handlers.QueryPayloadCleanup;
+import org.activiti.cloud.services.query.events.handlers.cleanup.variable.RuntimeVariableCleanup;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,14 +36,14 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
     private final EntityManager entityManager;
-    private final ObjectProvider<QueryPayloadCleanup> payloadCleanup;
+    private final ObjectProvider<RuntimeVariableCleanup> payloadCleanup;
     private int chunkSize = 100;
 
     public QueryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        ObjectProvider<QueryPayloadCleanup> payloadCleanup
+        ObjectProvider<RuntimeVariableCleanup> payloadCleanup
     ) {
         this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;

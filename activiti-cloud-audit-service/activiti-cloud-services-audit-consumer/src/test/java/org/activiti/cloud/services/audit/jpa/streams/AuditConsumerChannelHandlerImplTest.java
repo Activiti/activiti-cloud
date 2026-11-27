@@ -31,7 +31,7 @@ import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
-import org.activiti.cloud.services.audit.jpa.cleanup.variable.AuditPayloadCleanup;
+import org.activiti.cloud.services.audit.jpa.cleanup.variable.RuntimeVariableCleanup;
 import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
 import org.activiti.cloud.services.audit.jpa.converters.IncidentCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -51,7 +51,7 @@ import org.springframework.beans.factory.ObjectProvider;
 class AuditConsumerChannelHandlerImplTest {
 
     @Mock
-    private ObjectProvider<AuditPayloadCleanup> payloadCleanup;
+    private ObjectProvider<RuntimeVariableCleanup> payloadCleanup;
 
     @InjectMocks
     private AuditConsumerChannelHandlerImpl handler;
