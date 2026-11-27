@@ -17,6 +17,7 @@
 import { resolveNotificationsEndpoints } from '../connection/endpoints';
 import { GraphQlWebSocketClient } from '../ws/graphql-websocket.client';
 import { normalizeBearer, settleAfterSubscribe } from './subscription-utils';
+import { webSocketLogger } from '../../../helpers/logging/logger-builder';
 
 export interface PushedCountMessage {
     count: number;
@@ -64,6 +65,9 @@ export async function openPushedCountsSubscription(
         countUpdates[type] = [];
     });
 
+    webSocketLogger.info(`Opening pushed counts subscription for: ${countTypes.join(', ')}`);
+    webSocketLogger.debug(`WebSocket URL: ${webSocketGraphqlUrl}`);
+
     const ws = new GraphQlWebSocketClient(
         webSocketGraphqlUrl,
         normalizeBearer(accessToken),
@@ -71,29 +75,40 @@ export async function openPushedCountsSubscription(
     );
 
     let resolveInitialMessages: (() => void) | undefined;
+    let errorMessages: string[] = [];
     const initialMessagesPromise = new Promise<void>((resolve) => {
         resolveInitialMessages = resolve;
     });
 
     ws.onNext((data) => {
         const payload = data as Record<string, PushedCountMessage> | undefined;
+        webSocketLogger.debug(`Received pushed counts message: ${JSON.stringify(payload)}`);
         if (payload) {
             countTypes.forEach((type) => {
                 if (payload[type]) {
                     countUpdates[type].push(payload[type]);
+                    webSocketLogger.debug(`Updated ${type}: ${payload[type].count} (as of ${payload[type].asOf})`);
                 }
             });
 
             const allReceived = countTypes.every((type) => countUpdates[type].length > 0);
             if (allReceived && resolveInitialMessages) {
+                webSocketLogger.info(`All pushed count types received, subscription ready`);
                 resolveInitialMessages();
             }
         }
     });
 
+    ws.onError((error) => {
+        const errorMsg = `WebSocket error: ${error.message}`;
+        webSocketLogger.error(errorMsg);
+        errorMessages.push(errorMsg);
+    });
+
     ws.connect();
 
     try {
+        webSocketLogger.debug(`Subscribing to ${countTypes.length} count types...`);
         await Promise.all(
             countTypes.map((countType) =>
                 ws.subscribe(
@@ -106,12 +121,15 @@ export async function openPushedCountsSubscription(
                 )
             )
         );
+        webSocketLogger.debug(`All subscriptions sent to backend`);
     } catch (error) {
+        webSocketLogger.error(`Subscription failed: ${error}`);
         ws.close();
         throw error;
     }
 
     await settleAfterSubscribe();
+    webSocketLogger.debug(`Waiting for initial messages (timeout: ${readyTimeoutMs}ms)...`);
 
     try {
         await Promise.race([
@@ -120,7 +138,9 @@ export async function openPushedCountsSubscription(
                 setTimeout(
                     () => reject(new Error(
                         `Timeout waiting for initial pushed count messages after ${readyTimeoutMs}ms. ` +
-                        `Ensure the pushed-counts feature is enabled on the query service.`
+                        `${errorMessages.length > 0 ? 'WebSocket errors: ' + errorMessages.join('; ') + ' - ' : ''}` +
+                        `Ensure the pushed-counts feature is enabled on the query service. ` +
+                        `Received messages for: ${countTypes.filter((type) => countUpdates[type].length > 0).join(', ') || 'none'}`
                     )),
                     readyTimeoutMs
                 )
