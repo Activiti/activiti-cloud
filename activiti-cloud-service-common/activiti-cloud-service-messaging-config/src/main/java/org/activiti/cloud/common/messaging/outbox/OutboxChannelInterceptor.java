@@ -16,14 +16,16 @@
 package org.activiti.cloud.common.messaging.outbox;
 
 import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_DESTINATION;
-import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_UUID;
+import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_MESSAGE_ID;
 import static org.springframework.messaging.MessageHeaders.ERROR_CHANNEL;
 import static org.springframework.messaging.MessageHeaders.REPLY_CHANNEL;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import org.jspecify.annotations.NonNull;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -51,16 +53,23 @@ public class OutboxChannelInterceptor implements ChannelInterceptor, MessageHand
         return this;
     }
 
+    AmqpHeaders d;
+
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         if (!message.getHeaders().containsKey(OUTBOX_DESTINATION)) {
-            final var result = Optional.ofNullable(destinationProvider.apply(message, channel)).map(outboxDestination ->
-                MessageBuilder.fromMessage(message)
-                    .setHeader(OUTBOX_UUID, UUID.randomUUID().toString())
-                    .setHeader(OUTBOX_DESTINATION, outboxDestination)
-                    .removeHeaders(headersToRemove)
-                    .build()
-            );
+            final var result = Optional.ofNullable(destinationProvider.apply(message, channel))
+                .filter(Predicate.not(String::isBlank))
+                .map(outboxDestination ->
+                    MessageBuilder.fromMessage(message)
+                        .setHeader(
+                            OUTBOX_MESSAGE_ID,
+                            outboxDestination.concat(":".concat(UUID.randomUUID().toString()))
+                        )
+                        .setHeader(OUTBOX_DESTINATION, outboxDestination)
+                        .removeHeaders(headersToRemove)
+                        .build()
+                );
 
             return result.isPresent() ? result.get() : message;
         }

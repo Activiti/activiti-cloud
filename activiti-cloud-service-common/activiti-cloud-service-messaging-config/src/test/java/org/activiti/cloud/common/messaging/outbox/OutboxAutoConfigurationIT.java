@@ -17,7 +17,7 @@ package org.activiti.cloud.common.messaging.outbox;
 
 import static org.activiti.cloud.common.messaging.outbox.OutboxChannelInterceptorFactory.OUTBOX_ROLE;
 import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_DESTINATION;
-import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_UUID;
+import static org.activiti.cloud.common.messaging.outbox.OutboxHeaders.OUTBOX_MESSAGE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
@@ -232,7 +232,7 @@ class OutboxAutoConfigurationIT {
             .actual();
 
         assertThat(result.getPayload()).isEqualTo("outbox-payload".getBytes());
-        assertThat(result.getHeaders()).containsKey(OUTBOX_UUID);
+        assertThat(result.getHeaders()).containsKey(OUTBOX_MESSAGE_ID);
         assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
         assertThat(auditProducerQueue.getQueueSize()).isZero();
     }
@@ -258,7 +258,7 @@ class OutboxAutoConfigurationIT {
             .actual();
 
         assertThat(result.getPayload()).isEqualTo("script-payload".getBytes());
-        assertThat(result.getHeaders()).containsKey(OUTBOX_UUID);
+        assertThat(result.getHeaders()).containsKey(OUTBOX_MESSAGE_ID);
         assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
         assertThat(auditProducerQueue.getQueueSize()).isZero();
     }
@@ -290,7 +290,7 @@ class OutboxAutoConfigurationIT {
             .isNotNull()
             .actual();
         assertThat(result.getPayload()).isEqualTo("outbox-payload".getBytes());
-        assertThat(result.getHeaders()).containsKey(OUTBOX_UUID);
+        assertThat(result.getHeaders()).containsKey(OUTBOX_MESSAGE_ID);
         assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
     }
 
@@ -326,7 +326,7 @@ class OutboxAutoConfigurationIT {
             .isNotNull()
             .actual();
         assertThat(result.getPayload()).isEqualTo("outbox-payload".getBytes());
-        assertThat(result.getHeaders()).containsKey(OUTBOX_UUID);
+        assertThat(result.getHeaders()).containsKey(OUTBOX_MESSAGE_ID);
         assertThat(result.getHeaders()).doesNotContainKey(OUTBOX_DESTINATION);
     }
 
