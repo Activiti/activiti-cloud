@@ -18,13 +18,16 @@ package org.activiti.cloud.notifications.graphql.starter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
+import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
@@ -61,6 +64,10 @@ import org.activiti.cloud.notifications.graphql.GrapqhQLApplication;
 import org.activiti.cloud.notifications.graphql.config.EngineEvents;
 import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
+import org.activiti.cloud.services.notifications.graphql.ws.handler.DecoratingGraphQlWebSocketHandler;
+import org.activiti.cloud.services.notifications.graphql.ws.liveness.GraphQlWebSocketLivenessMonitor;
+import org.activiti.cloud.services.notifications.graphql.ws.liveness.GraphQlWebSocketLivenessProperties;
+import org.activiti.cloud.services.notifications.graphql.ws.liveness.LivenessGraphQlWebSocketHandler;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -71,6 +78,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
@@ -80,6 +88,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.graphql.server.support.GraphQlWebSocketMessage;
+import org.springframework.graphql.server.support.GraphQlWebSocketMessageType;
+import org.springframework.graphql.server.webmvc.GraphQlWebSocketHandler;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -90,6 +100,11 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
+import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
@@ -101,7 +116,11 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 @AutoConfigureTestRestTemplate
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = { GrapqhQLApplication.class })
+@SpringBootTest(
+    webEnvironment = WebEnvironment.RANDOM_PORT,
+    classes = { GrapqhQLApplication.class },
+    properties = "spring.activiti.cloud.services.notifications.graphql.ws.liveness.timeout=PT10S"
+)
 @ContextConfiguration(
     classes = { EngineEventsConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
@@ -138,6 +157,16 @@ class ActivitiGraphQLWsNativeStarterIT {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private GraphQlWebSocketHandler graphQlWebSocketHandler;
+
+    @Autowired
+    @Qualifier("graphQlWebSocketMapping")
+    private WebSocketHandlerMapping graphQlWebSocketMapping;
+
+    @Autowired
+    private GraphQlWebSocketLivenessProperties graphQlWebSocketLivenessProperties;
 
     @MockitoBean
     private BuildProperties buildProperties;
@@ -240,6 +269,221 @@ class ActivitiGraphQLWsNativeStarterIT {
         StepVerifier.create(output).expectComplete().verify(); //TODO add timeout
     }
 
+    @Test
+    void should_routeWebSocketEndpointThroughLivenessCheck_when_applicationStarts() {
+        WebSocketHttpRequestHandler endpoint = (WebSocketHttpRequestHandler) graphQlWebSocketMapping
+            .getUrlMap()
+            .get(WS_GRAPHQL_URI);
+
+        WebSocketHandler innermost = endpoint.getWebSocketHandler();
+        List<WebSocketHandler> chain = new ArrayList<>();
+        while (innermost instanceof WebSocketHandlerDecorator decorator) {
+            chain.add(decorator);
+            innermost = decorator.getDelegate();
+        }
+
+        assertThat(chain).hasAtLeastOneElementOfType(LivenessGraphQlWebSocketHandler.class);
+        assertThat(innermost).isSameAs(graphQlWebSocketHandler).isInstanceOf(DecoratingGraphQlWebSocketHandler.class);
+    }
+
+    @Test
+    void should_closeSessionWithPingTimeoutStatus_when_clientStopsAnsweringPings() {
+        String initMessage = connectionInitMessage(TESTADMIN);
+        Duration livenessTimeout = graphQlWebSocketLivenessProperties.getTimeout();
+
+        Mono<WebSocketCloseStatus> closeStatus = HttpClient.create()
+            .baseUrl("ws://localhost:" + port)
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) ->
+                Flux.merge(
+                    o.sendString(Mono.just(initMessage)).then().then(Mono.<WebSocketCloseStatus>never()),
+                    i.receive().then(Mono.<WebSocketCloseStatus>never()),
+                    i
+                        .receiveCloseStatus()
+                        .switchIfEmpty(
+                            Mono.<WebSocketCloseStatus>error(
+                                new IllegalStateException("Connection terminated without close frame")
+                            )
+                        )
+                )
+            )
+            .next();
+
+        StepVerifier.create(closeStatus)
+            .expectSubscription()
+            .expectNoEvent(livenessTimeout.minusSeconds(1))
+            .assertNext(status -> {
+                assertThat(status.code()).isEqualTo(GraphQlWebSocketLivenessMonitor.PING_TIMEOUT_STATUS.getCode());
+                assertThat(status.reasonText()).isEqualTo(
+                    GraphQlWebSocketLivenessMonitor.PING_TIMEOUT_STATUS.getReason()
+                );
+            })
+            .expectComplete()
+            .verify(livenessTimeout.plus(TIMEOUT));
+    }
+
+    @Test
+    void should_keepSessionOpen_when_clientAnswersPings() {
+        String initMessage = connectionInitMessage(TESTADMIN);
+        String pongMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.pong(null));
+        Duration livenessTimeout = graphQlWebSocketLivenessProperties.getTimeout();
+        AtomicInteger pingsAnswered = new AtomicInteger();
+
+        Mono<WebSocketCloseStatus> closeStatus = HttpClient.create()
+            .baseUrl("ws://localhost:" + port)
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) ->
+                Flux.merge(
+                    o
+                        .sendString(
+                            Flux.concat(
+                                Mono.just(initMessage),
+                                i
+                                    .receive()
+                                    .asString()
+                                    .filter(message -> hasType(message, GraphQlWebSocketMessageType.PING))
+                                    .doOnNext(ping -> pingsAnswered.incrementAndGet())
+                                    .map(ping -> pongMessage)
+                            )
+                        )
+                        .then()
+                        .then(Mono.<WebSocketCloseStatus>never()),
+                    i
+                        .receiveCloseStatus()
+                        .switchIfEmpty(
+                            Mono.<WebSocketCloseStatus>error(
+                                new IllegalStateException("Connection terminated without close frame")
+                            )
+                        )
+                )
+            )
+            .next();
+
+        StepVerifier.create(closeStatus)
+            .expectSubscription()
+            .expectNoEvent(livenessTimeout.plusSeconds(5))
+            .thenCancel()
+            .verify(livenessTimeout.plus(TIMEOUT));
+
+        assertThat(pingsAnswered.get()).isGreaterThanOrEqualTo(2);
+    }
+
+    @Test
+    void should_keepSessionOpen_when_subscriptionStreamsEventsContinuously() {
+        String initMessage = connectionInitMessage(TESTADMIN);
+        String subscribeMessage = objectMapper.writeValueAsString(
+            Map.of(
+                "id",
+                "1",
+                "type",
+                "subscribe",
+                "payload",
+                Map.of(
+                    "query",
+                    "subscription { engineEvents(appName: [\"default-app\"], eventType: PROCESS_DEPLOYED) " +
+                        "{ processDefinitionKey eventType } }"
+                )
+            )
+        );
+        String pongMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.pong(null));
+        Duration livenessTimeout = graphQlWebSocketLivenessProperties.getTimeout();
+        AtomicInteger eventsReceived = new AtomicInteger();
+        AtomicInteger pingsAnswered = new AtomicInteger();
+
+        Mono<WebSocketCloseStatus> closeStatus = HttpClient.create()
+            .baseUrl("ws://localhost:" + port)
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) ->
+                Flux.merge(
+                    o
+                        .sendString(
+                            Flux.concat(
+                                Mono.just(initMessage),
+                                Mono.just(subscribeMessage),
+                                i
+                                    .receive()
+                                    .asString()
+                                    .doOnNext(message -> {
+                                        if (hasType(message, GraphQlWebSocketMessageType.NEXT)) {
+                                            eventsReceived.incrementAndGet();
+                                        }
+                                    })
+                                    .filter(message -> hasType(message, GraphQlWebSocketMessageType.PING))
+                                    .doOnNext(ping -> pingsAnswered.incrementAndGet())
+                                    .map(ping -> pongMessage)
+                            )
+                        )
+                        .then()
+                        .then(Mono.<WebSocketCloseStatus>never()),
+                    i
+                        .receiveCloseStatus()
+                        .switchIfEmpty(
+                            Mono.<WebSocketCloseStatus>error(
+                                new IllegalStateException("Connection terminated without close frame")
+                            )
+                        )
+                )
+            )
+            .next();
+        Disposable eventPublisher = Flux.interval(Duration.ofMillis(500), Duration.ofSeconds(1)).subscribe(tick ->
+            sendEvents(processDeployedEvent()).run()
+        );
+
+        try {
+            StepVerifier.create(closeStatus)
+                .expectSubscription()
+                .expectNoEvent(livenessTimeout.plusSeconds(5))
+                .thenCancel()
+                .verify(livenessTimeout.plus(TIMEOUT));
+        } finally {
+            eventPublisher.dispose();
+        }
+
+        assertThat(eventsReceived.get()).isGreaterThanOrEqualTo((int) livenessTimeout.toSeconds());
+        assertThat(pingsAnswered.get()).isGreaterThanOrEqualTo(2);
+    }
+
+    private boolean hasType(String message, GraphQlWebSocketMessageType type) {
+        return objectMapper.readValue(message, GraphQlWebSocketMessage.class).resolvedType() == type;
+    }
+
+    private Runnable sendEvents(CloudRuntimeEvent... events) {
+        return () ->
+            producerChannel
+                .output()
+                .send(
+                    MessageBuilder.withPayload(Arrays.array(events)).setHeader("routingKey", "eventProducer").build()
+                );
+    }
+
+    private static CloudProcessDeployedEventImpl processDeployedEvent() {
+        CloudProcessDeployedEventImpl event = new CloudProcessDeployedEventImpl(
+            "id",
+            new Date().getTime(),
+            new ProcessDefinitionEntity()
+        );
+        event.setAppName("default-app");
+        event.setServiceName("rb-my-app");
+        event.setServiceFullName("serviceFullName");
+        event.setServiceType("runtime-bundle");
+        event.setServiceVersion("");
+        event.setProcessDefinitionId("processDefinitionId");
+        event.setProcessDefinitionKey("processDefinitionKey");
+        event.setProcessDefinitionVersion(1);
+        event.setBusinessKey("businessKey");
+        return event;
+    }
+
+    private String connectionInitMessage(String user) {
+        identityTokenProducer.withTestUser(user);
+        String accessToken = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+        Map<String, Object> payload = new StringObjectMapBuilder().put("Authorization", accessToken).get();
+        return objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(payload));
+    }
+
     private void closeWebSocketAnCompleteDataProcessor(
         ReplayProcessor<String> data,
         WebsocketOutbound webSocketOutbound
@@ -332,17 +576,6 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .expectNext(messages)
                 .thenCancel()
                 .verify(TIMEOUT);
-        }
-
-        private Runnable sendEvents(CloudRuntimeEvent... events) {
-            return () ->
-                producerChannel
-                    .output()
-                    .send(
-                        MessageBuilder.withPayload(Arrays.array(events))
-                            .setHeader("routingKey", "eventProducer")
-                            .build()
-                    );
         }
 
         @Test
