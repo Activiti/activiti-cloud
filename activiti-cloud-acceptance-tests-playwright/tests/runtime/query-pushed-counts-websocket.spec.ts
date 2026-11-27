@@ -21,22 +21,9 @@ import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { TaskStatus } from '../../models/task.models';
 import type { PushedCountsSubscription } from '../../services/notifications';
 import { openPushedCountsSubscription } from '../../services/notifications';
-import { Logger } from '../../helpers/logging/logger';
 
 activiti.describe('Runtime — Query Pushed Counts WebSocket Subscription', () => {
     let activeSubscription: PushedCountsSubscription | undefined;
-
-    activiti.beforeEach(async ({}, testInfo) => {
-        const activitiFeatureEnabled = process.env.ACTIVITI_CLOUD_QUERY_PUSHEDCOUNTS_ENABLED;
-        const featuresFlagEnabled = process.env.ACTIVITI_FEATURES_QUERY_PUSHEDCOUNTS_ENABLED;
-
-        if (activitiFeatureEnabled !== 'true' || featuresFlagEnabled !== 'true') {
-            Logger.info('Skipping test because pushed counts feature is not enabled:');    
-            Logger.info(`  ACTIVITI_CLOUD_QUERY_PUSHEDCOUNTS_ENABLED=${activitiFeatureEnabled}`);
-            Logger.info(`  ACTIVITI_FEATURES_QUERY_PUSHEDCOUNTS_ENABLED=${featuresFlagEnabled}`);
-            testInfo.skip();
-        }
-    });
 
     activiti.afterEach(() => {
         activeSubscription?.close();
