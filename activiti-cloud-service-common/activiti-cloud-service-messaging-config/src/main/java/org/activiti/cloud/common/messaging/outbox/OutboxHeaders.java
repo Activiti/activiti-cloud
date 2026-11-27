@@ -17,8 +17,10 @@ package org.activiti.cloud.common.messaging.outbox;
 
 public final class OutboxHeaders {
 
-    public static final String OUTBOX_MESSAGE_ID = "outboxMessageId";
-    public static final String OUTBOX_DESTINATION = "outboxDestination";
+    public static final String PREFIX = "outbox_";
+
+    public static final String OUTBOX_MESSAGE_ID = PREFIX + "messageId";
+    public static final String OUTBOX_DESTINATION = PREFIX + "destination";
 
     private OutboxHeaders() {
         // noop

@@ -92,7 +92,7 @@ class OutboxMessageHandlerTest {
         // When / Then
         assertThatThrownBy(() -> handler.handleMessage(message))
             .isInstanceOf(DestinationResolutionException.class)
-            .hasMessage("Cannot resolve outboxDestination message header for %s outbox".formatted(PARTITION_KEY));
+            .hasMessage("Cannot resolve outbox_destination message header for %s outbox".formatted(PARTITION_KEY));
 
         verifyNoInteractions(streamBridgeProvider, streamBridge);
     }
@@ -105,7 +105,7 @@ class OutboxMessageHandlerTest {
         // When / Then
         assertThatThrownBy(() -> handler.handleMessage(message))
             .isInstanceOf(DestinationResolutionException.class)
-            .hasMessage("Cannot resolve outboxDestination message header for %s outbox".formatted(PARTITION_KEY));
+            .hasMessage("Cannot resolve outbox_destination message header for %s outbox".formatted(PARTITION_KEY));
 
         verifyNoInteractions(streamBridgeProvider, streamBridge);
     }

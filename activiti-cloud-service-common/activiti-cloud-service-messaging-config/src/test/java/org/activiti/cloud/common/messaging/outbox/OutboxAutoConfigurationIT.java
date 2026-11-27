@@ -352,7 +352,7 @@ class OutboxAutoConfigurationIT {
             .containsEntry("x-error-class", "org.springframework.messaging.core.DestinationResolutionException")
             .containsEntry(
                 "x-error-message",
-                "Cannot resolve outboxDestination message header for auditProducer outbox"
+                "Cannot resolve outbox_destination message header for auditProducer outbox"
             );
     }
 }
