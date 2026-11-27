@@ -117,6 +117,31 @@ export async function openPushedCountsSubscription(
 
     await settleAfterSubscribe();
 
+    webSocketLogger.debug(`Waiting for initial message batch (timeout: ${readyTimeoutMs}ms)...`);
+    const startTime = Date.now();
+    let allTypesReceived = false;
+
+    while (!allTypesReceived && (Date.now() - startTime) < readyTimeoutMs) {
+        allTypesReceived = countTypes.every((type) => countUpdates[type].length > 0);
+        if (!allTypesReceived) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+    }
+
+    if (allTypesReceived) {
+        webSocketLogger.info(`All count types received initial message, clearing counters to capture only new updates`);
+    } else {
+        const received = countTypes.filter((type) => countUpdates[type].length > 0).join(', ') || 'none';
+        webSocketLogger.warn(
+            `Timeout waiting for initial message batch. Received: ${received}. ` +
+            `Subscription may still work, proceeding anyway.`
+        );
+    }
+
+    countTypes.forEach((type) => {
+        countUpdates[type] = [];
+    });
+
     return {
         getLatestCounts: () => {
             const latest: Record<string, PushedCountMessage> = {};
