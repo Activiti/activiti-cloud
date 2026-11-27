@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { timeouts } from '../../../config/runtime/timeouts';
 import { resolveNotificationsEndpoints } from '../connection/endpoints';
 import { GraphQlWebSocketClient } from '../ws/graphql-websocket.client';
 import { normalizeBearer, settleAfterSubscribe } from './subscription-utils';
@@ -33,10 +32,6 @@ export interface PushedCountsSubscriptionOptions {
 }
 
 export interface PushedCountsSubscription {
-    waitForCountUpdate(predicate: (count: PushedCountMessage) => boolean, timeoutMs?: number): Promise<PushedCountMessage>;
-    waitForAssignedTasksCount(predicate: (count: number) => boolean, timeoutMs?: number): Promise<PushedCountMessage>;
-    waitForQueuedTasksCount(predicate: (count: number) => boolean, timeoutMs?: number): Promise<PushedCountMessage>;
-    waitForRunningProcessesCount(predicate: (count: number) => boolean, timeoutMs?: number): Promise<PushedCountMessage>;
     getLatestCounts(): Record<string, PushedCountMessage>;
     close(): void;
 }
@@ -60,7 +55,7 @@ export async function openPushedCountsSubscription(
     const {
         accessToken,
         countTypes,
-        readyTimeoutMs = 15_000,
+        readyTimeoutMs = 30_000,
     } = options;
 
     const { webSocketGraphqlUrl, hostHeader } = resolveNotificationsEndpoints();
@@ -108,15 +103,9 @@ export async function openPushedCountsSubscription(
 
     await settleAfterSubscribe();
 
+    await waitForInitialMessages(countUpdates, countTypes, readyTimeoutMs);
+
     return {
-        waitForCountUpdate: (predicate, timeoutMs = timeouts.engineEvents.wait) =>
-            waitForPredicate(countUpdates, predicate, timeoutMs),
-        waitForAssignedTasksCount: (predicate, timeoutMs) =>
-            waitForCountPredicate(countUpdates, 'assignedTasks', predicate, timeoutMs),
-        waitForQueuedTasksCount: (predicate, timeoutMs) =>
-            waitForCountPredicate(countUpdates, 'queuedTasks', predicate, timeoutMs),
-        waitForRunningProcessesCount: (predicate, timeoutMs) =>
-            waitForCountPredicate(countUpdates, 'runningProcesses', predicate, timeoutMs),
         getLatestCounts: () => {
             const latest: Record<string, PushedCountMessage> = {};
             countTypes.forEach((type) => {
@@ -131,45 +120,26 @@ export async function openPushedCountsSubscription(
     };
 }
 
-async function waitForPredicate(
+async function waitForInitialMessages(
     countUpdates: Record<string, PushedCountMessage[]>,
-    predicate: (count: PushedCountMessage) => boolean,
+    countTypes: PushedCountType[],
     timeoutMs: number
-): Promise<PushedCountMessage> {
+): Promise<void> {
     const startTime = Date.now();
-    const pollInterval = 100;
+    const pollInterval = 50;
 
     while (Date.now() - startTime < timeoutMs) {
-        for (const updates of Object.values(countUpdates)) {
-            for (const update of updates) {
-                if (predicate(update)) {
-                    return update;
-                }
-            }
+        const allReceived = countTypes.every((type) => countUpdates[type].length > 0);
+        if (allReceived) {
+            return;
         }
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
     }
 
-    throw new Error(`Timeout waiting for count predicate after ${timeoutMs}ms`);
-}
-
-async function waitForCountPredicate(
-    countUpdates: Record<string, PushedCountMessage[]>,
-    countType: string,
-    predicate: (count: number) => boolean,
-    timeoutMs: number = timeouts.engineEvents.wait
-): Promise<PushedCountMessage> {
-    const startTime = Date.now();
-    const pollInterval = 100;
-
-    while (Date.now() - startTime < timeoutMs) {
-        const updates = countUpdates[countType] ?? [];
-        for (const update of updates) {
-            if (predicate(update.count)) {
-                return update;
-            }
-        }
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    }
-    throw new Error(`Timeout waiting for ${countType} count predicate after ${timeoutMs}ms`);
+    const missing = countTypes.filter((type) => countUpdates[type].length === 0);
+    throw new Error(
+        `Timeout waiting for initial pushed count messages for: ${missing.join(', ')}. ` +
+        `This indicates the subscription was not properly registered on the backend. ` +
+        `Please check that the pushed-counts feature is enabled on the query service.`
+    );
 }
