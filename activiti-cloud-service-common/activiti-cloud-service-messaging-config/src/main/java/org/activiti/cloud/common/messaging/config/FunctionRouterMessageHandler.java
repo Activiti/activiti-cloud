@@ -19,6 +19,7 @@ package org.activiti.cloud.common.messaging.config;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.CONNECTOR_TYPE;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
@@ -90,11 +92,12 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
             .filter(Predicate.not(Collection::isEmpty))
             .ifPresentOrElse(
                 registrations -> {
+                    final var functionTasks = new ArrayList<Future<?>>();
                     var functions = registrations
                         .stream()
                         .map(functionRegistration -> toFunctionRequest().apply(message, functionRegistration))
                         .map(functionRequest ->
-                            routingFunctionFuture()
+                            routingFunctionFuture(functionTasks)
                                 .apply(functionRequest)
                                 .thenApply(result -> mapResult(functionRequest, result))
                                 .exceptionally(error -> mapError(functionRequest, error))
@@ -157,10 +160,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
                         .orTimeout(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS)
                         .exceptionally(cause -> {
                             if (cause instanceof TimeoutException) {
-                                functions
-                                    .stream()
-                                    .filter(Predicate.not(CompletableFuture::isDone))
-                                    .forEach(f -> f.cancel(true));
+                                functionTasks.forEach(task -> task.cancel(true));
                             }
                             throw new CompletionException(cause);
                         })
@@ -251,7 +251,7 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
         };
     }
 
-    private Function<Message<?>, CompletableFuture<Object>> routingFunctionFuture() {
+    private Function<Message<?>, CompletableFuture<Object>> routingFunctionFuture(List<Future<?>> functionTasks) {
         return request -> {
             final CompletableFuture<Object> result = new CompletableFuture<>();
             final var executor = functionExecutorSelector.apply(request);
@@ -265,10 +265,11 @@ public class FunctionRouterMessageHandler implements BiConsumer<Message<?>, Stri
 
                 return result;
             });
+            functionTasks.add(task);
 
             return CompletableFuture.supplyAsync(() -> {
                 try {
-                    final var future = task.get(functionRouter.getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS);
+                    final var future = task.get();
 
                     return future.get();
                 } catch (Exception cause) {
