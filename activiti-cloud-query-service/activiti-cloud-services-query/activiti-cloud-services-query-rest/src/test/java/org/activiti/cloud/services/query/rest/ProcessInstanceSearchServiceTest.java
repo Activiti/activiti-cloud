@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -61,6 +63,17 @@ class ProcessInstanceSearchServiceTest {
             processInstanceHierarchyRepository,
             Caffeine.newBuilder().<RestrictedProcessInstanceCountCacheKey, Long>build()
         );
+    }
+
+    @Nested
+    class FindProcessIdsWithServiceTaskErrors {
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        void should_skipDatabaseLookup_whenAncestorIdsAreMissing(Set<String> ancestorIds) {
+            assertThat(service.findProcessIdsWithServiceTaskErrors(ancestorIds)).isEmpty();
+            verifyNoInteractions(processInstanceHierarchyRepository);
+        }
     }
 
     @Nested

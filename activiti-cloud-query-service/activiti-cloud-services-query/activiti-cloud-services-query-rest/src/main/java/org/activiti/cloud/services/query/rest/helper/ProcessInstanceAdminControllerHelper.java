@@ -85,11 +85,18 @@ public class ProcessInstanceAdminControllerHelper {
         Map<String, Map<String, Long>> countsByAncestor = processInstanceSearchService.countRelatedProcessesByAncestor(
             ids
         );
+        Set<String> processIdsWithErrors = processInstanceSearchService.findProcessIdsWithServiceTaskErrors(ids);
         return processInstances.map(entity -> {
             Map<String, Long> counts = countsByAncestor.getOrDefault(entity.getId(), Map.of());
             long subprocessesCount = counts.getOrDefault(ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, 0L);
             long linkedProcessesCount = counts.getOrDefault(ProcessInstanceHierarchyEntity.RELATION_LINKED, 0L);
-            return ProcessInstanceSearchResultMapper.toResult(entity, subprocessesCount, linkedProcessesCount);
+            ProcessInstanceSearchResult result = ProcessInstanceSearchResultMapper.toResult(
+                entity,
+                subprocessesCount,
+                linkedProcessesCount
+            );
+            result.setHasServiceTaskErrors(processIdsWithErrors.contains(entity.getId()));
+            return result;
         });
     }
 
