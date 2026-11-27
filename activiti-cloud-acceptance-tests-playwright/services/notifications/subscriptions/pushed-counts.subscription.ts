@@ -70,6 +70,11 @@ export async function openPushedCountsSubscription(
         hostHeader
     );
 
+    let resolveInitialMessages: (() => void) | undefined;
+    const initialMessagesPromise = new Promise<void>((resolve) => {
+        resolveInitialMessages = resolve;
+    });
+
     ws.onNext((data) => {
         const payload = data as Record<string, PushedCountMessage> | undefined;
         if (payload) {
@@ -78,6 +83,11 @@ export async function openPushedCountsSubscription(
                     countUpdates[type].push(payload[type]);
                 }
             });
+
+            const allReceived = countTypes.every((type) => countUpdates[type].length > 0);
+            if (allReceived && resolveInitialMessages) {
+                resolveInitialMessages();
+            }
         }
     });
 
@@ -103,7 +113,23 @@ export async function openPushedCountsSubscription(
 
     await settleAfterSubscribe();
 
-    await waitForInitialMessages(countUpdates, countTypes, readyTimeoutMs);
+    try {
+        await Promise.race([
+            initialMessagesPromise,
+            new Promise<void>((_, reject) =>
+                setTimeout(
+                    () => reject(new Error(
+                        `Timeout waiting for initial pushed count messages after ${readyTimeoutMs}ms. ` +
+                        `Ensure the pushed-counts feature is enabled on the query service.`
+                    )),
+                    readyTimeoutMs
+                )
+            ),
+        ]);
+    } catch (error) {
+        ws.close();
+        throw error;
+    }
 
     return {
         getLatestCounts: () => {
@@ -118,28 +144,4 @@ export async function openPushedCountsSubscription(
         },
         close: () => ws.close(),
     };
-}
-
-async function waitForInitialMessages(
-    countUpdates: Record<string, PushedCountMessage[]>,
-    countTypes: PushedCountType[],
-    timeoutMs: number
-): Promise<void> {
-    const startTime = Date.now();
-    const pollInterval = 50;
-
-    while (Date.now() - startTime < timeoutMs) {
-        const allReceived = countTypes.every((type) => countUpdates[type].length > 0);
-        if (allReceived) {
-            return;
-        }
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    }
-
-    const missing = countTypes.filter((type) => countUpdates[type].length === 0);
-    throw new Error(
-        `Timeout waiting for initial pushed count messages for: ${missing.join(', ')}. ` +
-        `This indicates the subscription was not properly registered on the backend. ` +
-        `Please check that the pushed-counts feature is enabled on the query service.`
-    );
 }
